@@ -1,0 +1,4 @@
+# files to ignore
+Team26/Code26/.vs/*
+Team26/Code26/build_win/*
+.vs/*

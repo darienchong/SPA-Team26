@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <list>
+#include <fstream>
 
 // include your other headers here
 #include "AbstractWrapper.h"
