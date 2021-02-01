@@ -1,4 +1,5 @@
-# files to ignore
-Team26/Code26/.vs/*
-Team26/Code26/build_win/*
-.vs/*
+# Visual Studio cache
+.vs/
+
+# CMake build folder
+Team26/Code26/build*
