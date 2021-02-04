@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TableStub.h"
+#include "Table.h"
 #include <unordered_set>
 #include <vector>
 
@@ -25,18 +25,18 @@ public:
 	void addModifies(std::string proc, std::string var);
 
 private:
-	TableStub varTable;
-	TableStub stmtTable;
-	TableStub procTable;
+	Table varTable;
+	Table stmtTable;
+	Table procTable;
 
-	TableStub ifTable;
-	TableStub whileTable;
-	TableStub readTable;
-	TableStub printTable;
-	TableStub assignTable;
+	Table ifTable;
+	Table whileTable;
+	Table readTable;
+	Table printTable;
+	Table assignTable;
 
-	TableStub followsTable;
-	TableStub parentTable;
-	TableStub usesTable;
-	TableStub modifiesTable;
+	Table followsTable;
+	Table parentTable;
+	Table usesTable;
+	Table modifiesTable;
 };

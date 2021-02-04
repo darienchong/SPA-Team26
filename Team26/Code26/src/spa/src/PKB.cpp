@@ -8,70 +8,70 @@ PKB::PKB() {}
 
 void PKB::addVar(std::string var) {
 	std::vector<std::string> vect{ var };
-	varTable.insertData(vect);
+	varTable.insertRow(vect);
 }
 
 void PKB::addStmt(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
-	stmtTable.insertData(vect);
+	stmtTable.insertRow(vect);
 }
 
 void PKB::addProc(std::string proc) {
 	std::vector<std::string> vect{ proc };
-	procTable.insertData(vect);
+	procTable.insertRow(vect);
 }
 
 void PKB::addIf(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
-	ifTable.insertData(vect);
+	ifTable.insertRow(vect);
 }
 
 void PKB::addWhile(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
-	whileTable.insertData(vect);
+	whileTable.insertRow(vect);
 }
 
 void PKB::addRead(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
-	readTable.insertData(vect);
+	readTable.insertRow(vect);
 }
 
 void PKB::addPrint(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
-	printTable.insertData(vect);
+	printTable.insertRow(vect);
 }
 
 void PKB::addAssign(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
-	assignTable.insertData(vect);
+	assignTable.insertRow(vect);
 }
 
 void PKB::addFollows(int follower, int followed) {
 	std::vector<std::string> vect{ std::to_string(follower), std::to_string(followed) };
-	followsTable.insertData(vect);
+	followsTable.insertRow(vect);
 }
 
 void PKB::addParent(int parent, int child) {
 	std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
-	parentTable.insertData(vect);
+	parentTable.insertRow(vect);
 }
 
 void PKB::addUses(int stmtNo, std::string var) {
 	std::vector<std::string> vect{ std::to_string(stmtNo), var };
-	usesTable.insertData(vect);
+	usesTable.insertRow(vect);
 }
 
 void PKB::addUses(std::string proc, std::string var) {
 	std::vector<std::string> vect{ proc , var };
-	usesTable.insertData(vect);
+	usesTable.insertRow(vect);
 }
 
 void PKB::addModifies(int stmtNo, std::string var) {
 	std::vector<std::string> vect{ std::to_string(stmtNo), var };
-	modifiesTable.insertData(vect);
+	modifiesTable.insertRow(vect);
 }
 
 void PKB::addModifies(std::string proc, std::string var) {
 	std::vector<std::string> vect{ proc , var };
-	modifiesTable.insertData(vect);
+	modifiesTable.insertRow(vect);
 }
