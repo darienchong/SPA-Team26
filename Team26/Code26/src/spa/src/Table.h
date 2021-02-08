@@ -13,16 +13,16 @@ private:
 public:
   Table(); 
   explicit Table(Row header);
-  int getColumnIndex(std::string columnName);
-  Row getHeader() const;
   void setHeader(Row header);
+  Row getHeader();
   void insertRow(Row row);
+  int getColumnIndex(std::string columnName);
   std::set<std::string> getColumn(std::string header);
-  std::set<Row> getData(Row cols) const;
-  std::set<Row> getData() const;
-  int size() const;
-  bool contains(Row row) const;
-  bool empty() const;
+  int size();
+  bool contains(Row row);
+  bool empty();
+  std::set<Row> getData();
+  std::set<Row> getDataWithColumns(Row columnNames);
   void dropColumn(std::string toDrop);
   void selfJoin();
 
