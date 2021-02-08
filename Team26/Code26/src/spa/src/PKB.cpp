@@ -22,7 +22,6 @@ void PKB::addProc(std::string proc) {
 	procTable.insertRow(vect);
 }
 
-// store else as another column?
 void PKB::addIf(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
 	ifTable.insertRow(vect);
@@ -52,21 +51,25 @@ void PKB::addAssign(int stmtNo) {
 //// Design Abstractions ////
 /////////////////////////////
 void PKB::addFollows(int follower, int followed) {
+	if (follower >= followed) {
+		throw std::logic_error("Follower should come before followed");
+	}
 	std::vector<std::string> vect{ std::to_string(follower), std::to_string(followed) };
 	followsTable.insertRow(vect);
 }
 
-// fill followsTTable based on followsTable
 void PKB::addFollowsT() {
 	followsTTable.fillTransitiveTable(followsTable);
 }
 
 void PKB::addParent(int parent, int child) {
+	if (parent >= child) {
+		throw std::logic_error("Parent should come before child");
+	}
 	std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
 	parentTable.insertRow(vect);
 }
 
-// fill parentTTable based on parentTable
 void PKB::addParentT() {
 	parentTTable.fillTransitiveTable(parentTable);
 }
