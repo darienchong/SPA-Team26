@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <iterator>
 #include <map>
+#include <stack>
+#include <stdexcept>
 
 Table::Table() {
   headerRow.emplace_back(std::to_string(0));
@@ -104,4 +106,51 @@ void Table::selfJoin() {
     }
   }
   dropColumn(headerRow[1]);
+}
+
+void dfs(std::string v, std::map<std::string, std::set<std::string>> adjList,
+  std::map<std::string, std::set<std::string>> tMap) {
+  std::set<std::string> visited;
+  std::stack<std::string> stack;
+  std::string curr;
+
+  stack.push(v);
+
+  while (!stack.empty()) {
+    curr = stack.top();
+    stack.pop();
+
+    if (!(visited.find(curr) != visited.end())) {
+      visited.insert(curr);
+      if (adjList.find(curr) != adjList.end()) {
+        for (auto value : adjList.at(curr)) {
+          stack.push(value);
+        }
+      }
+    }
+  }
+  tMap.insert({ v, std::move(visited) });
+}
+
+// used for transitive closure for relationships Follows* and Parent*
+void Table::fillTransitiveTable(Table table) {
+  std::map<std::string, std::set<std::string>> adjList;
+  for (auto row : table.getData()) {
+    if (!(adjList.find(row[0]) != adjList.end())) {
+      adjList.insert({ row[0], std::set<std::string>({ row[1] }) });
+    } else {
+      adjList.at(row[0]).insert(row[1]);
+    }
+  }
+
+  std::map<std::string, std::set<std::string>> tMap;
+  for (auto entry : tMap) {
+    dfs(entry.first, adjList, tMap);
+  }
+
+  for (auto entry : tMap) {
+    for (auto value : entry.second) {
+      data.insert(Row({ entry.first, value }));
+    }
+  }
 }
