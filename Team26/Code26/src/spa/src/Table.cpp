@@ -13,6 +13,12 @@ Table::Table(Row header) {
   headerRow = header;
 }
 
+Table::Table(int n) {
+  for (int i = 0; i < n; ++i) {
+    headerRow.emplace_back(std::to_string(i));
+  }
+}
+
 void Table::setHeader(Row header) {
   headerRow = header;
 }
@@ -84,14 +90,11 @@ void Table::dropColumn(std::string toDrop) {
   int index = getColumnIndex(toDrop);
   headerRow.erase(headerRow.begin() + index);
   std::set<Row> newData;
-  for (auto &dataRow : data) {
-    Row curr;
-    curr.reserve(dataRow.size() - 1);
-    auto it = dataRow.begin();
-    std::advance(it, index);
-    curr.assign(dataRow.begin(), it++);
-    curr.insert(curr.end(), it, dataRow.end());
-    newData.emplace_hint(newData.end(), std::move(curr));
+
+  for (auto dataRow : data) {
+    Row newRow = dataRow;
+    newRow.erase(newRow.begin() + index);
+    newData.emplace(newRow);
   }
   data = std::move(newData);
 }
@@ -109,7 +112,7 @@ void Table::selfJoin() {
 }
 
 void dfs(std::string v, std::map<std::string, std::set<std::string>> adjList,
-  std::map<std::string, std::set<std::string>> tMap) {
+         std::map<std::string, std::set<std::string>> tMap) {
   std::set<std::string> visited;
   std::stack<std::string> stack;
   std::string curr;

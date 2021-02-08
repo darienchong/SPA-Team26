@@ -11,8 +11,9 @@ private:
   std::set<Row> data;
 
 public:
-  Table(); 
+  Table();
   explicit Table(Row header);
+  explicit Table(int n);
   void setHeader(Row header);
   Row getHeader();
   void insertRow(Row row);
@@ -25,6 +26,5 @@ public:
   std::set<Row> getDataWithColumns(Row columnNames);
   void dropColumn(std::string toDrop);
   void selfJoin();
-
   void fillTransitiveTable(Table table);
 };
