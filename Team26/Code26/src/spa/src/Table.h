@@ -25,6 +25,7 @@ public:
   std::set<Row> getData();
   std::set<Row> getDataWithColumns(Row columnNames);
   void dropColumn(std::string toDrop);
+  void concatenate(Table otherTable);
   void selfJoin();
   void fillTransitiveTable(Table table);
 };

@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 Table::Table() {
-  headerRow.emplace_back("");
+  headerRow.emplace_back("0");
 }
 
 Table::Table(Row header) {
@@ -28,6 +28,9 @@ Table::Row Table::getHeader() {
 }
 
 void Table::insertRow(Row row) {
+  if (row.size() != headerRow.size()) {
+    throw std::logic_error("Row should be of length " + std::to_string(headerRow.size()));
+  }
   data.emplace(row);
 }
 
@@ -88,15 +91,30 @@ std::set<Table::Row> Table::getDataWithColumns(Row columnNames) {
 
 void Table::dropColumn(std::string toDrop) {
   int index = getColumnIndex(toDrop);
-  headerRow.erase(headerRow.begin() + index);
-  std::set<Row> newData;
 
-  for (auto dataRow : data) {
-    Row newRow = dataRow;
-    newRow.erase(newRow.begin() + index);
-    newData.emplace(newRow);
+  // Clear data if there is only one column, otherwise erase column
+  if (headerRow.size() == 1) {
+    data.clear();
+  } else {
+    headerRow.erase(headerRow.begin() + index);
+    std::set<Row> newData;
+
+    for (auto dataRow : data) {
+      Row newRow = dataRow;
+      newRow.erase(newRow.begin() + index);
+      newData.emplace(newRow);
+    }
+    data = std::move(newData);
   }
-  data = std::move(newData);
+}
+
+void Table::concatenate(Table otherTable) {
+  if (getHeader().size() != otherTable.getHeader().size()) {
+    throw std::logic_error("Concatenation requires table with the same number of columns");
+  }
+  for (Row row: otherTable.getData()) {
+    data.emplace(row);
+  }
 }
 
 void Table::selfJoin() {
