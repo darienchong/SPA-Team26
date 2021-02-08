@@ -3,6 +3,7 @@
 #include "Table.h"
 #include <unordered_set>
 #include <vector>
+#include <map>
 
 class PKB {
 public:
@@ -52,10 +53,10 @@ private:
 	Table printTable;
 	Table assignTable;
 
-	Table followsTable;
-	Table followsTTable;
-	Table parentTable;
-	Table parentTTable;
-	Table usesTable;
-	Table modifiesTable;
+	Table followsTable{ 2 };
+	Table followsTTable{ 2 };
+	Table parentTable{ 2 };
+	Table parentTTable{ 2 };
+	Table usesTable{ 2 };
+	Table modifiesTable{ 2 };
 };

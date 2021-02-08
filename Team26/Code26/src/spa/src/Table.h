@@ -26,5 +26,7 @@ public:
   std::set<Row> getDataWithColumns(Row columnNames);
   void dropColumn(std::string toDrop);
   void selfJoin();
+
+  // technically only followsTTable and parentTTable are allowed to call this
   void fillTransitiveTable(Table table);
 };
