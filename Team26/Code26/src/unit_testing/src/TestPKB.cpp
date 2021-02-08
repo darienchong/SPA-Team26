@@ -111,3 +111,27 @@ TEST_CASE("[PKB.cpp] addParentT") {
 	REQUIRE(dataCopy.count({ "6", "7" }) == 1);
 	REQUIRE(dataCopy.count({ "5", "7" }) == 1);
 }
+
+TEST_CASE("[PKB.cpp] addUses") {
+	PKB pkb;
+
+	SECTION("Check valid insertion") {
+		pkb.addUses(5, "x");
+		pkb.addUses("main", "y");
+		auto dataCopy = pkb.getUsesTable().getData();
+		REQUIRE(dataCopy.count({ "5", "x" }) == 1);
+		REQUIRE(dataCopy.count({ "main", "y" }) == 1);
+	}
+}
+
+TEST_CASE("[PKB.cpp] addModifies") {
+	PKB pkb;
+
+	SECTION("Check valid insertion") {
+		pkb.addModifies(5, "x");
+		pkb.addModifies("main", "y");
+		auto dataCopy = pkb.getModifiesTable().getData();
+		REQUIRE(dataCopy.count({ "5", "x" }) == 1);
+		REQUIRE(dataCopy.count({ "main", "y" }) == 1);
+	}
+}

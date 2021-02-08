@@ -59,4 +59,6 @@ private:
 	Table parentTTable{ 2 };
 	Table usesTable{ 2 };
 	Table modifiesTable{ 2 };
+
+	std::map<int, std::tuple<std::string, std::vector<std::string>>> patternAssignMap;
 };

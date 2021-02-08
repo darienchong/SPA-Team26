@@ -5,7 +5,7 @@ TEST_CASE("[TestTable] New Table") {
 
   SECTION( "new empty table" ) {
     Table table;
-    REQUIRE(table.getHeader() == (std::vector<std::string>){"0"});
+    REQUIRE(table.getHeader() == std::vector<std::string>{"0"});
     REQUIRE(table.empty());
   }
 
@@ -20,7 +20,7 @@ TEST_CASE("[TestTable] New Table") {
   SECTION( "new table with given header length") {
     Table tableWithHeader(2);
     REQUIRE(tableWithHeader.getHeader().size() == 2);
-    REQUIRE(tableWithHeader.getHeader() == (std::vector<std::string>){"0", "1"});
+    REQUIRE(tableWithHeader.getHeader() == std::vector<std::string> {"0", "1"});
     REQUIRE(tableWithHeader.getColumnIndex("1") == 1);
   }
 
@@ -70,7 +70,7 @@ TEST_CASE("[TestTable] Get Data") {
     REQUIRE(table.getData().count({"1", "11"}));
     REQUIRE(table.getDataWithColumns({"1"}).count({"33"}));
     REQUIRE(!table.getDataWithColumns({"1"}).count({"3"}));
-    REQUIRE(table.getColumn("0") == (std::set<std::string>){"1", "2", "3"});
+    REQUIRE(table.getColumn("0") == std::set<std::string> { "1", "2", "3" });
   }
 
   SECTION ("invalid column name") {
@@ -87,7 +87,7 @@ TEST_CASE("[TestTable] Drop Column") {
   table.insertRow({"1", "11"});
   table.insertRow({"2", "22"});
   table.dropColumn("a");
-  REQUIRE(table.getHeader() == (std::vector<std::string>){"b"});
+  REQUIRE(table.getHeader() == std::vector<std::string>{"b"});
   table.dropColumn("b");
   REQUIRE(table.empty());
 }
@@ -111,6 +111,4 @@ TEST_CASE("[TestTable] Concatenate") {
     table2.insertRow({"3", "33", "333"});
     REQUIRE_THROWS(table1.concatenate(table2));
   }
-
-
 }
