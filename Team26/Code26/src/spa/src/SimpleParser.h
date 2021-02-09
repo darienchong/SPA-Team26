@@ -8,8 +8,6 @@
 #include "PkbStub.h" // remove this once pkb is implemented
 #include "Token.h"
 
-using namespace ExprProcessor;
-
 namespace SourceProcessor {
   class SimpleParser {
   private:

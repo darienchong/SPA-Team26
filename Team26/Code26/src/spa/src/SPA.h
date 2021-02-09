@@ -5,11 +5,14 @@
 
 #include "PKB.h"
 
+/**
+ * Static Program Analyzer (SPA) library API
+*/
 class SPA {
 private:
   PKB pkb;
 public:
   SPA();
   void parseSourceFile(const std::string& filename);
-  void evaluateQuery(const std::string& query, std::list<std::string>& results);
+  void evaluateQuery(const std::string& queryString, std::list<std::string>& results);
 };

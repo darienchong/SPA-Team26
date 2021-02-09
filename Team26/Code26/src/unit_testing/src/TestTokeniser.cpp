@@ -4,7 +4,6 @@
 #include <string>
 
 #include "Token.h"
-#include "TokenType.h"
 #include "Tokeniser.h"
 #include "catch.hpp"
 
@@ -27,7 +26,7 @@ TEST_CASE("[TestTokeniser] Delimiter, single") {
   std::list<Token> tokens = tokeniser.tokenise(stream);
   
   Token token = tokens.front();
-  REQUIRE(token.type == TokenType::Delimiter);
+  REQUIRE(token.type == TokenType::DELIMITER);
   REQUIRE(token.value == "{");
 }
 
@@ -38,7 +37,7 @@ TEST_CASE("[TestTokeniser] Delimiter, multiple") {
   std::list<std::string>::const_iterator expectedValuesItr = expectedValues.begin();
 
   for (const Token token : tokens) {
-    TokenType expectedType = TokenType::Delimiter;
+    TokenType expectedType = TokenType::DELIMITER;
     std::string expectedValue = *expectedValuesItr;
 
     REQUIRE(token.type == expectedType);
@@ -55,7 +54,7 @@ TEST_CASE("[TestTokeniser] Identifier, positive") {
   std::list<std::string>::const_iterator expectedValuesItr = expectedValues.begin();
 
   for (const Token token : tokens) {
-    TokenType expectedType = TokenType::Identifier;
+    TokenType expectedType = TokenType::IDENTIFIER;
     std::string expectedValue = *expectedValuesItr;
 
     REQUIRE(token.type == expectedType);
@@ -75,7 +74,7 @@ TEST_CASE("[TestTokeniser] Operator, single-char, single") {
   std::list<Token> tokens = tokeniser.tokenise(stream);
   
   Token token = tokens.front();
-  REQUIRE(token.type == TokenType::Operator);
+  REQUIRE(token.type == TokenType::OPERATOR);
   REQUIRE(token.value == "<");
 }
 
@@ -84,7 +83,7 @@ TEST_CASE("[TestTokeniser] Operator, two-char, single, positive") {
   std::list<Token> tokens = tokeniser.tokenise(stream);
 
   Token token = tokens.front();
-  REQUIRE(token.type == TokenType::Operator);
+  REQUIRE(token.type == TokenType::OPERATOR);
   REQUIRE(token.value == "<=");
 }
 
@@ -95,7 +94,7 @@ TEST_CASE("[TestTokeniser] Operator, two-char, multiple, positive") {
   std::list<std::string>::const_iterator expectedValuesItr = expectedValues.begin();
 
   for (const Token token : tokens) {
-    REQUIRE(token.type == TokenType::Operator);
+    REQUIRE(token.type == TokenType::OPERATOR);
     REQUIRE(token.value == *expectedValuesItr);
 
     ++expectedValuesItr;

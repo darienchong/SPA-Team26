@@ -26,7 +26,7 @@ namespace {
    *    if a non-delimiter character is encountered.
    */
   Token constructDelimiter(std::istream& stream) {
-    TokenType type = TokenType::Delimiter;
+    TokenType type = TokenType::DELIMITER;
     std::string value;
     
     bool isNextCharDelimiter = isDelimiter(stream.peek());
@@ -47,7 +47,7 @@ namespace {
    * @returns Token representing an identifier.
    */
   Token constructIdentifier(std::istream& stream) {
-    TokenType type = TokenType::Identifier;
+    TokenType type = TokenType::IDENTIFIER;
     std::string value;
 
     bool isFirstChar = true;
@@ -75,7 +75,7 @@ namespace {
    * @returns Token representing a number.
    */
   Token constructNumber(std::istream& stream) {
-    TokenType type = TokenType::Number;
+    TokenType type = TokenType::NUMBER;
     std::string value;
 
     bool isFirstChar = true;
@@ -199,7 +199,7 @@ namespace {
    * @returns Token representing an operator.
    */
   Token constructOperator(std::istream& stream) {
-    TokenType type = TokenType::Operator;
+    TokenType type = TokenType::OPERATOR;
     std::string value;
 
     // We need to treat the operators depending on the first char

@@ -10,41 +10,41 @@
 
 namespace SourceProcessor {
   // Delimiters
-  const static Token SEMI_COLON{ TokenType::Delimiter, ";" };
-  const static Token LEFT_BRACE{ TokenType::Delimiter, "{" };
-  const static Token RIGHT_BRACE{ TokenType::Delimiter, "}" };
-  const static Token LEFT_PARENTHESIS{ TokenType::Delimiter, "(" };
-  const static Token RIGHT_PARENTHESIS{ TokenType::Delimiter, ")" };
+  const static Token SEMICOLON{ TokenType::DELIMITER, ";" };
+  const static Token LEFT_BRACE{ TokenType::DELIMITER, "{" };
+  const static Token RIGHT_BRACE{ TokenType::DELIMITER, "}" };
+  const static Token LEFT_PARENTHESIS{ TokenType::DELIMITER, "(" };
+  const static Token RIGHT_PARENTHESIS{ TokenType::DELIMITER, ")" };
 
   // Entities
-  const static Token PROCEDURE{ TokenType::Identifier, "procedure" };
-  const static Token READ{ TokenType::Identifier, "read" };
-  const static Token PRINT{ TokenType::Identifier, "print" };
-  const static Token ASSIGN{ TokenType::Identifier, "assign" };
-  const static Token CALL{ TokenType::Identifier, "call" };
-  const static Token WHILE{ TokenType::Identifier, "while" };
-  const static Token IF{ TokenType::Identifier, "if" };
-  const static Token THEN{ TokenType::Identifier, "then" };
-  const static Token ELSE{ TokenType::Identifier, "else" };
+  const static Token PROCEDURE{ TokenType::IDENTIFIER, "procedure" };
+  const static Token READ{ TokenType::IDENTIFIER, "read" };
+  const static Token PRINT{ TokenType::IDENTIFIER, "print" };
+  const static Token ASSIGN{ TokenType::IDENTIFIER, "assign" };
+  const static Token CALL{ TokenType::IDENTIFIER, "call" };
+  const static Token WHILE{ TokenType::IDENTIFIER, "while" };
+  const static Token IF{ TokenType::IDENTIFIER, "if" };
+  const static Token THEN{ TokenType::IDENTIFIER, "then" };
+  const static Token ELSE{ TokenType::IDENTIFIER, "else" };
 
   // Assignment Operator
-  const static Token ASSIGN_OP{ TokenType::Operator, "=" };
+  const static Token ASSIGN_OP{ TokenType::OPERATOR, "=" };
 
   // Relation Expression Operators
-  const static Token REL_EXPR_OP_GRT{ TokenType::Operator, ">" };
-  const static Token REL_EXPR_OP_GEQ{ TokenType::Operator, ">=" };
-  const static Token REL_EXPR_OP_LET{ TokenType::Operator, "<" };
-  const static Token REL_EXPR_OP_LEQ{ TokenType::Operator, "<=" };
-  const static Token REL_EXPR_OP_EQV{ TokenType::Operator, "==" };
-  const static Token REL_EXPR_OP_NEQ{ TokenType::Operator, "!=" };
+  const static Token REL_EXPR_OP_GRT{ TokenType::OPERATOR, ">" };
+  const static Token REL_EXPR_OP_GEQ{ TokenType::OPERATOR, ">=" };
+  const static Token REL_EXPR_OP_LET{ TokenType::OPERATOR, "<" };
+  const static Token REL_EXPR_OP_LEQ{ TokenType::OPERATOR, "<=" };
+  const static Token REL_EXPR_OP_EQV{ TokenType::OPERATOR, "==" };
+  const static Token REL_EXPR_OP_NEQ{ TokenType::OPERATOR, "!=" };
 
   // Conditional Statement Operator
-  const static Token COND_EXPR_NOT{ TokenType::Operator, "!" };
-  const static Token COND_EXPR_AND{ TokenType::Operator, "&&" };
-  const static Token COND_EXPR_OR{ TokenType::Operator, "||" };
+  const static Token COND_EXPR_NOT{ TokenType::OPERATOR, "!" };
+  const static Token COND_EXPR_AND{ TokenType::OPERATOR, "&&" };
+  const static Token COND_EXPR_OR{ TokenType::OPERATOR, "||" };
 
   // Identifier
-  const static Token NAME{ TokenType::Identifier, "" };
+  const static Token NAME{ TokenType::IDENTIFIER, "" };
 
   /**
    * Increments the statement number.
@@ -111,7 +111,7 @@ namespace SourceProcessor {
    */
   void SimpleParser::parseAssignExpr() {
     Token next = getNextToken();
-    while (!tokens.empty() && next != SEMI_COLON) {
+    while (!tokens.empty() && next != SEMICOLON) {
       exprParser.addToken(next);
       removeNextToken();
     }
@@ -268,7 +268,7 @@ namespace SourceProcessor {
     // grammar: 'read' var_name ';'
     validate(READ);
     std::string varName = validate(NAME);
-    validate(SEMI_COLON);
+    validate(SEMICOLON);
 
     int stmtNum = getStmtNum();
     incStmtNum();
@@ -290,7 +290,7 @@ namespace SourceProcessor {
     // grammar: 'print' var_name ';'
     validate(PRINT);
     std::string varName = validate(NAME);
-    validate(SEMI_COLON);
+    validate(SEMICOLON);
 
     int stmtNum = getStmtNum();
     incStmtNum();
@@ -315,7 +315,7 @@ namespace SourceProcessor {
     std::string varName = validate(NAME);
     validate(ASSIGN_OP);
     parseAssignExpr();
-    validate(SEMI_COLON);
+    validate(SEMICOLON);
 
     // Getting relevant info to add to pkb
     std::list<std::string> varLst = exprParser.getVariables();
