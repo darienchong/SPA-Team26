@@ -24,11 +24,11 @@ TEST_CASE("[TestTable] New Table") {
     REQUIRE(tableWithHeader.getColumnIndex("1") == 1);
   }
 
-  SECTION( "set header " ) {
-    Table table;
-    std::vector<std::string> header = {"0", "1"};
-    table.setHeader(header);
-    REQUIRE(table.getHeader() == header);
+  SECTION( "set header" ) {
+    Table table(2);
+    std::vector<std::string> h{"0", "1"};
+    table.setHeader(h);
+    REQUIRE(table.getHeader() == h);
   }
 }
 
@@ -68,8 +68,8 @@ TEST_CASE("[TestTable] Get Data") {
     table.insertRow({"2", "22"});
     table.insertRow({"3", "33"});
     REQUIRE(table.getData().count({"1", "11"}));
-    REQUIRE(table.getDataWithColumns({"1"}).count({"33"}));
-    REQUIRE(!table.getDataWithColumns({"1"}).count({"3"}));
+    REQUIRE(table.getColumns({"1"}).count({"33"}));
+    REQUIRE(!table.getColumns({"1"}).count({"3"}));
     REQUIRE(table.getColumn("0") == std::set<std::string> { "1", "2", "3" });
   }
 
@@ -77,7 +77,7 @@ TEST_CASE("[TestTable] Get Data") {
     Table table(2);
     table.insertRow({"1", "11"});
     table.insertRow({"2", "22"});
-    REQUIRE_THROWS_WITH(table.getDataWithColumns({"4"}), Catch::Contains("4"));
+    REQUIRE_THROWS_WITH(table.getColumns({"4"}), Catch::Contains("4"));
   }
 
 }

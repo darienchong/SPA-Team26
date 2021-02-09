@@ -1,33 +1,39 @@
 #pragma once
 
-#include <set>
 #include <string>
+#include <set>
 #include <vector>
 
 class Table {
   typedef std::vector<std::string> Row;
 
 private:
-  Row headerRow;
+  Row header;
   std::set<Row> data;
 
 public:
   Table();
-  explicit Table(Row header);
-  explicit Table(int n);
+  Table(int n);
+  Table(Row header);
+
   void setHeader(Row header);
-  Row getHeader();
   void insertRow(Row row);
-  int getColumnIndex(std::string columnName);
-  std::set<std::string> getColumn(std::string header);
+
+  // getters
+  Row getHeader();
+  std::set<Row> getData();
+  std::set<std::string> getColumn(std::string headerTitle);
+  std::set<Row> getColumns(Row headerTitles);
+  int getColumnIndex(std::string headerTitle);
+
+  // util functions
+  void dropColumn(std::string headerTitle);
+  void concatenate(Table otherTable);
+
   int size();
   bool contains(Row row);
   bool empty();
-  std::set<Row> getData();
-  std::set<Row> getDataWithColumns(Row columnNames);
-  void dropColumn(std::string toDrop);
-  void concatenate(Table otherTable);
 
-  // technically only followsTTable and parentTTable are allowed to call this
+  // only called by transitive tables
   void fillTransitiveTable(Table table);
 };

@@ -1,119 +1,106 @@
-#include "Table.h"
-
-#include <unordered_map>
 #include <stack>
 #include <stdexcept>
+#include <unordered_map>
+
+#include "Table.h"
 
 Table::Table() {
-  headerRow.emplace_back("0");
-}
-
-Table::Table(Row header) {
-  headerRow = header;
+  header.emplace_back("0");
 }
 
 Table::Table(int n) {
-  for (int i = 0; i < n; ++i) {
-    headerRow.emplace_back(std::to_string(i));
+  for (int i = 0; i < n; i++) {
+    header.push_back(std::to_string(i));
   }
 }
 
-void Table::setHeader(Row header) {
-  headerRow = header;
+Table::Table(Row h) {
+  header = h;
 }
 
-Table::Row Table::getHeader() {
-  return headerRow;
+void Table::setHeader(Row h) {
+  if (h.size() != header.size()) {
+    throw std::logic_error("Header size does not match");
+  }
+  header = h;
 }
 
 void Table::insertRow(Row row) {
-  if (row.size() != headerRow.size()) {
-    throw std::logic_error("Row should be of length " + std::to_string(headerRow.size()));
+  if (row.size() != header.size()) {
+    throw std::logic_error("Row should be of length " + std::to_string(header.size()));
   }
   data.emplace(row);
 }
 
-int Table::getColumnIndex(std::string columnName) {
-  for (int i = 0; i < headerRow.size(); ++i) {
-    if (headerRow[i] == columnName) {
-      return i;
-    }
-  }
-  throw std::logic_error("Column with name:" + columnName + " not found");
-}
-
-std::set<std::string> Table::getColumn(std::string columnName) {
-  int index = getColumnIndex(columnName);
-  std::set<std::string> column;
-  for (auto &dataRow : data) {
-    column.emplace(dataRow[index]);
-  }
-  return column;
-}
-
-int Table::size() {
-  return data.size();
-}
-
-bool Table::contains(Row row) {
-  return data.count(row);
-}
-
-bool Table::empty() {
-  return data.empty();
+Table::Row Table::getHeader() {
+  return header;
 }
 
 std::set<Table::Row> Table::getData() {
   return data;
 }
 
-std::set<Table::Row> Table::getDataWithColumns(Row columnNames) {
+std::set<std::string> Table::getColumn(std::string headerTitle) {
+  int index = getColumnIndex(headerTitle);
+  std::set<std::string> column;
+  for (Row row : data) {
+    column.emplace(row[index]);
+  }
+  return column;
+}
+
+std::set<Table::Row> Table::getColumns(Row headerTitles) {
   std::vector<int> indexList;
-  for (auto columnName : columnNames) {
-    indexList.emplace_back(getColumnIndex(columnName));
+  for (auto headerTitle : headerTitles) {
+    indexList.push_back(getColumnIndex(headerTitle));
   }
 
   std::set<Row> result;
-  for (auto dataRow : data) {
+  for (Row row : data) {
     Row curr;
     for (auto i : indexList) {
-      curr.emplace_back(dataRow[i]);
+      curr.push_back(row[i]);
     }
     result.insert(curr);
   }
   return result;
 }
 
-void Table::dropColumn(std::string toDrop) {
-  int index = getColumnIndex(toDrop);
+int Table::getColumnIndex(std::string headerTitle) {
+  for (int i = 0; i < header.size(); i++) {
+    if (header[i] == headerTitle) {
+      return i;
+    }
+  }
+  throw std::logic_error("Column with name:" + headerTitle + " not found");
+}
+
+void Table::dropColumn(std::string headerTitle) {
+  int index = getColumnIndex(headerTitle);
 
   // Clear data if there is only one column, otherwise erase column
-  if (headerRow.size() == 1) {
+  if (header.size() == 1) {
     data.clear();
   } else {
-    headerRow.erase(headerRow.begin() + index);
-    std::set<Row> newData;
-
-    for (auto dataRow : data) {
-      Row newRow = dataRow;
-      newRow.erase(newRow.begin() + index);
-      newData.emplace(newRow);
+    header.erase(header.begin() + index);
+    for (Row row : data) {
+      row.erase(row.begin() + index);
     }
-    data = std::move(newData);
   }
 }
 
-void Table::concatenate(Table otherTable) {
-  if (getHeader().size() != otherTable.getHeader().size()) {
+void Table::concatenate(Table table) {
+  if (header.size() != table.getHeader().size()) {
     throw std::logic_error("Concatenation requires table with the same number of columns");
   }
-  for (Row row: otherTable.getData()) {
+  for (Row row : table.getData()) {
     data.emplace(row);
   }
 }
 
-void dfs(const std::string& v, std::unordered_map<std::string, std::set<std::string>>& adjList,
-         std::unordered_map<std::string, std::set<std::string>>& tMap) {
+// helper function for filling transitive table
+void runDfs(std::string v, std::unordered_map<std::string, std::set<std::string>>& adjList,
+  std::unordered_map<std::string, std::set<std::string>>& tMap) {
   std::set<std::string> visited;
   std::stack<std::string> stack;
   std::string curr;
@@ -134,26 +121,39 @@ void dfs(const std::string& v, std::unordered_map<std::string, std::set<std::str
   tMap.insert({ v, std::move(visited) });
 }
 
-// Used for transitive closure for relationships Follows* and Parent*
+// Used for transitive relationships Follows* and Parent*
 void Table::fillTransitiveTable(Table table) {
   std::unordered_map<std::string, std::set<std::string>> adjList;
-  for (auto row : table.getData()) {
-    //if (!adjList.count(row[0])) {
+  std::unordered_map<std::string, std::set<std::string>> tMap;
+
+  for (Row row : table.getData()) {
     if (!(adjList.find(row[0]) != adjList.end())) {
-      adjList.insert({ row[0], std::move(std::set<std::string>({ row[1] }) )});
+      adjList.insert({ row[0], std::set<std::string>({ row[1] }) });
     } else {
       adjList.at(row[0]).insert(row[1]);
     }
   }
 
-  std::unordered_map<std::string, std::set<std::string>> tMap;
   for (auto entry : adjList) {
-    dfs(entry.first, adjList, tMap);
+    runDfs(entry.first, adjList, tMap);
   }
 
   for (auto entry : tMap) {
     for (auto value : entry.second) {
-      data.insert(std::move(Row({ entry.first, value })));
+      data.insert(Row({ entry.first, value }));
     }
   }
+}
+
+bool Table::contains(Row row) {
+  return data.count(row) == 1;
+}
+
+int Table::size() {
+  return data.size();
+}
+
+
+bool Table::empty() {
+  return data.size() == 0;
 }
