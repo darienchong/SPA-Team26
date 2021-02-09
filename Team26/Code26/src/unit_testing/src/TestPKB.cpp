@@ -2,10 +2,6 @@
 
 #include "PKB.h"
 
-TEST_CASE("[PKB.cpp] 1st Test") { 
-	REQUIRE(1 == 1);
-}
-
 TEST_CASE("[PKB.cpp] varTable Insertion") {
 	PKB pkb;
 	pkb.addVar("x");

@@ -7,17 +7,22 @@
 
 class PKB {
 public:
+  // constructor
 	PKB();
+
+  // add names to table
 	void addVar(std::string var);
 	void addStmt(int stmtNo);
 	void addProc(std::string proc);
 
+  // add statements to table of corresponding statement type
 	void addIf(int stmtNo);
 	void addWhile(int stmtNo);
 	void addRead(int stmtNo);
 	void addPrint(int stmtNo);
 	void addAssign(int stmtNo);
 
+	// add relationships
 	void addFollows(int follower, int followed);
 	void addFollowsT();
 	void addParent(int parent, int child);
@@ -28,16 +33,19 @@ public:
 	void addModifies(std::string proc, std::string var);
 	void addPatternAssign(int stmtNo, std::string lhs, std::string rhs);
 
+	// get Table of names
 	Table getVarTable();
 	Table getStmtTable();
 	Table getProcTable();
 
+	// get Table of statement numbers
 	Table getIfTable();
 	Table getWhileTable();
 	Table getReadTable();
 	Table getPrintTable();
 	Table getAssignTable();
 
+	// get Table of relations
 	Table getFollowsTable();
 	Table getFollowsTTable();
 	Table getParentTable();

@@ -12,11 +12,15 @@ private:
   std::set<Row> data;
 
 public:
+  // constructors
   Table();
   Table(int n);
   Table(Row header);
 
+  // setters
   void setHeader(Row header);
+
+  // data insertions
   void insertRow(Row row);
 
   // getters

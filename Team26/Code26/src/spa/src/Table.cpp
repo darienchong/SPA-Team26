@@ -98,28 +98,6 @@ void Table::concatenate(Table table) {
   }
 }
 
-// helper function for filling transitive table
-void runDfs(std::string v, std::unordered_map<std::string, std::set<std::string>>& adjList,
-  std::unordered_map<std::string, std::set<std::string>>& tMap) {
-  std::set<std::string> visited;
-  std::stack<std::string> stack;
-  std::string curr;
-
-  stack.push(v);
-  while (!stack.empty()) {
-    curr = stack.top();
-    stack.pop();
-    if (!(visited.find(curr) != visited.end())) {
-      visited.insert(curr);
-      if (adjList.find(curr) != adjList.end()) {
-        for (auto value : adjList.at(curr)) {
-          stack.push(value);
-        }
-      }
-    }
-  }
-  tMap.insert({ v, std::move(visited) });
-}
 
 // Used for transitive relationships Follows* and Parent*
 void Table::fillTransitiveTable(Table table) {
@@ -135,7 +113,24 @@ void Table::fillTransitiveTable(Table table) {
   }
 
   for (auto entry : adjList) {
-    runDfs(entry.first, adjList, tMap);
+    std::set<std::string> visited;
+    std::stack<std::string> stack;
+    std::string curr;
+
+    stack.push(entry.first);
+    while (!stack.empty()) {
+      curr = stack.top();
+      stack.pop();
+      if (!(visited.find(curr) != visited.end())) {
+        visited.insert(curr);
+        if (adjList.find(curr) != adjList.end()) {
+          for (auto value : adjList.at(curr)) {
+            stack.push(value);
+          }
+        }
+      }
+    }
+    tMap.insert({ entry.first, std::move(visited) });
   }
 
   for (auto entry : tMap) {
