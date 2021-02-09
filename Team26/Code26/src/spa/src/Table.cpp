@@ -1,7 +1,6 @@
 #include "Table.h"
-#include <algorithm>
-#include <iterator>
-#include <map>
+
+#include <unordered_map>
 #include <stack>
 #include <stdexcept>
 
@@ -71,11 +70,7 @@ std::set<Table::Row> Table::getData() {
 std::set<Table::Row> Table::getDataWithColumns(Row columnNames) {
   std::vector<int> indexList;
   for (auto columnName : columnNames) {
-    auto it = std::find(headerRow.begin(), headerRow.end(), columnName);
-    if (it == headerRow.end()) {
-      throw std::logic_error("Column: " + columnName + " does not exist");
-    }
-    indexList.emplace_back(std::distance(headerRow.begin(), it));
+    indexList.emplace_back(getColumnIndex(columnName));
   }
 
   std::set<Row> result;
@@ -117,20 +112,8 @@ void Table::concatenate(Table otherTable) {
   }
 }
 
-void Table::selfJoin() {
-  auto it = data.begin();
-  while (it != data.end()) {
-    if (it->at(0) != it->at(1)) {
-      it = data.erase(it);
-    } else {
-      ++it;
-    }
-  }
-  dropColumn(headerRow[1]);
-}
-
-void dfs(const std::string& v, std::map<std::string, std::set<std::string>>& adjList,
-         std::map<std::string, std::set<std::string>>& tMap) {
+void dfs(const std::string& v, std::unordered_map<std::string, std::set<std::string>>& adjList,
+         std::unordered_map<std::string, std::set<std::string>>& tMap) {
   std::set<std::string> visited;
   std::stack<std::string> stack;
   std::string curr;
@@ -153,7 +136,7 @@ void dfs(const std::string& v, std::map<std::string, std::set<std::string>>& adj
 
 // Used for transitive closure for relationships Follows* and Parent*
 void Table::fillTransitiveTable(Table table) {
-  std::map<std::string, std::set<std::string>> adjList;
+  std::unordered_map<std::string, std::set<std::string>> adjList;
   for (auto row : table.getData()) {
     //if (!adjList.count(row[0])) {
     if (!(adjList.find(row[0]) != adjList.end())) {
@@ -163,7 +146,7 @@ void Table::fillTransitiveTable(Table table) {
     }
   }
 
-  std::map<std::string, std::set<std::string>> tMap;
+  std::unordered_map<std::string, std::set<std::string>> tMap;
   for (auto entry : adjList) {
     dfs(entry.first, adjList, tMap);
   }

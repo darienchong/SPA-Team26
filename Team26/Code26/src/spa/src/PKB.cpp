@@ -1,8 +1,7 @@
-#include <stdio.h>
-#include <iostream>
-
 #include "PKB.h"
 #include "Table.h"
+
+#include <string>
 
 PKB::PKB() {}
 
