@@ -33,25 +33,25 @@ public:
 	void addPatternAssign(int stmtNo, std::string lhs, std::string rhs);
 
 	// get Table of names
-	Table getVarTable();
-	Table getStmtTable();
-	Table getProcTable();
+	Table getVarTable() const;
+	Table getStmtTable() const;
+	Table getProcTable() const;
 
 	// get Table of statement numbers
-	Table getIfTable();
-	Table getWhileTable();
-	Table getReadTable();
-	Table getPrintTable();
-	Table getAssignTable();
+	Table getIfTable() const;
+	Table getWhileTable() const;
+	Table getReadTable() const;
+	Table getPrintTable() const;
+	Table getAssignTable() const;
 
 	// get Table of relations
-	Table getFollowsTable();
-	Table getFollowsTTable();
-	Table getParentTable();
-	Table getParentTTable();
-	Table getUsesTable();
-	Table getModifiesTable();
-	Table getPatternAssignTable();
+	Table getFollowsTable() const;
+	Table getFollowsTTable() const;
+	Table getParentTable() const;
+	Table getParentTTable() const;
+	Table getUsesTable() const;
+	Table getModifiesTable() const;
+	Table getPatternAssignTable() const;
 
 private:
 	Table varTable{ 1 };

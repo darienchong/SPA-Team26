@@ -97,18 +97,18 @@ void PKB::addPatternAssign(int stmtNo, std::string lhs, std::string rhs) {
 }
 
 // Getters
-Table PKB::getVarTable() { return varTable; }
-Table PKB::getStmtTable() { return stmtTable; }
-Table PKB::getProcTable() { return procTable; }
-Table PKB::getIfTable() { return ifTable; }
-Table PKB::getWhileTable() { return whileTable; }
-Table PKB::getReadTable() { return readTable; }
-Table PKB::getPrintTable() { return printTable; }
-Table PKB::getAssignTable() { return assignTable; }
-Table PKB::getFollowsTable() { return followsTable; }
-Table PKB::getFollowsTTable() { return followsTTable; }
-Table PKB::getParentTable() { return parentTable; }
-Table PKB::getParentTTable() { return parentTTable; }
-Table PKB::getUsesTable() { return usesTable; }
-Table PKB::getModifiesTable() { return modifiesTable; }
-Table PKB::getPatternAssignTable() { return patternAssignTable; }
+Table PKB::getVarTable() const { return varTable; }
+Table PKB::getStmtTable() const { return stmtTable; }
+Table PKB::getProcTable() const { return procTable; }
+Table PKB::getIfTable() const { return ifTable; }
+Table PKB::getWhileTable() const { return whileTable; }
+Table PKB::getReadTable() const { return readTable; }
+Table PKB::getPrintTable() const { return printTable; }
+Table PKB::getAssignTable() const { return assignTable; }
+Table PKB::getFollowsTable() const { return followsTable; }
+Table PKB::getFollowsTTable() const { return followsTTable; }
+Table PKB::getParentTable() const { return parentTable; }
+Table PKB::getParentTTable() const { return parentTTable; }
+Table PKB::getUsesTable() const { return usesTable; }
+Table PKB::getModifiesTable() const { return modifiesTable; }
+Table PKB::getPatternAssignTable() const { return patternAssignTable; }
