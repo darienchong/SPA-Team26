@@ -14,8 +14,8 @@ private:
 public:
   // constructors
   Table();
-  Table(int n);
-  Table(Row header);
+  explicit Table(int n);
+  explicit Table(Row header);
 
   // setters
   void setHeader(Row header);
@@ -32,10 +32,10 @@ public:
 
   // util functions
   void dropColumn(std::string headerTitle);
-  void concatenate(Table otherTable);
+  void concatenate(Table& otherTable);
 
   int size();
-  bool contains(Row row);
+  bool contains(const Row& row);
   bool empty();
 
   // only called by transitive tables

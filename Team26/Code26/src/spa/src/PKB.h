@@ -3,7 +3,6 @@
 #include "Table.h"
 
 #include <map>
-#include <vector>
 
 class PKB {
 public:

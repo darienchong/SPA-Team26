@@ -68,7 +68,7 @@ TEST_CASE("[PKB.cpp] addFollows") {
 	}
 
 	SECTION("Check invalid insertion") {
-		REQUIRE_THROWS_AS(pkb.addFollows(5, 4), std::logic_error);
+		REQUIRE_THROWS(pkb.addFollows(5, 4));
 	}
 }
 
@@ -93,7 +93,7 @@ TEST_CASE("[PKB.cpp] addParent") {
 	}
 
 	SECTION("Check invalid insertion") {
-		REQUIRE_THROWS_AS(pkb.addParent(5, 4), std::logic_error);
+		REQUIRE_THROWS(pkb.addParent(5, 4));
 	}
 }
 

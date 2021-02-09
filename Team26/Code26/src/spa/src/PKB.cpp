@@ -1,7 +1,9 @@
 #include "PKB.h"
-#include "Table.h"
 
 #include <string>
+#include <vector>
+
+#include "Table.h"
 
 PKB::PKB() {}
 
@@ -47,7 +49,7 @@ void PKB::addAssign(int stmtNo) {
 
 void PKB::addFollows(int follower, int followed) {
 	if (follower >= followed) {
-		throw std::logic_error("Follower should come before followed");
+		throw "Follower should come before followed";
 	}
 	std::vector<std::string> vect{ std::to_string(follower), std::to_string(followed) };
 	followsTable.insertRow(vect);
@@ -59,7 +61,7 @@ void PKB::addFollowsT() {
 
 void PKB::addParent(int parent, int child) {
 	if (parent >= child) {
-		throw std::logic_error("Parent should come before child");
+		throw "Parent should come before child";
 	}
 	std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
 	parentTable.insertRow(vect);

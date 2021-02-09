@@ -1,8 +1,10 @@
+#include "Table.h"
+
+#include <string>
 #include <stack>
+#include <set>
 #include <stdexcept>
 #include <unordered_map>
-
-#include "Table.h"
 
 Table::Table() {
   header.emplace_back("0");
@@ -20,14 +22,14 @@ Table::Table(Row h) {
 
 void Table::setHeader(Row h) {
   if (h.size() != header.size()) {
-    throw std::logic_error("Header size does not match");
+    throw "Header size does not match";
   }
   header = h;
 }
 
 void Table::insertRow(Row row) {
   if (row.size() != header.size()) {
-    throw std::logic_error("Row should be of length " + std::to_string(header.size()));
+    throw "Row should be of length " + std::to_string(header.size());
   }
   data.emplace(row);
 }
@@ -72,7 +74,7 @@ int Table::getColumnIndex(std::string headerTitle) {
       return i;
     }
   }
-  throw std::logic_error("Column with name:" + headerTitle + " not found");
+  throw "Column with name:" + headerTitle + " not found";
 }
 
 void Table::dropColumn(std::string headerTitle) {
@@ -89,9 +91,9 @@ void Table::dropColumn(std::string headerTitle) {
   }
 }
 
-void Table::concatenate(Table table) {
+void Table::concatenate(Table& table) {
   if (header.size() != table.getHeader().size()) {
-    throw std::logic_error("Concatenation requires table with the same number of columns");
+    throw "Concatenation requires table with the same number of columns";
   }
   for (Row row : table.getData()) {
     data.emplace(row);
@@ -140,7 +142,7 @@ void Table::fillTransitiveTable(Table table) {
   }
 }
 
-bool Table::contains(Row row) {
+bool Table::contains(const Row& row) {
   return data.count(row) == 1;
 }
 
