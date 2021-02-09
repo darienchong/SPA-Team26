@@ -54,15 +54,15 @@ public:
 	Table getPatternAssignTable();
 
 private:
-	Table varTable;
-	Table stmtTable;
-	Table procTable;
+	Table varTable{ 1 };
+	Table stmtTable{ 1 };
+	Table procTable{ 1 };
 
-	Table ifTable;
-	Table whileTable;
-	Table readTable;
-	Table printTable;
-	Table assignTable;
+	Table ifTable{ 1 };
+	Table whileTable{ 1 };
+	Table readTable{ 1 };
+	Table printTable{ 1 };
+	Table assignTable{ 1 };
 
 	Table followsTable{ 2 };
 	Table followsTTable{ 2 };

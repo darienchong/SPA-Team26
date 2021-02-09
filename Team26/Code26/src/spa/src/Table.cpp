@@ -100,11 +100,9 @@ void Table::concatenate(Table& table) {
   }
 }
 
-
 // Used for transitive relationships Follows* and Parent*
 void Table::fillTransitiveTable(Table table) {
   std::unordered_map<std::string, std::set<std::string>> adjList;
-  std::unordered_map<std::string, std::set<std::string>> tMap;
 
   for (Row row : table.getData()) {
     if (!(adjList.find(row[0]) != adjList.end())) {
@@ -114,30 +112,28 @@ void Table::fillTransitiveTable(Table table) {
     }
   }
 
-  for (auto entry : adjList) {
-    std::set<std::string> visited;
+  for (auto& entry : adjList) {
+    // generate transitives
+    std::set<std::string> transitives;
     std::stack<std::string> stack;
     std::string curr;
-
     stack.push(entry.first);
     while (!stack.empty()) {
       curr = stack.top();
       stack.pop();
-      if (!(visited.find(curr) != visited.end())) {
-        visited.insert(curr);
+      if (!(transitives.find(curr) != transitives.end())) {
+        transitives.insert(curr);
         if (adjList.find(curr) != adjList.end()) {
-          for (auto value : adjList.at(curr)) {
+          for (std::string value : adjList.at(curr)) {
             stack.push(value);
           }
         }
       }
     }
-    tMap.insert({ entry.first, std::move(visited) });
-  }
-
-  for (auto entry : tMap) {
-    for (auto value : entry.second) {
-      data.insert(Row({ entry.first, value }));
+    // insert transitives
+    std::set<std::string>::iterator it;
+    for (it = transitives.begin(); it != transitives.end(); it++) {
+      data.insert(Row({ entry.first, *it }));
     }
   }
 }
@@ -149,7 +145,6 @@ bool Table::contains(const Row& row) {
 int Table::size() {
   return data.size();
 }
-
 
 bool Table::empty() {
   return data.size() == 0;

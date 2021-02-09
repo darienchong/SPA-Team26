@@ -32,7 +32,7 @@ public:
 
   // util functions
   void dropColumn(std::string headerTitle);
-  void concatenate(Table& otherTable);
+  void concatenate(Table& table);
 
   int size();
   bool contains(const Row& row);
