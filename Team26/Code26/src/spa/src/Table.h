@@ -1,4 +1,5 @@
 #pragma once
+
 #include <set>
 #include <string>
 #include <vector>
@@ -26,7 +27,6 @@ public:
   std::set<Row> getDataWithColumns(Row columnNames);
   void dropColumn(std::string toDrop);
   void concatenate(Table otherTable);
-  void selfJoin();
 
   // technically only followsTTable and parentTTable are allowed to call this
   void fillTransitiveTable(Table table);
