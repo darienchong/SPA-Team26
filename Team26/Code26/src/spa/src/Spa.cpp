@@ -1,4 +1,4 @@
-#include "SPA.h"
+#include "Spa.h"
 
 #include <iostream>
 #include <fstream>
@@ -11,10 +11,10 @@
 #include "Token.h"
 #include "Tokeniser.h"
 
-SPA::SPA()
-  : pkb(PKB()) {}
+Spa::Spa()
+  : pkb(Pkb()) {}
 
-void SPA::parseSourceFile(const std::string& filename) {
+void Spa::parseSourceFile(const std::string& filename) {
   std::ifstream sourceFile(filename);
   if (!sourceFile.is_open()) {
     std::cerr << "Unable to open source file";
@@ -24,7 +24,7 @@ void SPA::parseSourceFile(const std::string& filename) {
   sourceFile.close();
 }
 
-void SPA::evaluateQuery(const std::string& queryString, std::list<std::string>& results) {
+void Spa::evaluateQuery(const std::string& queryString, std::list<std::string>& results) {
   std::stringstream ss(queryString);
   Tokeniser t;
   std::list<Token> tokens = t.tokenise(ss);

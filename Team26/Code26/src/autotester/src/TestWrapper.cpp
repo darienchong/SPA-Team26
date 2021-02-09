@@ -10,7 +10,7 @@ AbstractWrapper* WrapperFactory::createWrapper() {
 volatile bool AbstractWrapper::GlobalStop = false;
 
 // a default constructor
-TestWrapper::TestWrapper() : spa(SPA()) {}
+TestWrapper::TestWrapper() : spa(Spa()) {}
 
 // method for parsing the SIMPLE source
 void TestWrapper::parse(std::string filename) {

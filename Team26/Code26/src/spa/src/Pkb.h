@@ -4,10 +4,10 @@
 
 #include <map>
 
-class PKB {
+class Pkb {
 public:
   // constructor
-	PKB();
+	Pkb();
 
   // add names to table
 	void addVar(std::string var);

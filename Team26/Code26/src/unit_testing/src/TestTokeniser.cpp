@@ -1,17 +1,34 @@
+#include "catch.hpp"
+
 #include <fstream>
 #include <list>
 #include <sstream>
 #include <string>
+#include <iostream>
 
 #include "Token.h"
 #include "Tokeniser.h"
-#include "catch.hpp"
 
 namespace {
   std::stringstream strToStream(std::string str) {
     std::stringstream stream;
     stream << str << "\n";
     return stream;
+  }
+
+  std::string tokenTypeToStr(TokenType type) {
+    switch (type) {
+    case TokenType::DELIMITER:
+      return "Delimiter";
+    case TokenType::IDENTIFIER:
+      return "Identifier";
+    case TokenType::NUMBER:
+      return "Number";
+    case TokenType::OPERATOR:
+      return "Operator";
+    default:
+      throw std::invalid_argument("TokenType passed is not one of the defined types.");
+    }
   }
 
   Tokeniser tokeniser;
@@ -106,4 +123,25 @@ TEST_CASE("[TestTokeniser] Operator, two-char, single, negative") {
   REQUIRE_THROWS(tokeniser.tokenise(stream));
 }
 
+TEST_CASE("[TestTokeniser] Number, single-digit, positive") {
+  std::stringstream stream = strToStream("0");
+  std::list<Token> tokens = tokeniser.tokenise(stream);
+  Token token = tokens.front();
 
+  REQUIRE(token.type == TokenType::NUMBER);
+  REQUIRE(token.value == "0");
+}
+
+TEST_CASE("[TestTokeniser] Number, multiple-digit, positive") {
+  std::stringstream stream = strToStream("123");
+  std::list<Token> tokens = tokeniser.tokenise(stream);
+  Token token = tokens.front();
+
+  REQUIRE(token.type == TokenType::NUMBER);
+  REQUIRE(token.value == "123");
+}
+
+TEST_CASE("[TestTokeniser] Number, multiple-digit, negative") {
+  std::stringstream stream = strToStream("0123");
+  REQUIRE_THROWS(tokeniser.tokenise(stream));
+}

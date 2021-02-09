@@ -81,14 +81,12 @@ namespace {
     bool isFirstChar = true;
 
     while (std::isdigit(stream.peek())) {
-      bool isFirstDigitZero = isFirstChar && (stream.peek() == '0');
-
-      // Names cannot have digits as the first character.
-      if (isFirstDigitZero) {
+      // Since we peek ahead, if value equals "0" at any time it means that
+      // we are at least on the second digit, hence an invalid construction.
+      if (value == "0") {
         throw std::invalid_argument("[Tokeniser::constructNumber]: Encountered 0 as the first digit of a number.");
-      } else {
-        isFirstChar = false;
       }
+
       value.push_back(stream.get());
     }
 
