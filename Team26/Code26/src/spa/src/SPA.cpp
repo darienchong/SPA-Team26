@@ -1,7 +1,7 @@
+#include "SPA.h"
+
 #include <iostream>
 #include <fstream>
-
-#include "SPA.h"
 
 SPA::SPA()
   : pkb(PKB()) {}

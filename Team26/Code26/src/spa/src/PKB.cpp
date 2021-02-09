@@ -1,7 +1,6 @@
 #include "PKB.h"
 #include "Table.h"
 
-#include <stdexcept>
 #include <string>
 
 PKB::PKB() {}
