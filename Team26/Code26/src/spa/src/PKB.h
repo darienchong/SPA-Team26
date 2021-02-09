@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Table.h"
-#include <unordered_set>
 #include <vector>
 #include <map>
 
@@ -30,11 +29,13 @@ public:
 	Table getVarTable();
 	Table getStmtTable();
 	Table getProcTable();
+
 	Table getIfTable();
 	Table getWhileTable();
 	Table getReadTable();
 	Table getPrintTable();
 	Table getAssignTable();
+
 	Table getFollowsTable();
 	Table getFollowsTTable();
 	Table getParentTable();

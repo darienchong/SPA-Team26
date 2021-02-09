@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <iostream>
-#include <string>
 
 #include "PKB.h"
 #include "Table.h"
@@ -47,9 +46,6 @@ void PKB::addAssign(int stmtNo) {
 	assignTable.insertRow(vect);
 }
 
-/////////////////////////////
-//// Design Abstractions ////
-/////////////////////////////
 void PKB::addFollows(int follower, int followed) {
 	if (follower >= followed) {
 		throw std::logic_error("Follower should come before followed");
