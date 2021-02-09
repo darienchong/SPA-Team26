@@ -1,6 +1,7 @@
 #include "PKB.h"
 #include "Table.h"
 
+#include <stdexcept>
 #include <string>
 
 PKB::PKB() {}
@@ -89,6 +90,11 @@ void PKB::addModifies(std::string proc, std::string var) {
 	modifiesTable.insertRow(vect);
 }
 
+void PKB::addPatternAssign(int stmtNo, std::string lhs, std::string rhs) {
+	std::vector<std::string> vect{ std::to_string(stmtNo), lhs, rhs };
+	patternAssignTable.insertRow(vect);
+}
+
 // Getters
 Table PKB::getVarTable() { return varTable; }
 Table PKB::getStmtTable() { return stmtTable; }
@@ -104,3 +110,4 @@ Table PKB::getParentTable() { return parentTable; }
 Table PKB::getParentTTable() { return parentTTable; }
 Table PKB::getUsesTable() { return usesTable; }
 Table PKB::getModifiesTable() { return modifiesTable; }
+Table PKB::getPatternAssignTable() { return patternAssignTable; }

@@ -135,3 +135,16 @@ TEST_CASE("[PKB.cpp] addModifies") {
 		REQUIRE(dataCopy.count({ "main", "y" }) == 1);
 	}
 }
+
+
+TEST_CASE("[PKB.cpp] addPatternAssign") {
+	PKB pkb;
+
+	SECTION("Check valid insertion") {
+		pkb.addPatternAssign(5, "x", "x y *");
+		pkb.addPatternAssign(7, "_", "b c * a +");
+		auto dataCopy = pkb.getPatternAssignTable().getData();
+		REQUIRE(dataCopy.count({ "5", "x", "x y *" }) == 1);
+		REQUIRE(dataCopy.count({ "7", "_", "b c * a +" }) == 1);
+	}
+}

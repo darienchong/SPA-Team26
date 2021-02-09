@@ -26,6 +26,7 @@ public:
 	void addUses(std::string proc, std::string var);
 	void addModifies(int stmtNo, std::string var);
 	void addModifies(std::string proc, std::string var);
+	void addPatternAssign(int stmtNo, std::string lhs, std::string rhs);
 
 	Table getVarTable();
 	Table getStmtTable();
@@ -43,6 +44,7 @@ public:
 	Table getParentTTable();
 	Table getUsesTable();
 	Table getModifiesTable();
+	Table getPatternAssignTable();
 
 private:
 	Table varTable;
@@ -61,6 +63,5 @@ private:
 	Table parentTTable{ 2 };
 	Table usesTable{ 2 };
 	Table modifiesTable{ 2 };
-
-	std::map<int, std::tuple<std::string, std::vector<std::string>>> patternAssignMap;
+	Table patternAssignTable{ 3 };
 };
