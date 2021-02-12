@@ -38,6 +38,7 @@ TEST_CASE("[TestTokeniser] Sanity check") {
   REQUIRE(1 == 1);
 }
 
+
 TEST_CASE("[TestTokeniser] Delimiter, single") {
   std::stringstream stream = strToStream("{");
   std::list<Token> tokens = tokeniser.tokenise(stream);
@@ -46,6 +47,7 @@ TEST_CASE("[TestTokeniser] Delimiter, single") {
   REQUIRE(token.type == TokenType::DELIMITER);
   REQUIRE(token.value == "{");
 }
+
 
 TEST_CASE("[TestTokeniser] Delimiter, multiple") {
   std::stringstream stream = strToStream("{}();_\",");
@@ -87,12 +89,12 @@ TEST_CASE("[TestTokeniser] Identifier, negative") {
 }
 
 TEST_CASE("[TestTokeniser] Operator, single-char, single") {
-  std::stringstream stream = strToStream("<");
+  std::stringstream stream = strToStream("!");
   std::list<Token> tokens = tokeniser.tokenise(stream);
   
   Token token = tokens.front();
   REQUIRE(token.type == TokenType::OPERATOR);
-  REQUIRE(token.value == "<");
+  REQUIRE(token.value == "!");
 }
 
 TEST_CASE("[TestTokeniser] Operator, two-char, single, positive") {
@@ -119,7 +121,7 @@ TEST_CASE("[TestTokeniser] Operator, two-char, multiple, positive") {
 }
 
 TEST_CASE("[TestTokeniser] Operator, two-char, single, negative") {
-  std::stringstream stream = strToStream("!!");
+  std::stringstream stream = strToStream("&");
   REQUIRE_THROWS(tokeniser.tokenise(stream));
 }
 
@@ -144,4 +146,19 @@ TEST_CASE("[TestTokeniser] Number, multiple-digit, positive") {
 TEST_CASE("[TestTokeniser] Number, multiple-digit, negative") {
   std::stringstream stream = strToStream("0123");
   REQUIRE_THROWS(tokeniser.tokenise(stream));
+}
+
+
+TEST_CASE("[TestTokeniser] Whitespace not consumed") {
+  std::stringstream stream = strToStream("Follows *");
+  
+  std::list<Token> tokens = tokeniser.notConsumingWhitespace().tokenise(stream);
+  std::list<std::string> expectedValues = { "Follows", " ", "*", " " };
+  std::list<std::string>::const_iterator expectedValuesItr = expectedValues.begin();
+
+  for (Token token : tokens) {
+    REQUIRE(token.value == *expectedValuesItr);
+
+    ++expectedValuesItr;
+  }
 }

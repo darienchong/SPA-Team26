@@ -15,12 +15,13 @@
  */
 class Tokeniser {
 private:
-
+  bool isConsumeWhitespace;
 public:
   /**
    * Standard c'tor.
    */
   Tokeniser() {
+    isConsumeWhitespace = true;
   }
 
   /**
@@ -43,4 +44,25 @@ public:
    * @returns List of Tokens for parsing.
    */
   std::list<Token> tokenise(std::istream& stream);
+
+  /**
+   * Sets a flag to consume all encountered whitespace characters
+   * while tokenizing. The default behaviour is to consume whitespace.
+   * Returns a Tokeniser to allow for chaining e.g.
+   * std::list<Token> tokens = tokeniser.consumingWhitespace().tokenise(my_stream);
+   * 
+   * @returns A Tokeniser that consumes encountered whitespace characters.
+   */
+  Tokeniser consumingWhitespace();
+
+  /**
+   * Sets a flag to tokenize all encountered whitespace characters
+   * while tokenizing.
+   * Returns a Tokeniser to allow for chaining e.g.
+   * std::list<Token> tokens = tokeniser.notConsumingWhitespace().tokenise(my_stream);
+   *
+   * @returns A Tokeniser that does not consume encountered whitespace
+   *     characters.
+   */
+  Tokeniser notConsumingWhitespace();
 };

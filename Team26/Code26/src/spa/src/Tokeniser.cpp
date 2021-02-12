@@ -7,6 +7,7 @@
 #include <iostream>
 
 namespace {
+  const static Token WHITESPACE{ TokenType::DELIMITER, " " };
   /**
    * Checks if a given character is a delimiter or not.
    * 
@@ -123,7 +124,7 @@ namespace {
    *    operator, `false` otherwise.
    */
   bool isCanHaveEquals(char c) {
-    std::unordered_set<char> canHaveEquals{ '>', '<', '=' };
+    std::unordered_set<char> canHaveEquals{ '>', '<', '=', '!' };
 
     return canHaveEquals.count(c) > 0;
   }
@@ -140,7 +141,7 @@ namespace {
    *    operator, `false` otherwise.
    */
   bool isExpectEquals(char c) {
-    std::unordered_set<char> expectEquals{ '!' };
+    std::unordered_set<char> expectEquals;
 
     return expectEquals.count(c) > 0;
   }
@@ -214,9 +215,10 @@ namespace {
       return { type, value };
     }
     
-    // We distinguish the cases where the character must have an = after it 
-    // (e.g. ! is not valid, but != is) and the cases where the character can
-    // have an = after it, but is valid without (e.g. < and <= are both valid)
+    // We distinguish the cases where the operator is valid with or without
+    // an = after it, and the cases where the operator is invalid without 
+    // an = after it. Right now, there aren't any operators that are invalid
+    // without an = after it, but for extensibility we'll leave this logic in.
     if (isCanHaveEquals(stream.peek())) {
       value.push_back(stream.get());
       bool isNextCharEquals = stream.peek() == '=';
@@ -300,7 +302,12 @@ std::list<Token> Tokeniser::tokenise(std::istream &stream) {
     } else if (isOperator(stream.peek())) {
       tokens.push_back(constructOperator(stream));
     } else if (isWhitespace) {
-      consumeWhitespace(stream);
+      if (!isConsumeWhitespace) {
+        stream.get();
+        tokens.push_back(WHITESPACE);
+      } else {
+        consumeWhitespace(stream);
+      }
     } else {
       throw std::logic_error("[Tokeniser::tokenise]: Failed to recognise character " + stream.peek());
     }
@@ -308,3 +315,15 @@ std::list<Token> Tokeniser::tokenise(std::istream &stream) {
 
   return tokens;
 }
+
+Tokeniser Tokeniser::consumingWhitespace() {
+  this->isConsumeWhitespace = true;
+  return *this;
+}
+
+Tokeniser Tokeniser::notConsumingWhitespace() {
+  this->isConsumeWhitespace = false;
+  return *this;
+}
+
+
