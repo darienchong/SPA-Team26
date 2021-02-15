@@ -23,11 +23,21 @@ TEST_CASE("[PKB.cpp] procTable Insertion") {
 	REQUIRE(dataCopy.find({ "main" }) != dataCopy.end());
 }
 
+TEST_CASE("[PKB.cpp] constTable Insertion") {
+  PKB pkb;
+  pkb.addConst(std::to_string(2));
+  auto dataCopy = pkb.getConstTable().getData();
+  REQUIRE(dataCopy.find({ "2" }) != dataCopy.end());
+}
+
+
 TEST_CASE("[PKB.cpp] ifTable Insertion") {
 	PKB pkb;
 	pkb.addIf(12);
 	auto dataCopy = pkb.getIfTable().getData();
 	REQUIRE(dataCopy.find({ "12" }) != dataCopy.end());
+	auto stmtDataCopy = pkb.getStmtTable().getData();
+	REQUIRE(stmtDataCopy.count({"12"}));
 }
 
 TEST_CASE("[PKB.cpp] whileTable Insertion") {
@@ -35,6 +45,8 @@ TEST_CASE("[PKB.cpp] whileTable Insertion") {
 	pkb.addWhile(15);
 	auto dataCopy = pkb.getWhileTable().getData();
 	REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
+  auto stmtDataCopy = pkb.getStmtTable().getData();
+  REQUIRE(stmtDataCopy.count({"15"}));
 }
 
 TEST_CASE("[PKB.cpp] readTable Insertion") {
@@ -42,6 +54,8 @@ TEST_CASE("[PKB.cpp] readTable Insertion") {
 	pkb.addRead(15);
 	auto dataCopy = pkb.getReadTable().getData();
 	REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
+  auto stmtDataCopy = pkb.getStmtTable().getData();
+  REQUIRE(stmtDataCopy.count({"15"}));
 }
 
 TEST_CASE("[PKB.cpp] printTable Insertion") {
@@ -49,6 +63,8 @@ TEST_CASE("[PKB.cpp] printTable Insertion") {
 	pkb.addPrint(526);
 	auto dataCopy = pkb.getPrintTable().getData();
 	REQUIRE(dataCopy.find({ "526" }) != dataCopy.end());
+  auto stmtDataCopy = pkb.getStmtTable().getData();
+  REQUIRE(stmtDataCopy.count({"526"}));
 }
 
 TEST_CASE("[PKB.cpp] assignTable Insertion") {
@@ -56,6 +72,8 @@ TEST_CASE("[PKB.cpp] assignTable Insertion") {
 	pkb.addAssign(32);
 	auto dataCopy = pkb.getAssignTable().getData();
 	REQUIRE(dataCopy.find({ "32" }) != dataCopy.end());
+  auto stmtDataCopy = pkb.getStmtTable().getData();
+  REQUIRE(stmtDataCopy.count({"32"}));
 }
 
 TEST_CASE("[PKB.cpp] addFollows") {
@@ -131,7 +149,6 @@ TEST_CASE("[PKB.cpp] addModifies") {
 		REQUIRE(dataCopy.count({ "main", "y" }) == 1);
 	}
 }
-
 
 TEST_CASE("[PKB.cpp] addPatternAssign") {
 	PKB pkb;

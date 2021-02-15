@@ -59,7 +59,7 @@ TEST_CASE("[TestTable] Get Data") {
     table.insertRow({"2"});
     table.insertRow({"3"});
     REQUIRE(table.getData().size() == 3);
-    REQUIRE(table.getData().count({"1"}));
+    REQUIRE(table.getData().count({"1"}) == 1);
   }
 
   SECTION ("two columns") {
@@ -67,9 +67,9 @@ TEST_CASE("[TestTable] Get Data") {
     table.insertRow({"1", "11"});
     table.insertRow({"2", "22"});
     table.insertRow({"3", "33"});
-    REQUIRE(table.getData().count({"1", "11"}));
-    REQUIRE(table.getColumns({"1"}).count({"33"}));
-    REQUIRE(!table.getColumns({"1"}).count({"3"}));
+    REQUIRE(table.getData().count({"1", "11"}) == 1);
+    REQUIRE(table.getColumns({"1"}).count({"33"}) == 1);
+    REQUIRE(!table.getColumns({"1"}).count({"3"}) == 1);
     REQUIRE(table.getColumn("0") == std::set<std::string> { "1", "2", "3" });
   }
 
@@ -101,6 +101,7 @@ TEST_CASE("[TestTable] Concatenate") {
     table2.insertRow({"3", "33"});
     table1.concatenate(table2);
     REQUIRE(table1.contains({"3", "33"}));
+    REQUIRE(table1.size() == 3);
   }
 
   SECTION ("invalid concatenation") {
@@ -123,6 +124,22 @@ TEST_CASE("[TestTable] Filter Column") {
     REQUIRE(table.contains({"1", "11"}));
   }
 
+  SECTION ("valid filtration with empty filter values") {
+    Table table({"a", "b"});
+    table.insertRow({"1", "11"});
+    table.insertRow({"2", "22"});
+    table.filterColumn("b", std::set<std::string>{});
+    REQUIRE(table.empty());
+  }
+
+  SECTION ("valid filtration with non-existent filter values") {
+    Table table({"a", "b"});
+    table.insertRow({"1", "11"});
+    table.insertRow({"2", "22"});
+    table.filterColumn("a", std::set<std::string>{"3"});
+    REQUIRE(table.empty());
+  }
+
   SECTION ("invalid filtration") {
     Table table({"a", "b"});
     table.insertRow({"1", "11"});
@@ -132,7 +149,7 @@ TEST_CASE("[TestTable] Filter Column") {
 }
 
 TEST_CASE("[TestTable] join table") {
-  SECTION ("valid cross product join") {
+  SECTION ("cross product join") {
     Table table1({"a", "b"});
     table1.insertRow({"1", "11"});
     table1.insertRow({"2", "22"});
@@ -146,7 +163,7 @@ TEST_CASE("[TestTable] join table") {
     REQUIRE(table1.contains({"1", "11", "4", "44"}));
   }
 
-  SECTION ("valid natural join") {
+  SECTION ("natural join one overlapping column") {
     Table table1({"a", "b"});
     table1.insertRow({"1", "11"});
     table1.insertRow({"2", "22"});
@@ -158,5 +175,19 @@ TEST_CASE("[TestTable] join table") {
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
     REQUIRE(table1.contains({"1", "11", "33"}));
     REQUIRE(table1.contains({"2", "22", "44"}));
+  }
+
+  SECTION ("natural join two overlapping column") {
+    Table table1({"a", "b", "c"});
+    table1.insertRow({"1", "11", "33"});
+    table1.insertRow({"2", "22", "43"});
+    Table table2({"a", "c"});
+    table2.insertRow({"1", "33"});
+    table2.insertRow({"2", "44"});
+    table1.join(table2);
+    REQUIRE(table1.size() == 1);
+    REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
+    REQUIRE(table1.contains({"1", "11", "33"}));
+    REQUIRE(!table1.contains({"2", "22", "43"}));
   }
 }
