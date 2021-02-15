@@ -22,29 +22,39 @@ void PKB::addProc(std::string proc) {
 	procTable.insertRow(vect);
 }
 
+void PKB::addConst(std::string constValue) {
+  std::vector<std::string> vect{ constValue };
+  constTable.insertRow(vect);
+}
+
 void PKB::addIf(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
 	ifTable.insertRow(vect);
+  stmtTable.insertRow(vect);
 }
 
 void PKB::addWhile(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
 	whileTable.insertRow(vect);
+  stmtTable.insertRow(vect);
 }
 
 void PKB::addRead(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
 	readTable.insertRow(vect);
+  stmtTable.insertRow(vect);
 }
 
 void PKB::addPrint(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
 	printTable.insertRow(vect);
+  stmtTable.insertRow(vect);
 }
 
 void PKB::addAssign(int stmtNo) {
 	std::vector<std::string> vect{ std::to_string(stmtNo) };
 	assignTable.insertRow(vect);
+  stmtTable.insertRow(vect);
 }
 
 void PKB::addFollows(int follower, int followed) {
@@ -96,10 +106,25 @@ void PKB::addPatternAssign(int stmtNo, std::string lhs, std::string rhs) {
 	patternAssignTable.insertRow(vect);
 }
 
+void PKB::addIndirectUses() {
+  if (parentTTable.empty()) {
+    PKB::addParentT();
+  }
+  usesTable.fillIndirectRelation(parentTTable);
+}
+
+void PKB::addIndirectModifies() {
+  if (parentTTable.empty()) {
+    PKB::addParentT();
+  }
+  modifiesTable.fillIndirectRelation(parentTTable);
+}
+
 // Getters
 Table PKB::getVarTable() const { return varTable; }
 Table PKB::getStmtTable() const { return stmtTable; }
 Table PKB::getProcTable() const { return procTable; }
+Table PKB::getConstTable() const { return constTable; }
 Table PKB::getIfTable() const { return ifTable; }
 Table PKB::getWhileTable() const { return whileTable; }
 Table PKB::getReadTable() const { return readTable; }

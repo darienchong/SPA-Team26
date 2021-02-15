@@ -112,3 +112,15 @@ TEST_CASE("[TestTable] Concatenate") {
     REQUIRE_THROWS(table1.concatenate(table2));
   }
 }
+
+TEST_CASE("[TestTable] Filter Column") {
+//  SECTION ("valid filtration") {
+//    Table table({"a", "b"});
+//    table.insertRow({"1", "11"});
+//    table.insertRow({"2", "22"});
+//    table.filterColumn("b", std::set<std::string>{"11"});
+//    REQUIRE(table.contains({"2", "22"}));
+//    REQUIRE(!table.contains({"1", "11"}));
+
+//  }
+}

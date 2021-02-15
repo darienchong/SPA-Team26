@@ -24,7 +24,7 @@ public:
   void insertRow(Row row);
 
   // getters
-  Row getHeader();
+  Row getHeader() const;
   std::set<Row> getData();
   std::set<std::string> getColumn(std::string headerTitle);
   std::set<Row> getColumns(Row headerTitles);
@@ -32,7 +32,9 @@ public:
 
   // util functions
   void dropColumn(std::string headerTitle);
-  void concatenate(Table& table);
+  void filterColumn(std::string columnName, std::set<std::string> values);
+  void concatenate(Table& otherTable);
+  void join(const Table& otherTable);
 
   int size();
   bool contains(const Row& row);
@@ -40,4 +42,5 @@ public:
 
   // only called by transitive tables
   void fillTransitiveTable(Table table);
+  void fillIndirectRelation(Table parentTable);
 };

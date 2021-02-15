@@ -34,7 +34,7 @@ void Table::insertRow(Row row) {
   data.emplace(row);
 }
 
-Table::Row Table::getHeader() {
+Table::Row Table::getHeader() const{
   return header;
 }
 
@@ -69,7 +69,7 @@ std::set<Table::Row> Table::getColumns(Row headerTitles) {
 }
 
 int Table::getColumnIndex(std::string headerTitle) {
-  for (int i = 0; i < header.size(); i++) {
+  for (size_t i = 0; i < header.size(); i++) {
     if (header[i] == headerTitle) {
       return i;
     }
@@ -91,11 +91,24 @@ void Table::dropColumn(std::string headerTitle) {
   }
 }
 
-void Table::concatenate(Table& table) {
-  if (header.size() != table.getHeader().size()) {
+void Table::filterColumn(std::string columnName, std::set<std::string> values) {
+  int index = getColumnIndex(columnName);
+
+  for (auto it = data.begin(); it != data.end(); ) {
+    if (!values.count(it->at(index))) {
+      it = data.erase(it);
+    } else {
+      it++;
+    }
+  }
+
+}
+
+void Table::concatenate(Table& otherTable) {
+  if (header.size() != otherTable.getHeader().size()) {
     throw "Concatenation requires table with the same number of columns";
   }
-  for (Row row : table.getData()) {
+  for (Row row : otherTable.getData()) {
     data.emplace(row);
   }
 }
@@ -148,4 +161,80 @@ int Table::size() {
 
 bool Table::empty() {
   return data.size() == 0;
+}
+
+void Table::fillIndirectRelation(Table parentTable) {
+  if (header.size() != 2 or parentTable.header.size() != 2) {
+    throw "Tables must have 2 columns.";
+  }
+  if (header[0] == "Parent" || header[1] == "Parent") {
+    throw "Column name should not be \"Parent\".";
+  }
+
+  std::string joinedColumnName = header[1];
+  Table newParentTable = parentTable;
+  newParentTable.setHeader({"Parent", joinedColumnName});
+  newParentTable.join(*this);
+  newParentTable.dropColumn(joinedColumnName);
+  Table::concatenate(newParentTable);
+}
+
+// If current table and otherTable have common column names, do natural join
+// else, cross product
+void Table::join(const Table& otherTable) {
+  std::vector<std::pair<int, int>> indexPairs; // pairs of columns with the same name
+  Row otherHeader = otherTable.getHeader();
+
+  for (int i = 0; i < header.size(); ++i) {
+    auto otherIndex = find(otherHeader.begin(), otherHeader.end(), header[i]);
+    if (otherIndex != otherHeader.end()) {
+      indexPairs.emplace_back(i, otherIndex - otherHeader.begin());
+    }
+  }
+
+  std::set<Row> newData;
+  if (indexPairs.empty()) { // cross-product
+    header.insert(header.end(), otherHeader.begin(), otherHeader.end());
+    for (auto row : data) {
+      for (auto otherRow : otherTable.data) {
+        auto newRow = row;
+        newRow.insert(newRow.end(), otherRow.begin(), otherRow.end());
+        newData.emplace(newRow);
+      }
+    }
+
+  } else { // natural join -> change to hash join ?
+    std::set<int> droppedIndexes;
+    for (auto pair : indexPairs) {
+      droppedIndexes.emplace(pair.second);
+    }
+    for (size_t i = 0; i < otherHeader.size(); i++) {
+      if (!droppedIndexes.count(i)) {
+        header.emplace_back(otherHeader[i]);
+      }
+    }
+
+    for (auto row : data) {
+      for (auto otherRow : otherTable.data) {
+        bool keep = true;
+        for (auto pair : indexPairs) {
+          if (row[pair.first] != otherRow[pair.second]) {
+            keep = false;
+            break;
+          }
+        }
+        if (keep) {
+          Row newRow = row;
+          for (size_t i = 0; i < otherRow.size(); i++) {
+            if (!droppedIndexes.count(i)) {
+              newRow.emplace_back(otherRow[i]);
+            }
+          }
+          newRow.insert(newRow.end(), otherRow.begin(), otherRow.end());
+          newData.emplace(newRow);
+        }
+      }
+    }
+  }
+  data = std::move(newData);
 }
