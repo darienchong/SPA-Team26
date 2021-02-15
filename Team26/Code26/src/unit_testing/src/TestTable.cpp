@@ -88,6 +88,7 @@ TEST_CASE("[TestTable] Drop Column") {
   table.insertRow({"2", "22"});
   table.dropColumn("a");
   REQUIRE(table.getHeader() == std::vector<std::string>{"b"});
+  REQUIRE(table.getData().count({ "1","11" }) == 0);
   table.dropColumn("b");
   REQUIRE(table.empty());
 }
@@ -159,8 +160,18 @@ TEST_CASE("[TestTable] join table") {
     table1.join(table2);
     REQUIRE(table1.size() == 4);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c", "d"});
-    REQUIRE(table1.contains({"1", "11", "3", "33"}));
-    REQUIRE(table1.contains({"1", "11", "4", "44"}));
+    REQUIRE(table1.contains({ "1", "11", "3", "33" }));
+    REQUIRE(table1.contains({ "1", "11", "4", "44" }));
+    REQUIRE(table1.contains({ "2", "22", "3", "33" }));
+    REQUIRE(table1.contains({ "2", "22", "4", "44" }));
+  }
+
+  SECTION("valid cross product join with empty tables") {
+    Table table1({ "a", "b" });
+    Table table2({ "c", "d" });
+    table1.join(table2);
+    REQUIRE(table1.size() == 0);
+    REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c", "d"});
   }
 
   SECTION ("natural join one overlapping column") {
@@ -186,8 +197,59 @@ TEST_CASE("[TestTable] join table") {
     table2.insertRow({"2", "44"});
     table1.join(table2);
     REQUIRE(table1.size() == 1);
-    REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
+    REQUIRE(table1.getHeader() == std::vector<std::string>{"a", "b", "c"});
     REQUIRE(table1.contains({"1", "11", "33"}));
     REQUIRE(!table1.contains({"2", "22", "43"}));
+  }
+
+  SECTION("valid natural join with empty tables") {
+    Table table1({ "a", "b" });
+    Table table2({ "a", "c" });
+    table1.join(table2);
+    REQUIRE(table1.size() == 0);
+    REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
+  }
+}
+
+TEST_CASE("[TestTable] Fill Indirect Relation") {
+  SECTION("Valid Input with one indirect relation") {
+    Table usesTable({ "stmtRef", "entRef" });
+    usesTable.insertRow({ "1", "x" });
+    usesTable.insertRow({ "3", "y" });
+    Table parentTTable({ "parent", "child" });
+    parentTTable.insertRow({ "1", "3" });
+    usesTable.fillIndirectRelation(parentTTable);
+    REQUIRE(usesTable.size() == 3);
+    REQUIRE(usesTable.getHeader() == std::vector<std::string>{"stmtRef", "entRef"});
+    REQUIRE(usesTable.contains({ "1", "y" }));
+  }
+
+  SECTION("Valid Input with multiple indirect relations") {
+    Table usesTable({ "stmtRef", "entRef" });
+    usesTable.insertRow({ "3", "y" });
+    usesTable.insertRow({ "3", "z" });
+    usesTable.insertRow({ "5", "a" });
+    Table parentTTable({ "parent", "child" });
+    parentTTable.insertRow({ "1", "3" });
+    parentTTable.insertRow({ "3", "5" });
+    parentTTable.insertRow({ "1", "5" });
+    usesTable.fillIndirectRelation(parentTTable);
+    REQUIRE(usesTable.size() == 7);
+    REQUIRE(usesTable.getHeader() == std::vector<std::string>{"stmtRef", "entRef"});
+    REQUIRE(usesTable.contains({ "1", "y" }));
+    REQUIRE(usesTable.contains({ "1", "z" }));
+    REQUIRE(usesTable.contains({ "1", "a" }));
+    REQUIRE(usesTable.contains({ "3", "a" }));
+  }
+
+  SECTION("Valid input with no indirect relations") {
+    Table usesTable({ "stmtRef", "entRef" });
+    usesTable.insertRow({ "3", "y" });
+    usesTable.insertRow({ "3", "z" });
+    Table parentTTable({ "parent", "child" });
+    parentTTable.insertRow({ "1", "4" });
+    usesTable.fillIndirectRelation(parentTTable);
+    REQUIRE(usesTable.size() == 2);
+    REQUIRE(usesTable.getHeader() == std::vector<std::string>{"stmtRef", "entRef"});
   }
 }
