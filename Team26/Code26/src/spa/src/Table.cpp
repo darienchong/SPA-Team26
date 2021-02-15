@@ -164,7 +164,7 @@ bool Table::empty() {
 }
 
 void Table::fillIndirectRelation(Table parentTable) {
-  if (header.size() != 2 or parentTable.header.size() != 2) {
+  if (header.size() != 2 || parentTable.header.size() != 2) {
     throw "Tables must have 2 columns.";
   }
   if (header[0] == "Parent" || header[1] == "Parent") {
@@ -230,7 +230,6 @@ void Table::join(const Table& otherTable) {
               newRow.emplace_back(otherRow[i]);
             }
           }
-          newRow.insert(newRow.end(), otherRow.begin(), otherRow.end());
           newData.emplace(newRow);
         }
       }
