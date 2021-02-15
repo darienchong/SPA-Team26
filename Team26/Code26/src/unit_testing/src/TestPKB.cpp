@@ -217,3 +217,147 @@ TEST_CASE("[TestPkb] addIndirectModifies") {
     REQUIRE(pkb.getModifiesTable().getData().count({"1", "x"}) == 1);
   }
 }
+
+TEST_CASE("[TestPkb] getFollows") {
+  PKB pkb;
+  pkb.addFollows(1, 2);
+  pkb.addFollows(3, 4);
+  pkb.addFollows(2, 5);
+  Table table = pkb.getFollower(2);
+  REQUIRE(table.getData().count({"5"}));
+}
+
+TEST_CASE("[TestPkb] getFollowedBy") {
+  PKB pkb;
+  pkb.addFollows(1, 2);
+  pkb.addFollows(3, 4);
+  pkb.addFollows(2, 5);
+  Table table = pkb.getFollowedBy(2);
+  REQUIRE(table.getData().count({"1"}));
+}
+
+TEST_CASE("[TestPkb] getFollowerT") {
+  PKB pkb;
+  pkb.addFollows(1, 2);
+  pkb.addFollows(3, 4);
+  pkb.addFollows(2, 5);
+  pkb.addFollowsT();
+  Table table = pkb.getFollowerT(1);
+  REQUIRE(table.getData().count({"2"}));
+  REQUIRE(table.getData().count({"5"}));
+}
+
+TEST_CASE("[TestPkb] getFollowedByT") {
+  PKB pkb;
+  pkb.addFollows(1, 2);
+  pkb.addFollows(3, 4);
+  pkb.addFollows(2, 5);
+  pkb.addFollowsT();
+  Table table = pkb.getFollowedByT(5);
+  REQUIRE(table.getData().count({"1"}));
+  REQUIRE(table.getData().count({"2"}));
+}
+
+TEST_CASE("[TestPkb] getParent") {
+  PKB pkb;
+  pkb.addParent(1, 2);
+  pkb.addParent(3, 4);
+  pkb.addParent(2, 5);
+  Table table = pkb.getParent(5);
+  REQUIRE(table.getData().count({"2"}));
+}
+
+TEST_CASE("[TestPkb] getChild") {
+  PKB pkb;
+  pkb.addParent(1, 2);
+  pkb.addParent(3, 4);
+  pkb.addParent(2, 5);
+  Table table = pkb.getChild(1);
+  REQUIRE(table.getData().count({"2"}));
+}
+
+TEST_CASE("[TestPkb] getParentT") {
+  PKB pkb;
+  pkb.addParent(1, 2);
+  pkb.addParent(3, 4);
+  pkb.addParent(2, 5);
+  pkb.addParentT();
+  Table table = pkb.getParentT(5);
+  REQUIRE(table.getData().count({"1"}));
+  REQUIRE(table.getData().count({"2"}));
+}
+
+TEST_CASE("[TestPkb] getChildT") {
+  PKB pkb;
+  pkb.addParent(1, 2);
+  pkb.addParent(3, 4);
+  pkb.addParent(2, 5);
+  pkb.addParentT();
+  Table table = pkb.getChildT(1);
+  REQUIRE(table.getData().count({"2"}));
+  REQUIRE(table.getData().count({"5"}));
+}
+
+TEST_CASE("[TestPkb] getUses") {
+  PKB pkb;
+  pkb.addUses(1, "x");
+  pkb.addUses(2, "y");
+  Table table = pkb.getUses("x");
+  REQUIRE(table.getData().count({"1"}));
+  pkb.addUses(2, "x");
+  table = pkb.getUses("x");
+  REQUIRE(table.getData().count({"2"}));
+}
+
+TEST_CASE("[TestPkb] getUsedBy") {
+  PKB pkb;
+  pkb.addUses(1, "x");
+  pkb.addUses(2, "y");
+  pkb.addUses(2, "x");
+  pkb.addUses("proc1", "x");
+
+  SECTION("used by statement") {
+    Table table = pkb.getUsedBy(1);
+    REQUIRE(table.getData().count({"x"}));
+    table = pkb.getUsedBy(2);
+    REQUIRE(table.getData().count({"x"}));
+    REQUIRE(table.getData().count({"y"}));
+  }
+
+  SECTION("used by procedure") {
+    Table table = pkb.getUsedBy("proc1");
+    REQUIRE(table.getData().count({"x"}));
+  }
+}
+
+TEST_CASE("[TestPkb] getModifies") {
+  PKB pkb;
+  pkb.addModifies(1, "x");
+  pkb.addModifies(2, "y");
+  Table table = pkb.getModifies("x");
+  REQUIRE(table.getData().count({"1"}));
+  pkb.addModifies(2, "x");
+  table = pkb.getModifies("x");
+  REQUIRE(table.getData().count({"2"}));
+}
+
+TEST_CASE("[TestPkb] getModifiedBy") {
+  PKB pkb;
+  pkb.addModifies(1, "x");
+  pkb.addModifies(2, "y");
+  pkb.addModifies(2, "x");
+  pkb.addModifies("proc1", "x");
+
+  SECTION("modified by statement") {
+    Table table = pkb.getModifiedBy(1);
+    REQUIRE(table.getData().count({"x"}));
+    table = pkb.getModifiedBy(2);
+    REQUIRE(table.getData().count({"x"}));
+    REQUIRE(table.getData().count({"y"}));
+  }
+
+  SECTION("modified by procedure") {
+    Table table = pkb.getModifiedBy("proc1");
+    REQUIRE(table.getData().count({"x"}));
+  }
+}

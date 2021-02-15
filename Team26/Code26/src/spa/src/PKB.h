@@ -73,11 +73,6 @@ public:
 	Table getModifiedBy(int n) const;
   Table getModifiedBy(std::string str) const; // for procedure
 
-
-
-
-
-
 private:
 	Table varTable{ std::vector<std::string> {"varName"} };
 	Table stmtTable{ std::vector<std::string> {"stmtNo"} };
