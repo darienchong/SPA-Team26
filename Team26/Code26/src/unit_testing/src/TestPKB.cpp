@@ -161,3 +161,59 @@ TEST_CASE("[TestPkb] addPatternAssign") {
 		REQUIRE(dataCopy.count({ "7", "_", "b c * a +" }) == 1);
 	}
 }
+
+TEST_CASE("[TestPkb] addIndirectUses") {
+  PKB pkb;
+
+  SECTION("with parentTTable already filled") {
+    pkb.addUses(2, "x");
+    pkb.addParent(1, 2);
+    pkb.addParentT();
+    pkb.addIndirectUses();
+    REQUIRE(pkb.getUsesTable().getData().count({"1", "x"}) == 1);
+  }
+
+  SECTION("without parentTTable already filled") {
+    pkb.addUses(2, "x");
+    pkb.addParent(1, 2);
+    pkb.addIndirectUses();
+    REQUIRE(pkb.getUsesTable().getData().count({"1", "x"}) == 1);
+  }
+
+  SECTION("3 transitive steps") {
+    pkb.addUses(3, "x");
+    pkb.addParent(1, 2);
+    pkb.addParent(2, 3);
+    pkb.addParentT();
+    pkb.addIndirectUses();
+    REQUIRE(pkb.getUsesTable().getData().count({"1", "x"}) == 1);
+  }
+}
+
+TEST_CASE("[TestPkb] addIndirectModifies") {
+  PKB pkb;
+
+  SECTION("with parentTTable already filled") {
+    pkb.addModifies(2, "x");
+    pkb.addParent(1, 2);
+    pkb.addParentT();
+    pkb.addIndirectModifies();
+    REQUIRE(pkb.getModifiesTable().getData().count({"1", "x"}) == 1);
+  }
+
+  SECTION("without parentTTable already filled") {
+    pkb.addModifies(2, "x");
+    pkb.addParent(1, 2);
+    pkb.addIndirectModifies();
+    REQUIRE(pkb.getModifiesTable().getData().count({"1", "x"}) == 1);
+  }
+
+  SECTION("3 transitive steps") {
+    pkb.addModifies(3, "x");
+    pkb.addParent(1, 2);
+    pkb.addParent(2, 3);
+    pkb.addParentT();
+    pkb.addIndirectModifies();
+    REQUIRE(pkb.getModifiesTable().getData().count({"1", "x"}) == 1);
+  }
+}

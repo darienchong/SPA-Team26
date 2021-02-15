@@ -5,6 +5,7 @@
 #include <map>
 
 class PKB {
+
 public:
   // constructor
 	PKB();
@@ -59,22 +60,22 @@ public:
 
 
 private:
-	Table varTable{ 1 };
-	Table stmtTable{ 1 };
-	Table procTable{ 1 };
-	Table constTable{1};
+	Table varTable{ std::vector<std::string> {"varName"} };
+	Table stmtTable{ std::vector<std::string> {"stmtNo"} };
+	Table procTable{ std::vector<std::string> {"procName"} };
+	Table constTable{std::vector<std::string> {"constName"}};
 
-	Table ifTable{ 1 };
-	Table whileTable{ 1 };
-	Table readTable{ 1 };
-	Table printTable{ 1 };
-	Table assignTable{ 1 };
+	Table ifTable{ std::vector<std::string> {"stmtNo"} };
+	Table whileTable{ std::vector<std::string> {"stmtNo"} };
+	Table readTable{ std::vector<std::string> {"stmtNo"} };
+	Table printTable{ std::vector<std::string> {"stmtNo"} };
+	Table assignTable{ std::vector<std::string> {"stmtNo"} };
 
-	Table followsTable{ 2 };
-	Table followsTTable{ 2 };
-	Table parentTable{ 2 };
-	Table parentTTable{ 2 };
-	Table usesTable{ 2 };
-	Table modifiesTable{ 2 };
-	Table patternAssignTable{ 3 };
+	Table followsTable{ std::vector<std::string> {"followed", "follower"} };
+	Table followsTTable{ std::vector<std::string> {"followed", "follower"} };
+	Table parentTable{ std::vector<std::string> {"parent", "child"} };
+	Table parentTTable{ std::vector<std::string> {"parent", "child"} };
+	Table usesTable{ std::vector<std::string> {"user", "used"} };
+	Table modifiesTable{ std::vector<std::string> {"modifier", "modified"} };
+	Table patternAssignTable{ std::vector<std::string> {"stmtNo", "lhs", "rhs"} };
 };
