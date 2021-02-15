@@ -138,30 +138,30 @@ Table PKB::getUsesTable() const { return usesTable; }
 Table PKB::getModifiesTable() const { return modifiesTable; }
 Table PKB::getPatternAssignTable() const { return patternAssignTable; }
 
-Table PKB::getFollows(int n) const {
+Table PKB::getFollower(int n) const {
   Table filterTable = followsTable;
-  filterTable.filterColumn("follower", std::set<std::string> {std::to_string(n)});
+  filterTable.filterColumn("followed", std::set<std::string> {std::to_string(n)});
   filterTable.dropColumn("followed");
   return filterTable;
 }
 
 Table PKB::getFollowedBy(int n) const {
   Table filterTable = followsTable;
-  filterTable.filterColumn("followed", std::set<std::string> {std::to_string(n)});
+  filterTable.filterColumn("follower", std::set<std::string> {std::to_string(n)});
   filterTable.dropColumn("follower");
   return filterTable;
 }
 
-Table PKB::getFollowsT(int n) const {
+Table PKB::getFollowerT(int n) const {
   Table filterTable = followsTTable;
-  filterTable.filterColumn("follower", std::set<std::string> {std::to_string(n)});
+  filterTable.filterColumn("followed", std::set<std::string> {std::to_string(n)});
   filterTable.dropColumn("followed");
   return filterTable;
 }
 
-Table PKB::getFollowedTBy(int n) const {
+Table PKB::getFollowedByT(int n) const {
   Table filterTable = followsTTable;
-  filterTable.filterColumn("followed", std::set<std::string> {std::to_string(n)});
+  filterTable.filterColumn("follower", std::set<std::string> {std::to_string(n)});
   filterTable.dropColumn("follower");
   return filterTable;
 }
@@ -169,55 +169,69 @@ Table PKB::getFollowedTBy(int n) const {
 Table PKB::getParent(int n) const {
   Table filterTable = parentTable;
   filterTable.filterColumn("child", std::set<std::string> {std::to_string(n)});
-  filterTable.dropColumn("parent");
+  filterTable.dropColumn("child");
   return filterTable;
 }
 
 Table PKB::getChild(int n) const {
   Table filterTable = parentTable;
   filterTable.filterColumn("parent", std::set<std::string> {std::to_string(n)});
-  filterTable.dropColumn("child");
+  filterTable.dropColumn("parent");
   return filterTable;
 }
 
 Table PKB::getParentT(int n) const {
   Table filterTable = parentTTable;
   filterTable.filterColumn("child", std::set<std::string> {std::to_string(n)});
-  filterTable.dropColumn("parent");
+  filterTable.dropColumn("child");
   return filterTable;
 }
 
 Table PKB::getChildT(int n) const {
   Table filterTable = parentTTable;
   filterTable.filterColumn("parent", std::set<std::string> {std::to_string(n)});
-  filterTable.dropColumn("child");
+  filterTable.dropColumn("parent");
   return filterTable;
 }
 
 Table PKB::getUses(std::string str) const {
   Table filterTable = usesTable;
   filterTable.filterColumn("used", std::set<std::string> {str});
-  filterTable.dropColumn("user");
+  filterTable.dropColumn("used");
   return filterTable;
 }
 
 Table PKB::getUsedBy(int n) const {
   Table filterTable = usesTable;
   filterTable.filterColumn("user", std::set<std::string> {std::to_string(n)});
-  filterTable.dropColumn("used");
+  filterTable.dropColumn("user");
+  return filterTable;
+}
+
+Table PKB::getUsedBy(std::string str) const {
+  Table filterTable = usesTable;
+  filterTable.filterColumn("user", std::set<std::string> {str});
+  filterTable.dropColumn("user");
   return filterTable;
 }
 
 Table PKB::getModifies(std::string str) const {
   Table filterTable = modifiesTable;
   filterTable.filterColumn("modified", std::set<std::string> {str});
-  filterTable.dropColumn("modifies");
+  filterTable.dropColumn("modified");
   return filterTable;
 }
 
 Table PKB::getModifiedBy(int n) const {
   Table filterTable = modifiesTable;
-  filterTable.filterColumn("modifies", std::set<std::string> {std::to_string(n)});
-  filterTable.dropColumn("modified");
+  filterTable.filterColumn("modifier", std::set<std::string> {std::to_string(n)});
+  filterTable.dropColumn("modifier");
+  return filterTable;
+}
+
+Table PKB::getModifiedBy(std::string str) const {
+  Table filterTable = modifiesTable;
+  filterTable.filterColumn("modifier", std::set<std::string> {str});
+  filterTable.dropColumn("modifier");
   return filterTable;
 }
