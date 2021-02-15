@@ -5,6 +5,7 @@
 #include <set>
 #include <stdexcept>
 #include <unordered_map>
+//#include <iostream>
 
 Table::Table() {
   header.emplace_back("0");
@@ -85,9 +86,12 @@ void Table::dropColumn(std::string headerTitle) {
     data.clear();
   } else {
     header.erase(header.begin() + index);
-    for (Row row : data) {
+    std::set<Row> newData;
+    for (auto row : data) {
       row.erase(row.begin() + index);
+      newData.emplace(row);
     }
+    data = std::move(newData);
   }
 }
 
@@ -163,20 +167,30 @@ bool Table::empty() {
   return data.size() == 0;
 }
 
-void Table::fillIndirectRelation(Table parentTable) {
-  if (header.size() != 2 || parentTable.header.size() != 2) {
+void Table::fillIndirectRelation(Table parentTTable) {
+  if (header.size() != 2 || parentTTable.header.size() != 2) {
     throw "Tables must have 2 columns.";
   }
-  if (header[0] == "Parent" || header[1] == "Parent") {
-    throw "Column name should not be \"Parent\".";
+  if (header[0] == parentTTable.getHeader()[0] || header[1] == parentTTable.getHeader()[0]) {
+    throw "Column name should not be the same as Parent column name.";
   }
 
-  std::string joinedColumnName = header[1];
-  Table newParentTable = parentTable;
-  newParentTable.setHeader({"Parent", joinedColumnName});
-  newParentTable.join(*this);
-  newParentTable.dropColumn(joinedColumnName);
-  Table::concatenate(newParentTable);
+  std::string joinedColumnName = header[0];
+  Table newParentTTable = parentTTable;
+  newParentTTable.setHeader({"Parent", joinedColumnName});
+  newParentTTable.join(*this);
+  newParentTTable.dropColumn(joinedColumnName);
+  /*for (auto h : newParentTable.getHeader()) {
+    std::cout << h << " ";
+  }
+  std::cout << std::endl;
+  for (auto row : newParentTable.data) {
+    for (auto item : row) {
+      std::cout << item << " ";
+    }
+    std::cout << std::endl;
+  }*/
+  this->concatenate(newParentTTable);
 }
 
 // If current table and otherTable have common column names, do natural join
