@@ -269,3 +269,31 @@ TEST_CASE("[TestTable] Fill Indirect Relation") {
     REQUIRE(usesTable.getHeader() == std::vector<std::string>{"stmtRef", "entRef"});
   }
 }
+
+TEST_CASE("[TestTable] delete row") {
+  SECTION("delete rows that exist") {
+    Table table1({ "a", "b" });
+    table1.insertRow({ "1", "11" });
+    table1.insertRow({ "2", "22" });
+    table1.insertRow({ "3", "33" });
+    std::vector<std::string> row1({ "2","22" });
+    std::vector<std::string> row2({ "1","11" });
+    table1.deleteRow(row1);
+    table1.deleteRow(row2);
+    REQUIRE(table1.size() == 1);
+  }
+
+  SECTION("delete row that does not exist") {
+    Table table1({ "a", "b" });
+    table1.insertRow({ "1", "11" });
+    table1.insertRow({ "2", "22" });
+    std::vector<std::string> row({ "3","33" });
+    REQUIRE_THROWS(table1.deleteRow(row));
+  }
+
+  SECTION("delete row for empty table") {
+    Table table1({ "a", "b" });
+    std::vector<std::string> row({ "3","33" });
+    REQUIRE_THROWS(table1.deleteRow(row));
+  }
+}

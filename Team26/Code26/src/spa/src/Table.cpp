@@ -289,3 +289,12 @@ void Table::innerJoin(const Table& otherTable, std::string commonHeader) {
   }
   data = std::move(newData);
 }
+
+void Table::deleteRow(Row row) {
+  auto index = find(data.begin(), data.end(), row);
+  if (index != data.end()) {
+    data.erase(row);
+  } else {
+    throw "Row not found when trying to delete row.";
+  }
+}

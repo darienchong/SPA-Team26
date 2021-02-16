@@ -36,6 +36,7 @@ public:
   void concatenate(Table& otherTable);
   void join(const Table& otherTable);
   void innerJoin(const Table& otherTable, std::string commonHeader);
+  void deleteRow(Row row);
 
   int size();
   bool contains(const Row& row);
