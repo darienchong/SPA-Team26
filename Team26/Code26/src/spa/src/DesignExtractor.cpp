@@ -198,16 +198,16 @@ namespace {
   /**
    * Populates a given table with indirect relations.
    * We have a table with a number of direct relations.
-   * We wish to implement a new indirect relation, where
-   * if the relation holds in the other table, it passes 
-   * over to the original table as well. For example, where
+   * We wish to implement a new indirect relation, defined so: where
    * 
    *   R(x, y) indicates an existing relation in the first table,
-   *   P(x, y) indicates a relation in the second table,
+   *   P(x, y) indicates an existing relation in the second table,
    * 
    * If it is the case that
+   * 
    *   1) P(x, y)
    *   2) R(y, z)
+   * 
    * Then we have a new indirect relation to be put in the 
    * first table, R(x, z).
    * 
