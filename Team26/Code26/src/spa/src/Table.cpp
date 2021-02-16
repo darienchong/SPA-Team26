@@ -5,7 +5,6 @@
 #include <set>
 #include <stdexcept>
 #include <unordered_map>
-//#include <iostream>
 
 Table::Table() {
   header.emplace_back("0");
@@ -121,26 +120,27 @@ void Table::concatenate(Table& otherTable) {
 void Table::fillTransitiveTable(Table table) {
   std::unordered_map<std::string, std::set<std::string>> adjList;
 
+  // generate adjacency list
   for (Row row : table.getData()) {
-    if (!(adjList.find(row[0]) != adjList.end())) {
+    if (adjList.count(row[0]) == 0) {
       adjList.insert({ row[0], std::set<std::string>({ row[1] }) });
     } else {
       adjList.at(row[0]).insert(row[1]);
     }
   }
 
-  for (auto& entry : adjList) {
+  for (std::pair<const std::string, std::set<std::string>>& entry : adjList) {
     // generate transitives
-    std::set<std::string> transitives;
+    std::set<std::string> transitives; // keep track of explored nodes
     std::stack<std::string> stack;
     std::string curr;
     stack.push(entry.first);
     while (!stack.empty()) {
       curr = stack.top();
       stack.pop();
-      if (!(transitives.find(curr) != transitives.end())) {
+      if (transitives.count(curr) == 0) {
         transitives.insert(curr);
-        if (adjList.find(curr) != adjList.end()) {
+        if (adjList.count(curr) == 1) { // push neighbors
           for (std::string value : adjList.at(curr)) {
             stack.push(value);
           }
@@ -180,16 +180,6 @@ void Table::fillIndirectRelation(Table parentTTable) {
   newParentTTable.setHeader({"Parent", joinedColumnName});
   newParentTTable.join(*this);
   newParentTTable.dropColumn(joinedColumnName);
-  /*for (auto h : newParentTable.getHeader()) {
-    std::cout << h << " ";
-  }
-  std::cout << std::endl;
-  for (auto row : newParentTable.data) {
-    for (auto item : row) {
-      std::cout << item << " ";
-    }
-    std::cout << std::endl;
-  }*/
   this->concatenate(newParentTTable);
 }
 
