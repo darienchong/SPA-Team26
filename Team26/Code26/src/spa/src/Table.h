@@ -37,6 +37,7 @@ public:
   void join(const Table& otherTable);
   void innerJoin(const Table& otherTable, int firstTableIndex, int secondTableIndex);
   void innerJoin(const Table& otherTable, std::string commonHeader);
+  void deleteRow(Row row);
 
   int size() const;
   bool contains(const Row& row) const;

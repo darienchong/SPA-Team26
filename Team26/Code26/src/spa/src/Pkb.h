@@ -14,7 +14,7 @@ public:
 	void addVar(std::string var);
 	void addStmt(int stmtNo);
 	void addProc(std::string proc);
-  void addConst(std::string constValue);
+	void addConst(std::string constant);
 
   // add statements to table of corresponding statement type
 	void addIf(int stmtNo);

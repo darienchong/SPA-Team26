@@ -5,8 +5,7 @@
 #include <vector>
 
 #include "ExprParser.h"
-#include "PKB.h"
-#include "PkbStub.h" // remove this once pkb is implemented
+#include "Pkb.h"
 
 namespace SourceProcessor {
   // Delimiters
@@ -30,73 +29,47 @@ namespace SourceProcessor {
   // Assignment Operator
   const static Token ASSIGN_OP{ TokenType::OPERATOR, "=" };
 
-  // Relation Expression Operators
-  const static Token REL_EXPR_OP_GRT{ TokenType::OPERATOR, ">" };
-  const static Token REL_EXPR_OP_GEQ{ TokenType::OPERATOR, ">=" };
-  const static Token REL_EXPR_OP_LET{ TokenType::OPERATOR, "<" };
-  const static Token REL_EXPR_OP_LEQ{ TokenType::OPERATOR, "<=" };
-  const static Token REL_EXPR_OP_EQV{ TokenType::OPERATOR, "==" };
-  const static Token REL_EXPR_OP_NEQ{ TokenType::OPERATOR, "!=" };
-
-  // Conditional Statement Operator
-  const static Token COND_EXPR_NOT{ TokenType::OPERATOR, "!" };
-  const static Token COND_EXPR_AND{ TokenType::OPERATOR, "&&" };
-  const static Token COND_EXPR_OR{ TokenType::OPERATOR, "||" };
-
   // Identifier
   const static Token NAME{ TokenType::IDENTIFIER, "" };
+  const static Token CONST{ TokenType::NUMBER, "" };
 
-  /**
-   * Increments the statement number.
-   *
-   * @returns int The current statement number.
-   */
   void SimpleParser::incStmtNum() {
     ++stmtNum;
   }
 
-  /**
-   * Gets the current statement number.
-   *
-   * @returns int The current statement number.
-   */
   int SimpleParser::getStmtNum() {
     return stmtNum;
   }
 
-  // TODO: Might need to add error checking to handle empty list of tokens!!!
-  /**
-   * Removes the first token in std::list<Token> token list.
-   */
-  void SimpleParser::removeNextToken() {
+  // Might need to modify error message!!!
+  void SimpleParser::removeFrontToken() {
+    if (tokens.empty()) {
+      throw "No more tokens to remove!";
+    }
     tokens.pop_front();
   }
 
-  // TODO: Might need to add error checking to handle empty list of tokens!!!
-  /**
-   * Gets the first token in std::list<Token> token list WITHOUT popping it.
-   *
-   * @returns Token The first token in the list of tokens.
-   */
-  Token SimpleParser::getNextToken() {
-    return tokens.front();
-  }
-
-  // TODO: modify error messages to look "nicer"
-  /**
-   * Checks if the first token in std::list<Token> token list matches the input token and returns its string representation if they match.
-   * This check validates token type for procedure/variable names, both token type and token values otherwise.
-   *
-   * @param token Pointer of the input token.
-   * @returns std::string The string representation of the first tokenin the list of tokens.
-   */
-  std::string SimpleParser::validate(const Token &token) {
+  // Might need to modify error message!!!
+  Token SimpleParser::getFrontToken() {
     if (tokens.empty()) {
       throw "Syntax Error! Not enough tokens!";
     }
+    return tokens.front();
+  }
 
-    Token front = getNextToken();
-    removeNextToken();
+  void SimpleParser::setCurrentProc(std::string procName) {
+    currentProc = procName;
+  }
+
+  std::string SimpleParser::getCurrentProc() {
+    return currentProc;
+  }
+
+  // TODO: modify error messages to look "nicer"
+  std::string SimpleParser::validate(const Token& token) {
+    Token front = getFrontToken();
+    removeFrontToken();
+
     if (front == token || (token.type == front.type && token.value.empty())) {
       return front.value;
     }
@@ -104,116 +77,97 @@ namespace SourceProcessor {
     throw "Syntax Error! Expected XXX but got YYY!";
   }
 
-  /**
-   * Parses tokens into an assign statement expression.
-   * Calls ExprParser::addToken() and parseExpr().
-   *
-   */
-  void SimpleParser::parseAssignExpr() {
-    Token next = getNextToken();
-    while (!tokens.empty() && next != SEMICOLON) {
-      exprParser.addToken(next);
-      removeNextToken();
-    }
+  void SimpleParser::validateNumToken() {
+    Token front = getFrontToken();
 
-    parseExpr();
+    if (front.value.size() > 1 && front.value.front() == '0') {
+      throw "Syntax Error! Numbers cannot start with 0!";
+    }
   }
 
-  // TODO: complete function - needs auto it to check for next next token, whether it is == THEN/{
-  void SimpleParser::parseCondExpr() {
-    Token next = getNextToken();
+  // TODO: uncomment the method pkb.addConst() after pkb side finish its implementation
+  std::string SimpleParser::parseAssignExpr() {
+    std::list<Token> infixExprTokens;
     while (!tokens.empty()) {
-      exprParser.addToken(next);
-      removeNextToken();
-    }
-
-    parseExpr();
-  }
-
-  // TODO: verify helper functions postFix and evalPostFix
-  /**
-   * Parses tokens into a list of string of valid sub-expressions.
-   * Calls ExprParser::parseExpr()
-   *
-   */
-  void SimpleParser::parseExpr() {
-    exprParser.parseExpr();
-  }
-
-  // TODO: finish implementation - returns a std::list <std::string> of variables used in the cond (currently returns list of exprs), ensures correct syntax of cond_expr used
-  /**
-   * Parses tokens into a valid conditional expression.
-   * Returns a list of variables used in the conditional expression for Uses PQL query.
-   * Recursively calls itself when encountering multiple conditional expressions.
-   *
-   * @returns std::list<stdstd::string> The list of variables used in the conditional expression.
-   */
-  std::list<std::string> SimpleParser::parseCond() {
-    std::list<std::string> varLst;
-    Token first = getNextToken();
-    removeNextToken();
-
-    // '(' token - multiple conditional expressions
-    if (first == LEFT_PARENTHESIS) {
-      varLst.splice(varLst.end(), parseCond());
-      validate(RIGHT_PARENTHESIS);
-      Token condOp = getNextToken();
-      removeNextToken();
-      if (!(condOp == COND_EXPR_AND || condOp == COND_EXPR_OR)) {
-        throw "Missing AND/OR between conditional expressions!";
+      Token next = getFrontToken();
+      if (next == SEMICOLON) { // encountered ';'
+        break;
       }
-      validate(LEFT_PARENTHESIS);
-      varLst.splice(varLst.end(), parseCond());
-      validate(RIGHT_PARENTHESIS);
-    }
-    // '!' token - multiple conditional expressions
-    else if (first == COND_EXPR_NOT) {
-      validate(LEFT_PARENTHESIS);
-      varLst.splice(varLst.end(), parseCond());
-      validate(RIGHT_PARENTHESIS);
-    }
-    else { // is just a rel_expr
-      parseCondExpr();
-      varLst.splice(varLst.end(), exprParser.getVariables());
-
-      exprParser.clear();
-
-      Token next = getNextToken();
-      removeNextToken();
-      if (!(next == REL_EXPR_OP_EQV || next == REL_EXPR_OP_GRT || next == REL_EXPR_OP_GEQ || next == REL_EXPR_OP_LET || next == REL_EXPR_OP_LEQ || next == REL_EXPR_OP_NEQ)) {
-        throw "Missing valid operators between relational expressions!";
+      if (next.type == CONST.type) {
+        validateNumToken();
       }
-
-      parseCondExpr();
-      varLst.splice(varLst.end(), exprParser.getVariables());
-
-      exprParser.clear();
+      infixExprTokens.emplace_back(next);
+      removeFrontToken();
     }
 
-    return varLst;
+    ExprProcessor::AssignExprParser exprParser(infixExprTokens);
+    exprParser.parse();
+    std::unordered_set<std::string> variablesUsed = exprParser.getVariables();
+    std::unordered_set<std::string> constantsUsed = exprParser.getConstants();
+
+    // add variables and Uses relation for stmt-var to pkb
+    for (const std::string& variable : variablesUsed) {
+      pkb.addUses(getStmtNum(), variable);
+      pkb.addUses(getCurrentProc(), variable);
+      pkb.addVar(variable);
+    }
+    // add constants to pkb
+    for (const std::string& constants : constantsUsed) {
+      //pkb.addConst(constants); // method not implemented yet
+    }
+
+    return exprParser.getPostfixExprString();
   }
 
-  // TODO: replace stubs for pkb population
-  /**
-   * Parses tokens into an IF statement and returns its statement number. 
-   *
-   * @returns int Statement number of the IF statement.
-   */
+  // TODO: uncomment call to pkb.addConst() after pkb side finish implementing!!!!
+  void SimpleParser::parseCondExpr() {
+    std::list<Token> infixExprTokens;
+    // might need to change
+    auto it = tokens.begin();
+    while (it != tokens.end() && std::next(it) != tokens.end()) {
+      Token current = getFrontToken();
+      Token next = *std::next(it);
+
+      bool isEndOfCondExpr = current == RIGHT_PARENTHESIS && (next == THEN || next == LEFT_BRACE);
+      if (isEndOfCondExpr) {
+        break;
+      }
+      if (current.type == CONST.type) {
+        validateNumToken();
+      }
+      infixExprTokens.emplace_back(current);
+      it++;
+      removeFrontToken();
+    }
+
+    ExprProcessor::CondExprParser exprParser(infixExprTokens);
+    exprParser.parse();
+    std::unordered_set<std::string> variablesUsed = exprParser.getVariables();
+    std::unordered_set<std::string> constantsUsed = exprParser.getConstants();
+
+    // adding information to pkb
+    for (const std::string& variable : variablesUsed) {
+      pkb.addUses(getStmtNum(), variable); // add Uses relation for stmt-var
+      pkb.addUses(getCurrentProc(), variable); // add Uses relation for proc-var
+      pkb.addVar(variable); // add vars
+    }
+    for (const std::string& constants : constantsUsed) {
+      //pkb.addConst(constants); // add consts
+    }
+  }
+
   int SimpleParser::parseIf() {
     // grammar: 'if' '(' cond_expr ')'
     validate(IF);
     validate(LEFT_PARENTHESIS);
-    std::list<std::string> varLst = parseCond();
+    parseCondExpr();
     validate(RIGHT_PARENTHESIS);
 
     int stmtNum = getStmtNum();
     incStmtNum();
 
     // adding information to pkb
-    pkb.addIf(stmtNum); // stub to add if stmts
-    for (std::string var : varLst) {
-      pkb.addUses(stmtNum, var); // stub for Uses relation
-    }
+    pkb.addIf(stmtNum); // add if stmts
 
     // grammar: 'then' '{' stmtLst '}' 'else' '{' stmtLst '}'
     validate(THEN);
@@ -228,27 +182,18 @@ namespace SourceProcessor {
     return stmtNum;
   }
 
-  // TODO: replace stubs for pkb population
-  /**
-   * Parses tokens into a WHILE statement and returns its statement number.
-   *
-   * @returns int Statement number of the WHILE statement.
-   */
   int SimpleParser::parseWhile() {
     // grammar: 'while' '(' cond_expr ')'
     validate(WHILE);
     validate(LEFT_PARENTHESIS);
-    std::list<std::string> varLst = parseCond();
+    parseCondExpr();
     validate(RIGHT_PARENTHESIS);
 
     int stmtNum = getStmtNum();
     incStmtNum();
 
     // adding information to pkb
-    pkb.addWhile(stmtNum); // stub to add while stmts
-    for (std::string var : varLst) {
-      pkb.addUses(stmtNum, var); // stub for Uses relation
-    }
+    pkb.addWhile(stmtNum); // add while stmts
 
     // grammar: '{' stmtLst '}'
     validate(LEFT_BRACE);
@@ -258,12 +203,6 @@ namespace SourceProcessor {
     return stmtNum;
   }
 
-  // TODO: replace stubs for pkb population
-  /**
-   * Parses tokens into a READ statement and returns its statement number.
-   *
-   * @returns int Statement number of the READ statement.
-   */
   int SimpleParser::parseRead() {
     // grammar: 'read' var_name ';'
     validate(READ);
@@ -274,18 +213,14 @@ namespace SourceProcessor {
     incStmtNum();
 
     // adding information to pkb
-    pkb.addRead(stmtNum); // stub to add read stmts
-    pkb.addModifies(stmtNum, varName); // stub for Modifies relation
+    pkb.addVar(varName); // add variable
+    pkb.addRead(stmtNum); // add read stmts
+    pkb.addModifies(stmtNum, varName); // add Modifies relation for stmt-var
+    pkb.addModifies(getCurrentProc(), varName); // add Modifies relation for proc-var
 
     return stmtNum;
   }
 
-  // TODO: replace stubs for pkb population
-  /**
-   * Parses tokens into a PRINT statement and returns its statement number.
-   *
-   * @returns int Statement number of the PRINT statement.
-   */
   int SimpleParser::parsePrint() {
     // grammar: 'print' var_name ';'
     validate(PRINT);
@@ -296,41 +231,31 @@ namespace SourceProcessor {
     incStmtNum();
 
     // adding information to pkb
-    pkb.addPrint(stmtNum); // stub to add print stmts
-    pkb.addUses(stmtNum, varName); // stub for Uses relation
+    pkb.addVar(varName); // add variable
+    pkb.addPrint(stmtNum); // add print stmts
+    pkb.addUses(stmtNum, varName); // add Uses relation for stmt-var
+    pkb.addUses(getCurrentProc(), varName); // add Uses relation for proc-var
 
     return stmtNum;
   }
 
-  // TODO: replace stubs for pkb population
-  /**
-   * Parses tokens into an ASSIGN statement and returns its statement number.
-   * Calls parseExpr() to parse the right hand side of the assign statement.
-   * Calls getVariables() to retrieve variables used in the expression.
-   *
-   * @returns int Statement number of the ASSIGN statement.
-   */
   int SimpleParser::parseAssign() {
     // grammar: var_name '=' expr ';'
     std::string varName = validate(NAME);
     validate(ASSIGN_OP);
-    parseAssignExpr();
+    std::string exprString = parseAssignExpr();
     validate(SEMICOLON);
 
     // Getting relevant info to add to pkb
-    std::list<std::string> varLst = exprParser.getVariables();
     int stmtNum = getStmtNum();
     incStmtNum();
 
     // adding information to pkb
-    pkb.addAssign(stmtNum); // stub to add assign stmts
-    pkb.addUses(stmtNum, varName);
-    for (std::string var : varLst) {
-      pkb.addModifies(stmtNum, var); // stub for Modifies relation
-    }
-
-    // clean up
-    exprParser.clear();
+    pkb.addVar(varName); // add variable
+    pkb.addAssign(stmtNum); /// add assign stmts
+    pkb.addModifies(stmtNum, varName);
+    pkb.addModifies(getCurrentProc(), varName);
+    pkb.addPatternAssign(stmtNum, varName, exprString);
 
     return stmtNum;
   }
@@ -341,112 +266,108 @@ namespace SourceProcessor {
   }
 
   // TODO: modify error message + change return type if needed
-  /**
-   * Parses tokens into a statement if valid and returns its statement number.
-   * Statements are as follow - if/ while/ read/ print/ call/ assign.
-   * Calls the corresponding parseIf(), parseWhile(), parseRead(), parsePrint(), parseCall() and parseAssign() functions.
-   * Sets the FollowsT relation for the first statement and the current statement in the same statement list.
-   *
-   * @param first Statement number of the first statement in the current statement list. Used to set FollowsT() relation.
-   * @returns int Statement number of the parsed statement.
-   */
   int SimpleParser::parseStmt(int first) {
-    Token keyword = getNextToken();
+    Token keyword = getFrontToken();
     int stmt;
 
-    if (keyword == IF) {
-      stmt = parseIf();
-    }
-    else if (keyword == WHILE) {
-      stmt = parseWhile();
-    }
-    else if (keyword == READ) {
-      stmt = parseRead();
-    }
-    else if (keyword == PRINT) {
-      stmt = parsePrint();
-    }
-    else if (keyword == CALL) {
-      stmt = parseCall();
-    }
-    else if (keyword.type == NAME.type) {
-      stmt = parseAssign();
+    if (keyword.type != NAME.type) {
+      throw "Syntax Error! Unable to parse statement at #stmtNo";
     }
     else {
-      throw "Syntax Error! Unable to parse statement at #stmtNo";
+      auto it = std::next(tokens.begin());
+
+      if (it == tokens.end()) {
+        throw "Syntax Error! Not enough tokens!";
+      }
+
+      if (*it == ASSIGN_OP) {
+        stmt = parseAssign();
+      }
+      else if (keyword == IF) {
+        stmt = parseIf();
+      }
+      else if (keyword == WHILE) {
+        stmt = parseWhile();
+      }
+      else if (keyword == READ) {
+        stmt = parseRead();
+      }
+      else if (keyword == PRINT) {
+        stmt = parsePrint();
+      }
+      else if (keyword == CALL) {
+        stmt = parseCall();
+      }
+      else {
+        throw "Syntax Error! Unknown statement type!";
+      }
     }
 
     // adding information to pkb if first != statement - basically a statement cannot follow itself
     if (first != stmt) {
-      pkb.addFollowsT(first, stmt); // stub for followsT relation
+      pkb.addFollows(first, stmt); // add Follows relation for stmt-stmt
     }
+    pkb.addStmt(stmt); // add stmts
 
     return stmt;
   }
 
-  // TODO: replace stubs for pkb population & modify error message if needed
-  /**
-   * Parses tokens into a statement list and checks if the parsed statement list is empty.
-   * Calls parseStmt() to parse statements in the statement list.
-   * Sets the Parent relation if the parent statement exists.
-   *
-   * @param parent Statement number of the parent statement. 0 for no parent statement.
-   * @param first Statement number of the first statement in the statement list.
-   */
+  // TODO: modify error message if needed
   void SimpleParser::parseStmtLst(int parent, int first) {
     bool isEmpty = true;
+    int stmt = first;
     while (!tokens.empty() && tokens.front() != RIGHT_BRACE) {
-      int stmt = parseStmt(first);
+      stmt = parseStmt(stmt);
 
       // adding information to pkb if a parent statement exists
       if (parent != 0) {
-        pkb.addParent(parent, stmt); // stub for parents relation
+        pkb.addParent(parent, stmt); // add Parents relation for stmt-stmt
       }
 
       isEmpty = false;
     }
 
-    if (isEmpty) { // can replace with counter if theres no need to add the stmtlst anymore
+    if (isEmpty) {
       throw "Syntax Error! Statement list cannot be empty!";
     }
   }
 
-  // TODO: replace stubs for pkb population
-  /**
-   * Parses tokens into a procedure if valid.
-   * Calls parseStmtLst() to parse the statements in the procedure.
-   *
-   */
   void SimpleParser::parseProcedure() {
     // grammar: 'procedure' proc_name '{' '}'
     validate(PROCEDURE);
     std::string procName = validate(NAME);
-    pkb.addProc(procName); // stub to add procedures
+    setCurrentProc(procName);
+    pkb.addProc(procName); // add procedures
     validate(LEFT_BRACE);
     parseStmtLst(0, getStmtNum());
     validate(RIGHT_BRACE);
   }
 
-  /**
-   * Parses tokens in the program.
-   * Calls parseProcedures() to parse procedures in the input program.
-   * Might be more useful in Iteration 2 onwards.
-   *
-   */
   void SimpleParser::parseProgram() {
     // can remove this empty program check if already handled by tokeniser - ie guaranteed that the list is not empty when parsing
     if (tokens.empty()) {
       throw "Program cannot be empty!";
     }
-    while (!tokens.empty()) {
-      parseProcedure();
+    // code for iteration 2 onwards after multiple procs allowed
+    //while (!tokens.empty()) {
+    //  parseProcedure();
+    //}
+
+    // code for iteration 1
+    parseProcedure();
+    if (!tokens.empty()) {
+      throw "Error! Extra tokens at the end of the procedure! Only 1 procedure allowed for Iteration 1!";
     }
   }
 
-  SimpleParser::SimpleParser(std::list<Token> tokens) : tokens(tokens) {};
+  SimpleParser::SimpleParser(Pkb& pkb, std::list<Token> tokens) : pkb(pkb), tokens(tokens) {};
   SimpleParser::~SimpleParser() {};
 
   void SimpleParser::parse() {
     parseProgram();
+  }
+
+  Pkb SimpleParser::getPkb() {
+    return pkb;
   }
 }
