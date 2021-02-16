@@ -1,51 +1,255 @@
 #include "ExprParser.h"
 
+#include <assert.h>
 #include <list>
+#include <stack>
 #include <string>
+#include <unordered_set>
 
 #include "Token.h"
 
 namespace ExprProcessor {
-  // Operators
-  const static Token EXPR_OP_PLUS{ TokenType::OPERATOR, "+" };
-  const static Token EXPR_OP_MINUS{ TokenType::OPERATOR, "-" };
-  const static Token EXPR_OP_TIMES{ TokenType::OPERATOR, "*" };
-  const static Token EXPR_OP_DIVIDE{ TokenType::OPERATOR, "/" };
-  const static Token EXPR_OP_MOD{ TokenType::OPERATOR, "%" };
+  //==================//
+  // CondExprParser //
+  //==================//
 
-  // Delimiters
-  const static Token LEFT_PARENTHESIS{ TokenType::DELIMITER, "(" };
-  const static Token RIGHT_PARENTHESIS{ TokenType::DELIMITER, ")" };
+  CondExprParser::CondExprParser(std::list<Token>& tokens) : tokens(tokens) {
+    if (tokens.empty()) {
+      throw "Conditional expression cannot be empty!";
+    }
+    it = this->tokens.begin();
+  };
 
-  // Variable and Constant
-  const static Token NAME{ TokenType::IDENTIFIER, "" };
-  const static Token CONST{ TokenType::NUMBER, "" };
+  void CondExprParser::parse() {
+    parseCondExpr();
+  }
 
-  void ExprParser::addToPostFix(Token token) {
-    bool isOperator = token == EXPR_OP_PLUS || token == EXPR_OP_MINUS || token == EXPR_OP_TIMES || token == EXPR_OP_DIVIDE || token == EXPR_OP_MOD;
-    bool isParenthesis = token == LEFT_PARENTHESIS || token == RIGHT_PARENTHESIS;
-    bool isElement = token.type == NAME.type || token.type == CONST.type;
+  std::unordered_set<std::string> CondExprParser::getVariables() {
+    std::unordered_set<std::string> resultSet;
+    for (const Token& token : tokens) {
+      if (token.type == NAME.type) {
+        resultSet.emplace(token.value);
+      }
+    }
+    return resultSet;
+  }
 
-    if (!(isOperator || isParenthesis || isElement)) {
-      throw "Invalid token XXX for expression!";
+  std::unordered_set<std::string> CondExprParser::getConstants() {
+    std::unordered_set<std::string> resultSet;
+    for (const Token& token : tokens) {
+      if (token.type == CONST.type) {
+        resultSet.emplace(token.value);
+      }
+    }
+    return resultSet;
+  }
+
+  void CondExprParser::parseCondExpr() {
+    if (it == tokens.end()) {
+      throw "Syntax Error! Expected more tokens for conditional expression!";
     }
 
-    post.push_back(token);
+    Token currentToken = *it;
+    if (currentToken == COND_EXPR_NOT) {
+      validateAndConsume(COND_EXPR_NOT);
+      validateAndConsume(LEFT_PARENTHESIS);
+      parseCondExpr();
+      validateAndConsume(RIGHT_PARENTHESIS);
+    }
+    else if (currentToken == LEFT_PARENTHESIS) {
+      parseCondSubExpr();
+    }
+    else {
+      parseRelExpr();
+    }
   }
 
-  void ExprParser::addToVarLst(std::string varName) {
-    varLst.push_back(varName);
+
+  void CondExprParser::parseCondSubExpr() {
+    // Current token == '(' can mean a cond_expr or factor
+    // Thus, try parsing a cond_expr first. If parsing fails, parse factor only
+    std::list<Token>::iterator tempPosition = it;
+    try {
+      validateAndConsume(LEFT_PARENTHESIS);
+      parseCondExpr();
+      validateAndConsume(RIGHT_PARENTHESIS);
+      Token condExprBinaryOperatorToken = *it;
+      ++it;
+      if (isCondExprBinaryOperator(condExprBinaryOperatorToken)) {
+        it++;
+        std::list<Token>::iterator secondTempPosition = it;
+        try {
+          validateAndConsume(LEFT_PARENTHESIS);
+          parseCondExpr();
+          validateAndConsume(RIGHT_PARENTHESIS);
+        }
+        catch (...) {
+          it = secondTempPosition;
+          parseRelExpr();
+        }
+      }
+      else {
+        throw "Syntax Error! Invalid conditional subexpression!";
+      }
+    }
+    catch (...) {
+      it = tempPosition;
+      parseRelExpr();
+    }
   }
 
-  Token ExprParser::getNextToken() {
-    return tokens.front();
+  void CondExprParser::parseRelExpr() {
+    parseRelFactor();
+
+    if (it == tokens.end()) {
+      throw "Syntax Error! Expected more tokens for conditional expression!";
+    }
+    Token currentToken = *it;
+    ++it;
+
+    if (!isRelExprOperator(currentToken)) {
+      throw "Syntax Error! Invalid relational expression in conditional expression!";
+    }
+    parseRelFactor();
   }
-  void ExprParser::removeNextToken() {
-    tokens.pop_front();
+
+  // This method is redundant but we are following the redundant SIMPLE grammar rule
+  void CondExprParser::parseRelFactor() {
+    parseExpr();
+  }
+
+  void CondExprParser::parseExpr() {
+    parseTerm();
+    while (it != tokens.end() && isExprOperator(*it)) {
+      ++it;
+      parseTerm();
+    }
+  }
+
+  void CondExprParser::parseTerm() {
+    parseFactor();
+    while (it != tokens.end() && isTermOperator(*it)) {
+      ++it;
+      parseFactor();
+    }
+  }
+
+  void CondExprParser::parseFactor() {
+    if (it == tokens.end()) {
+      throw "Syntax Error! Expected more tokens for conditional expression!";
+    }
+
+    Token currentToken = *it;
+    ++it;
+
+    bool isVarOrConst = currentToken.type == NAME.type || currentToken.type == CONST.type;
+    if (currentToken == LEFT_PARENTHESIS) {
+      parseExpr();
+      validateAndConsume(RIGHT_PARENTHESIS);
+    }
+    else if (!isVarOrConst) {
+      throw "Syntax Error! Invalid factor for conditional expression!";
+    }
+    // Else if isVarOrConst is true, do nothing
+  }
+
+  void CondExprParser::validateAndConsume(const Token& token) {
+    if (it == tokens.end()) {
+      throw "Expected a token but received none";
+    }
+
+    const Token frontToken = *it;
+
+    if (token.value.empty()) {
+      // Check type only for empty token value
+      if (frontToken.type != token.type) {
+        throw "Encounted token of a wrong type";
+      }
+    }
+    else {
+      // Check exact match otherwise
+      if (frontToken != token) {
+        throw "Expected " + token.value + " but encountered " + frontToken.value;
+      }
+    }
+
+    // Validation success
+    ++it;
+  }
+
+  bool CondExprParser::isCondExprBinaryOperator(const Token& token) {
+    return token == COND_EXPR_AND || token == COND_EXPR_OR;
+  }
+
+  bool CondExprParser::isRelExprOperator(const Token& token)
+  {
+    return token == REL_EXPR_OP_GRT ||
+      token == REL_EXPR_OP_GEQ ||
+      token == REL_EXPR_OP_LET ||
+      token == REL_EXPR_OP_LEQ ||
+      token == REL_EXPR_OP_EQV ||
+      token == REL_EXPR_OP_NEQ;;
+  }
+
+
+  bool CondExprParser::isExprOperator(const Token& token) {
+    return token == EXPR_OP_PLUS || token == EXPR_OP_MINUS;
+  }
+
+  bool CondExprParser::isTermOperator(const Token& token) {
+    return token == EXPR_OP_TIMES || token == EXPR_OP_DIVIDE || token == EXPR_OP_MOD;
+  }
+
+  //==================//
+  // AssignExprParser //
+  //==================//
+
+  AssignExprParser::AssignExprParser(std::list<Token>& infixExprTokens)
+    : tokens(infixExprTokens) {}
+
+
+  void AssignExprParser::parse() {
+    generatePostfixExpr();
+    validatePostfixExpr();
+  }
+
+
+  std::list<Token> AssignExprParser::getPostfixExprTokens() {
+    return postfixExprTokens;
+  }
+
+  std::string AssignExprParser::getPostfixExprString() {
+    std::string resultString;
+    for (const Token& token : postfixExprTokens) {
+      resultString.append(token.value);
+      resultString.append(" ");
+    }
+    resultString.pop_back(); // remove last space
+    return resultString;
+  }
+
+  std::unordered_set<std::string> AssignExprParser::getVariables() {
+    std::unordered_set<std::string> resultSet;
+    for (const Token& token : postfixExprTokens) {
+      if (token.type == NAME.type) {
+        resultSet.emplace(token.value);
+      }
+    }
+    return resultSet;
+  }
+
+  std::unordered_set<std::string> AssignExprParser::getConstants() {
+    std::unordered_set<std::string> resultSet;
+    for (const Token& token : postfixExprTokens) {
+      if (token.type == CONST.type) {
+        resultSet.emplace(token.value);
+      }
+    }
+    return resultSet;
   }
 
   // Used in postFix() - rmb to change to overloading
-  int ExprParser::precedence(Token& token) {
+  int AssignExprParser::getOperatorPrecedence(Token& token) {
     if (token == EXPR_OP_MOD || token == EXPR_OP_TIMES || token == EXPR_OP_DIVIDE) {
       return 2;
     }
@@ -55,135 +259,122 @@ namespace ExprProcessor {
     return 0;
   }
 
-  // IMP: NEEDS TESTING
-  void ExprParser::toPostFix() {
-    std::list<Token> stack;
+  void AssignExprParser::generatePostfixExpr() {
+    std::stack<Token> stack;
+    bool expectOperand = true;
 
     while (!tokens.empty()) {
-      Token next = getNextToken();
-      removeNextToken();
+      Token next = tokens.front();
+      tokens.pop_front();
       bool isOperator = next == EXPR_OP_PLUS || next == EXPR_OP_MINUS || next == EXPR_OP_TIMES || next == EXPR_OP_DIVIDE || next == EXPR_OP_MOD;
+      bool isOperand = next.type == NAME.type || next.type == CONST.type;
 
-      if (next.type == NAME.type || next.type == CONST.type) {
-        addToPostFix(next);
+      if (isOperand) {
+        if (!expectOperand) {
+          throw "Syntax Error! Expected operator between 2 operands!";
+        }
+        expectOperand = false;
+
+        postfixExprTokens.emplace_back(next);
       }
       else if (isOperator) {
-        while (!stack.empty() && stack.front() != LEFT_PARENTHESIS && (precedence(next) <= precedence(stack.front()))) {
-          post.push_back(stack.front());
-          stack.pop_front();
+        if (expectOperand) {
+          throw "Syntax Error! Expected operand but got an operator!";
         }
-        stack.push_front(next);
+        expectOperand = true;
+
+        // Pop from stack and add to postfixExpr until current operator precedece is greater or '(' is encountered.
+        while (!stack.empty() && stack.top() != LEFT_PARENTHESIS && (getOperatorPrecedence(next) <= getOperatorPrecedence(stack.top()))) {
+          postfixExprTokens.emplace_back(stack.top());
+          stack.pop();
+        }
+        stack.push(next);
       }
       else if (next == LEFT_PARENTHESIS) {
-        stack.push_front(next);
+        if (!expectOperand) {
+          throw "Syntax Error! Expected operator before \"(\"!";
+        }
+
+        stack.push(next);
       }
-      else { // next = RIGHT_PARENTHESIS
+      else if (next == RIGHT_PARENTHESIS) {
+        if (expectOperand) {
+          throw "Syntax Error! Expected operand before \")\"!";
+        }
+
         if (stack.empty()) {
           throw "Syntax Error! Mismatched parenthesis in expression!";
         }
 
-        while (stack.front() != LEFT_PARENTHESIS) {
-          addToPostFix(stack.front());
-          stack.pop_front();
+        while (stack.top() != LEFT_PARENTHESIS) {
+          postfixExprTokens.emplace_back(stack.top());
+          stack.pop();
 
           if (stack.empty()) { // Missing '(' to pop
             throw "Syntax Error! Mismatched parenthesis in expression!";
           }
         }
 
-        stack.pop_front(); //Pop '(' in the stack
+        stack.pop(); //Pop '(' in the stack
+      }
+      else { // Invalid tokens. e.g. '{', '<', '_'
+        throw "Syntax Error! Invalid token for expression!";
       }
     }
 
     while (!stack.empty()) {
-      if (stack.front() == LEFT_PARENTHESIS) {
+      if (stack.top() == LEFT_PARENTHESIS) {
         throw "Syntax Error! Mismatched parenthesis in expression!";
       }
-      post.push_back(stack.front());
-      stack.pop_front();
+      postfixExprTokens.emplace_back(stack.top());
+      stack.pop();
     }
   }
 
-  // Evaluates postfix expr, also checks for mismatched OPs - should only need to check for empty expr
-  void ExprParser::evalPostFix(std::list<Token> post) {
-    if (post.empty()) {
+  // Pre-condition: postfixExprTokens only contains operands (NAME, CONST) or operators (EXPR_OP: '+', '-', '*', '/', '%')
+  // Validates postfix expr
+  void AssignExprParser::validatePostfixExpr() {
+    if (postfixExprTokens.empty()) {
       throw "Syntax Error! Expression cannot be empty!";
     }
 
-    //std::list<std::string> exprs;
-    std::list<std::string> stack;
+    std::stack<Token> stack;
+    std::list<Token> postfixExprTokens(this->postfixExprTokens); // duplicate postfixExprTokens for validation
 
-    while (!post.empty()) {
-      Token front = post.front();
-      post.pop_front();
-      if (front.type == CONST.type) {
-        stack.push_front(front.value);
+    while (!postfixExprTokens.empty()) {
+      Token front = postfixExprTokens.front();
+      postfixExprTokens.pop_front();
+
+      bool isOperand = front.type == CONST.type || front.type == NAME.type;
+      bool isOperator = front == EXPR_OP_PLUS || front == EXPR_OP_MINUS || front == EXPR_OP_TIMES || front == EXPR_OP_DIVIDE || front == EXPR_OP_MOD;;
+      if (isOperand) {
+        stack.push(front);
       }
-      else if (front.type == NAME.type) {
-        stack.push_front(front.value);
-        addToVarLst(front.value);
-      }
-      else { // operator
+      else if (isOperator) { // operator
         if (stack.empty()) {
           throw "Syntax Error! Operator XXX requires 2 operands!";
         }
-        std::string first = stack.front();
-        stack.pop_front();
+        stack.pop();
         if (stack.empty()) {
           throw "Syntax Error! Operator XXX requires 2 operands!";
         }
-        std::string second = stack.front();
-        stack.pop_front();
-        std::string combined = first + front.value + second; // might need to swap around first and second
-        //if (exprs.empty()) {
-        //  exprs.push_back(first);
-        //}
-        //exprs.push_back(second);
-        //exprs.push_back(combined);
-        stack.push_front(combined);
+        stack.pop();
+        // Creates a dummy token as the result of the subexpression for validation
+        Token dummyResult = { TokenType::IDENTIFIER, "dummy" };
+        stack.push(dummyResult);
+      }
+      else {
+        assert(false);
       }
     }
-  }
 
-  ExprParser::ExprParser() {};
-  ExprParser::~ExprParser() {};
-
-  void ExprParser::addToken(Token token) {
-    tokens.push_back(token);
-  }
-
-  void ExprParser::parseExpr() {
-    toPostFix();
-    evalPostFix(post);
-  }
-
-  void ExprParser::clear() {
-    post.clear();
-    tokens.clear();
-    varLst.clear();
-    exprLst.clear();
-  }
-
-  /**
-   * Returns a list of tokens in postfix expression.
-   *
-   * @returns std::list<Token> The list of tokens in postfix expression.
-   */
-  std::list<Token> ExprParser::getPostFix() {
-    return post;
-  }
-
-  /**
-   * Returns a list of variables used in the expression.
-   *
-   * @returns std::list<std::string> The list of variables in string representation.
-   */
-  std::list<std::string> ExprParser::getVariables() {
-    return varLst;
-  }
-
-  // might be useless
-  std::list<std::string> ExprParser::getExprs() {
-    return exprLst;
+    // At this point, stack should have exactly one element which is the result
+    if (stack.empty()) {
+      throw "Syntax Error! Invalid expression!";
+    }
+    stack.pop(); // pop result
+    if (!stack.empty()) {
+      throw "Syntax Error! Invalid expression!";
+    }
   }
 }
