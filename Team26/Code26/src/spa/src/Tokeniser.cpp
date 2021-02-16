@@ -7,6 +7,7 @@
 #include <iostream>
 
 namespace {
+  const static Token WHITESPACE{ TokenType::DELIMITER, " " };
   /**
    * Checks if a given character is a delimiter or not.
    * 
@@ -26,7 +27,7 @@ namespace {
    *    if a non-delimiter character is encountered.
    */
   Token constructDelimiter(std::istream& stream) {
-    TokenType type = TokenType::Delimiter;
+    TokenType type = TokenType::DELIMITER;
     std::string value;
     
     bool isNextCharDelimiter = isDelimiter(stream.peek());
@@ -47,7 +48,7 @@ namespace {
    * @returns Token representing an identifier.
    */
   Token constructIdentifier(std::istream& stream) {
-    TokenType type = TokenType::Identifier;
+    TokenType type = TokenType::IDENTIFIER;
     std::string value;
 
     bool isFirstChar = true;
@@ -74,21 +75,21 @@ namespace {
    * @param stream The stream to read from.
    * @returns Token representing a number.
    */
-  Token constructNumber(std::istream& stream) {
-    TokenType type = TokenType::Number;
+  Token constructNumber(std::istream& stream, bool isAllowLeadingZeroes) {
+    TokenType type = TokenType::NUMBER;
     std::string value;
 
     bool isFirstChar = true;
 
     while (std::isdigit(stream.peek())) {
-      bool isFirstDigitZero = isFirstChar && (stream.peek() == '0');
-
-      // Names cannot have digits as the first character.
-      if (isFirstDigitZero) {
-        throw std::invalid_argument("[Tokeniser::constructNumber]: Encountered 0 as the first digit of a number.");
-      } else {
-        isFirstChar = false;
+      // Since we peek ahead, if value equals "0" at any time it means that
+      // we are at least on the second digit, hence an invalid construction.
+      if (value == "0") {
+        if (!isAllowLeadingZeroes) {
+          throw std::invalid_argument("[Tokeniser::constructNumber]: Encountered 0 as the first digit of a number.");
+        }
       }
+
       value.push_back(stream.get());
     }
 
@@ -125,7 +126,7 @@ namespace {
    *    operator, `false` otherwise.
    */
   bool isCanHaveEquals(char c) {
-    std::unordered_set<char> canHaveEquals{ '>', '<', '=' };
+    std::unordered_set<char> canHaveEquals{ '>', '<', '=', '!' };
 
     return canHaveEquals.count(c) > 0;
   }
@@ -142,7 +143,7 @@ namespace {
    *    operator, `false` otherwise.
    */
   bool isExpectEquals(char c) {
-    std::unordered_set<char> expectEquals{ '!' };
+    std::unordered_set<char> expectEquals;
 
     return expectEquals.count(c) > 0;
   }
@@ -199,7 +200,7 @@ namespace {
    * @returns Token representing an operator.
    */
   Token constructOperator(std::istream& stream) {
-    TokenType type = TokenType::Operator;
+    TokenType type = TokenType::OPERATOR;
     std::string value;
 
     // We need to treat the operators depending on the first char
@@ -216,9 +217,10 @@ namespace {
       return { type, value };
     }
     
-    // We distinguish the cases where the character must have an = after it 
-    // (e.g. ! is not valid, but != is) and the cases where the character can
-    // have an = after it, but is valid without (e.g. < and <= are both valid)
+    // We distinguish the cases where the operator is valid with or without
+    // an = after it, and the cases where the operator is invalid without 
+    // an = after it. Right now, there aren't any operators that are invalid
+    // without an = after it, but for extensibility we'll leave this logic in.
     if (isCanHaveEquals(stream.peek())) {
       value.push_back(stream.get());
       bool isNextCharEquals = stream.peek() == '=';
@@ -298,11 +300,16 @@ std::list<Token> Tokeniser::tokenise(std::istream &stream) {
     } else if (isDelimiter(stream.peek())) {
       tokens.push_back(constructDelimiter(stream));
     } else if (isDigit) {
-      tokens.push_back(constructNumber(stream));
+      tokens.push_back(constructNumber(stream, isAllowLeadingZeroes));
     } else if (isOperator(stream.peek())) {
       tokens.push_back(constructOperator(stream));
     } else if (isWhitespace) {
-      consumeWhitespace(stream);
+      if (!isConsumeWhitespace) {
+        stream.get();
+        tokens.push_back(WHITESPACE);
+      } else {
+        consumeWhitespace(stream);
+      }
     } else {
       throw std::logic_error("[Tokeniser::tokenise]: Failed to recognise character " + stream.peek());
     }
@@ -310,3 +317,25 @@ std::list<Token> Tokeniser::tokenise(std::istream &stream) {
 
   return tokens;
 }
+
+Tokeniser Tokeniser::consumingWhitespace() {
+  this->isConsumeWhitespace = true;
+  return *this;
+}
+
+Tokeniser Tokeniser::notConsumingWhitespace() {
+  this->isConsumeWhitespace = false;
+  return *this;
+}
+
+Tokeniser Tokeniser::allowingLeadingZeroes() {
+  this->isAllowLeadingZeroes = true;
+  return *this;
+}
+
+Tokeniser Tokeniser::notAllowingLeadingZeroes() {
+  this->isAllowLeadingZeroes = false;
+  return *this;
+}
+
+

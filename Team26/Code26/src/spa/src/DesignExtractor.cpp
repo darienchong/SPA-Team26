@@ -3,9 +3,9 @@
 #include <string>
 #include <vector>
 
-#include "PKB.h"
+#include "Pkb.h"
 
-DesignExtractor::DesignExtractor(PKB pkb) : pkb(pkb) {
+DesignExtractor::DesignExtractor(Pkb pkb) : pkb(pkb) {
 }
 
 DesignExtractor::~DesignExtractor() {

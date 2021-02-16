@@ -1,12 +1,12 @@
 #pragma once
 
-#include "PKB.h"
+#include "Pkb.h"
 
 class DesignExtractor {
 private:
-  PKB pkb;
+  Pkb pkb;
 public:
-  DesignExtractor(PKB pkb);
+  DesignExtractor(Pkb pkb);
   ~DesignExtractor();
 
   void extractDesignAbstractions();

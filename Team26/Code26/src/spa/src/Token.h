@@ -1,8 +1,25 @@
 #pragma once
 
-#include "TokenType.h"
-
 #include <string>
+
+/**
+ * Defines the types of Tokens that we can have.
+ *
+ * @author Darien Chong
+ */
+enum class TokenType {
+  // Delimiters that separate other tokens e.g. {
+  DELIMITER,
+
+  // Either keywords e.g. procedure or names e.g. foo
+  IDENTIFIER,
+
+  // Numbers e.g. 2345
+  NUMBER,
+
+  // Operators on numbers e.g. +
+  OPERATOR
+};
 
 /**
  * Standard struct representing a token during tokenising and parsing.
@@ -40,5 +57,18 @@ struct Token {
    */
   friend bool operator!=(const Token &lhs, const Token& rhs) {
     return !(lhs == rhs);
+  }
+
+  friend bool operator<(const Token& lhs, const Token& rhs) {
+    return lhs.type != rhs.type ? lhs.type < rhs.type : lhs.value < rhs.value;
+  }
+  friend bool operator>(const Token& lhs, const Token& rhs) {
+    return rhs < lhs;
+  }
+  friend bool operator<=(const Token& lhs, const Token& rhs) {
+    return !(lhs > rhs);
+  }
+  friend bool operator>=(const Token& lhs, const Token& rhs) {
+    return !(lhs < rhs);
   }
 };

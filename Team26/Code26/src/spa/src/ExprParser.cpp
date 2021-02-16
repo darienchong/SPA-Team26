@@ -7,19 +7,19 @@
 
 namespace ExprProcessor {
   // Operators
-  const static Token EXPR_OP_PLUS{ TokenType::Operator, "+" };
-  const static Token EXPR_OP_MINUS{ TokenType::Operator, "-" };
-  const static Token EXPR_OP_TIMES{ TokenType::Operator, "*" };
-  const static Token EXPR_OP_DIVIDE{ TokenType::Operator, "/" };
-  const static Token EXPR_OP_MOD{ TokenType::Operator, "%" };
+  const static Token EXPR_OP_PLUS{ TokenType::OPERATOR, "+" };
+  const static Token EXPR_OP_MINUS{ TokenType::OPERATOR, "-" };
+  const static Token EXPR_OP_TIMES{ TokenType::OPERATOR, "*" };
+  const static Token EXPR_OP_DIVIDE{ TokenType::OPERATOR, "/" };
+  const static Token EXPR_OP_MOD{ TokenType::OPERATOR, "%" };
 
   // Delimiters
-  const static Token LEFT_PARENTHESIS{ TokenType::Delimiter, "(" };
-  const static Token RIGHT_PARENTHESIS{ TokenType::Delimiter, ")" };
+  const static Token LEFT_PARENTHESIS{ TokenType::DELIMITER, "(" };
+  const static Token RIGHT_PARENTHESIS{ TokenType::DELIMITER, ")" };
 
   // Variable and Constant
-  const static Token NAME{ TokenType::Identifier, "" };
-  const static Token CONST{ TokenType::Number, "" };
+  const static Token NAME{ TokenType::IDENTIFIER, "" };
+  const static Token CONST{ TokenType::NUMBER, "" };
 
   void ExprParser::addToPostFix(Token token) {
     bool isOperator = token == EXPR_OP_PLUS || token == EXPR_OP_MINUS || token == EXPR_OP_TIMES || token == EXPR_OP_DIVIDE || token == EXPR_OP_MOD;

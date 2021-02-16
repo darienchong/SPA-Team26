@@ -15,12 +15,15 @@
  */
 class Tokeniser {
 private:
-
+  bool isAllowLeadingZeroes;
+  bool isConsumeWhitespace;
 public:
   /**
    * Standard c'tor.
    */
   Tokeniser() {
+    isConsumeWhitespace = true;
+    isAllowLeadingZeroes = false;
   }
 
   /**
@@ -43,4 +46,39 @@ public:
    * @returns List of Tokens for parsing.
    */
   std::list<Token> tokenise(std::istream& stream);
+
+  /**
+   * Returns a Tokeniser that consumes all encountered whitespace characters
+   * while tokenizing. The default behaviour is to consume whitespace.
+   * 
+   * @returns A Tokeniser that consumes encountered whitespace characters.
+   */
+  Tokeniser consumingWhitespace();
+
+  /**
+   * Returns a Tokeniser that tokenizes all encountered whitespace characters
+   * while tokenizing.
+   *
+   * @returns A Tokeniser that does not consume encountered whitespace
+   *     characters.
+   */
+  Tokeniser notConsumingWhitespace();
+
+  /**
+   * Returns a Tokeniser that allows for leading zero non-single digit numbers
+   * to be tokenised.
+   * 
+   * @returns A Tokeniser that allows tokenising of leading zero
+   *    non-single digit numbers.
+   */
+  Tokeniser allowingLeadingZeroes();
+
+  /**
+   * Returns a Tokeniser that disallows leading zero non-single digit numbers
+   * to be tokenised.
+   * 
+   * @returns A Tokeniser that disallows tokenising of leading zero
+   *     non-single digit numbers.
+   */
+  Tokeniser notAllowingLeadingZeroes();
 };
