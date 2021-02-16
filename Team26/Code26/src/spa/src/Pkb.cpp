@@ -57,11 +57,11 @@ void Pkb::addAssign(int stmtNo) {
   stmtTable.insertRow(vect);
 }
 
-void Pkb::addFollows(int follower, int followed) {
-	if (follower >= followed) {
-		throw "Follower should come before followed";
+void Pkb::addFollows(int followed, int follower) {
+	if (followed >= follower) {
+		throw "Follower should come after followed";
 	}
-	std::vector<std::string> vect{ std::to_string(follower), std::to_string(followed) };
+	std::vector<std::string> vect{ std::to_string(followed), std::to_string(follower) };
 	followsTable.insertRow(vect);
 }
 
