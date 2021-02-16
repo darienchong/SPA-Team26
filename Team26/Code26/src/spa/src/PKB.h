@@ -58,23 +58,20 @@ public:
 	Table getModifiesTable() const;
 	Table getPatternAssignTable() const;
 
-	Table getFollows(int n) const;
+	Table getFollower(int n) const;
   Table getFollowedBy(int n) const;
-  Table getFollowsT(int n) const;
-  Table getFollowedTBy(int n) const;
+  Table getFollowerT(int n) const;
+  Table getFollowedByT(int n) const;
 	Table getParent(int n) const;
   Table getChild(int n) const;
 	Table getParentT(int n) const;
   Table getChildT(int n) const;
 	Table getUses(std::string str) const;
   Table getUsedBy(int n) const;
+  Table getUsedBy(std::string str) const; // for procedure
 	Table getModifies(std::string str) const;
 	Table getModifiedBy(int n) const;
-
-
-
-
-
+  Table getModifiedBy(std::string str) const; // for procedure
 
 private:
 	Table varTable{ std::vector<std::string> {"varName"} };
