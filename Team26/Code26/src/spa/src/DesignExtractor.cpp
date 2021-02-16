@@ -206,14 +206,10 @@ namespace {
    *   P(x, y) indicates a relation in the second table,
    * 
    * If it is the case that
-   *   1) R(x, y)
+   *   1) P(x, y)
    *   2) R(y, z)
-   *   3) P(x, z)
    * Then we have a new indirect relation to be put in the 
    * first table, R(x, z).
-   * 
-   * In terms of the design abstractions for CS3203, if 
-   * R(x, y) and R(y, z) and Parent(x, z), then R(x, z).
    * 
    * @param table The table to use/modify.
    * @param parentTTable The second table to refer to.
