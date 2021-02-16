@@ -35,6 +35,7 @@ public:
   void filterColumn(std::string columnName, std::set<std::string> values);
   void concatenate(Table& otherTable);
   void join(const Table& otherTable);
+  void innerJoin(const Table& otherTable, std::string commonHeader);
 
   int size();
   bool contains(const Row& row);

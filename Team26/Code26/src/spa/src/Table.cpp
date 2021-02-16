@@ -189,6 +189,7 @@ void Table::join(const Table& otherTable) {
   std::vector<std::pair<int, int>> indexPairs; // pairs of columns with the same name
   Row otherHeader = otherTable.getHeader();
 
+  // compare two tables and find columns with same header name
   for (int i = 0; i < header.size(); ++i) {
     auto otherIndex = find(otherHeader.begin(), otherHeader.end(), header[i]);
     if (otherIndex != otherHeader.end()) {
@@ -197,7 +198,7 @@ void Table::join(const Table& otherTable) {
   }
 
   std::set<Row> newData;
-  if (indexPairs.empty()) { // cross-product
+  if (indexPairs.empty()) { // cross-product if no common headers
     header.insert(header.end(), otherHeader.begin(), otherHeader.end());
     for (auto row : data) {
       for (auto otherRow : otherTable.data) {
@@ -236,6 +237,53 @@ void Table::join(const Table& otherTable) {
           }
           newData.emplace(newRow);
         }
+      }
+    }
+  }
+  data = std::move(newData);
+}
+
+void Table::innerJoin(const Table& otherTable, std::string commonHeader) {
+  std::pair<int, int> indexPair; // column index pair with the same header name
+  Row otherHeader = otherTable.getHeader();
+
+  // compare two tables and find column index with same header name
+  for (int i = 0; i < header.size(); ++i) {
+    auto thisIndex = find(header.begin(), header.end(), commonHeader);
+    if (thisIndex != header.end()) {
+      indexPair.first = thisIndex - header.begin();
+    }
+  }
+  for (int i = 0; i < otherHeader.size(); ++i) {
+    auto otherIndex = find(otherHeader.begin(), otherHeader.end(), commonHeader);
+    if (otherIndex != otherHeader.end()) {
+      indexPair.second = otherIndex - otherHeader.begin();
+    }
+  }
+
+  if (indexPair.first < 0 || indexPair.first >= header.size()) throw "Input header not found in first table";
+  if (indexPair.second < 0 || indexPair.second >= header.size()) throw "Input header not found in second table";
+
+  std::set<Row> newData;
+
+  // combine headers on those that are not common
+  for (size_t i = 0; i < otherHeader.size(); i++) {
+    if (i != indexPair.second) {
+      header.emplace_back(otherHeader[i]);
+    }
+  }
+
+  // combine data on those that are not common
+  for (auto row : data) {
+    for (auto otherRow : otherTable.data) {
+      if (row[indexPair.first] == otherRow[indexPair.second]) { // if rows have same data on the common columns
+        Row newRow = row;
+        for (size_t i = 0; i < otherRow.size(); i++) {
+          if (i != indexPair.second) {
+            newRow.emplace_back(otherRow[i]);
+          }
+        }
+        newData.emplace(newRow);
       }
     }
   }

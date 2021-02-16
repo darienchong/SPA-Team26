@@ -211,6 +211,22 @@ TEST_CASE("[TestTable] join table") {
   }
 }
 
+TEST_CASE("[TestTable] inner join") {
+  SECTION("inner join with a common header specified") {
+    Table table1({ "a", "b" });
+    table1.insertRow({ "1", "11" });
+    table1.insertRow({ "2", "22" });
+    Table table2({ "a", "c" });
+    table2.insertRow({ "1", "33" });
+    table2.insertRow({ "2", "44" });
+    table1.innerJoin(table2, "a");
+    REQUIRE(table1.size() == 2);
+    REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
+    REQUIRE(table1.contains({ "1", "11", "33" }));
+    REQUIRE(table1.contains({ "2", "22", "44" }));
+  }
+}
+
 TEST_CASE("[TestTable] Fill Indirect Relation") {
   SECTION("Valid Input with one indirect relation") {
     Table usesTable({ "stmtRef", "entRef" });
