@@ -1,4 +1,4 @@
-#include <catch.hpp>
+#include "catch.hpp"
 
 #include "Pkb.h"
 
@@ -90,7 +90,7 @@ TEST_CASE("[TestPkb] addFollows") {
 	}
 }
 
-TEST_CASE("[TestPkb] addFollowsT") {
+TEST_CASE("[TestPkb] addFollowsT()") {
 	Pkb pkb;
 	pkb.addFollows(5, 6);
 	pkb.addFollows(6, 7);
@@ -99,6 +99,20 @@ TEST_CASE("[TestPkb] addFollowsT") {
 	REQUIRE(dataCopy.count({ "5", "6" }) == 1);
 	REQUIRE(dataCopy.count({ "6", "7" }) == 1);
 	REQUIRE(dataCopy.count({ "5", "7" }) == 1);
+}
+
+TEST_CASE("[TestPkb] addFollowsT(int, int)") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addFollowsT(5, 6);
+    auto dataCopy = pkb.getFollowsTTable().getData();
+    REQUIRE(dataCopy.count({ "5", "6" }) == 1);
+  }
+
+  SECTION("Check invalid insertion") {
+    REQUIRE_THROWS(pkb.addFollowsT(5, 4));
+  }
 }
 
 TEST_CASE("[TestPkb] addParent") {
@@ -115,7 +129,7 @@ TEST_CASE("[TestPkb] addParent") {
 	}
 }
 
-TEST_CASE("[TestPkb] addParentT") {
+TEST_CASE("[TestPkb] addParentT()") {
 	Pkb pkb;
 	pkb.addParent(5, 6);
 	pkb.addParent(6, 7);
@@ -124,6 +138,20 @@ TEST_CASE("[TestPkb] addParentT") {
 	REQUIRE(dataCopy.count({ "5", "6" }) == 1);
 	REQUIRE(dataCopy.count({ "6", "7" }) == 1);
 	REQUIRE(dataCopy.count({ "5", "7" }) == 1);
+}
+
+TEST_CASE("[TestPkb] addParentT(int, int)") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addParentT(5, 6);
+    auto dataCopy = pkb.getParentTTable().getData();
+    REQUIRE(dataCopy.count({ "5", "6" }) == 1);
+  }
+
+  SECTION("Check invalid insertion") {
+    REQUIRE_THROWS(pkb.addParentT(5, 4));
+  }
 }
 
 TEST_CASE("[TestPkb] addUses") {

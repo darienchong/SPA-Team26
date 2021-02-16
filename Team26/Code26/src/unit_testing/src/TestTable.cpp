@@ -1,4 +1,5 @@
-#include <catch.hpp>
+#include "catch.hpp"
+
 #include "Table.h"
 
 TEST_CASE("[TestTable] New Table") {
@@ -24,13 +25,38 @@ TEST_CASE("[TestTable] New Table") {
     REQUIRE(tableWithHeader.getColumnIndex("1") == 1);
   }
 
-  SECTION( "set header" ) {
+}
+
+TEST_CASE("[TestTable] Set Header") {
+  SECTION( "valid header" ) {
     Table table(2);
     std::vector<std::string> h{"0", "1"};
     table.setHeader(h);
     REQUIRE(table.getHeader() == h);
   }
+
+  SECTION( "valid header with empty string" ) {
+    Table table(2);
+    std::vector<std::string> h{"", "a"};
+    table.setHeader(h);
+    REQUIRE(table.getHeader() == h);
+  }
+
+  SECTION( "valid header with duplicated empty string" ) {
+    Table table(2);
+    std::vector<std::string> h{"", ""};
+    table.setHeader(h);
+    REQUIRE(table.getHeader() == h);
+  }
+
+  SECTION( "invalid header" ) {
+    Table table(2);
+    std::vector<std::string> h{"a", "a"};
+    REQUIRE_THROWS(table.setHeader(h));
+  }
+
 }
+
 
 TEST_CASE("[TestTable] Insert Data") {
 
@@ -69,7 +95,7 @@ TEST_CASE("[TestTable] Get Data") {
     table.insertRow({"3", "33"});
     REQUIRE(table.getData().count({"1", "11"}) == 1);
     REQUIRE(table.getColumns({"1"}).count({"33"}) == 1);
-    REQUIRE(!table.getColumns({"1"}).count({"3"}) == 1);
+    REQUIRE(!table.getColumns({"1"}).count({"3"}));
     REQUIRE(table.getColumn("0") == std::set<std::string> { "1", "2", "3" });
   }
 
@@ -188,6 +214,20 @@ TEST_CASE("[TestTable] join table") {
     REQUIRE(table1.contains({"2", "22", "44"}));
   }
 
+  SECTION ("natural join one overlapping empty string column name") {
+    Table table1({"", "b"});
+    table1.insertRow({"1", "11"});
+    table1.insertRow({"2", "22"});
+    Table table2({"", "c"});
+    table2.insertRow({"1", "33"});
+    table2.insertRow({"2", "44"});
+    table1.join(table2);
+    REQUIRE(table1.size() == 4);
+    REQUIRE(table1.getHeader() == std::vector<std::string> {"", "b", "", "c"});
+    REQUIRE(table1.contains({"1", "11", "1", "33"}));
+    REQUIRE(table1.contains({"2", "22", "2", "44"}));
+  }
+
   SECTION ("natural join two overlapping column") {
     Table table1({"a", "b", "c"});
     table1.insertRow({"1", "11", "33"});
@@ -211,7 +251,23 @@ TEST_CASE("[TestTable] join table") {
   }
 }
 
-TEST_CASE("[TestTable] inner join") {
+TEST_CASE("[TestTable] inner join with indexes") {
+  SECTION("inner join with a common header specified") {
+    Table table1({ "a", "b" });
+    table1.insertRow({ "1", "11" });
+    table1.insertRow({ "2", "22" });
+    Table table2({ "a", "c" });
+    table2.insertRow({ "1", "33" });
+    table2.insertRow({ "2", "44" });
+    table1.innerJoin(table2, 0, 0);
+    REQUIRE(table1.size() == 2);
+    REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
+    REQUIRE(table1.contains({ "1", "11", "33" }));
+    REQUIRE(table1.contains({ "2", "22", "44" }));
+  }
+}
+
+TEST_CASE("[TestTable] inner join with column name") {
   SECTION("inner join with a common header specified") {
     Table table1({ "a", "b" });
     table1.insertRow({ "1", "11" });

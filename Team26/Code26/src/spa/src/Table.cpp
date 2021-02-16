@@ -21,6 +21,15 @@ Table::Table(Row h) {
 }
 
 void Table::setHeader(Row h) {
+  std::set<std::string> prevNames;
+  for (auto name: h) {
+    if (name != "" && prevNames.count(name)) {
+      throw "Non-empty  column name could not be duplicated";
+    } else {
+      prevNames.emplace(name);
+    }
+  }
+
   if (h.size() != header.size()) {
     throw "Header size does not match";
   }
@@ -34,15 +43,15 @@ void Table::insertRow(Row row) {
   data.emplace(row);
 }
 
-Table::Row Table::getHeader() const{
+Table::Row Table::getHeader() const {
   return header;
 }
 
-std::set<Table::Row> Table::getData() {
+std::set<Table::Row> Table::getData() const {
   return data;
 }
 
-std::set<std::string> Table::getColumn(std::string headerTitle) {
+std::set<std::string> Table::getColumn(std::string headerTitle) const {
   int index = getColumnIndex(headerTitle);
   std::set<std::string> column;
   for (Row row : data) {
@@ -51,7 +60,7 @@ std::set<std::string> Table::getColumn(std::string headerTitle) {
   return column;
 }
 
-std::set<Table::Row> Table::getColumns(Row headerTitles) {
+std::set<Table::Row> Table::getColumns(Row headerTitles) const {
   std::vector<int> indexList;
   for (auto headerTitle : headerTitles) {
     indexList.push_back(getColumnIndex(headerTitle));
@@ -68,7 +77,7 @@ std::set<Table::Row> Table::getColumns(Row headerTitles) {
   return result;
 }
 
-int Table::getColumnIndex(std::string headerTitle) {
+int Table::getColumnIndex(std::string headerTitle) const {
   for (size_t i = 0; i < header.size(); i++) {
     if (header[i] == headerTitle) {
       return i;
@@ -155,15 +164,15 @@ void Table::fillTransitiveTable(Table table) {
   }
 }
 
-bool Table::contains(const Row& row) {
+bool Table::contains(const Row& row) const {
   return data.count(row) == 1;
 }
 
-int Table::size() {
+int Table::size() const {
   return data.size();
 }
 
-bool Table::empty() {
+bool Table::empty() const {
   return data.size() == 0;
 }
 
@@ -191,6 +200,9 @@ void Table::join(const Table& otherTable) {
 
   // compare two tables and find columns with same header name
   for (int i = 0; i < header.size(); ++i) {
+    if (header[i] == "") {
+      continue;
+    }
     auto otherIndex = find(otherHeader.begin(), otherHeader.end(), header[i]);
     if (otherIndex != otherHeader.end()) {
       indexPairs.emplace_back(i, otherIndex - otherHeader.begin());
@@ -243,32 +255,13 @@ void Table::join(const Table& otherTable) {
   data = std::move(newData);
 }
 
-void Table::innerJoin(const Table& otherTable, std::string commonHeader) {
-  std::pair<int, int> indexPair; // column index pair with the same header name
+void Table::innerJoin(const Table& otherTable, int firstTableIndex, int secondTableIndex) {
   Row otherHeader = otherTable.getHeader();
-
-  // compare two tables and find column index with same header name
-  for (int i = 0; i < header.size(); ++i) {
-    auto thisIndex = find(header.begin(), header.end(), commonHeader);
-    if (thisIndex != header.end()) {
-      indexPair.first = thisIndex - header.begin();
-    }
-  }
-  for (int i = 0; i < otherHeader.size(); ++i) {
-    auto otherIndex = find(otherHeader.begin(), otherHeader.end(), commonHeader);
-    if (otherIndex != otherHeader.end()) {
-      indexPair.second = otherIndex - otherHeader.begin();
-    }
-  }
-
-  if (indexPair.first < 0 || indexPair.first >= header.size()) throw "Input header not found in first table";
-  if (indexPair.second < 0 || indexPair.second >= header.size()) throw "Input header not found in second table";
-
   std::set<Row> newData;
 
   // combine headers on those that are not common
   for (size_t i = 0; i < otherHeader.size(); i++) {
-    if (i != indexPair.second) {
+    if (i != int(secondTableIndex)) {
       header.emplace_back(otherHeader[i]);
     }
   }
@@ -276,10 +269,40 @@ void Table::innerJoin(const Table& otherTable, std::string commonHeader) {
   // combine data on those that are not common
   for (auto row : data) {
     for (auto otherRow : otherTable.data) {
-      if (row[indexPair.first] == otherRow[indexPair.second]) { // if rows have same data on the common columns
+      if (row[firstTableIndex] == otherRow[secondTableIndex]) { // if rows have same data on the common columns
         Row newRow = row;
         for (size_t i = 0; i < otherRow.size(); i++) {
-          if (i != indexPair.second) {
+          if (i != secondTableIndex) {
+            newRow.emplace_back(otherRow[i]);
+          }
+        }
+        newData.emplace(newRow);
+      }
+    }
+  }
+  data = std::move(newData);
+}
+
+void Table::innerJoin(const Table& otherTable, std::string commonHeader) {
+  Row otherHeader = otherTable.getHeader();
+  int thisIndex = getColumnIndex(commonHeader);
+  int otherIndex = otherTable.getColumnIndex(commonHeader);
+  std::set<Row> newData;
+
+  // combine headers on those that are not common
+  for (size_t i = 0; i < otherHeader.size(); i++) {
+    if (i != otherIndex) {
+      header.emplace_back(otherHeader[i]);
+    }
+  }
+
+  // combine data on those that are not common
+  for (auto row : data) {
+    for (auto otherRow : otherTable.data) {
+      if (row[thisIndex] == otherRow[otherIndex]) { // if rows have same data on the common columns
+        Row newRow = row;
+        for (size_t i = 0; i < otherRow.size(); i++) {
+          if (i != otherIndex) {
             newRow.emplace_back(otherRow[i]);
           }
         }

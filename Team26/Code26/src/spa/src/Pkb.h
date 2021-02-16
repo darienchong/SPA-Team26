@@ -26,8 +26,10 @@ public:
 	// add relationships
 	void addFollows(int follower, int followed);
 	void addFollowsT();
+  void addFollowsT(int follower, int followed);
 	void addParent(int parent, int child);
 	void addParentT();
+  void addParentT(int parent, int child);
 	void addUses(int stmtNo, std::string var);
 	void addUses(std::string proc, std::string var);
 	void addIndirectUses();
@@ -58,20 +60,20 @@ public:
 	Table getModifiesTable() const;
 	Table getPatternAssignTable() const;
 
-	Table getFollower(int n) const;
-  Table getFollowedBy(int n) const;
-  Table getFollowerT(int n) const;
-  Table getFollowedByT(int n) const;
-	Table getParent(int n) const;
-  Table getChild(int n) const;
-	Table getParentT(int n) const;
-  Table getChildT(int n) const;
-	Table getUses(std::string str) const;
-  Table getUsedBy(int n) const;
-  Table getUsedBy(std::string str) const; // for procedure
-	Table getModifies(std::string str) const;
-	Table getModifiedBy(int n) const;
-  Table getModifiedBy(std::string str) const; // for procedure
+	Table getFollower(int stmtNo) const;
+  Table getFollowedBy(int stmtNo) const;
+  Table getFollowerT(int stmtNo) const;
+  Table getFollowedByT(int stmtNo) const;
+	Table getParent(int stmtNo) const;
+  Table getChild(int stmtNo) const;
+	Table getParentT(int stmtNo) const;
+  Table getChildT(int stmtNo) const;
+	Table getUses(std::string varName) const;
+  Table getUsedBy(int stmtNo) const;
+  Table getUsedBy(std::string procName) const;
+	Table getModifies(std::string varName) const;
+	Table getModifiedBy(int stmtNo) const;
+  Table getModifiedBy(std::string procName) const; 
 
 private:
 	Table varTable{ std::vector<std::string> {"varName"} };
