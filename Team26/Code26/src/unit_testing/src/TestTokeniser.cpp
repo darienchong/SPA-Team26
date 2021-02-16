@@ -176,18 +176,3 @@ TEST_CASE("[TestTokeniser] Whitespace not consumed") {
     ++expectedValuesItr;
   }
 }
-
-
-TEST_CASE("[TestTokeniser] Whitespace not consumed") {
-  std::stringstream stream = strToStream("Follows *");
-  
-  std::list<Token> tokens = tokeniser.notConsumingWhitespace().tokenise(stream);
-  std::list<std::string> expectedValues = { "Follows", " ", "*", " " };
-  std::list<std::string>::const_iterator expectedValuesItr = expectedValues.begin();
-
-  for (Token token : tokens) {
-    REQUIRE(token.value == *expectedValuesItr);
-
-    ++expectedValuesItr;
-  }
-}
