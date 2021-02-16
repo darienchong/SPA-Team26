@@ -15,6 +15,7 @@
  */
 class Tokeniser {
 private:
+  bool isAllowLeadingZeroes;
   bool isConsumeWhitespace;
 public:
   /**
@@ -22,6 +23,7 @@ public:
    */
   Tokeniser() {
     isConsumeWhitespace = true;
+    isAllowLeadingZeroes = false;
   }
 
   /**
@@ -46,23 +48,37 @@ public:
   std::list<Token> tokenise(std::istream& stream);
 
   /**
-   * Sets a flag to consume all encountered whitespace characters
+   * Returns a Tokeniser that consumes all encountered whitespace characters
    * while tokenizing. The default behaviour is to consume whitespace.
-   * Returns a Tokeniser to allow for chaining e.g.
-   * std::list<Token> tokens = tokeniser.consumingWhitespace().tokenise(my_stream);
    * 
    * @returns A Tokeniser that consumes encountered whitespace characters.
    */
   Tokeniser consumingWhitespace();
 
   /**
-   * Sets a flag to tokenize all encountered whitespace characters
+   * Returns a Tokeniser that tokenizes all encountered whitespace characters
    * while tokenizing.
-   * Returns a Tokeniser to allow for chaining e.g.
-   * std::list<Token> tokens = tokeniser.notConsumingWhitespace().tokenise(my_stream);
    *
    * @returns A Tokeniser that does not consume encountered whitespace
    *     characters.
    */
   Tokeniser notConsumingWhitespace();
+
+  /**
+   * Returns a Tokeniser that allows for leading zero non-single digit numbers
+   * to be tokenised.
+   * 
+   * @returns A Tokeniser that allows tokenising of leading zero
+   *    non-single digit numbers.
+   */
+  Tokeniser allowingLeadingZeroes();
+
+  /**
+   * Returns a Tokeniser that disallows leading zero non-single digit numbers
+   * to be tokenised.
+   * 
+   * @returns A Tokeniser that disallows tokenising of leading zero
+   *     non-single digit numbers.
+   */
+  Tokeniser notAllowingLeadingZeroes();
 };

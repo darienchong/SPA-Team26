@@ -125,9 +125,11 @@ TEST_CASE("[TestTokeniser] Operator, two-char, single, negative") {
   REQUIRE_THROWS(tokeniser.tokenise(stream));
 }
 
-TEST_CASE("[TestTokeniser] Number, single-digit, positive") {
+TEST_CASE("[TestTokeniser] Number, leading zero, single-digit, positive") {
+  Tokeniser allowLeadingZeroTokeniser;
+
   std::stringstream stream = strToStream("0");
-  std::list<Token> tokens = tokeniser.tokenise(stream);
+  std::list<Token> tokens = allowLeadingZeroTokeniser.allowingLeadingZeroes().tokenise(stream);
   Token token = tokens.front();
 
   REQUIRE(token.type == TokenType::NUMBER);
@@ -144,8 +146,35 @@ TEST_CASE("[TestTokeniser] Number, multiple-digit, positive") {
 }
 
 TEST_CASE("[TestTokeniser] Number, multiple-digit, negative") {
+  Tokeniser notAllowLeadingZeroTokeniser;
+
   std::stringstream stream = strToStream("0123");
-  REQUIRE_THROWS(tokeniser.tokenise(stream));
+  REQUIRE_THROWS(notAllowLeadingZeroTokeniser.notAllowingLeadingZeroes().tokenise(stream));
+}
+
+TEST_CASE("[TestTokeniser] Number, leading zero, multiple-digit, positive") {
+  Tokeniser allowLeadingZeroTokeniser;
+  
+  std::stringstream stream = strToStream("0001");
+  std::list<Token> tokens = allowLeadingZeroTokeniser.allowingLeadingZeroes().tokenise(stream);
+  Token token = tokens.front();
+
+  REQUIRE(token.type == TokenType::NUMBER);
+  REQUIRE(token.value == "0001");
+}
+
+TEST_CASE("[TestTokeniser] Whitespace not consumed") {
+  std::stringstream stream = strToStream("Follows *");
+  
+  std::list<Token> tokens = tokeniser.notConsumingWhitespace().tokenise(stream);
+  std::list<std::string> expectedValues = { "Follows", " ", "*", " " };
+  std::list<std::string>::const_iterator expectedValuesItr = expectedValues.begin();
+
+  for (Token token : tokens) {
+    REQUIRE(token.value == *expectedValuesItr);
+
+    ++expectedValuesItr;
+  }
 }
 
 

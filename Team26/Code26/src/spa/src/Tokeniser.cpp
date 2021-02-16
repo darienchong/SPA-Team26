@@ -75,7 +75,7 @@ namespace {
    * @param stream The stream to read from.
    * @returns Token representing a number.
    */
-  Token constructNumber(std::istream& stream) {
+  Token constructNumber(std::istream& stream, bool isAllowLeadingZeroes) {
     TokenType type = TokenType::NUMBER;
     std::string value;
 
@@ -85,7 +85,9 @@ namespace {
       // Since we peek ahead, if value equals "0" at any time it means that
       // we are at least on the second digit, hence an invalid construction.
       if (value == "0") {
-        throw std::invalid_argument("[Tokeniser::constructNumber]: Encountered 0 as the first digit of a number.");
+        if (!isAllowLeadingZeroes) {
+          throw std::invalid_argument("[Tokeniser::constructNumber]: Encountered 0 as the first digit of a number.");
+        }
       }
 
       value.push_back(stream.get());
@@ -298,7 +300,7 @@ std::list<Token> Tokeniser::tokenise(std::istream &stream) {
     } else if (isDelimiter(stream.peek())) {
       tokens.push_back(constructDelimiter(stream));
     } else if (isDigit) {
-      tokens.push_back(constructNumber(stream));
+      tokens.push_back(constructNumber(stream, isAllowLeadingZeroes));
     } else if (isOperator(stream.peek())) {
       tokens.push_back(constructOperator(stream));
     } else if (isWhitespace) {
@@ -323,6 +325,16 @@ Tokeniser Tokeniser::consumingWhitespace() {
 
 Tokeniser Tokeniser::notConsumingWhitespace() {
   this->isConsumeWhitespace = false;
+  return *this;
+}
+
+Tokeniser Tokeniser::allowingLeadingZeroes() {
+  this->isAllowLeadingZeroes = true;
+  return *this;
+}
+
+Tokeniser Tokeniser::notAllowingLeadingZeroes() {
+  this->isAllowLeadingZeroes = false;
   return *this;
 }
 
