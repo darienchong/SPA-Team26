@@ -10,8 +10,15 @@
 #include "Pkb.h"
 
 namespace {
-  static const std::string TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG =
+  static const std::string GENERATE_TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG =
     "[DesignExtractor::generateTransitiveClosure]: Table must have two columns.";
+
+  static const std::string FILL_INDIRECT_RELATION_HEADER_SIZE_NEQ_2_ERROR_MSG =
+    "[DesignExtractor::fillIndirectRelation]: Both tables must have two columns.";
+
+  static const std::string FILL_INDIRECT_RELATION_COLUMN_NAME_SAME_ERROR_MSG = 
+    "[DesignExtractor::fillIndirectRelation]: First table column name should not "
+    "be the same as second table column name.";
 
   /**
    * Helper method to insert a key-value pair into the adjacency list.
@@ -154,7 +161,7 @@ namespace {
   Table generateTransitiveClosure(Table table) {
     Table newTable = table;
     if (table.getHeader().size() != 2) {
-      throw std::invalid_argument(TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG);
+      throw std::invalid_argument(GENERATE_TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG);
     }
 
     // We insert the initial relations into the adjacency list
@@ -186,6 +193,54 @@ namespace {
     }
 
     return newTable;
+  }
+
+  /**
+   * Populates a given table with indirect relations.
+   * We have a table with a number of direct relations.
+   * We wish to implement a new indirect relation, where
+   * if the relation holds in the other table, it passes 
+   * over to the original table as well. For example, where
+   * 
+   *   R(x, y) indicates an existing relation in the first table,
+   *   P(x, y) indicates a relation in the second table,
+   * 
+   * If it is the case that
+   *   1) R(x, y)
+   *   2) R(y, z)
+   *   3) P(x, z)
+   * Then we have a new indirect relation to be put in the 
+   * first table, R(x, z).
+   * 
+   * In terms of the design abstractions for CS3203, if 
+   * R(x, y) and R(y, z) and Parent(x, z), then R(x, z).
+   * 
+   * @param table The table to use/modify.
+   * @param parentTTable The second table to refer to.
+   * @returns The table with new indirect relation entries.
+   */
+  Table fillIndirectRelation(Table table, Table parentTTable) {
+    bool isTableColumnCountNotTwo = (table.getHeader().size() != 2) || 
+      (parentTTable.getHeader().size() != 2);
+    bool isFirstTableColumnNameSameAsParentColumnName =
+      (table.getHeader()[0] == parentTTable.getHeader()[0]) ||
+      (table.getHeader()[1] == parentTTable.getHeader()[0]);
+
+    if (isTableColumnCountNotTwo) {
+      throw std::invalid_argument(FILL_INDIRECT_RELATION_HEADER_SIZE_NEQ_2_ERROR_MSG);
+    }
+    if (isFirstTableColumnNameSameAsParentColumnName) {
+      throw std::invalid_argument(FILL_INDIRECT_RELATION_COLUMN_NAME_SAME_ERROR_MSG);
+    }
+
+    std::string joinedColumnName = table.getHeader()[0];
+    Table newParentTTable = parentTTable;
+    newParentTTable.setHeader({ "Parent", joinedColumnName });
+    newParentTTable.join(table);
+    newParentTTable.dropColumn(joinedColumnName);
+    table.concatenate(newParentTTable);
+
+    return table;
   }
 
   /**
@@ -227,17 +282,39 @@ namespace {
   }
 
   /**
-   * .
+   * Populates the PKB's Uses table with all indirect relations (i.e. Uses() relations
+   * other than Uses(s, v) and Uses(if, v) where the variable appears in the conditional.
+   * 
+   * Requires that the ParentTTable be populated first.
+   * 
+   * @param pkb The PKB to use/modify.
+   * @returns
    */
   void fillUsesTable(Pkb& pkb) {
-
+    Table newUsesTable = fillIndirectRelation(pkb.getUsesTable(), pkb.getParentTTable());
+    for (std::vector<std::string> row : newUsesTable.getData()) {
+      std::string proc = row[0];
+      std::string var = row[1];
+      pkb.addUses(proc, var);
+    }
   }
 
   /**
-   * .
+   * Populates the PKB's Modifies table with all indirect relations (i.e. Modifies() relations
+   * other than Modifies(s, v).
+   *
+   * Requires that the ParentTTable be populated first.
+   * 
+   * @param pkb The PKB to use/modify.
+   * @returns
    */
   void fillModifiesTable(Pkb& pkb) {
-
+    Table newModifiesTable = fillIndirectRelation(pkb.getModifiesTable(), pkb.getParentTTable());
+    for (std::vector<std::string> row : newModifiesTable.getData()) {
+      std::string stmtNum = row[0];
+      std::string var = row[1];
+      pkb.addModifies(stmtNum, var);
+    }
   }
 }
 
@@ -250,4 +327,6 @@ DesignExtractor::~DesignExtractor() {
 void DesignExtractor::extractDesignAbstractions() {
   fillParentTTable(pkb);
   fillFollowsTTable(pkb);
+  fillUsesTable(pkb);
+  fillModifiesTable(pkb);
 }
