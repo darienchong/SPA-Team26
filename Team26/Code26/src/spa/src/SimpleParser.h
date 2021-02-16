@@ -4,7 +4,7 @@
 #include <string>
 
 #include "ExprParser.h"
-#include "PKB.h"
+#include "Pkb.h"
 #include "PkbStub.h" // remove this once pkb is implemented
 #include "Token.h"
 

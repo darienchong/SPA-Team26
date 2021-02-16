@@ -1,30 +1,30 @@
 #include <catch.hpp>
 
-#include "PKB.h"
+#include "Pkb.h"
 
 TEST_CASE("[TestPkb] varTable Insertion") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addVar("x");
 	auto dataCopy = pkb.getVarTable().getData();
 	REQUIRE(dataCopy.find({ "x" }) != dataCopy.end());
 }
 
 TEST_CASE("[TestPkb] stmtTable Insertion") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addStmt(2);
 	auto dataCopy = pkb.getStmtTable().getData();
 	REQUIRE(dataCopy.find({ "2" }) != dataCopy.end());
 }
 
 TEST_CASE("[TestPkb] procTable Insertion") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addProc("main");
 	auto dataCopy = pkb.getProcTable().getData();
 	REQUIRE(dataCopy.find({ "main" }) != dataCopy.end());
 }
 
 TEST_CASE("[TestPkb] constTable Insertion") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addConst(std::to_string(2));
   auto dataCopy = pkb.getConstTable().getData();
   REQUIRE(dataCopy.find({ "2" }) != dataCopy.end());
@@ -32,7 +32,7 @@ TEST_CASE("[TestPkb] constTable Insertion") {
 
 
 TEST_CASE("[TestPkb] ifTable Insertion") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addIf(12);
 	auto dataCopy = pkb.getIfTable().getData();
 	REQUIRE(dataCopy.find({ "12" }) != dataCopy.end());
@@ -41,7 +41,7 @@ TEST_CASE("[TestPkb] ifTable Insertion") {
 }
 
 TEST_CASE("[TestPkb] whileTable Insertion") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addWhile(15);
 	auto dataCopy = pkb.getWhileTable().getData();
 	REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
@@ -50,7 +50,7 @@ TEST_CASE("[TestPkb] whileTable Insertion") {
 }
 
 TEST_CASE("[TestPkb] readTable Insertion") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addRead(15);
 	auto dataCopy = pkb.getReadTable().getData();
 	REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
@@ -59,7 +59,7 @@ TEST_CASE("[TestPkb] readTable Insertion") {
 }
 
 TEST_CASE("[TestPkb] printTable Insertion") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addPrint(526);
 	auto dataCopy = pkb.getPrintTable().getData();
 	REQUIRE(dataCopy.find({ "526" }) != dataCopy.end());
@@ -68,7 +68,7 @@ TEST_CASE("[TestPkb] printTable Insertion") {
 }
 
 TEST_CASE("[TestPkb] assignTable Insertion") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addAssign(32);
 	auto dataCopy = pkb.getAssignTable().getData();
 	REQUIRE(dataCopy.find({ "32" }) != dataCopy.end());
@@ -77,7 +77,7 @@ TEST_CASE("[TestPkb] assignTable Insertion") {
 }
 
 TEST_CASE("[TestPkb] addFollows") {
-	PKB pkb;
+	Pkb pkb;
 
 	SECTION("Check valid insertion") {
 		pkb.addFollows(5, 6);
@@ -91,7 +91,7 @@ TEST_CASE("[TestPkb] addFollows") {
 }
 
 TEST_CASE("[TestPkb] addFollowsT") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addFollows(5, 6);
 	pkb.addFollows(6, 7);
 	pkb.addFollowsT();
@@ -102,7 +102,7 @@ TEST_CASE("[TestPkb] addFollowsT") {
 }
 
 TEST_CASE("[TestPkb] addParent") {
-	PKB pkb;
+	Pkb pkb;
 
 	SECTION("Check valid insertion") {
 		pkb.addParent(5, 6);
@@ -116,7 +116,7 @@ TEST_CASE("[TestPkb] addParent") {
 }
 
 TEST_CASE("[TestPkb] addParentT") {
-	PKB pkb;
+	Pkb pkb;
 	pkb.addParent(5, 6);
 	pkb.addParent(6, 7);
 	pkb.addParentT();
@@ -127,7 +127,7 @@ TEST_CASE("[TestPkb] addParentT") {
 }
 
 TEST_CASE("[TestPkb] addUses") {
-	PKB pkb;
+	Pkb pkb;
 
 	SECTION("Check valid insertion") {
 		pkb.addUses(5, "x");
@@ -139,7 +139,7 @@ TEST_CASE("[TestPkb] addUses") {
 }
 
 TEST_CASE("[TestPkb] addModifies") {
-	PKB pkb;
+	Pkb pkb;
 
 	SECTION("Check valid insertion") {
 		pkb.addModifies(5, "x");
@@ -151,7 +151,7 @@ TEST_CASE("[TestPkb] addModifies") {
 }
 
 TEST_CASE("[TestPkb] addPatternAssign") {
-	PKB pkb;
+	Pkb pkb;
 
 	SECTION("Check valid insertion") {
 		pkb.addPatternAssign(5, "x", "x y *");
@@ -163,7 +163,7 @@ TEST_CASE("[TestPkb] addPatternAssign") {
 }
 
 TEST_CASE("[TestPkb] addIndirectUses") {
-  PKB pkb;
+  Pkb pkb;
 
   SECTION("with parentTTable already filled") {
     pkb.addUses(2, "x");
@@ -191,7 +191,7 @@ TEST_CASE("[TestPkb] addIndirectUses") {
 }
 
 TEST_CASE("[TestPkb] addIndirectModifies") {
-  PKB pkb;
+  Pkb pkb;
 
   SECTION("with parentTTable already filled") {
     pkb.addModifies(2, "x");
@@ -219,7 +219,7 @@ TEST_CASE("[TestPkb] addIndirectModifies") {
 }
 
 TEST_CASE("[TestPkb] getFollows") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addFollows(1, 2);
   pkb.addFollows(3, 4);
   pkb.addFollows(2, 5);
@@ -228,7 +228,7 @@ TEST_CASE("[TestPkb] getFollows") {
 }
 
 TEST_CASE("[TestPkb] getFollowedBy") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addFollows(1, 2);
   pkb.addFollows(3, 4);
   pkb.addFollows(2, 5);
@@ -237,7 +237,7 @@ TEST_CASE("[TestPkb] getFollowedBy") {
 }
 
 TEST_CASE("[TestPkb] getFollowerT") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addFollows(1, 2);
   pkb.addFollows(3, 4);
   pkb.addFollows(2, 5);
@@ -248,7 +248,7 @@ TEST_CASE("[TestPkb] getFollowerT") {
 }
 
 TEST_CASE("[TestPkb] getFollowedByT") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addFollows(1, 2);
   pkb.addFollows(3, 4);
   pkb.addFollows(2, 5);
@@ -259,7 +259,7 @@ TEST_CASE("[TestPkb] getFollowedByT") {
 }
 
 TEST_CASE("[TestPkb] getParent") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addParent(1, 2);
   pkb.addParent(3, 4);
   pkb.addParent(2, 5);
@@ -268,7 +268,7 @@ TEST_CASE("[TestPkb] getParent") {
 }
 
 TEST_CASE("[TestPkb] getChild") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addParent(1, 2);
   pkb.addParent(3, 4);
   pkb.addParent(2, 5);
@@ -277,7 +277,7 @@ TEST_CASE("[TestPkb] getChild") {
 }
 
 TEST_CASE("[TestPkb] getParentT") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addParent(1, 2);
   pkb.addParent(3, 4);
   pkb.addParent(2, 5);
@@ -288,7 +288,7 @@ TEST_CASE("[TestPkb] getParentT") {
 }
 
 TEST_CASE("[TestPkb] getChildT") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addParent(1, 2);
   pkb.addParent(3, 4);
   pkb.addParent(2, 5);
@@ -299,7 +299,7 @@ TEST_CASE("[TestPkb] getChildT") {
 }
 
 TEST_CASE("[TestPkb] getUses") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addUses(1, "x");
   pkb.addUses(2, "y");
   Table table = pkb.getUses("x");
@@ -310,7 +310,7 @@ TEST_CASE("[TestPkb] getUses") {
 }
 
 TEST_CASE("[TestPkb] getUsedBy") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addUses(1, "x");
   pkb.addUses(2, "y");
   pkb.addUses(2, "x");
@@ -331,7 +331,7 @@ TEST_CASE("[TestPkb] getUsedBy") {
 }
 
 TEST_CASE("[TestPkb] getModifies") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addModifies(1, "x");
   pkb.addModifies(2, "y");
   Table table = pkb.getModifies("x");
@@ -342,7 +342,7 @@ TEST_CASE("[TestPkb] getModifies") {
 }
 
 TEST_CASE("[TestPkb] getModifiedBy") {
-  PKB pkb;
+  Pkb pkb;
   pkb.addModifies(1, "x");
   pkb.addModifies(2, "y");
   pkb.addModifies(2, "x");

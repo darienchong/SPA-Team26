@@ -3,13 +3,13 @@
 #include <string>
 #include <list>
 
-#include "PKB.h"
+#include "Pkb.h"
 
-class SPA {
+class Spa {
 private:
-  PKB pkb;
+  Pkb pkb;
 public:
-  SPA();
+  Spa();
   void parseSourceFile(const std::string& filename);
   void evaluateQuery(const std::string& query, std::list<std::string>& results);
 };
