@@ -29,12 +29,15 @@ public:
   std::set<std::string> getColumn(const std::string& headerTitle) const;
   std::set<Row> getColumns(const Row& headerTitles) const;
   int getColumnIndex(const std::string& headerTitle) const;
+  std::vector<std::pair<int, int>> getColumnIndexPairs(const Table &otherTable) const;
 
   // util functions
   void dropColumn(const std::string& headerTitle);
   void filterColumn(const std::string& columnName, const std::set<std::string>& values);
   void concatenate(Table& otherTable);
   void join(const Table& otherTable);
+  void crossJoin(const Table &otherTable);
+  void innerJoin(const Table &otherTable, std::vector<std::pair<int, int>> &indexPairs);
   void innerJoin(const Table& otherTable, int firstTableIndex, int secondTableIndex);
   void innerJoin(const Table& otherTable, const std::string& commonHeader);
   void deleteRow(const Row& row);
@@ -46,4 +49,6 @@ public:
   // only called by transitive tables
   void fillTransitiveTable(const Table& table);
   void fillIndirectRelation(const Table& parentTable);
+
+
 };

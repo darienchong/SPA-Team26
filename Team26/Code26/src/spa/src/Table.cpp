@@ -24,7 +24,8 @@ Table::Table(Row newHeader) {
 void Table::setHeader(const Row& newHeader) {
   std::set<std::string> prevNames;
   for (auto name: newHeader) {
-    if (name != "" && prevNames.count(name)) {
+    bool isDuplicate = (name != "") && prevNames.count(name);
+    if (isDuplicate) {
       throw "Non-empty  column name could not be duplicated";
     } else {
       prevNames.emplace(name);
@@ -106,7 +107,6 @@ void Table::dropColumn(const std::string& headerTitle) {
 
 void Table::filterColumn(const std::string& columnName, const std::set<std::string>& values) {
   int index = getColumnIndex(columnName);
-
   for (auto it = data.begin(); it != data.end(); ) {
     if (!values.count(it->at(index))) {
       it = data.erase(it);
@@ -114,7 +114,6 @@ void Table::filterColumn(const std::string& columnName, const std::set<std::stri
       it++;
     }
   }
-
 }
 
 void Table::concatenate(Table& otherTable) {
@@ -196,60 +195,79 @@ void Table::fillIndirectRelation(const Table& parentTTable) {
 // If current table and otherTable have common column names, do natural join
 // else, cross product
 void Table::join(const Table& otherTable) {
-  std::vector<std::pair<int, int>> indexPairs; // pairs of columns with the same name
+  // get pairs of columns with the same name
+  std::vector<std::pair<int, int>> indexPairs = getColumnIndexPairs(otherTable);
+
+  if (indexPairs.empty()) { // cross-product if no common headers
+    crossJoin(otherTable);
+  } else { // natural join -> change to hash join ?
+    innerJoin(otherTable, indexPairs);
+  }
+}
+
+std::vector<std::pair<int, int>> Table::getColumnIndexPairs(const Table &otherTable) const {
+  std::vector<std::pair<int, int>> indexPairs;
   Row otherHeader = otherTable.getHeader();
 
-  // compare two tables and find columns with same header name
-  for (int i = 0; i < header.size(); ++i) {
+  for (size_t i = 0; i < header.size(); ++i) {
     if (header[i] == "") {
       continue;
     }
-    auto otherIndex = find(otherHeader.begin(), otherHeader.end(), header[i]);
-    if (otherIndex != otherHeader.end()) {
-      indexPairs.emplace_back(i, otherIndex - otherHeader.begin());
+    bool isInOtherHeader = std::find(otherHeader.begin(), otherHeader.end(), header[i]) != otherHeader.end();
+    if (isInOtherHeader) {
+      indexPairs.emplace_back(i, otherTable.getColumnIndex(header[i]));
+    }
+  }
+  return indexPairs;
+}
+
+void Table::crossJoin(const Table &otherTable) {
+  std::set<Row> newData;
+  Table::Row otherHeader = otherTable.getHeader();
+  header.insert(header.end(), otherHeader.begin(), otherHeader.end());
+  for (const auto& row : data) {
+    for (auto otherRow : otherTable.data) {
+      auto newRow = row;
+      newRow.insert(newRow.end(), otherRow.begin(), otherRow.end());
+      newData.emplace(newRow);
+    }
+  }
+  data = std::move(newData);
+}
+
+void Table::innerJoin(const Table &otherTable, std::vector<std::pair<int, int>> &indexPairs) {
+  std::set<Row> newData;
+  const Table::Row otherHeader = otherTable.getHeader();
+  std::set<int> droppedIndexes;
+
+  for (auto pair : indexPairs) {
+    droppedIndexes.emplace(pair.second);
+  }
+
+  for (size_t i = 0; i < otherHeader.size(); i++) {
+    if (!droppedIndexes.count(i)) {
+      header.emplace_back(otherHeader[i]);
     }
   }
 
-  std::set<Row> newData;
-  if (indexPairs.empty()) { // cross-product if no common headers
-    header.insert(header.end(), otherHeader.begin(), otherHeader.end());
-    for (const auto& row : data) {
-      for (auto otherRow : otherTable.data) {
-        auto newRow = row;
-        newRow.insert(newRow.end(), otherRow.begin(), otherRow.end());
+  for (auto row : data) {
+    for (auto otherRow : otherTable.data) {
+      bool keepRow = true;
+      for (auto pair : indexPairs) {
+        if (row[pair.first] != otherRow[pair.second]) {
+          keepRow = false;
+          break;
+        }
+      }
+      if (keepRow) {
+        Row newRow = row;
+        for (size_t i = 0; i < otherRow.size(); i++) {
+          bool isToDrop = droppedIndexes.count(i);
+          if (!isToDrop) {
+            newRow.emplace_back(otherRow[i]);
+          }
+        }
         newData.emplace(newRow);
-      }
-    }
-
-  } else { // natural join -> change to hash join ?
-    std::set<int> droppedIndexes;
-    for (auto pair : indexPairs) {
-      droppedIndexes.emplace(pair.second);
-    }
-    for (size_t i = 0; i < otherHeader.size(); i++) {
-      if (!droppedIndexes.count(i)) {
-        header.emplace_back(otherHeader[i]);
-      }
-    }
-
-    for (auto row : data) {
-      for (auto otherRow : otherTable.data) {
-        bool keep = true;
-        for (auto pair : indexPairs) {
-          if (row[pair.first] != otherRow[pair.second]) {
-            keep = false;
-            break;
-          }
-        }
-        if (keep) {
-          Row newRow = row;
-          for (size_t i = 0; i < otherRow.size(); i++) {
-            if (!droppedIndexes.count(i)) {
-              newRow.emplace_back(otherRow[i]);
-            }
-          }
-          newData.emplace(newRow);
-        }
       }
     }
   }
@@ -257,61 +275,15 @@ void Table::join(const Table& otherTable) {
 }
 
 void Table::innerJoin(const Table& otherTable, int firstTableIndex, int secondTableIndex) {
-  Row otherHeader = otherTable.getHeader();
-  std::set<Row> newData;
-
-  // combine headers on those that are not common
-  for (size_t i = 0; i < otherHeader.size(); i++) {
-    if (i != int(secondTableIndex)) {
-      header.emplace_back(otherHeader[i]);
-    }
-  }
-
-  // combine data on those that are not common
-  for (auto row : data) {
-    for (auto otherRow : otherTable.data) {
-      if (row[firstTableIndex] == otherRow[secondTableIndex]) { // if rows have same data on the common columns
-        Row newRow = row;
-        for (size_t i = 0; i < otherRow.size(); i++) {
-          if (i != secondTableIndex) {
-            newRow.emplace_back(otherRow[i]);
-          }
-        }
-        newData.emplace(newRow);
-      }
-    }
-  }
-  data = std::move(newData);
+  std::vector<std::pair<int, int>> indexPairs;
+  indexPairs.emplace_back(firstTableIndex, secondTableIndex);
+  innerJoin(otherTable, indexPairs);
 }
 
 void Table::innerJoin(const Table& otherTable, const std::string& commonHeader) {
-  Row otherHeader = otherTable.getHeader();
-  int thisIndex = getColumnIndex(commonHeader);
-  int otherIndex = otherTable.getColumnIndex(commonHeader);
-  std::set<Row> newData;
-
-  // combine headers on those that are not common
-  for (size_t i = 0; i < otherHeader.size(); i++) {
-    if (i != otherIndex) {
-      header.emplace_back(otherHeader[i]);
-    }
-  }
-
-  // combine data on those that are not common
-  for (auto row : data) {
-    for (auto otherRow : otherTable.data) {
-      if (row[thisIndex] == otherRow[otherIndex]) { // if rows have same data on the common columns
-        Row newRow = row;
-        for (size_t i = 0; i < otherRow.size(); i++) {
-          if (i != otherIndex) {
-            newRow.emplace_back(otherRow[i]);
-          }
-        }
-        newData.emplace(newRow);
-      }
-    }
-  }
-  data = std::move(newData);
+  int firstTableIndex = getColumnIndex(commonHeader);
+  int secondTableIndex = otherTable.getColumnIndex(commonHeader);
+  innerJoin(otherTable, firstTableIndex, secondTableIndex);
 }
 
 void Table::deleteRow(const Row& row) {
