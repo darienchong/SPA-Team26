@@ -1,14 +1,15 @@
 #include "Pkb.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "Table.h"
 
-Pkb::Pkb() {}
+Pkb::Pkb() = default;
 
 void Pkb::addVar(std::string var) {
-  std::vector<std::string> vect{ var };
+  std::vector<std::string> vect{ std::move(var) };
   varTable.insertRow(vect);
 }
 
@@ -18,12 +19,12 @@ void Pkb::addStmt(int stmtNo) {
 }
 
 void Pkb::addProc(std::string proc) {
-  std::vector<std::string> vect{ proc };
+  std::vector<std::string> vect{ std::move(proc) };
   procTable.insertRow(vect);
 }
 
 void Pkb::addConst(std::string constValue) {
-  std::vector<std::string> vect{ constValue };
+  std::vector<std::string> vect{ std::move(constValue) };
   constTable.insertRow(vect);
 }
 
@@ -98,27 +99,27 @@ void Pkb::addParentT(int parent, int child) {
 }
 
 void Pkb::addUses(int stmtNo, std::string var) {
-  std::vector<std::string> vect{ std::to_string(stmtNo), var };
+  std::vector<std::string> vect{ std::to_string(stmtNo), std::move(var) };
   usesTable.insertRow(vect);
 }
 
 void Pkb::addUses(std::string proc, std::string var) {
-  std::vector<std::string> vect{ proc , var };
+  std::vector<std::string> vect{ std::move(proc) , std::move(var) };
   usesTable.insertRow(vect);
 }
 
 void Pkb::addModifies(int stmtNo, std::string var) {
-  std::vector<std::string> vect{ std::to_string(stmtNo), var };
+  std::vector<std::string> vect{ std::to_string(stmtNo), std::move(var) };
   modifiesTable.insertRow(vect);
 }
 
 void Pkb::addModifies(std::string proc, std::string var) {
-  std::vector<std::string> vect{ proc , var };
+  std::vector<std::string> vect{ std::move(proc) , std::move(var) };
   modifiesTable.insertRow(vect);
 }
 
 void Pkb::addPatternAssign(int stmtNo, std::string lhs, std::string rhs) {
-  std::vector<std::string> vect{ std::to_string(stmtNo), lhs, rhs };
+  std::vector<std::string> vect{ std::to_string(stmtNo), std::move(lhs), std::move(rhs) };
   patternAssignTable.insertRow(vect);
 }
 
@@ -212,7 +213,7 @@ Table Pkb::getChildT(int stmtNo) const {
 
 Table Pkb::getUses(std::string varName) const {
   Table filterTable = usesTable;
-  filterTable.filterColumn("used", std::set<std::string> {varName});
+  filterTable.filterColumn("used", std::set<std::string> {std::move(varName)});
   filterTable.dropColumn("used");
   return filterTable;
 }
@@ -226,14 +227,14 @@ Table Pkb::getUsedBy(int stmtNo) const {
 
 Table Pkb::getUsedBy(std::string procName) const {
   Table filterTable = usesTable;
-  filterTable.filterColumn("user", std::set<std::string> {procName});
+  filterTable.filterColumn("user", std::set<std::string> {std::move(procName)});
   filterTable.dropColumn("user");
   return filterTable;
 }
 
 Table Pkb::getModifies(std::string varName) const {
   Table filterTable = modifiesTable;
-  filterTable.filterColumn("modified", std::set<std::string> {varName});
+  filterTable.filterColumn("modified", std::set<std::string> {std::move(varName)});
   filterTable.dropColumn("modified");
   return filterTable;
 }
@@ -247,7 +248,7 @@ Table Pkb::getModifiedBy(int stmtNo) const {
 
 Table Pkb::getModifiedBy(std::string procName) const {
   Table filterTable = modifiesTable;
-  filterTable.filterColumn("modifier", std::set<std::string> {procName});
+  filterTable.filterColumn("modifier", std::set<std::string> {std::move(procName)});
   filterTable.dropColumn("modifier");
   return filterTable;
 }

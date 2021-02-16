@@ -5,6 +5,7 @@
 #include <set>
 #include <stdexcept>
 #include <unordered_map>
+#include <utility>
 
 Table::Table() {
   header.emplace_back("0");
@@ -16,13 +17,13 @@ Table::Table(int n) {
   }
 }
 
-Table::Table(Row h) {
-  header = h;
+Table::Table(Row newHeader) {
+  header = std::move(newHeader);
 }
 
-void Table::setHeader(Row h) {
+void Table::setHeader(const Row& newHeader) {
   std::set<std::string> prevNames;
-  for (auto name: h) {
+  for (auto name: newHeader) {
     if (name != "" && prevNames.count(name)) {
       throw "Non-empty  column name could not be duplicated";
     } else {
@@ -30,10 +31,10 @@ void Table::setHeader(Row h) {
     }
   }
 
-  if (h.size() != header.size()) {
+  if (newHeader.size() != header.size()) {
     throw "Header size does not match";
   }
-  header = h;
+  header = newHeader;
 }
 
 void Table::insertRow(Row row) {
@@ -51,7 +52,7 @@ std::set<Table::Row> Table::getData() const {
   return data;
 }
 
-std::set<std::string> Table::getColumn(std::string headerTitle) const {
+std::set<std::string> Table::getColumn(const std::string& headerTitle) const {
   int index = getColumnIndex(headerTitle);
   std::set<std::string> column;
   for (Row row : data) {
@@ -60,9 +61,9 @@ std::set<std::string> Table::getColumn(std::string headerTitle) const {
   return column;
 }
 
-std::set<Table::Row> Table::getColumns(Row headerTitles) const {
+std::set<Table::Row> Table::getColumns(const Row& headerTitles) const {
   std::vector<int> indexList;
-  for (auto headerTitle : headerTitles) {
+  for (const auto& headerTitle : headerTitles) {
     indexList.push_back(getColumnIndex(headerTitle));
   }
 
@@ -77,7 +78,7 @@ std::set<Table::Row> Table::getColumns(Row headerTitles) const {
   return result;
 }
 
-int Table::getColumnIndex(std::string headerTitle) const {
+int Table::getColumnIndex(const std::string& headerTitle) const {
   for (size_t i = 0; i < header.size(); i++) {
     if (header[i] == headerTitle) {
       return i;
@@ -86,7 +87,7 @@ int Table::getColumnIndex(std::string headerTitle) const {
   throw "Column with name:" + headerTitle + " not found";
 }
 
-void Table::dropColumn(std::string headerTitle) {
+void Table::dropColumn(const std::string& headerTitle) {
   int index = getColumnIndex(headerTitle);
 
   // Clear data if there is only one column, otherwise erase column
@@ -103,7 +104,7 @@ void Table::dropColumn(std::string headerTitle) {
   }
 }
 
-void Table::filterColumn(std::string columnName, std::set<std::string> values) {
+void Table::filterColumn(const std::string& columnName, const std::set<std::string>& values) {
   int index = getColumnIndex(columnName);
 
   for (auto it = data.begin(); it != data.end(); ) {
@@ -126,7 +127,7 @@ void Table::concatenate(Table& otherTable) {
 }
 
 // Used for transitive relationships Follows* and Parent*
-void Table::fillTransitiveTable(Table table) {
+void Table::fillTransitiveTable(const Table& table) {
   std::unordered_map<std::string, std::set<std::string>> adjList;
 
   // generate adjacency list
@@ -150,7 +151,7 @@ void Table::fillTransitiveTable(Table table) {
       if (transitives.count(curr) == 0) {
         transitives.insert(curr);
         if (adjList.count(curr) == 1) { // push neighbors
-          for (std::string value : adjList.at(curr)) {
+          for (const std::string& value : adjList.at(curr)) {
             stack.push(value);
           }
         }
@@ -176,7 +177,7 @@ bool Table::empty() const {
   return data.size() == 0;
 }
 
-void Table::fillIndirectRelation(Table parentTTable) {
+void Table::fillIndirectRelation(const Table& parentTTable) {
   if (header.size() != 2 || parentTTable.header.size() != 2) {
     throw "Tables must have 2 columns.";
   }
@@ -212,7 +213,7 @@ void Table::join(const Table& otherTable) {
   std::set<Row> newData;
   if (indexPairs.empty()) { // cross-product if no common headers
     header.insert(header.end(), otherHeader.begin(), otherHeader.end());
-    for (auto row : data) {
+    for (const auto& row : data) {
       for (auto otherRow : otherTable.data) {
         auto newRow = row;
         newRow.insert(newRow.end(), otherRow.begin(), otherRow.end());
@@ -283,7 +284,7 @@ void Table::innerJoin(const Table& otherTable, int firstTableIndex, int secondTa
   data = std::move(newData);
 }
 
-void Table::innerJoin(const Table& otherTable, std::string commonHeader) {
+void Table::innerJoin(const Table& otherTable, const std::string& commonHeader) {
   Row otherHeader = otherTable.getHeader();
   int thisIndex = getColumnIndex(commonHeader);
   int otherIndex = otherTable.getColumnIndex(commonHeader);
@@ -313,7 +314,7 @@ void Table::innerJoin(const Table& otherTable, std::string commonHeader) {
   data = std::move(newData);
 }
 
-void Table::deleteRow(Row row) {
+void Table::deleteRow(const Row& row) {
   auto index = find(data.begin(), data.end(), row);
   if (index != data.end()) {
     data.erase(row);
