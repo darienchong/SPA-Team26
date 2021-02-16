@@ -4,10 +4,9 @@
 
 class DesignExtractor {
 private:
-  Pkb pkb;
 public:
-  DesignExtractor(Pkb pkb);
+  DesignExtractor();
   ~DesignExtractor();
 
-  void extractDesignAbstractions();
+  void extractDesignAbstractions(Pkb pkb);
 };

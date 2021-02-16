@@ -314,13 +314,13 @@ namespace {
   }
 }
 
-DesignExtractor::DesignExtractor(Pkb pkb) : pkb(pkb) {
+DesignExtractor::DesignExtractor() {
 }
 
 DesignExtractor::~DesignExtractor() {
 }
 
-void DesignExtractor::extractDesignAbstractions() {
+void DesignExtractor::extractDesignAbstractions(Pkb pkb) {
   fillParentTTable(pkb);
   fillFollowsTTable(pkb);
   fillUsesTable(pkb);
