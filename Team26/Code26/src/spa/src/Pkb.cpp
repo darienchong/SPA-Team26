@@ -157,99 +157,99 @@ Table Pkb::getPatternAssignTable() const { return patternAssignTable; }
 
 Table Pkb::getFollower(int stmtNo) const {
   Table filterTable = followsTable;
-  filterTable.filterColumn("followed", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("followed");
+  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getFollowedBy(int stmtNo) const {
   Table filterTable = followsTable;
-  filterTable.filterColumn("follower", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("follower");
+  filterTable.filterColumn(1, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getFollowerT(int stmtNo) const {
   Table filterTable = followsTTable;
-  filterTable.filterColumn("followed", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("followed");
+  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getFollowedByT(int stmtNo) const {
   Table filterTable = followsTTable;
-  filterTable.filterColumn("follower", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("follower");
+  filterTable.filterColumn(1, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getParent(int stmtNo) const {
   Table filterTable = parentTable;
-  filterTable.filterColumn("child", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("child");
+  filterTable.filterColumn(1, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getChild(int stmtNo) const {
   Table filterTable = parentTable;
-  filterTable.filterColumn("parent", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("parent");
+  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getParentT(int stmtNo) const {
   Table filterTable = parentTTable;
-  filterTable.filterColumn("child", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("child");
+  filterTable.filterColumn(1, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getChildT(int stmtNo) const {
   Table filterTable = parentTTable;
-  filterTable.filterColumn("parent", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("parent");
+  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getUses(std::string varName) const {
   Table filterTable = usesTable;
-  filterTable.filterColumn("used", std::set<std::string> {std::move(varName)});
-  filterTable.dropColumn("used");
+  filterTable.filterColumn(1, std::set<std::string> {std::move(varName)});
+  filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getUsedBy(int stmtNo) const {
   Table filterTable = usesTable;
-  filterTable.filterColumn("user", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("user");
+  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getUsedBy(std::string procName) const {
   Table filterTable = usesTable;
-  filterTable.filterColumn("user", std::set<std::string> {std::move(procName)});
-  filterTable.dropColumn("user");
+  filterTable.filterColumn(0, std::set<std::string> {std::move(procName)});
+  filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getModifies(std::string varName) const {
   Table filterTable = modifiesTable;
-  filterTable.filterColumn("modified", std::set<std::string> {std::move(varName)});
-  filterTable.dropColumn("modified");
+  filterTable.filterColumn(1, std::set<std::string> {std::move(varName)});
+  filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getModifiedBy(int stmtNo) const {
   Table filterTable = modifiesTable;
-  filterTable.filterColumn("modifier", std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn("modifier");
+  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getModifiedBy(std::string procName) const {
   Table filterTable = modifiesTable;
-  filterTable.filterColumn("modifier", std::set<std::string> {std::move(procName)});
-  filterTable.dropColumn("modifier");
+  filterTable.filterColumn(0, std::set<std::string> {std::move(procName)});
+  filterTable.dropColumn(0);
   return filterTable;
 }
 
@@ -257,14 +257,8 @@ void Pkb::fillIndirectRelation(Table& toUpdateTable) {
   if (toUpdateTable.getHeader().size() != 2 || parentTTable.getHeader().size() != 2) {
     throw "Tables must have 2 columns.";
   }
-  if (toUpdateTable.getHeader()[0] == parentTTable.getHeader()[0] || toUpdateTable.getHeader()[1] == parentTTable.getHeader()[0]) {
-    throw "Column name should not be the same as Parent column name.";
-  }
-
-  std::string joinedColumnName = toUpdateTable.getHeader()[0];
   Table newParentTTable = parentTTable;
-  newParentTTable.setHeader({"Parent", joinedColumnName});
-  newParentTTable.naturalJoin(toUpdateTable);
-  newParentTTable.dropColumn(joinedColumnName);
+  newParentTTable.innerJoin(toUpdateTable, 1, 0); //resulting table header = {parent, child, varName}
+  newParentTTable.dropColumn(1);
   toUpdateTable.concatenate(newParentTTable);
 }

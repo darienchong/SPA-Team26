@@ -88,9 +88,7 @@ int Table::getColumnIndex(const std::string& headerTitle) const {
   throw "Column with name:" + headerTitle + " not found";
 }
 
-void Table::dropColumn(const std::string& headerTitle) {
-  int index = getColumnIndex(headerTitle);
-
+void Table::dropColumn(int index) {
   // Clear data if there is only one column, otherwise erase column
   if (header.size() == 1) {
     data.clear();
@@ -105,8 +103,12 @@ void Table::dropColumn(const std::string& headerTitle) {
   }
 }
 
-void Table::filterColumn(const std::string& columnName, const std::set<std::string>& values) {
-  int index = getColumnIndex(columnName);
+void Table::dropColumn(const std::string& headerTitle) {
+  int index = getColumnIndex(headerTitle);
+  dropColumn(index);
+}
+
+void Table::filterColumn(int index, const std::set<std::string>& values) {
   for (auto it = data.begin(); it != data.end(); ) {
     if (!values.count(it->at(index))) {
       it = data.erase(it);
@@ -114,6 +116,11 @@ void Table::filterColumn(const std::string& columnName, const std::set<std::stri
       it++;
     }
   }
+}
+
+void Table::filterColumn(const std::string& columnName, const std::set<std::string>& values) {
+  int index = getColumnIndex(columnName);
+  filterColumn(index, values);
 }
 
 void Table::concatenate(Table& otherTable) {
@@ -131,7 +138,8 @@ void Table::fillTransitiveTable(const Table& table) {
 
   // generate adjacency list
   for (Row row : table.getData()) {
-    if (adjList.count(row[0]) == 0) {
+    bool isInAdjList = adjList.count(row[0]);
+    if (!isInAdjList) {
       adjList.insert({ row[0], std::set<std::string>({ row[1] }) });
     } else {
       adjList.at(row[0]).insert(row[1]);
@@ -147,9 +155,11 @@ void Table::fillTransitiveTable(const Table& table) {
     while (!stack.empty()) {
       curr = stack.top();
       stack.pop();
-      if (transitives.count(curr) == 0) {
+      bool isInTransitives = transitives.count(curr);
+      if (!isInTransitives) {
         transitives.insert(curr);
-        if (adjList.count(curr) == 1) { // push neighbors
+        bool isInAdjList = adjList.count(curr);
+        if (isInAdjList) { // push neighbors
           for (const std::string& value : adjList.at(curr)) {
             stack.push(value);
           }
@@ -241,7 +251,8 @@ void Table::innerJoin(const Table &otherTable, std::vector<std::pair<int, int>> 
     for (auto otherRow : otherTable.data) {
       bool keepRow = true;
       for (auto pair : indexPairs) {
-        if (row[pair.first] != otherRow[pair.second]) {
+        bool isMatchingPair = row[pair.first] == otherRow[pair.second];
+        if (!isMatchingPair) {
           keepRow = false;
           break;
         }

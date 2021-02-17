@@ -32,7 +32,9 @@ public:
   std::vector<std::pair<int, int>> getColumnIndexPairs(const Table &otherTable) const;
 
   // util functions
+  void dropColumn(int index);
   void dropColumn(const std::string& headerTitle);
+  void filterColumn(int index, const std::set<std::string>& values);
   void filterColumn(const std::string& columnName, const std::set<std::string>& values);
   void concatenate(Table& otherTable);
   void naturalJoin(const Table& otherTable);
