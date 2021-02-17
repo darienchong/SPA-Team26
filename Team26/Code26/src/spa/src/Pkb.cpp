@@ -124,16 +124,10 @@ void Pkb::addPatternAssign(int stmtNo, std::string lhs, std::string rhs) {
 }
 
 void Pkb::addIndirectUses() {
-  if (parentTTable.empty()) {
-    Pkb::addParentT();
-  }
   fillIndirectRelation(usesTable);
 }
 
 void Pkb::addIndirectModifies() {
-  if (parentTTable.empty()) {
-    Pkb::addParentT();
-  }
   fillIndirectRelation(modifiesTable);
 }
 
@@ -254,11 +248,17 @@ Table Pkb::getModifiedBy(std::string procName) const {
 }
 
 void Pkb::fillIndirectRelation(Table& toUpdateTable) {
+  if (parentTTable.empty()) {
+    Pkb::addParentT();
+  }
+
   if (toUpdateTable.getHeader().size() != 2 || parentTTable.getHeader().size() != 2) {
     throw "Tables must have 2 columns.";
   }
   Table newParentTTable = parentTTable;
-  newParentTTable.innerJoin(toUpdateTable, 1, 0); //resulting table header = {parent, child, varName}
+
+  // do inner join which results with table {parent, child, varName}
+  newParentTTable.innerJoin(toUpdateTable, 1, 0);
   newParentTTable.dropColumn(1);
   toUpdateTable.concatenate(newParentTTable);
 }

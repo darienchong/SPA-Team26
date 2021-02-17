@@ -48,9 +48,6 @@ public:
   bool contains(const Row& row) const;
   bool empty() const;
 
-  // only called by transitive tables
   void fillTransitiveTable(const Table& table);
-
-
 
 };
