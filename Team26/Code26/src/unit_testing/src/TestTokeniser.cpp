@@ -191,5 +191,3 @@ TEST_CASE("[TestTokeniser] Whitespace not consumed") {
     ++expectedValuesItr;
   }
 }
-
-
