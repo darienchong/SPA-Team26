@@ -52,12 +52,9 @@ namespace {
 
   // TODO - To change after ExprParser changes
   std::string infixToPostfixExpression(std::list<Token>& infixExpressionTokens) {
-    ExprProcessor::ExprParser exprParser;
-    for (const Token& token : infixExpressionTokens) {
-      exprParser.addToken(token);
-    }
-    exprParser.parseExpr();
-    std::list<Token> postfixTokens = exprParser.getPostFix();
+    ExprProcessor::AssignExprParser exprParser(infixExpressionTokens);
+    exprParser.parse();
+    std::list<Token> postfixTokens = exprParser.getPostfixExprTokens();
     std::string postfixString;
     for (const Token& token : postfixTokens) {
       postfixString.append(token.value);
