@@ -3,24 +3,24 @@
 #include "Pkb.h"
 
 TEST_CASE("[TestPkb] varTable Insertion") {
-	Pkb pkb;
-	pkb.addVar("x");
-	auto dataCopy = pkb.getVarTable().getData();
-	REQUIRE(dataCopy.find({ "x" }) != dataCopy.end());
+  Pkb pkb;
+  pkb.addVar("x");
+  auto dataCopy = pkb.getVarTable().getData();
+  REQUIRE(dataCopy.find({ "x" }) != dataCopy.end());
 }
 
 TEST_CASE("[TestPkb] stmtTable Insertion") {
-	Pkb pkb;
-	pkb.addStmt(2);
-	auto dataCopy = pkb.getStmtTable().getData();
-	REQUIRE(dataCopy.find({ "2" }) != dataCopy.end());
+  Pkb pkb;
+  pkb.addStmt(2);
+  auto dataCopy = pkb.getStmtTable().getData();
+  REQUIRE(dataCopy.find({ "2" }) != dataCopy.end());
 }
 
 TEST_CASE("[TestPkb] procTable Insertion") {
-	Pkb pkb;
-	pkb.addProc("main");
-	auto dataCopy = pkb.getProcTable().getData();
-	REQUIRE(dataCopy.find({ "main" }) != dataCopy.end());
+  Pkb pkb;
+  pkb.addProc("main");
+  auto dataCopy = pkb.getProcTable().getData();
+  REQUIRE(dataCopy.find({ "main" }) != dataCopy.end());
 }
 
 TEST_CASE("[TestPkb] constTable Insertion") {
@@ -32,73 +32,73 @@ TEST_CASE("[TestPkb] constTable Insertion") {
 
 
 TEST_CASE("[TestPkb] ifTable Insertion") {
-	Pkb pkb;
-	pkb.addIf(12);
-	auto dataCopy = pkb.getIfTable().getData();
-	REQUIRE(dataCopy.find({ "12" }) != dataCopy.end());
-	auto stmtDataCopy = pkb.getStmtTable().getData();
-	REQUIRE(stmtDataCopy.count({"12"}));
+  Pkb pkb;
+  pkb.addIf(12);
+  auto dataCopy = pkb.getIfTable().getData();
+  REQUIRE(dataCopy.find({ "12" }) != dataCopy.end());
+  auto stmtDataCopy = pkb.getStmtTable().getData();
+  REQUIRE(stmtDataCopy.count({"12"}));
 }
 
 TEST_CASE("[TestPkb] whileTable Insertion") {
-	Pkb pkb;
-	pkb.addWhile(15);
-	auto dataCopy = pkb.getWhileTable().getData();
-	REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
+  Pkb pkb;
+  pkb.addWhile(15);
+  auto dataCopy = pkb.getWhileTable().getData();
+  REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
   REQUIRE(stmtDataCopy.count({"15"}));
 }
 
 TEST_CASE("[TestPkb] readTable Insertion") {
-	Pkb pkb;
-	pkb.addRead(15);
-	auto dataCopy = pkb.getReadTable().getData();
-	REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
+  Pkb pkb;
+  pkb.addRead(15);
+  auto dataCopy = pkb.getReadTable().getData();
+  REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
   REQUIRE(stmtDataCopy.count({"15"}));
 }
 
 TEST_CASE("[TestPkb] printTable Insertion") {
-	Pkb pkb;
-	pkb.addPrint(526);
-	auto dataCopy = pkb.getPrintTable().getData();
-	REQUIRE(dataCopy.find({ "526" }) != dataCopy.end());
+  Pkb pkb;
+  pkb.addPrint(526);
+  auto dataCopy = pkb.getPrintTable().getData();
+  REQUIRE(dataCopy.find({ "526" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
   REQUIRE(stmtDataCopy.count({"526"}));
 }
 
 TEST_CASE("[TestPkb] assignTable Insertion") {
-	Pkb pkb;
-	pkb.addAssign(32);
-	auto dataCopy = pkb.getAssignTable().getData();
-	REQUIRE(dataCopy.find({ "32" }) != dataCopy.end());
+  Pkb pkb;
+  pkb.addAssign(32);
+  auto dataCopy = pkb.getAssignTable().getData();
+  REQUIRE(dataCopy.find({ "32" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
   REQUIRE(stmtDataCopy.count({"32"}));
 }
 
 TEST_CASE("[TestPkb] addFollows") {
-	Pkb pkb;
+  Pkb pkb;
 
-	SECTION("Check valid insertion") {
-		pkb.addFollows(5, 6);
-		auto dataCopy = pkb.getFollowsTable().getData();
-		REQUIRE(dataCopy.count({ "5", "6" }) == 1);
-	}
+  SECTION("Check valid insertion") {
+    pkb.addFollows(5, 6);
+    auto dataCopy = pkb.getFollowsTable().getData();
+    REQUIRE(dataCopy.count({ "5", "6" }) == 1);
+  }
 
-	SECTION("Check invalid insertion") {
-		REQUIRE_THROWS(pkb.addFollows(5, 4));
-	}
+  SECTION("Check invalid insertion") {
+    REQUIRE_THROWS(pkb.addFollows(5, 4));
+  }
 }
 
 TEST_CASE("[TestPkb] addFollowsT()") {
-	Pkb pkb;
-	pkb.addFollows(5, 6);
-	pkb.addFollows(6, 7);
-	pkb.addFollowsT();
-	auto dataCopy = pkb.getFollowsTTable().getData();
-	REQUIRE(dataCopy.count({ "5", "6" }) == 1);
-	REQUIRE(dataCopy.count({ "6", "7" }) == 1);
-	REQUIRE(dataCopy.count({ "5", "7" }) == 1);
+  Pkb pkb;
+  pkb.addFollows(5, 6);
+  pkb.addFollows(6, 7);
+  pkb.addFollowsT();
+  auto dataCopy = pkb.getFollowsTTable().getData();
+  REQUIRE(dataCopy.count({ "5", "6" }) == 1);
+  REQUIRE(dataCopy.count({ "6", "7" }) == 1);
+  REQUIRE(dataCopy.count({ "5", "7" }) == 1);
 }
 
 TEST_CASE("[TestPkb] addFollowsT(int, int)") {
@@ -116,28 +116,28 @@ TEST_CASE("[TestPkb] addFollowsT(int, int)") {
 }
 
 TEST_CASE("[TestPkb] addParent") {
-	Pkb pkb;
+  Pkb pkb;
 
-	SECTION("Check valid insertion") {
-		pkb.addParent(5, 6);
-		auto dataCopy = pkb.getParentTable().getData();
-		REQUIRE(dataCopy.count({ "5", "6" }) == 1);
-	}
+  SECTION("Check valid insertion") {
+    pkb.addParent(5, 6);
+    auto dataCopy = pkb.getParentTable().getData();
+    REQUIRE(dataCopy.count({ "5", "6" }) == 1);
+  }
 
-	SECTION("Check invalid insertion") {
-		REQUIRE_THROWS(pkb.addParent(5, 4));
-	}
+  SECTION("Check invalid insertion") {
+    REQUIRE_THROWS(pkb.addParent(5, 4));
+  }
 }
 
 TEST_CASE("[TestPkb] addParentT()") {
-	Pkb pkb;
-	pkb.addParent(5, 6);
-	pkb.addParent(6, 7);
-	pkb.addParentT();
-	auto dataCopy = pkb.getParentTTable().getData();
-	REQUIRE(dataCopy.count({ "5", "6" }) == 1);
-	REQUIRE(dataCopy.count({ "6", "7" }) == 1);
-	REQUIRE(dataCopy.count({ "5", "7" }) == 1);
+  Pkb pkb;
+  pkb.addParent(5, 6);
+  pkb.addParent(6, 7);
+  pkb.addParentT();
+  auto dataCopy = pkb.getParentTTable().getData();
+  REQUIRE(dataCopy.count({ "5", "6" }) == 1);
+  REQUIRE(dataCopy.count({ "6", "7" }) == 1);
+  REQUIRE(dataCopy.count({ "5", "7" }) == 1);
 }
 
 TEST_CASE("[TestPkb] addParentT(int, int)") {
@@ -155,39 +155,39 @@ TEST_CASE("[TestPkb] addParentT(int, int)") {
 }
 
 TEST_CASE("[TestPkb] addUses") {
-	Pkb pkb;
+  Pkb pkb;
 
-	SECTION("Check valid insertion") {
-		pkb.addUses(5, "x");
-		pkb.addUses("main", "y");
-		auto dataCopy = pkb.getUsesTable().getData();
-		REQUIRE(dataCopy.count({ "5", "x" }) == 1);
-		REQUIRE(dataCopy.count({ "main", "y" }) == 1);
-	}
+  SECTION("Check valid insertion") {
+    pkb.addUses(5, "x");
+    pkb.addUses("main", "y");
+    auto dataCopy = pkb.getUsesTable().getData();
+    REQUIRE(dataCopy.count({ "5", "x" }) == 1);
+    REQUIRE(dataCopy.count({ "main", "y" }) == 1);
+  }
 }
 
 TEST_CASE("[TestPkb] addModifies") {
-	Pkb pkb;
+  Pkb pkb;
 
-	SECTION("Check valid insertion") {
-		pkb.addModifies(5, "x");
-		pkb.addModifies("main", "y");
-		auto dataCopy = pkb.getModifiesTable().getData();
-		REQUIRE(dataCopy.count({ "5", "x" }) == 1);
-		REQUIRE(dataCopy.count({ "main", "y" }) == 1);
-	}
+  SECTION("Check valid insertion") {
+    pkb.addModifies(5, "x");
+    pkb.addModifies("main", "y");
+    auto dataCopy = pkb.getModifiesTable().getData();
+    REQUIRE(dataCopy.count({ "5", "x" }) == 1);
+    REQUIRE(dataCopy.count({ "main", "y" }) == 1);
+  }
 }
 
 TEST_CASE("[TestPkb] addPatternAssign") {
-	Pkb pkb;
+  Pkb pkb;
 
-	SECTION("Check valid insertion") {
-		pkb.addPatternAssign(5, "x", "x y *");
-		pkb.addPatternAssign(7, "_", "b c * a +");
-		auto dataCopy = pkb.getPatternAssignTable().getData();
-		REQUIRE(dataCopy.count({ "5", "x", "x y *" }) == 1);
-		REQUIRE(dataCopy.count({ "7", "_", "b c * a +" }) == 1);
-	}
+  SECTION("Check valid insertion") {
+    pkb.addPatternAssign(5, "x", "x y *");
+    pkb.addPatternAssign(7, "_", "b c * a +");
+    auto dataCopy = pkb.getPatternAssignTable().getData();
+    REQUIRE(dataCopy.count({ "5", "x", "x y *" }) == 1);
+    REQUIRE(dataCopy.count({ "7", "_", "b c * a +" }) == 1);
+  }
 }
 
 TEST_CASE("[TestPkb] addIndirectUses") {
@@ -387,5 +387,84 @@ TEST_CASE("[TestPkb] getModifiedBy") {
   SECTION("modified by procedure") {
     Table table = pkb.getModifiedBy("proc1");
     REQUIRE(table.getData().count({"x"}));
+  }
+}
+
+TEST_CASE("[TestPkb] Add Indirect Uses") {
+  SECTION("Valid Input with one indirect relation") {
+    Pkb pkb;
+    pkb.addUses(1, "x");
+    pkb.addUses(2, "y");
+    pkb.addParentT(1, 2);
+    pkb.addIndirectUses();
+    REQUIRE(pkb.getUsesTable().size() == 3);
+    REQUIRE(pkb.getUsesTable().contains({ "1", "y" }));
+  }
+
+  SECTION("Valid Input with multiple indirect relations") {
+    Pkb pkb;
+    pkb.addUses(3, "y");
+    pkb.addUses(3, "z");
+    pkb.addUses(5, "a");
+    pkb.addParentT(1, 3);
+    pkb.addParentT(3, 5);
+    pkb.addParentT(1, 5);
+    pkb.addIndirectUses();
+    REQUIRE(pkb.getUsesTable().size() == 7);
+    REQUIRE(pkb.getUsesTable().contains({ "1", "y" }));
+    REQUIRE(pkb.getUsesTable().contains({ "1", "z" }));
+    REQUIRE(pkb.getUsesTable().contains({ "1", "a" }));
+    REQUIRE(pkb.getUsesTable().contains({ "3", "a" }));
+  }
+
+  SECTION("Valid input with no parentTTable") {
+    Pkb pkb;
+    pkb.addUses(3, "y");
+    pkb.addUses(3, "z");
+    pkb.addParent(1, 3);
+    pkb.addIndirectUses();
+    REQUIRE(pkb.getUsesTable().size() == 4);
+  }
+}
+
+TEST_CASE("[TestPkb] Add Indirect Modifies") {
+  SECTION("Valid Input with one indirect relation") {
+    Pkb pkb;
+    pkb.addModifies(1, "x");
+    pkb.addModifies(2, "y");
+    pkb.addParentT(1, 2);
+    pkb.addIndirectModifies();
+    REQUIRE(pkb.getModifiesTable().size() == 3);
+    REQUIRE(pkb.getModifiesTable().contains({ "1", "y" }));
+  }
+
+  SECTION("Valid Input with multiple indirect relations") {
+    Pkb pkb;
+    pkb.addModifies(3, "y");
+    pkb.addModifies(3, "z");
+    pkb.addModifies(5, "a");
+    pkb.addParentT(1, 3);
+    pkb.addParentT(3, 5);
+    pkb.addParentT(1, 5);
+    pkb.addIndirectModifies();
+    REQUIRE(pkb.getModifiesTable().size() == 7);
+    REQUIRE(pkb.getModifiesTable().contains({ "1", "y" }));
+    REQUIRE(pkb.getModifiesTable().contains({ "1", "z" }));
+    REQUIRE(pkb.getModifiesTable().contains({ "1", "a" }));
+    REQUIRE(pkb.getModifiesTable().contains({ "3", "a" }));
+  }
+
+  SECTION("Valid input with no parentTTable") {
+    Pkb pkb;
+    pkb.addModifies(3, "y");
+    pkb.addModifies(3, "z");
+    pkb.addParent(1, 3);
+    pkb.addIndirectModifies();
+    REQUIRE(pkb.getModifiesTable().size() == 4);
+    REQUIRE(pkb.getParentTTable().size() == 1);
+    REQUIRE(pkb.getModifiesTable().contains({ "3", "y" }));
+    REQUIRE(pkb.getModifiesTable().contains({ "3", "z" }));
+    REQUIRE(pkb.getModifiesTable().contains({ "1", "y" }));
+    REQUIRE(pkb.getModifiesTable().contains({ "1", "z" }));
   }
 }

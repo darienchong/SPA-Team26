@@ -75,6 +75,8 @@ public:
   Table getModifiedBy(int stmtNo) const;
   Table getModifiedBy(std::string procName) const;
 
+  void fillIndirectRelation(Table& toUpdateTable);
+
 private:
   Table varTable{ std::vector<std::string> {"varName"} };
   Table stmtTable{ std::vector<std::string> {"stmtNo"} };

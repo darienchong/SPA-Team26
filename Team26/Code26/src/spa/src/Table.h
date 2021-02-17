@@ -48,7 +48,7 @@ public:
 
   // only called by transitive tables
   void fillTransitiveTable(const Table& table);
-  void fillIndirectRelation(const Table& parentTable);
+
 
 
 };

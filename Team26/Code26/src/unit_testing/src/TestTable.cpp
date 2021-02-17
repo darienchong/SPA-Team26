@@ -283,49 +283,6 @@ TEST_CASE("[TestTable] inner naturalJoin with column name") {
   }
 }
 
-TEST_CASE("[TestTable] Fill Indirect Relation") {
-  SECTION("Valid Input with one indirect relation") {
-    Table usesTable({ "stmtRef", "entRef" });
-    usesTable.insertRow({ "1", "x" });
-    usesTable.insertRow({ "3", "y" });
-    Table parentTTable({ "parent", "child" });
-    parentTTable.insertRow({ "1", "3" });
-    usesTable.fillIndirectRelation(parentTTable);
-    REQUIRE(usesTable.size() == 3);
-    REQUIRE(usesTable.getHeader() == std::vector<std::string>{"stmtRef", "entRef"});
-    REQUIRE(usesTable.contains({ "1", "y" }));
-  }
-
-  SECTION("Valid Input with multiple indirect relations") {
-    Table usesTable({ "stmtRef", "entRef" });
-    usesTable.insertRow({ "3", "y" });
-    usesTable.insertRow({ "3", "z" });
-    usesTable.insertRow({ "5", "a" });
-    Table parentTTable({ "parent", "child" });
-    parentTTable.insertRow({ "1", "3" });
-    parentTTable.insertRow({ "3", "5" });
-    parentTTable.insertRow({ "1", "5" });
-    usesTable.fillIndirectRelation(parentTTable);
-    REQUIRE(usesTable.size() == 7);
-    REQUIRE(usesTable.getHeader() == std::vector<std::string>{"stmtRef", "entRef"});
-    REQUIRE(usesTable.contains({ "1", "y" }));
-    REQUIRE(usesTable.contains({ "1", "z" }));
-    REQUIRE(usesTable.contains({ "1", "a" }));
-    REQUIRE(usesTable.contains({ "3", "a" }));
-  }
-
-  SECTION("Valid input with no indirect relations") {
-    Table usesTable({ "stmtRef", "entRef" });
-    usesTable.insertRow({ "3", "y" });
-    usesTable.insertRow({ "3", "z" });
-    Table parentTTable({ "parent", "child" });
-    parentTTable.insertRow({ "1", "4" });
-    usesTable.fillIndirectRelation(parentTTable);
-    REQUIRE(usesTable.size() == 2);
-    REQUIRE(usesTable.getHeader() == std::vector<std::string>{"stmtRef", "entRef"});
-  }
-}
-
 TEST_CASE("[TestTable] delete row") {
   SECTION("delete rows that exist") {
     Table table1({ "a", "b" });

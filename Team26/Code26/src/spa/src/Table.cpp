@@ -159,7 +159,9 @@ void Table::fillTransitiveTable(const Table& table) {
     // insert transitives
     std::set<std::string>::iterator it;
     for (it = transitives.begin(); it != transitives.end(); it++) {
-      data.insert(Row({ entry.first, *it }));
+      if (entry.first != *it) {
+        data.insert(Row({ entry.first, *it }));
+      }
     }
   }
 }
@@ -176,21 +178,6 @@ bool Table::empty() const {
   return data.size() == 0;
 }
 
-void Table::fillIndirectRelation(const Table& parentTTable) {
-  if (header.size() != 2 || parentTTable.header.size() != 2) {
-    throw "Tables must have 2 columns.";
-  }
-  if (header[0] == parentTTable.getHeader()[0] || header[1] == parentTTable.getHeader()[0]) {
-    throw "Column name should not be the same as Parent column name.";
-  }
-
-  std::string joinedColumnName = header[0];
-  Table newParentTTable = parentTTable;
-  newParentTTable.setHeader({"Parent", joinedColumnName});
-  newParentTTable.naturalJoin(*this);
-  newParentTTable.dropColumn(joinedColumnName);
-  this->concatenate(newParentTTable);
-}
 
 // If current table and otherTable have common column names, do natural naturalJoin
 // else, cross product

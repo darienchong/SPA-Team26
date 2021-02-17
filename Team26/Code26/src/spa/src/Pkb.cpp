@@ -127,14 +127,14 @@ void Pkb::addIndirectUses() {
   if (parentTTable.empty()) {
     Pkb::addParentT();
   }
-  usesTable.fillIndirectRelation(parentTTable);
+  fillIndirectRelation(usesTable);
 }
 
 void Pkb::addIndirectModifies() {
   if (parentTTable.empty()) {
     Pkb::addParentT();
   }
-  modifiesTable.fillIndirectRelation(parentTTable);
+  fillIndirectRelation(modifiesTable);
 }
 
 // Getters
@@ -251,4 +251,20 @@ Table Pkb::getModifiedBy(std::string procName) const {
   filterTable.filterColumn("modifier", std::set<std::string> {std::move(procName)});
   filterTable.dropColumn("modifier");
   return filterTable;
+}
+
+void Pkb::fillIndirectRelation(Table& toUpdateTable) {
+  if (toUpdateTable.getHeader().size() != 2 || parentTTable.getHeader().size() != 2) {
+    throw "Tables must have 2 columns.";
+  }
+  if (toUpdateTable.getHeader()[0] == parentTTable.getHeader()[0] || toUpdateTable.getHeader()[1] == parentTTable.getHeader()[0]) {
+    throw "Column name should not be the same as Parent column name.";
+  }
+
+  std::string joinedColumnName = toUpdateTable.getHeader()[0];
+  Table newParentTTable = parentTTable;
+  newParentTTable.setHeader({"Parent", joinedColumnName});
+  newParentTTable.naturalJoin(toUpdateTable);
+  newParentTTable.dropColumn(joinedColumnName);
+  toUpdateTable.concatenate(newParentTTable);
 }
