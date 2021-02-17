@@ -215,14 +215,4 @@ public:
    * @return Returns true if the Table data is empty. Otherwise, returns false.
    */
   bool empty() const;
-
-  /**
-   * Updates the transitive table based on the non-transitive table.
-   * 
-   * The caller Table should match its type. For example, if the caller is FollowsTTable,
-   * the argument should be FollowsTable.
-   *
-   * @param table The non-transitive table.
-   */
-  void fillTransitiveTable(const Table& table);
 };

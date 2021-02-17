@@ -94,7 +94,9 @@ TEST_CASE("[TestPkb] addFollowsT()") {
   Pkb pkb;
   pkb.addFollows(5, 6);
   pkb.addFollows(6, 7);
-  pkb.addFollowsT();
+  
+  // TODO: Add transitive relations
+
   auto dataCopy = pkb.getFollowsTTable().getData();
   REQUIRE(dataCopy.count({ "5", "6" }) == 1);
   REQUIRE(dataCopy.count({ "6", "7" }) == 1);
@@ -133,7 +135,7 @@ TEST_CASE("[TestPkb] addParentT()") {
   Pkb pkb;
   pkb.addParent(5, 6);
   pkb.addParent(6, 7);
-  pkb.addParentT();
+  // TODO: pkb.addParentT();
   auto dataCopy = pkb.getParentTTable().getData();
   REQUIRE(dataCopy.count({ "5", "6" }) == 1);
   REQUIRE(dataCopy.count({ "6", "7" }) == 1);
@@ -196,15 +198,15 @@ TEST_CASE("[TestPkb] addIndirectUses") {
   SECTION("with parentTTable already filled") {
     pkb.addUses(2, "x");
     pkb.addParent(1, 2);
-    pkb.addParentT();
-    pkb.addIndirectUses();
+    // TODO: pkb.addParentT();
+    // TODO: pkb.addIndirectUses();
     REQUIRE(pkb.getUsesTable().getData().count({"1", "x"}) == 1);
   }
 
   SECTION("without parentTTable already filled") {
     pkb.addUses(2, "x");
     pkb.addParent(1, 2);
-    pkb.addIndirectUses();
+    // TODO: pkb.addIndirectUses();
     REQUIRE(pkb.getUsesTable().getData().count({"1", "x"}) == 1);
   }
 
@@ -212,8 +214,8 @@ TEST_CASE("[TestPkb] addIndirectUses") {
     pkb.addUses(3, "x");
     pkb.addParent(1, 2);
     pkb.addParent(2, 3);
-    pkb.addParentT();
-    pkb.addIndirectUses();
+    // TODO: pkb.addParentT();
+    // TODO: pkb.addIndirectUses();
     REQUIRE(pkb.getUsesTable().getData().count({"1", "x"}) == 1);
   }
 }
@@ -224,15 +226,15 @@ TEST_CASE("[TestPkb] addIndirectModifies") {
   SECTION("with parentTTable already filled") {
     pkb.addModifies(2, "x");
     pkb.addParent(1, 2);
-    pkb.addParentT();
-    pkb.addIndirectModifies();
+    // TODO: pkb.addParentT();
+    // TODO: pkb.addIndirectModifies();
     REQUIRE(pkb.getModifiesTable().getData().count({"1", "x"}) == 1);
   }
 
   SECTION("without parentTTable already filled") {
     pkb.addModifies(2, "x");
     pkb.addParent(1, 2);
-    pkb.addIndirectModifies();
+    // TODO: pkb.addIndirectModifies();
     REQUIRE(pkb.getModifiesTable().getData().count({"1", "x"}) == 1);
   }
 
@@ -240,8 +242,8 @@ TEST_CASE("[TestPkb] addIndirectModifies") {
     pkb.addModifies(3, "x");
     pkb.addParent(1, 2);
     pkb.addParent(2, 3);
-    pkb.addParentT();
-    pkb.addIndirectModifies();
+    // TODO: pkb.addParentT();
+    // TODO: pkb.addIndirectModifies();
     REQUIRE(pkb.getModifiesTable().getData().count({"1", "x"}) == 1);
   }
 }
@@ -269,7 +271,7 @@ TEST_CASE("[TestPkb] getFollowerT") {
   pkb.addFollows(1, 2);
   pkb.addFollows(3, 4);
   pkb.addFollows(2, 5);
-  pkb.addFollowsT();
+  // TODO: pkb.addFollowsT();
   Table table = pkb.getFollowerT(1);
   REQUIRE(table.getData().count({"2"}));
   REQUIRE(table.getData().count({"5"}));
@@ -280,7 +282,7 @@ TEST_CASE("[TestPkb] getFollowedByT") {
   pkb.addFollows(1, 2);
   pkb.addFollows(3, 4);
   pkb.addFollows(2, 5);
-  pkb.addFollowsT();
+  // TODO: pkb.addFollowsT();
   Table table = pkb.getFollowedByT(5);
   REQUIRE(table.getData().count({"1"}));
   REQUIRE(table.getData().count({"2"}));
@@ -309,7 +311,7 @@ TEST_CASE("[TestPkb] getParentT") {
   pkb.addParent(1, 2);
   pkb.addParent(3, 4);
   pkb.addParent(2, 5);
-  pkb.addParentT();
+  // TODO: pkb.addParentT();
   Table table = pkb.getParentT(5);
   REQUIRE(table.getData().count({"1"}));
   REQUIRE(table.getData().count({"2"}));
@@ -320,7 +322,7 @@ TEST_CASE("[TestPkb] getChildT") {
   pkb.addParent(1, 2);
   pkb.addParent(3, 4);
   pkb.addParent(2, 5);
-  pkb.addParentT();
+  // TODO: pkb.addParentT();
   Table table = pkb.getChildT(1);
   REQUIRE(table.getData().count({"2"}));
   REQUIRE(table.getData().count({"5"}));
@@ -396,7 +398,7 @@ TEST_CASE("[TestPkb] Add Indirect Uses") {
     pkb.addUses(1, "x");
     pkb.addUses(2, "y");
     pkb.addParentT(1, 2);
-    pkb.addIndirectUses();
+    // TODO: pkb.addIndirectUses();
     REQUIRE(pkb.getUsesTable().size() == 3);
     REQUIRE(pkb.getUsesTable().contains({ "1", "y" }));
   }
@@ -409,7 +411,7 @@ TEST_CASE("[TestPkb] Add Indirect Uses") {
     pkb.addParentT(1, 3);
     pkb.addParentT(3, 5);
     pkb.addParentT(1, 5);
-    pkb.addIndirectUses();
+    // TODO: pkb.addIndirectUses();
     REQUIRE(pkb.getUsesTable().size() == 7);
     REQUIRE(pkb.getUsesTable().contains({ "1", "y" }));
     REQUIRE(pkb.getUsesTable().contains({ "1", "z" }));
@@ -422,7 +424,7 @@ TEST_CASE("[TestPkb] Add Indirect Uses") {
     pkb.addUses(3, "y");
     pkb.addUses(3, "z");
     pkb.addParent(1, 3);
-    pkb.addIndirectUses();
+    // TODO: pkb.addIndirectUses();
     REQUIRE(pkb.getUsesTable().size() == 4);
   }
 }
@@ -433,7 +435,7 @@ TEST_CASE("[TestPkb] Add Indirect Modifies") {
     pkb.addModifies(1, "x");
     pkb.addModifies(2, "y");
     pkb.addParentT(1, 2);
-    pkb.addIndirectModifies();
+    // TODO: pkb.addIndirectModifies();
     REQUIRE(pkb.getModifiesTable().size() == 3);
     REQUIRE(pkb.getModifiesTable().contains({ "1", "y" }));
   }
@@ -446,7 +448,7 @@ TEST_CASE("[TestPkb] Add Indirect Modifies") {
     pkb.addParentT(1, 3);
     pkb.addParentT(3, 5);
     pkb.addParentT(1, 5);
-    pkb.addIndirectModifies();
+    // TODO: pkb.addIndirectModifies();
     REQUIRE(pkb.getModifiesTable().size() == 7);
     REQUIRE(pkb.getModifiesTable().contains({ "1", "y" }));
     REQUIRE(pkb.getModifiesTable().contains({ "1", "z" }));
@@ -459,7 +461,7 @@ TEST_CASE("[TestPkb] Add Indirect Modifies") {
     pkb.addModifies(3, "y");
     pkb.addModifies(3, "z");
     pkb.addParent(1, 3);
-    pkb.addIndirectModifies();
+    // TODO: pkb.addIndirectModifies();
     REQUIRE(pkb.getModifiesTable().size() == 4);
     REQUIRE(pkb.getParentTTable().size() == 1);
     REQUIRE(pkb.getModifiesTable().contains({ "3", "y" }));

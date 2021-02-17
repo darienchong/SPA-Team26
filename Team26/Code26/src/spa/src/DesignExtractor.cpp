@@ -16,10 +16,6 @@ namespace {
   static const std::string FILL_INDIRECT_RELATION_HEADER_SIZE_NEQ_2_ERROR_MSG =
     "[DesignExtractor::fillIndirectRelation]: Both tables must have two columns.";
 
-  static const std::string FILL_INDIRECT_RELATION_COLUMN_NAME_SAME_ERROR_MSG = 
-    "[DesignExtractor::fillIndirectRelation]: First table column name should not "
-    "be the same as second table column name.";
-
   /**
    * Helper method to insert a key-value pair into the adjacency list.
    * Handles edge cases e.g. first insertion (creating the set).
@@ -156,9 +152,10 @@ namespace {
    * 
    * @param table The table to use when generating
    *     the transitive closure.
+   * @param The total number of statements.
    * @returns A Table with entries as detailed above.
    */
-  Table generateTransitiveClosure(Table table) {
+  Table generateTransitiveClosure(Table table, int numOfStmt) {
     Table newTable = table;
     if (table.getHeader().size() != 2) {
       throw std::invalid_argument(GENERATE_TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG);
@@ -171,20 +168,13 @@ namespace {
       insertIntoAdjList(adjList, row[0], row[1]);
     }
 
-    // We don't know how many statements are numbered
-    // in the table, but we do know that an upper bound
-    // for the number of statements in the table
-    // is the number of rows in the table, since 
-    // in the upper bound each row enumerates a unique
-    // statement. 
-    int tableSize = table.getData().size();
-    applyWarshallAlgorithm(adjList, tableSize);
+    applyWarshallAlgorithm(adjList, numOfStmt);
 
     // For each true entry in the transitive
     // closure matrix, add a new row to the 
     // table to return.
-    for (int i = 1; i <= tableSize; i++) {
-      for (int j = 1; j <= tableSize; j++) {
+    for (int i = 1; i <= numOfStmt; i++) {
+      for (int j = 1; j <= numOfStmt; j++) {
         if (getFromAdjList(adjList, i, j)) {
           std::vector<std::string> newRow = { std::to_string(i), std::to_string(j) };
           newTable.insertRow(newRow);
@@ -218,22 +208,14 @@ namespace {
   Table fillIndirectRelation(Table table, Table parentTTable) {
     bool isTableColumnCountNotTwo = (table.getHeader().size() != 2) || 
       (parentTTable.getHeader().size() != 2);
-    bool isFirstTableColumnNameSameAsParentColumnName =
-      (table.getHeader()[0] == parentTTable.getHeader()[0]) ||
-      (table.getHeader()[1] == parentTTable.getHeader()[0]);
 
     if (isTableColumnCountNotTwo) {
       throw std::invalid_argument(FILL_INDIRECT_RELATION_HEADER_SIZE_NEQ_2_ERROR_MSG);
     }
-    if (isFirstTableColumnNameSameAsParentColumnName) {
-      throw std::invalid_argument(FILL_INDIRECT_RELATION_COLUMN_NAME_SAME_ERROR_MSG);
-    }
 
-    std::string joinedColumnName = table.getHeader()[0];
     Table newParentTTable = parentTTable;
-    newParentTTable.setHeader({ "Parent", joinedColumnName });
-    newParentTTable.join(table);
-    newParentTTable.dropColumn(joinedColumnName);
+    newParentTTable.innerJoin(table, 1, 0);
+    newParentTTable.dropColumn(1);
     table.concatenate(newParentTTable);
 
     return table;
@@ -243,14 +225,18 @@ namespace {
    * Given the Parent() relations between statements, writes in all the
    * transitive Parent*() relations.
    * 
-   * Pre-condition: Requires that all the Parent() relations be populated
-   * in the PKB first.
+   * Pre-conditions: 
+   *   1) Requires that all the Parent() relations be populated
+   *      in the PKB first.
+   *   2) Requires that pkb.getStmtTable().size() returns the total
+   *      number of statements in the PKB.
    * 
    * @param pkb The PKB to refer to.
    * @returns
    */
   void fillParentTTable(Pkb& pkb) {
-    Table parentTTable = generateTransitiveClosure(pkb.getParentTable());
+    Table parentTTable = generateTransitiveClosure(pkb.getParentTable(),
+      pkb.getStmtTable().size());
     for (std::vector<std::string> row : parentTTable.getData()) {
       int parent = std::stoi(row[0]);
       int child = std::stoi(row[1]);
@@ -269,7 +255,8 @@ namespace {
    * @returns
    */
   void fillFollowsTTable(Pkb& pkb) {
-    Table followsTTable = generateTransitiveClosure(pkb.getFollowsTable());
+    Table followsTTable = generateTransitiveClosure(pkb.getFollowsTable(), 
+      pkb.getStmtTable().size());
     for (std::vector<std::string> row : followsTTable.getData()) {
       int followed = std::stoi(row[0]);
       int follower = std::stoi(row[1]);
@@ -320,7 +307,7 @@ DesignExtractor::DesignExtractor() {
 DesignExtractor::~DesignExtractor() {
 }
 
-void DesignExtractor::extractDesignAbstractions(Pkb pkb) {
+void DesignExtractor::extractDesignAbstractions(Pkb& pkb) {
   fillParentTTable(pkb);
   fillFollowsTTable(pkb);
   fillUsesTable(pkb);

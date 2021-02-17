@@ -11,6 +11,11 @@ TEST_CASE("[TestDesignExtractor] ParentT extraction") {
   Pkb pkb;
   DesignExtractor designExtractor;
 
+  pkb.addStmt(1);
+  pkb.addStmt(2);
+  pkb.addStmt(3);
+  pkb.addStmt(4);
+
   pkb.addParent(1, 2);
   pkb.addParent(2, 3);
   pkb.addParent(3, 4);
@@ -32,6 +37,11 @@ TEST_CASE("[TestDesignExtractor] ParentT extraction") {
 TEST_CASE("[TestDesignExtractor] FollowsT extraction") {
   Pkb pkb;
   DesignExtractor designExtractor;
+
+  pkb.addStmt(1);
+  pkb.addStmt(2);
+  pkb.addStmt(3);
+  pkb.addStmt(4);
 
   pkb.addFollows(1, 2);
   pkb.addFollows(2, 3);
@@ -55,20 +65,27 @@ TEST_CASE("[TestDesignExtractor] Uses extraction") {
   Pkb pkb;
   DesignExtractor designExtractor;
 
+  pkb.addStmt(1);
+  pkb.addStmt(2);
+  pkb.addVar("z");
+
   pkb.addParent(1, 2);
   pkb.addUses(2, "z");
 
   designExtractor.extractDesignAbstractions(pkb);
   Table usesTable = pkb.getUsesTable();
 
-  REQUIRE(usesTable.contains({ 1, "z" });
+  REQUIRE(usesTable.contains({ "1", "z" }));
   REQUIRE(usesTable.size() == 2);
-
 }
 
 TEST_CASE("[TestDesignExtractor] Modifies extraction") {
   Pkb pkb;
   DesignExtractor designExtractor;
+
+  pkb.addStmt(1);
+  pkb.addStmt(2);
+  pkb.addVar("z");
 
   pkb.addParent(1, 2);
   pkb.addModifies(2, "z");
@@ -76,7 +93,7 @@ TEST_CASE("[TestDesignExtractor] Modifies extraction") {
   designExtractor.extractDesignAbstractions(pkb);
   Table modifiesTable = pkb.getModifiesTable();
 
-  REQUIRE(modifiesTable.contains({ 1, "z" });
+  REQUIRE(modifiesTable.contains({ "1", "z" }));
   REQUIRE(modifiesTable.size() == 2);
 }
 

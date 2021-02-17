@@ -8,5 +8,5 @@ public:
   DesignExtractor();
   ~DesignExtractor();
 
-  void extractDesignAbstractions(Pkb pkb);
+  void extractDesignAbstractions(Pkb& pkb);
 };
