@@ -11,5 +11,5 @@ private:
 public:
   Spa();
   void parseSourceFile(const std::string& filename);
-  void evaluateQuery(const std::string& query, std::list<std::string>& results);
+  void evaluateQuery(const std::string& queryString, std::list<std::string>& results);
 };

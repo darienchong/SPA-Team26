@@ -32,6 +32,10 @@ void Spa::parseSourceFile(const std::string& filename) {
   // DE to fill up pkb here
 }
 
-void Spa::evaluateQuery(const std::string& query, std::list<std::string>& results) {
-  // PQL evaluation code here
+void Spa::evaluateQuery(const std::string& queryString, std::list<std::string>& results) {
+  std::stringstream ss(queryString);
+  Tokeniser t;
+  std::list<Token> tokens = t.tokenise(ss);
+  PqlParser p(tokens);
+  Pql::Query queryStruct = p.parseQuery();
 }

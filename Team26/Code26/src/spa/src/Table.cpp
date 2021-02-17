@@ -187,20 +187,20 @@ void Table::fillIndirectRelation(const Table& parentTTable) {
   std::string joinedColumnName = header[0];
   Table newParentTTable = parentTTable;
   newParentTTable.setHeader({"Parent", joinedColumnName});
-  newParentTTable.join(*this);
+  newParentTTable.naturalJoin(*this);
   newParentTTable.dropColumn(joinedColumnName);
   this->concatenate(newParentTTable);
 }
 
-// If current table and otherTable have common column names, do natural join
+// If current table and otherTable have common column names, do natural naturalJoin
 // else, cross product
-void Table::join(const Table& otherTable) {
+void Table::naturalJoin(const Table& otherTable) {
   // get pairs of columns with the same name
   std::vector<std::pair<int, int>> indexPairs = getColumnIndexPairs(otherTable);
 
   if (indexPairs.empty()) { // cross-product if no common headers
     crossJoin(otherTable);
-  } else { // natural join -> change to hash join ?
+  } else { // natural join -> change to hash naturalJoin ?
     innerJoin(otherTable, indexPairs);
   }
 }

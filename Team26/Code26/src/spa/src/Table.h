@@ -35,7 +35,7 @@ public:
   void dropColumn(const std::string& headerTitle);
   void filterColumn(const std::string& columnName, const std::set<std::string>& values);
   void concatenate(Table& otherTable);
-  void join(const Table& otherTable);
+  void naturalJoin(const Table& otherTable);
   void crossJoin(const Table &otherTable);
   void innerJoin(const Table &otherTable, std::vector<std::pair<int, int>> &indexPairs);
   void innerJoin(const Table& otherTable, int firstTableIndex, int secondTableIndex);

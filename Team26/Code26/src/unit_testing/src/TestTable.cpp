@@ -175,15 +175,15 @@ TEST_CASE("[TestTable] Filter Column") {
   }
 }
 
-TEST_CASE("[TestTable] join table") {
-  SECTION ("cross product join") {
+TEST_CASE("[TestTable] naturalJoin table") {
+  SECTION ("cross product naturalJoin") {
     Table table1({"a", "b"});
     table1.insertRow({"1", "11"});
     table1.insertRow({"2", "22"});
     Table table2({"c", "d"});
     table2.insertRow({"3", "33"});
     table2.insertRow({"4", "44"});
-    table1.join(table2);
+    table1.naturalJoin(table2);
     REQUIRE(table1.size() == 4);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c", "d"});
     REQUIRE(table1.contains({ "1", "11", "3", "33" }));
@@ -192,67 +192,67 @@ TEST_CASE("[TestTable] join table") {
     REQUIRE(table1.contains({ "2", "22", "4", "44" }));
   }
 
-  SECTION("valid cross product join with empty tables") {
+  SECTION("valid cross product naturalJoin with empty tables") {
     Table table1({ "a", "b" });
     Table table2({ "c", "d" });
-    table1.join(table2);
+    table1.naturalJoin(table2);
     REQUIRE(table1.size() == 0);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c", "d"});
   }
 
-  SECTION ("natural join one overlapping column") {
+  SECTION ("natural naturalJoin one overlapping column") {
     Table table1({"a", "b"});
     table1.insertRow({"1", "11"});
     table1.insertRow({"2", "22"});
     Table table2({"a", "c"});
     table2.insertRow({"1", "33"});
     table2.insertRow({"2", "44"});
-    table1.join(table2);
+    table1.naturalJoin(table2);
     REQUIRE(table1.size() == 2);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
     REQUIRE(table1.contains({"1", "11", "33"}));
     REQUIRE(table1.contains({"2", "22", "44"}));
   }
 
-  SECTION ("natural join one overlapping empty string column name") {
+  SECTION ("natural naturalJoin one overlapping empty string column name") {
     Table table1({"", "b"});
     table1.insertRow({"1", "11"});
     table1.insertRow({"2", "22"});
     Table table2({"", "c"});
     table2.insertRow({"1", "33"});
     table2.insertRow({"2", "44"});
-    table1.join(table2);
+    table1.naturalJoin(table2);
     REQUIRE(table1.size() == 4);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"", "b", "", "c"});
     REQUIRE(table1.contains({"1", "11", "1", "33"}));
     REQUIRE(table1.contains({"2", "22", "2", "44"}));
   }
 
-  SECTION ("natural join two overlapping column") {
+  SECTION ("natural naturalJoin two overlapping column") {
     Table table1({"a", "b", "c"});
     table1.insertRow({"1", "11", "33"});
     table1.insertRow({"2", "22", "43"});
     Table table2({"a", "c"});
     table2.insertRow({"1", "33"});
     table2.insertRow({"2", "44"});
-    table1.join(table2);
+    table1.naturalJoin(table2);
     REQUIRE(table1.size() == 1);
     REQUIRE(table1.getHeader() == std::vector<std::string>{"a", "b", "c"});
     REQUIRE(table1.contains({"1", "11", "33"}));
     REQUIRE(!table1.contains({"2", "22", "43"}));
   }
 
-  SECTION("valid natural join with empty tables") {
+  SECTION("valid natural naturalJoin with empty tables") {
     Table table1({ "a", "b" });
     Table table2({ "a", "c" });
-    table1.join(table2);
+    table1.naturalJoin(table2);
     REQUIRE(table1.size() == 0);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
   }
 }
 
-TEST_CASE("[TestTable] inner join with indexes") {
-  SECTION("inner join with a common header specified") {
+TEST_CASE("[TestTable] inner naturalJoin with indexes") {
+  SECTION("inner naturalJoin with a common header specified") {
     Table table1({ "a", "b" });
     table1.insertRow({ "1", "11" });
     table1.insertRow({ "2", "22" });
@@ -267,8 +267,8 @@ TEST_CASE("[TestTable] inner join with indexes") {
   }
 }
 
-TEST_CASE("[TestTable] inner join with column name") {
-  SECTION("inner join with a common header specified") {
+TEST_CASE("[TestTable] inner naturalJoin with column name") {
+  SECTION("inner naturalJoin with a common header specified") {
     Table table1({ "a", "b" });
     table1.insertRow({ "1", "11" });
     table1.insertRow({ "2", "22" });
