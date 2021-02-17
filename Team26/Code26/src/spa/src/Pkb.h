@@ -403,8 +403,8 @@ public:
 private:
   Table varTable{ 1 };
   Table stmtTable{ 1 };
-  Table procTable{ 1};
-  Table constTable{1};
+  Table procTable{ 1 };
+  Table constTable{ 1 };
 
   Table ifTable{ 1 };
   Table whileTable{ 1 };
@@ -413,7 +413,7 @@ private:
   Table assignTable{ 1 };
 
   Table followsTable{ 2 };
-  Table followsTTable{ 2};
+  Table followsTTable{ 2 };
   Table parentTable{ 2 };
   Table parentTTable{ 2 };
   Table usesTable{ 2 };

@@ -23,7 +23,7 @@ Table::Table(Row newHeader) {
 
 void Table::setHeader(const Row& newHeader) {
   std::set<std::string> prevNames;
-  for (auto name: newHeader) {
+  for (std::string name : newHeader) {
     bool isDuplicate = (name != "") && prevNames.count(name);
     if (isDuplicate) {
       throw "Non-empty  column name could not be duplicated";
@@ -64,14 +64,14 @@ std::set<std::string> Table::getColumn(const std::string& headerTitle) const {
 
 std::set<Table::Row> Table::getColumns(const Row& headerTitles) const {
   std::vector<int> indexList;
-  for (const auto& headerTitle : headerTitles) {
+  for (const std::string& headerTitle : headerTitles) {
     indexList.push_back(getColumnIndex(headerTitle));
   }
 
   std::set<Row> result;
   for (Row row : data) {
     Row curr;
-    for (auto i : indexList) {
+    for (int i : indexList) {
       curr.push_back(row[i]);
     }
     result.insert(curr);
@@ -95,7 +95,7 @@ void Table::dropColumn(int index) {
   } else {
     header.erase(header.begin() + index);
     std::set<Row> newData;
-    for (auto row : data) {
+    for (Row row : data) {
       row.erase(row.begin() + index);
       newData.emplace(row);
     }
@@ -202,7 +202,7 @@ void Table::naturalJoin(const Table& otherTable) {
   }
 }
 
-std::vector<std::pair<int, int>> Table::getColumnIndexPairs(const Table &otherTable) const {
+std::vector<std::pair<int, int>> Table::getColumnIndexPairs(const Table& otherTable) const {
   std::vector<std::pair<int, int>> indexPairs;
   Row otherHeader = otherTable.getHeader();
 
@@ -218,13 +218,13 @@ std::vector<std::pair<int, int>> Table::getColumnIndexPairs(const Table &otherTa
   return indexPairs;
 }
 
-void Table::crossJoin(const Table &otherTable) {
+void Table::crossJoin(const Table& otherTable) {
   std::set<Row> newData;
   Table::Row otherHeader = otherTable.getHeader();
   header.insert(header.end(), otherHeader.begin(), otherHeader.end());
-  for (const auto& row : data) {
-    for (auto otherRow : otherTable.data) {
-      auto newRow = row;
+  for (const Row& row : data) {
+    for (Row otherRow : otherTable.data) {
+      Row newRow = row;
       newRow.insert(newRow.end(), otherRow.begin(), otherRow.end());
       newData.emplace(newRow);
     }
@@ -232,12 +232,12 @@ void Table::crossJoin(const Table &otherTable) {
   data = std::move(newData);
 }
 
-void Table::innerJoin(const Table &otherTable, std::vector<std::pair<int, int>> &indexPairs) {
+void Table::innerJoin(const Table& otherTable, std::vector<std::pair<int, int>>& indexPairs) {
   std::set<Row> newData;
   const Table::Row otherHeader = otherTable.getHeader();
   std::set<int> droppedIndexes;
 
-  for (auto pair : indexPairs) {
+  for (std::pair<int, int> pair : indexPairs) {
     droppedIndexes.emplace(pair.second);
   }
 
@@ -247,10 +247,10 @@ void Table::innerJoin(const Table &otherTable, std::vector<std::pair<int, int>> 
     }
   }
 
-  for (auto row : data) {
-    for (auto otherRow : otherTable.data) {
+  for (Row row : data) {
+    for (Row otherRow : otherTable.data) {
       bool keepRow = true;
-      for (auto pair : indexPairs) {
+      for (std::pair<int, int> pair : indexPairs) {
         bool isMatchingPair = row[pair.first] == otherRow[pair.second];
         if (!isMatchingPair) {
           keepRow = false;
