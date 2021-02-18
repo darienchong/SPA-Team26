@@ -132,50 +132,6 @@ void Table::concatenate(Table& otherTable) {
   }
 }
 
-// Used for transitive relationships Follows* and Parent*
-void Table::fillTransitiveTable(const Table& table) {
-  std::unordered_map<std::string, std::set<std::string>> adjList;
-
-  // generate adjacency list
-  for (Row row : table.getData()) {
-    bool isInAdjList = adjList.count(row[0]);
-    if (!isInAdjList) {
-      adjList.insert({ row[0], std::set<std::string>({ row[1] }) });
-    } else {
-      adjList.at(row[0]).insert(row[1]);
-    }
-  }
-
-  for (std::pair<const std::string, std::set<std::string>>& entry : adjList) {
-    // generate transitives
-    std::set<std::string> transitives; // keep track of explored nodes
-    std::stack<std::string> stack;
-    std::string curr;
-    stack.push(entry.first);
-    while (!stack.empty()) {
-      curr = stack.top();
-      stack.pop();
-      bool isInTransitives = transitives.count(curr);
-      if (!isInTransitives) {
-        transitives.insert(curr);
-        bool isInAdjList = adjList.count(curr);
-        if (isInAdjList) { // push neighbors
-          for (const std::string& value : adjList.at(curr)) {
-            stack.push(value);
-          }
-        }
-      }
-    }
-    // insert transitives
-    std::set<std::string>::iterator it;
-    for (it = transitives.begin(); it != transitives.end(); it++) {
-      if (entry.first != *it) {
-        data.insert(Row({ entry.first, *it }));
-      }
-    }
-  }
-}
-
 bool Table::contains(const Row& row) const {
   return data.count(row) == 1;
 }

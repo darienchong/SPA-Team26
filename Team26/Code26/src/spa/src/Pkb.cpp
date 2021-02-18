@@ -66,10 +66,6 @@ void Pkb::addFollows(int followed, int follower) {
   followsTable.insertRow(vect);
 }
 
-void Pkb::addFollowsT() {
-  followsTTable.fillTransitiveTable(followsTable);
-}
-
 void Pkb::addFollowsT(int followed, int follower) {
   if (followed >= follower) {
     throw "Follower should come after followed";
@@ -84,10 +80,6 @@ void Pkb::addParent(int parent, int child) {
   }
   std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
   parentTable.insertRow(vect);
-}
-
-void Pkb::addParentT() {
-  parentTTable.fillTransitiveTable(parentTable);
 }
 
 void Pkb::addParentT(int parent, int child) {
@@ -121,14 +113,6 @@ void Pkb::addModifies(std::string proc, std::string var) {
 void Pkb::addPatternAssign(int stmtNo, std::string lhs, std::string rhs) {
   std::vector<std::string> vect{ std::to_string(stmtNo), std::move(lhs), std::move(rhs) };
   patternAssignTable.insertRow(vect);
-}
-
-void Pkb::addIndirectUses() {
-  fillIndirectRelation(usesTable);
-}
-
-void Pkb::addIndirectModifies() {
-  fillIndirectRelation(modifiesTable);
 }
 
 // Getters
@@ -245,20 +229,4 @@ Table Pkb::getModifiedBy(std::string procName) const {
   filterTable.filterColumn(0, std::set<std::string> {std::move(procName)});
   filterTable.dropColumn(0);
   return filterTable;
-}
-
-void Pkb::fillIndirectRelation(Table& toUpdateTable) {
-  if (parentTTable.empty()) {
-    Pkb::addParentT();
-  }
-
-  if (toUpdateTable.getHeader().size() != 2 || parentTTable.getHeader().size() != 2) {
-    throw "Tables must have 2 columns.";
-  }
-  Table newParentTTable = parentTTable;
-
-  // do inner join which results with table {parent, child, varName}
-  newParentTTable.innerJoin(toUpdateTable, 1, 0);
-  newParentTTable.dropColumn(1);
-  toUpdateTable.concatenate(newParentTTable);
 }
