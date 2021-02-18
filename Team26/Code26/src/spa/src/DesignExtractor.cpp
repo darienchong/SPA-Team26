@@ -248,8 +248,11 @@ namespace {
    * Given the Follows() relations between statements, writes in all the
    * transitive Follows*() relations.
    *
-   * Pre-condition: Requires that all the Follows() relations be populated
-   * in the PKB first.
+   * Pre-conditions: 
+   *   1) Requires that all the Follows() relations be populated
+   *      in the PKB first.
+   *   2) Requires that pkb.getStmtTable().size() returns the total
+   *      number of statements in the PKB.
    *
    * @param pkb The PKB to refer to.
    * @returns
