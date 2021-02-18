@@ -4,7 +4,7 @@
 #include <vector>
 #include <stdexcept>
 #include <map>
-#include <set>
+#include <unordered_set>
 
 #include "Table.h"
 #include "Pkb.h"
@@ -25,11 +25,11 @@ namespace {
    * @param value The value in the key-value pair.
    * @returns
    */
-  void insertIntoAdjList(std::map<std::string, std::set<std::string>>& adjList,
+  void insertIntoAdjList(std::map<std::string, std::unordered_set<std::string>>& adjList,
     std::string key, std::string value) {
     bool isFirstTimePlacingIntoAdjList = (adjList.count(key) == 0);
     if (isFirstTimePlacingIntoAdjList) {
-      std::set<std::string> temp{ value };
+      std::unordered_set<std::string> temp{ value };
       adjList.emplace(key, temp);
     } else {
       adjList.at(key).insert(value);
@@ -47,7 +47,7 @@ namespace {
    * @returns `true` if the given key-value pair is in the adjacency list,
    *     `false` otherwise.
    */
-  bool getFromAdjList(std::map<std::string, std::set<std::string>>& adjList,
+  bool getFromAdjList(std::map<std::string, std::unordered_set<std::string>>& adjList,
     std::string key, std::string value) {
     
     bool isKeyNotInAdjList = (adjList.count(key) == 0);
@@ -55,7 +55,7 @@ namespace {
       return false;
     }
 
-    std::set<std::string> setOfPossibleValues = adjList.at(key);
+    std::unordered_set<std::string> setOfPossibleValues = adjList.at(key);
     bool isValueNotInSet = (setOfPossibleValues.count(value) == 0);
     if (isValueNotInSet) {
       return false;
@@ -67,7 +67,7 @@ namespace {
   /**
    * Overload for ease of use.
    */
-  bool getFromAdjList(std::map<std::string, std::set<std::string>>& adjList,
+  bool getFromAdjList(std::map<std::string, std::unordered_set<std::string>>& adjList,
     int key, int value) {
     return getFromAdjList(adjList, std::to_string(key), std::to_string(value));
   }
@@ -81,7 +81,7 @@ namespace {
    * @param j The number to use for index j.
    * @param n The maximum row length (table size).
    */
-  void warshallRowOperation(std::map<std::string, std::set<std::string>>& adjList,
+  void warshallRowOperation(std::map<std::string, std::unordered_set<std::string>>& adjList,
     int i, int j, int n) {
     std::string iAsString = std::to_string(i);
     std::string jAsString = std::to_string(j);
@@ -99,14 +99,14 @@ namespace {
     }
 
     if (isIthRowEmpty) {
-      std::set<std::string> copyOfJthRow = adjList.at(jAsString);
+      std::unordered_set<std::string> copyOfJthRow = adjList.at(jAsString);
       adjList.emplace(iAsString, copyOfJthRow);
       return;
     }
 
     // Otherwise, both the ith and jth rows are non-empty.
     // We perform 'bitwise' operations (one entry at a time).
-    std::set<std::string> newIthRow;
+    std::unordered_set<std::string> newIthRow;
     for (int k = 1; k <= n; k++) {
       bool ithRowKthEntry = getFromAdjList(adjList, i, k);
       bool jthRowKthEntry = getFromAdjList(adjList, j, k);
@@ -127,7 +127,7 @@ namespace {
    * @param adjList The adjacency list to use/modify.
    * @param n The total number of statements (vertices in graph).
    */
-  void applyWarshallAlgorithm(std::map<std::string, std::set<std::string>>& adjList, int n) {
+  void applyWarshallAlgorithm(std::map<std::string, std::unordered_set<std::string>>& adjList, int n) {
     for (int j = 1; j <= n; j++) {
       for (int i = 1; i <= n; i++) {
         if (getFromAdjList(adjList, i, j)) {
@@ -163,7 +163,7 @@ namespace {
 
     // We insert the initial relations into the adjacency list
     // for use in the Warshall algorithm later.
-    std::map<std::string, std::set<std::string>> adjList;
+    std::map<std::string, std::unordered_set<std::string>> adjList;
     for (std::vector<std::string> row : table.getData()) {
       insertIntoAdjList(adjList, row[0], row[1]);
     }
