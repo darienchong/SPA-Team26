@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 #include <sstream>
+#include <exception>
 
 #include "PqlParser.h"
 #include "PqlQuery.h"
@@ -21,15 +22,26 @@ void Spa::parseSourceFile(const std::string& filename) {
     std::cerr << "Unable to open source file";
     exit(EXIT_FAILURE);
   }
-  sourceFile.close();
 
-  // SIMPLE Parsing code here
-  Tokeniser t;
-  std::list<Token> tokens = t.tokenise(sourceFile);
-  SourceProcessor::SimpleParser parser(pkb, tokens);
-  parser.parse();
+  try {
+    std::list<Token> tokens = Tokeniser()
+      .notAllowingLeadingZeroes()
+      .consumingWhitespace()
+      .tokenise(sourceFile);
+    sourceFile.close();
 
-  // DE to fill up pkb here
+    SourceProcessor::SimpleParser parser(pkb, tokens);
+    parser.parse();
+
+    // DE to fill up pkb here
+
+  }
+  catch (const std::exception& e) {
+    std::cout << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cout << "OOPS! An unexpected error occured!";
+  }
 }
 
 void Spa::evaluateQuery(const std::string& queryString, std::list<std::string>& results) {

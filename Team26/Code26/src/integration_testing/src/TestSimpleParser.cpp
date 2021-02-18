@@ -5,6 +5,7 @@
 #include <list>
 #include <sstream>
 
+#include "DesignExtractor.h"
 #include "Pkb.h"
 #include "SimpleParser.h"
 #include "Table.h"
@@ -16,18 +17,13 @@
 */
 
 namespace {
-  Tokeniser tokeniser;
-
   std::list<Token> expressionStringToTokens(std::string& string) {
     std::stringstream ss;
     ss << string << std::endl;
-    return tokeniser.tokenise(ss);
-  }
-
-  std::list<Token> expressionStringToTokensAllowLeadingZeros(std::string& string) {
-    std::stringstream ss;
-    ss << string << std::endl;
-    return tokeniser.allowingLeadingZeroes().tokenise(ss);
+    return Tokeniser()
+      .notAllowingLeadingZeroes()
+      .consumingWhitespace()
+      .tokenise(ss);
   }
 }
 
@@ -282,15 +278,6 @@ TEST_CASE("Invalid assign statement", "[TestSimpleParser][Assign]") {
       SourceProcessor::SimpleParser parser(pkb, simpleProg);
       REQUIRE_THROWS(parser.parse());
     }
-
-    // should not be a possible case in reality since tokeniser instance should default to not allowing starting 0s & remove all whitespace
-    SECTION("Assign with constant starting with 0") {
-      std::string string("procedure computeAverage {m34NiNg0fL1f3 = 042;}");
-      std::list<Token> simpleProg = expressionStringToTokensAllowLeadingZeros(string);
-      Pkb pkb;
-      SourceProcessor::SimpleParser parser(pkb, simpleProg);
-      REQUIRE_THROWS(parser.parse());
-    }
   }
 }
 
@@ -341,7 +328,7 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       Table procTable = pkb.getProcTable();
       Table assignTable = pkb.getAssignTable();
       Table varTable = pkb.getVarTable();
-      //Table constTable = pkb.getConstTable();
+      Table constTable = pkb.getConstTable();
       Table stmtTable = pkb.getStmtTable();
       Table usesTable = pkb.getUsesTable();
       Table modifiesTable = pkb.getModifiesTable();
@@ -355,8 +342,8 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       REQUIRE(assignTable.size() == 1);
       REQUIRE(varTable.contains({ "x" }));
       REQUIRE(varTable.size() == 1);
-      //REQUIRE(constTable.contains({ "0" }));
-      //REQUIRE(constTable.size() == 1);
+      REQUIRE(constTable.contains({ "0" }));
+      REQUIRE(constTable.size() == 1);
       REQUIRE(stmtTable.size() == 1); // maybe can also check the statement num? maybe not necessary
       REQUIRE(modifiesTable.contains({ "1", "x" }));
       REQUIRE(modifiesTable.contains({ "computeAverage", "x" }));
@@ -374,7 +361,7 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       Table procTable = pkb.getProcTable();
       Table assignTable = pkb.getAssignTable();
       Table varTable = pkb.getVarTable();
-      //Table constTable = pkb.getConstTable();
+      Table constTable = pkb.getConstTable();
       Table stmtTable = pkb.getStmtTable();
       Table usesTable = pkb.getUsesTable();
       Table modifiesTable = pkb.getModifiesTable();
@@ -392,8 +379,8 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       REQUIRE(varTable.contains({ "x" }));
       REQUIRE(varTable.contains({ "y" }));
       REQUIRE(varTable.size() == 2);
-      //REQUIRE(constTable.contains({ "0" }));
-      //REQUIRE(constTable.size() == 1);
+      REQUIRE(constTable.contains({ "0" }));
+      REQUIRE(constTable.size() == 1);
       REQUIRE(stmtTable.size() == 2); // maybe can also check the statement num? maybe not necessary
       REQUIRE(usesTable.contains({ "2", "x" }));
       REQUIRE(usesTable.contains({ "computeAverage", "x" }));
@@ -479,7 +466,7 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       Table procTable = pkb.getProcTable();
       Table assignTable = pkb.getAssignTable();
       Table varTable = pkb.getVarTable();
-      //Table constTable = pkb.getConstTable();
+      Table constTable = pkb.getConstTable();
       Table stmtTable = pkb.getStmtTable();
       Table usesTable = pkb.getUsesTable();
       Table modifiesTable = pkb.getModifiesTable();
@@ -497,20 +484,20 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       REQUIRE(varTable.contains({ "v13dj3d0a3kd" }));
       REQUIRE(varTable.contains({ "c" }));
       REQUIRE(varTable.size() == 5);
-      //REQUIRE(constTable.contains({ "1" }));
-      //REQUIRE(constTable.contains({ "2" }));
-      //REQUIRE(constTable.contains({ "3" }));
-      //REQUIRE(constTable.contains({ "4" }));
-      //REQUIRE(constTable.contains({ "6" }));
-      //REQUIRE(constTable.contains({ "8" }));
-      //REQUIRE(constTable.contains({ "9" }));
-      //REQUIRE(constTable.contains({ "29" }));
-      //REQUIRE(constTable.contains({ "45" }));
-      //REQUIRE(constTable.contains({ "57" }));
-      //REQUIRE(constTable.contains({ "74" }));
-      //REQUIRE(constTable.contains({ "76" }));
-      //REQUIRE(constTable.contains({ "96" }));
-      //REQUIRE(constTable.size() == 13);
+      REQUIRE(constTable.contains({ "1" }));
+      REQUIRE(constTable.contains({ "2" }));
+      REQUIRE(constTable.contains({ "3" }));
+      REQUIRE(constTable.contains({ "4" }));
+      REQUIRE(constTable.contains({ "6" }));
+      REQUIRE(constTable.contains({ "8" }));
+      REQUIRE(constTable.contains({ "9" }));
+      REQUIRE(constTable.contains({ "29" }));
+      REQUIRE(constTable.contains({ "45" }));
+      REQUIRE(constTable.contains({ "57" }));
+      REQUIRE(constTable.contains({ "74" }));
+      REQUIRE(constTable.contains({ "76" }));
+      REQUIRE(constTable.contains({ "96" }));
+      REQUIRE(constTable.size() == 13);
       REQUIRE(stmtTable.size() == 1); // maybe can also check the statement num? maybe not necessary
       REQUIRE(usesTable.contains({ "1", "var1340" }));
       REQUIRE(usesTable.contains({ "1", "varY" }));
@@ -636,7 +623,7 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
     Table ifTable = pkb.getIfTable();
     Table readTable = pkb.getReadTable();
     Table varTable = pkb.getVarTable();
-    //Table constTable = pkb.getConstTable();
+    Table constTable = pkb.getConstTable();
     Table stmtTable = pkb.getStmtTable();
     Table usesTable = pkb.getUsesTable();
     Table modifiesTable = pkb.getModifiesTable();
@@ -659,8 +646,8 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
     REQUIRE(varTable.contains({ "then" }));
     REQUIRE(varTable.contains({ "else" }));
     REQUIRE(varTable.size() == 4);
-    //REQUIRE(constTable.contains({ "1" }));
-    //REQUIRE(constTable.size() == 1);
+    REQUIRE(constTable.contains({ "1" }));
+    REQUIRE(constTable.size() == 1);
     REQUIRE(stmtTable.size() == 3); // maybe can also check the statement num? maybe not necessary
     REQUIRE(usesTable.contains({ "1", "then" }));
     REQUIRE(usesTable.contains({ "1", "else" }));
@@ -680,6 +667,20 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
     REQUIRE(parentTable.size() == 2);
     REQUIRE(patternAssignTable.contains({ "2", "x", expectedPostFixString }));
     REQUIRE(patternAssignTable.size() == 1);
+
+    SECTION("With DE relations") {
+      DesignExtractor designExtractor;
+      designExtractor.extractDesignAbstractions(pkb);
+      Table parentTTable = pkb.getParentTTable();
+      Table usesTTable = pkb.getUsesTable();
+      Table modifiesTTable = pkb.getModifiesTable();
+
+      REQUIRE(usesTTable.size() == 4);
+      REQUIRE(modifiesTTable.contains({ "1", "x" }));
+      REQUIRE(modifiesTTable.contains({ "1", "y" }));
+      REQUIRE(modifiesTTable.size() == 6);
+      REQUIRE(parentTTable.size() == 2);
+    }
   }
 
   SECTION("Advanced") {
@@ -695,7 +696,7 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
       Table printTable = pkb.getPrintTable();
       Table readTable = pkb.getReadTable();
       Table varTable = pkb.getVarTable();
-      //Table constTable = pkb.getConstTable();
+      Table constTable = pkb.getConstTable();
       Table stmtTable = pkb.getStmtTable();
       Table usesTable = pkb.getUsesTable();
       Table modifiesTable = pkb.getModifiesTable();
@@ -727,7 +728,7 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
       REQUIRE(varTable.contains({ "read" }));
       REQUIRE(varTable.contains({ "while" }));
       REQUIRE(varTable.size() == 7);
-      //REQUIRE(constTable.size() == 0);
+      REQUIRE(constTable.size() == 0);
       REQUIRE(stmtTable.size() == 7); // maybe can also check the statement num? maybe not necessary
       REQUIRE(usesTable.contains({ "1", "then" }));
       REQUIRE(usesTable.contains({ "1", "else" }));
@@ -765,6 +766,35 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
       REQUIRE(patternAssignTable.contains({ "6", "y", expectedPostFixString1 }));
       REQUIRE(patternAssignTable.contains({ "7", "x", expectedPostFixString2 }));
       REQUIRE(patternAssignTable.size() == 2);
+
+      SECTION("With DE relations") {
+        DesignExtractor designExtractor;
+        designExtractor.extractDesignAbstractions(pkb);
+        Table parentTTable = pkb.getParentTTable();
+        Table usesTTable = pkb.getUsesTable();
+        Table modifiesTTable = pkb.getModifiesTable();
+
+        REQUIRE(usesTTable.contains({ "1", "while" }));
+        REQUIRE(usesTTable.contains({ "1", "x" }));
+        REQUIRE(usesTTable.contains({ "1", "if" }));
+        REQUIRE(usesTTable.contains({ "1", "read" }));
+        REQUIRE(usesTTable.contains({ "1", "y" }));
+        REQUIRE(usesTTable.contains({ "2", "x" }));
+        REQUIRE(usesTTable.contains({ "5", "x" }));
+        REQUIRE(usesTTable.contains({ "5", "y" }));
+        REQUIRE(usesTTable.size() == 24);
+        REQUIRE(modifiesTTable.contains({ "1", "x" }));
+        REQUIRE(modifiesTTable.contains({ "1", "y" }));
+        REQUIRE(modifiesTTable.contains({ "2", "x" }));
+        REQUIRE(modifiesTTable.contains({ "5", "x" }));
+        REQUIRE(modifiesTTable.contains({ "5", "y" }));
+        REQUIRE(modifiesTTable.size() == 10);
+        REQUIRE(parentTTable.contains({ "1", "3" }));
+        REQUIRE(parentTTable.contains({ "1", "4" }));
+        REQUIRE(parentTTable.contains({ "1", "6" }));
+        REQUIRE(parentTTable.contains({ "1", "7" }));
+        REQUIRE(parentTTable.size() == 10);
+      }
     }
 
     SECTION("Doubly nested if") {
@@ -779,7 +809,7 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
       Table printTable = pkb.getPrintTable();
       Table readTable = pkb.getReadTable();
       Table varTable = pkb.getVarTable();
-      //Table constTable = pkb.getConstTable();
+      Table constTable = pkb.getConstTable();
       Table stmtTable = pkb.getStmtTable();
       Table usesTable = pkb.getUsesTable();
       Table modifiesTable = pkb.getModifiesTable();
@@ -819,11 +849,11 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
       REQUIRE(varTable.contains({ "g" }));
       REQUIRE(varTable.contains({ "d" }));
       REQUIRE(varTable.size() == 10);
-      //REQUIRE(constTable.contains({ "2" }));
-      //REQUIRE(constTable.contains({ "3" }));
-      //REQUIRE(constTable.contains({ "5" }));
-      //REQUIRE(constTable.contains({ "6" }));
-      //REQUIRE(constTable.size() == 4);
+      REQUIRE(constTable.contains({ "2" }));
+      REQUIRE(constTable.contains({ "3" }));
+      REQUIRE(constTable.contains({ "5" }));
+      REQUIRE(constTable.contains({ "6" }));
+      REQUIRE(constTable.size() == 4);
       REQUIRE(stmtTable.size() == 10); // maybe can also check the statement num? maybe not necessary
       REQUIRE(usesTable.contains({ "2", "y1" }));
       REQUIRE(usesTable.contains({ "3", "while" }));
@@ -871,6 +901,52 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
       REQUIRE(patternAssignTable.contains({ "8", "z", expectedPostFixString3 }));
       REQUIRE(patternAssignTable.contains({ "9", "c", expectedPostFixString4 }));
       REQUIRE(patternAssignTable.size() == 4);
+
+      SECTION("With DE relations") {
+        DesignExtractor designExtractor;
+        designExtractor.extractDesignAbstractions(pkb);
+        Table parentTTable = pkb.getParentTTable();
+        Table usesTTable = pkb.getUsesTable();
+        Table modifiesTTable = pkb.getModifiesTable();
+
+        REQUIRE(usesTTable.contains({ "1", "y1" }));
+        REQUIRE(usesTTable.contains({ "1", "while" }));
+        REQUIRE(usesTTable.contains({ "1", "x" }));
+        REQUIRE(usesTTable.contains({ "1", "b" }));
+        REQUIRE(usesTTable.contains({ "1", "f" }));
+        REQUIRE(usesTTable.contains({ "1", "g" }));
+        REQUIRE(usesTTable.contains({ "3", "x" }));
+        REQUIRE(usesTTable.contains({ "3", "b" }));
+        REQUIRE(usesTTable.contains({ "3", "f" }));
+        REQUIRE(usesTTable.contains({ "3", "g" }));
+        REQUIRE(usesTTable.contains({ "7", "f" }));
+        REQUIRE(usesTTable.contains({ "7", "g" }));
+        REQUIRE(usesTTable.size() == 24);
+        REQUIRE(modifiesTTable.contains({ "1", "x1" }));
+        REQUIRE(modifiesTTable.contains({ "1", "x" }));
+        REQUIRE(modifiesTTable.contains({ "1", "z" }));
+        REQUIRE(modifiesTTable.contains({ "1", "c" }));
+        REQUIRE(modifiesTTable.contains({ "1", "d" }));
+        REQUIRE(modifiesTTable.contains({ "3", "x" }));
+        REQUIRE(modifiesTTable.contains({ "3", "z" }));
+        REQUIRE(modifiesTTable.contains({ "3", "c" }));
+        REQUIRE(modifiesTTable.contains({ "3", "d" }));
+        REQUIRE(modifiesTTable.contains({ "7", "z" }));
+        REQUIRE(modifiesTTable.contains({ "7", "c" }));
+        REQUIRE(modifiesTTable.contains({ "7", "d" }));
+        REQUIRE(modifiesTTable.size() == 23);
+        REQUIRE(parentTTable.contains({ "1", "4" }));
+        REQUIRE(parentTTable.contains({ "1", "5" }));
+        REQUIRE(parentTTable.contains({ "1", "6" }));
+        REQUIRE(parentTTable.contains({ "1", "7" }));
+        REQUIRE(parentTTable.contains({ "1", "8" }));
+        REQUIRE(parentTTable.contains({ "1", "9" }));
+        REQUIRE(parentTTable.contains({ "1", "10" }));
+        REQUIRE(parentTTable.contains({ "3", "8" }));
+        REQUIRE(parentTTable.contains({ "3", "9" }));
+        REQUIRE(parentTTable.contains({ "3", "10" }));
+        REQUIRE(parentTTable.size() == 19);
+      }
     }
   }
 }
@@ -965,7 +1041,7 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
     Table printTable = pkb.getPrintTable();
     Table readTable = pkb.getReadTable();
     Table varTable = pkb.getVarTable();
-    //Table constTable = pkb.getConstTable();
+    Table constTable = pkb.getConstTable();
     Table stmtTable = pkb.getStmtTable();
     Table usesTable = pkb.getUsesTable();
     Table modifiesTable = pkb.getModifiesTable();
@@ -987,9 +1063,9 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
     REQUIRE(varTable.contains({ "read" }));
     REQUIRE(varTable.contains({ "print" }));
     REQUIRE(varTable.size() == 5);
-    //REQUIRE(constTable.contains({ "43" }));
-    //REQUIRE(constTable.contains({ "3" }));
-    //REQUIRE(constTable.size() == 2);
+    REQUIRE(constTable.contains({ "43" }));
+    REQUIRE(constTable.contains({ "3" }));
+    REQUIRE(constTable.size() == 2);
     REQUIRE(stmtTable.size() == 3); // maybe can also check the statement num? maybe not necessary
     REQUIRE(usesTable.contains({ "1", "if" }));
     REQUIRE(usesTable.contains({ "1", "else" }));
@@ -1010,6 +1086,19 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
     REQUIRE(parentTable.contains({ "1", "2" }));
     REQUIRE(parentTable.size() == 1);
     REQUIRE(patternAssignTable.size() == 0);
+
+    SECTION("With DE relations") {
+      DesignExtractor designExtractor;
+      designExtractor.extractDesignAbstractions(pkb);
+      Table parentTTable = pkb.getParentTTable();
+      Table usesTTable = pkb.getUsesTable();
+      Table modifiesTTable = pkb.getModifiesTable();
+
+      REQUIRE(usesTTable.size() == 8);
+      REQUIRE(modifiesTTable.contains({ "1", "read" }));
+      REQUIRE(modifiesTTable.size() == 3);
+      REQUIRE(parentTTable.size() == 1);
+    }
   }
 
   SECTION("Advanced") {
@@ -1024,7 +1113,7 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
       Table printTable = pkb.getPrintTable();
       Table readTable = pkb.getReadTable();
       Table varTable = pkb.getVarTable();
-      //Table constTable = pkb.getConstTable();
+      Table constTable = pkb.getConstTable();
       Table stmtTable = pkb.getStmtTable();
       Table usesTable = pkb.getUsesTable();
       Table modifiesTable = pkb.getModifiesTable();
@@ -1047,9 +1136,9 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
       REQUIRE(varTable.contains({ "while" }));
       REQUIRE(varTable.contains({ "i" }));
       REQUIRE(varTable.size() == 2);
-      //REQUIRE(constTable.contains({ "1" }));
-      //REQUIRE(constTable.contains({ "2" }));
-      //REQUIRE(constTable.size() == 2);
+      REQUIRE(constTable.contains({ "1" }));
+      REQUIRE(constTable.contains({ "2" }));
+      REQUIRE(constTable.size() == 2);
       REQUIRE(stmtTable.size() == 6); // maybe can also check the statement num? maybe not necessary
       REQUIRE(usesTable.contains({ "2", "while" }));
       REQUIRE(usesTable.contains({ "3", "while" }));
@@ -1077,6 +1166,25 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
       REQUIRE(parentTable.size() == 3);
       REQUIRE(patternAssignTable.contains({ "4", "i", expectedPostFixString }));
       REQUIRE(patternAssignTable.size() == 1);
+
+      SECTION("With DE relations") {
+        DesignExtractor designExtractor;
+        designExtractor.extractDesignAbstractions(pkb);
+        Table parentTTable = pkb.getParentTTable();
+        Table usesTTable = pkb.getUsesTable();
+        Table followsTTable = pkb.getFollowsTTable();
+        Table modifiesTTable = pkb.getModifiesTable();
+
+        REQUIRE(usesTTable.contains({ "2", "i" }));
+        REQUIRE(usesTTable.size() == 9);
+        REQUIRE(modifiesTTable.contains({ "2", "i" }));
+        REQUIRE(modifiesTTable.contains({ "3", "i" }));
+        REQUIRE(modifiesTTable.size() == 6);
+        REQUIRE(followsTTable.contains({ "1", "6" }));
+        REQUIRE(followsTTable.size() == 4);
+        REQUIRE(parentTTable.contains({ "2", "4" }));
+        REQUIRE(parentTTable.size() == 4);
+      }
     }
 
     SECTION("Doubly nested while") {
@@ -1090,7 +1198,7 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
       Table printTable = pkb.getPrintTable();
       Table readTable = pkb.getReadTable();
       Table varTable = pkb.getVarTable();
-      //Table constTable = pkb.getConstTable();
+      Table constTable = pkb.getConstTable();
       Table stmtTable = pkb.getStmtTable();
       Table usesTable = pkb.getUsesTable();
       Table modifiesTable = pkb.getModifiesTable();
@@ -1124,12 +1232,12 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
       REQUIRE(varTable.contains({ "read" }));
       REQUIRE(varTable.contains({ "while" }));
       REQUIRE(varTable.size() == 11);
-      //REQUIRE(constTable.contains({ "0" }));
-      //REQUIRE(constTable.contains({ "1" }));
-      //REQUIRE(constTable.contains({ "2" }));
-      //REQUIRE(constTable.contains({ "3" }));
-      //REQUIRE(constTable.contains({ "4" }));
-      //REQUIRE(constTable.size() == 5);
+      REQUIRE(constTable.contains({ "0" }));
+      REQUIRE(constTable.contains({ "1" }));
+      REQUIRE(constTable.contains({ "2" }));
+      REQUIRE(constTable.contains({ "3" }));
+      REQUIRE(constTable.contains({ "4" }));
+      REQUIRE(constTable.size() == 5);
       REQUIRE(stmtTable.size() == 8); // maybe can also check the statement num? maybe not necessary
       REQUIRE(usesTable.contains({ "1", "a" }));
       REQUIRE(usesTable.contains({ "1", "b" }));
@@ -1185,6 +1293,45 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
       REQUIRE(patternAssignTable.contains({ "7", "while", expectedPostFixString4 }));
       REQUIRE(patternAssignTable.contains({ "8", "call", expectedPostFixString5 }));
       REQUIRE(patternAssignTable.size() == 5);
+
+      SECTION("With DE relations") {
+        DesignExtractor designExtractor;
+        designExtractor.extractDesignAbstractions(pkb);
+        Table parentTTable = pkb.getParentTTable();
+        Table usesTTable = pkb.getUsesTable();
+        Table followsTTable = pkb.getFollowsTTable();
+        Table modifiesTTable = pkb.getModifiesTable();
+
+        REQUIRE(usesTTable.contains({ "1", "print" }));
+        REQUIRE(usesTTable.contains({ "1", "c" }));
+        REQUIRE(usesTTable.contains({ "1", "d" }));
+        REQUIRE(usesTTable.contains({ "1", "e" }));
+        REQUIRE(usesTTable.contains({ "1", "f" }));
+        REQUIRE(usesTTable.contains({ "1", "read" }));
+        REQUIRE(usesTTable.contains({ "1", "if" }));
+        REQUIRE(usesTTable.contains({ "1", "while" }));
+        REQUIRE(usesTTable.contains({ "3", "e" }));
+        REQUIRE(usesTTable.contains({ "3", "f" }));
+        REQUIRE(usesTTable.contains({ "3", "read" }));
+        REQUIRE(usesTTable.contains({ "3", "if" }));
+        REQUIRE(usesTTable.contains({ "4", "read" }));
+        REQUIRE(usesTTable.size() == 35);
+        REQUIRE(modifiesTTable.contains({ "1", "print" }));
+        REQUIRE(modifiesTTable.contains({ "1", "read" }));
+        REQUIRE(modifiesTTable.contains({ "1", "if" }));
+        REQUIRE(modifiesTTable.contains({ "1", "while" }));
+        REQUIRE(modifiesTTable.contains({ "3", "read" }));
+        REQUIRE(modifiesTTable.contains({ "3", "if" }));
+        REQUIRE(modifiesTTable.contains({ "4", "read" }));
+        REQUIRE(modifiesTTable.size() == 17);
+        REQUIRE(followsTTable.contains({ "2", "7" }));
+        REQUIRE(followsTTable.size() == 5);
+        REQUIRE(parentTTable.contains({ "1", "4" }));
+        REQUIRE(parentTTable.contains({ "1", "5" }));
+        REQUIRE(parentTTable.contains({ "1", "6" }));
+        REQUIRE(parentTTable.contains({ "3", "5" }));
+        REQUIRE(parentTTable.size() == 10);
+      }
     }
   }
 }
@@ -1203,7 +1350,7 @@ TEST_CASE("Loops", "[SimpleParser][Assign][If][Print][Read][While]") {
     Table printTable = pkb.getPrintTable();
     Table readTable = pkb.getReadTable();
     Table varTable = pkb.getVarTable();
-    //Table constTable = pkb.getConstTable();
+    Table constTable = pkb.getConstTable();
     Table stmtTable = pkb.getStmtTable();
     Table usesTable = pkb.getUsesTable();
     Table modifiesTable = pkb.getModifiesTable();
@@ -1234,11 +1381,11 @@ TEST_CASE("Loops", "[SimpleParser][Assign][If][Print][Read][While]") {
     REQUIRE(varTable.contains({ "print" }));
     REQUIRE(varTable.contains({ "read" }));
     REQUIRE(varTable.size() == 6);
-    //REQUIRE(constTable.contains({ "1" }));
-    //REQUIRE(constTable.contains({ "2" }));
-    //REQUIRE(constTable.contains({ "6" }));
-    //REQUIRE(constTable.contains({ "42" }));
-    //REQUIRE(constTable.size() == 4);
+    REQUIRE(constTable.contains({ "1" }));
+    REQUIRE(constTable.contains({ "2" }));
+    REQUIRE(constTable.contains({ "6" }));
+    REQUIRE(constTable.contains({ "42" }));
+    REQUIRE(constTable.size() == 4);
     REQUIRE(stmtTable.size() == 9); // maybe can also check the statement num? maybe not necessary
     REQUIRE(usesTable.contains({ "2", "D33z" }));
     REQUIRE(usesTable.contains({ "4", "life" }));
@@ -1281,5 +1428,161 @@ TEST_CASE("Loops", "[SimpleParser][Assign][If][Print][Read][While]") {
     REQUIRE(patternAssignTable.contains({ "5", "print", expectedPostFixString2 }));
     REQUIRE(patternAssignTable.contains({ "7", "D33z", expectedPostFixString3 }));
     REQUIRE(patternAssignTable.size() == 3);
+
+    SECTION("With DE relations") {
+      DesignExtractor designExtractor;
+      designExtractor.extractDesignAbstractions(pkb);
+      Table parentTTable = pkb.getParentTTable();
+      Table usesTTable = pkb.getUsesTable();
+      Table followsTTable = pkb.getFollowsTTable();
+      Table modifiesTTable = pkb.getModifiesTable();
+
+      REQUIRE(usesTTable.contains({ "2", "life" }));
+      REQUIRE(usesTTable.contains({ "2", "bad" }));
+      REQUIRE(usesTTable.contains({ "2", "read" }));
+      REQUIRE(usesTTable.contains({ "2", "nu7z" }));
+      REQUIRE(usesTTable.contains({ "4", "read" }));
+      REQUIRE(usesTTable.contains({ "4", "D33z" }));
+      REQUIRE(usesTTable.contains({ "8", "nu7z" }));
+      REQUIRE(usesTTable.size() == 21);
+      REQUIRE(modifiesTTable.contains({ "2", "life" }));
+      REQUIRE(modifiesTTable.contains({ "2", "print" }));
+      REQUIRE(modifiesTTable.contains({ "2", "D33z" }));
+      REQUIRE(modifiesTTable.contains({ "4", "print" }));
+      REQUIRE(modifiesTTable.contains({ "4", "D33z" }));
+      REQUIRE(modifiesTTable.contains({ "6", "D33z" }));
+      REQUIRE(modifiesTTable.size() == 13);
+      REQUIRE(followsTTable.contains({ "3", "8" }));
+      REQUIRE(followsTTable.size() == 4);
+      REQUIRE(parentTTable.contains({ "2", "5" }));
+      REQUIRE(parentTTable.contains({ "2", "6" }));
+      REQUIRE(parentTTable.contains({ "2", "7" }));
+      REQUIRE(parentTTable.contains({ "2", "9" }));
+      REQUIRE(parentTTable.contains({ "4", "7" }));
+      REQUIRE(parentTTable.size() == 12);
+    }
+  }
+
+  SECTION("Random example") {
+    std::string string("procedure main {while (((while + (print)) != read) || ((if) <= else)) {if (!((if > then) && (print < while))) then {read read;} else {while (print >= (((call) + ((read))) % else)) {print = call + procedure;}}}}");
+    std::list<Token> simpleProg = expressionStringToTokens(string);
+    Pkb pkb;
+    SourceProcessor::SimpleParser parser(pkb, simpleProg);
+    parser.parse();
+    Table procTable = pkb.getProcTable();
+    Table ifTable = pkb.getIfTable();
+    Table whileTable = pkb.getWhileTable();
+    Table printTable = pkb.getPrintTable();
+    Table readTable = pkb.getReadTable();
+    Table varTable = pkb.getVarTable();
+    Table constTable = pkb.getConstTable();
+    Table stmtTable = pkb.getStmtTable();
+    Table usesTable = pkb.getUsesTable();
+    Table modifiesTable = pkb.getModifiesTable();
+    Table followsTable = pkb.getFollowsTable();
+    Table parentTable = pkb.getParentTable();
+    Table patternAssignTable = pkb.getPatternAssignTable();
+
+    std::string expectedPostFixString("call procedure +");
+
+    REQUIRE(procTable.contains({ "main" }));
+    REQUIRE(procTable.size() == 1);
+    REQUIRE(ifTable.contains({ "2" }));
+    REQUIRE(ifTable.size() == 1);
+    REQUIRE(whileTable.contains({ "1" }));
+    REQUIRE(whileTable.contains({ "4" }));
+    REQUIRE(whileTable.size() == 2);
+    REQUIRE(printTable.size() == 0);
+    REQUIRE(readTable.contains({ "3" }));
+    REQUIRE(readTable.size() == 1);
+    REQUIRE(varTable.contains({ "while" }));
+    REQUIRE(varTable.contains({ "print" }));
+    REQUIRE(varTable.contains({ "read" }));
+    REQUIRE(varTable.contains({ "if" }));
+    REQUIRE(varTable.contains({ "else" }));
+    REQUIRE(varTable.contains({ "then" }));
+    REQUIRE(varTable.contains({ "call" }));
+    REQUIRE(varTable.contains({ "procedure" }));
+    REQUIRE(varTable.size() == 8);
+    REQUIRE(constTable.size() == 0);
+    REQUIRE(stmtTable.size() == 5); // maybe can also check the statement num? maybe not necessary
+    REQUIRE(usesTable.contains({ "1", "while" }));
+    REQUIRE(usesTable.contains({ "1", "print" }));
+    REQUIRE(usesTable.contains({ "1", "read" }));
+    REQUIRE(usesTable.contains({ "1", "if" }));
+    REQUIRE(usesTable.contains({ "1", "else" }));
+    REQUIRE(usesTable.contains({ "2", "if" }));
+    REQUIRE(usesTable.contains({ "2", "then" }));
+    REQUIRE(usesTable.contains({ "2", "print" }));
+    REQUIRE(usesTable.contains({ "2", "while" }));
+    REQUIRE(usesTable.contains({ "4", "print" }));
+    REQUIRE(usesTable.contains({ "4", "call" }));
+    REQUIRE(usesTable.contains({ "4", "read" }));
+    REQUIRE(usesTable.contains({ "4", "else" }));
+    REQUIRE(usesTable.contains({ "5", "call" }));
+    REQUIRE(usesTable.contains({ "5", "procedure" }));
+    REQUIRE(usesTable.contains({ "main", "call" }));
+    REQUIRE(usesTable.contains({ "main", "else" }));
+    REQUIRE(usesTable.contains({ "main", "if" }));
+    REQUIRE(usesTable.contains({ "main", "print" }));
+    REQUIRE(usesTable.contains({ "main", "procedure" }));
+    REQUIRE(usesTable.contains({ "main", "read" }));
+    REQUIRE(usesTable.contains({ "main", "then" }));
+    REQUIRE(usesTable.contains({ "main", "while" }));
+    // Missing Uses for if-var because its the job of design extractor-pkb to populate after
+    REQUIRE(usesTable.size() == 23);
+    REQUIRE(modifiesTable.contains({ "3", "read" }));
+    REQUIRE(modifiesTable.contains({ "5", "print" }));
+    REQUIRE(modifiesTable.contains({ "main", "read" }));
+    REQUIRE(modifiesTable.contains({ "main", "print" }));
+    // Missing Modifies for if-var because its the job of design extractor-pkb to populate after
+    REQUIRE(modifiesTable.size() == 4);
+    REQUIRE(followsTable.size() == 0);
+    REQUIRE(parentTable.contains({ "1", "2" }));
+    REQUIRE(parentTable.contains({ "2", "3" }));
+    REQUIRE(parentTable.contains({ "2", "4" }));
+    REQUIRE(parentTable.contains({ "4", "5" }));
+    REQUIRE(parentTable.size() == 4);
+    REQUIRE(patternAssignTable.contains({ "5", "print", expectedPostFixString }));
+    REQUIRE(patternAssignTable.size() == 1);
+
+    SECTION("With DE relations") {
+      DesignExtractor designExtractor;
+      designExtractor.extractDesignAbstractions(pkb);
+      Table parentTTable = pkb.getParentTTable();
+      Table usesTTable = pkb.getUsesTable();
+      Table followsTTable = pkb.getFollowsTTable();
+      Table modifiesTTable = pkb.getModifiesTable();
+
+      REQUIRE(usesTTable.contains({ "1", "then" }));
+      REQUIRE(usesTTable.contains({ "1", "call" }));
+      REQUIRE(usesTTable.contains({ "1", "procedure" }));
+      REQUIRE(usesTTable.contains({ "2", "call" }));
+      REQUIRE(usesTTable.contains({ "2", "read" }));
+      REQUIRE(usesTTable.contains({ "2", "else" }));
+      REQUIRE(usesTTable.contains({ "2", "procedure" }));
+      REQUIRE(usesTTable.contains({ "4", "procedure" }));
+      REQUIRE(usesTTable.size() == 31);
+      REQUIRE(modifiesTTable.contains({ "1", "read" }));
+      REQUIRE(modifiesTTable.contains({ "1", "print" }));
+      REQUIRE(modifiesTTable.contains({ "2", "read" }));
+      REQUIRE(modifiesTTable.contains({ "2", "print" }));
+      REQUIRE(modifiesTTable.contains({ "4", "print" }));
+      REQUIRE(modifiesTTable.size() == 9);
+      REQUIRE(followsTTable.size() == 0);
+      REQUIRE(parentTTable.contains({ "1", "3" }));
+      REQUIRE(parentTTable.contains({ "1", "4" }));
+      REQUIRE(parentTTable.contains({ "1", "5" }));
+      REQUIRE(parentTTable.contains({ "2", "5" }));
+      REQUIRE(parentTTable.size() == 8);
+    }
+  }
+
+  SECTION("Random example, but with extra parenthesis around cond expr") {
+    std::string string("procedure main {while ((((while + (print)) != read) || ((if) <= else))) {if (!((if > then) && (print < while))) then {read read;} else {while (print >= (((call) + ((read))) % else)) {print = call + procedure;}}}}");
+    std::list<Token> simpleProg = expressionStringToTokens(string);
+    Pkb pkb;
+    SourceProcessor::SimpleParser parser(pkb, simpleProg);
+    REQUIRE_THROWS(parser.parse());
   }
 }

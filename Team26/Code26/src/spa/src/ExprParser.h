@@ -35,6 +35,9 @@ namespace ExprProcessor {
   const static Token COND_EXPR_AND{ TokenType::OPERATOR, "&&" };
   const static Token COND_EXPR_OR{ TokenType::OPERATOR, "||" };
 
+  // Dummy result token
+  const static Token DUMMY_RESULT = { TokenType::IDENTIFIER, "dummy" };
+
   class CondExprParser {
   private:
     std::list<Token> tokens;
@@ -75,7 +78,7 @@ namespace ExprProcessor {
     void parseExpr();
     void parseTerm();
     void parseFactor();
-    void validateAndConsume(const Token& token);
+    void validateAndConsume(const Token& validationToken);
     bool isCondExprBinaryOperator(const Token& token);
     bool isRelExprOperator(const Token& token);
     bool isExprOperator(const Token& token);

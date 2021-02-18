@@ -61,10 +61,10 @@ namespace SourceProcessor {
      * Checks if the first token in std::list<Token> token list matches the input token and returns its string representation if they match.
      * This check validates token type for procedure/variable names, both token type and token values otherwise.
      *
-     * @param token Pointer of the input token.
+     * @param validationToken Reference of the input token used for validation.
      * @returns std::string The string representation of the first token in the list of tokens.
      */
-    std::string validate(const Token& token);
+    std::string validate(const Token& validationToken);
 
     /**
      * Checks if the token is a valid constant not starting with '0',
@@ -140,7 +140,8 @@ namespace SourceProcessor {
      */
     int parseAssign();
 
-    int parseCall();
+    // TODO: For Iteration 2
+    //int parseCall();
 
     /**
      * Parses tokens into a statement if valid and returns its statement number.
@@ -181,10 +182,7 @@ namespace SourceProcessor {
 
   public:
     SimpleParser(Pkb& pkb, std::list<Token> tokens);
-    ~SimpleParser();
 
     void parse();
-
-    Pkb getPkb();
   };
 }

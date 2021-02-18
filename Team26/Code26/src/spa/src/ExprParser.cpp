@@ -7,21 +7,28 @@
 #include <unordered_set>
 
 #include "Token.h"
+#include "SpaException.h"
 
 namespace ExprProcessor {
   //==================//
-  // CondExprParser //
+  //  CondExprParser  //
   //==================//
 
   CondExprParser::CondExprParser(std::list<Token>& tokens) : tokens(tokens) {
-    if (tokens.empty()) {
-      throw "Conditional expression cannot be empty!";
-    }
     it = this->tokens.begin();
   };
 
   void CondExprParser::parse() {
     parseCondExpr();
+
+    // Should have no more tokens left
+    if (it != tokens.end()) {
+      throw SyntaxError(
+        ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS +
+        ErrorMessage::APPEND_TOKEN_RECEIVED +
+        it->value
+      );
+    }
   }
 
   std::unordered_set<std::string> CondExprParser::getVariables() {
@@ -46,7 +53,7 @@ namespace ExprProcessor {
 
   void CondExprParser::parseCondExpr() {
     if (it == tokens.end()) {
-      throw "Syntax Error! Expected more tokens for conditional expression!";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS);
     }
 
     Token currentToken = *it;
@@ -73,26 +80,30 @@ namespace ExprProcessor {
       validateAndConsume(LEFT_PARENTHESIS);
       parseCondExpr();
       validateAndConsume(RIGHT_PARENTHESIS);
+
+      if (it == tokens.end()) {
+        throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS);
+      }
+
       Token condExprBinaryOperatorToken = *it;
       ++it;
       if (isCondExprBinaryOperator(condExprBinaryOperatorToken)) {
-        it++;
         std::list<Token>::iterator secondTempPosition = it;
         try {
           validateAndConsume(LEFT_PARENTHESIS);
           parseCondExpr();
           validateAndConsume(RIGHT_PARENTHESIS);
         }
-        catch (...) {
+        catch (const SyntaxError& e) {
           it = secondTempPosition;
           parseRelExpr();
         }
       }
       else {
-        throw "Syntax Error! Invalid conditional subexpression!";
+        throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_INVALID_COND_SUB_EXPR);
       }
     }
-    catch (...) {
+    catch (const SyntaxError& e) {
       it = tempPosition;
       parseRelExpr();
     }
@@ -102,13 +113,13 @@ namespace ExprProcessor {
     parseRelFactor();
 
     if (it == tokens.end()) {
-      throw "Syntax Error! Expected more tokens for conditional expression!";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS);
     }
     Token currentToken = *it;
     ++it;
 
     if (!isRelExprOperator(currentToken)) {
-      throw "Syntax Error! Invalid relational expression in conditional expression!";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_INVALID_REL_EXPR);
     }
     parseRelFactor();
   }
@@ -136,7 +147,7 @@ namespace ExprProcessor {
 
   void CondExprParser::parseFactor() {
     if (it == tokens.end()) {
-      throw "Syntax Error! Expected more tokens for conditional expression!";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS);
     }
 
     Token currentToken = *it;
@@ -148,28 +159,39 @@ namespace ExprProcessor {
       validateAndConsume(RIGHT_PARENTHESIS);
     }
     else if (!isVarOrConst) {
-      throw "Syntax Error! Invalid factor for conditional expression!";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_INVALID_FACTOR);
     }
-    // Else if isVarOrConst is true, do nothing
+    // Else isVarOrConst is true, do nothing
   }
 
-  void CondExprParser::validateAndConsume(const Token& token) {
+  void CondExprParser::validateAndConsume(const Token& validationToken) {
     if (it == tokens.end()) {
-      throw "Expected a token but received none";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_NOT_ENOUGHT_TOKENS);
     }
 
     const Token frontToken = *it;
 
-    if (token.value.empty()) {
+    bool isValidateTokenType = validationToken.value.empty();
+    if (isValidateTokenType) {
       // Check type only for empty token value
-      if (frontToken.type != token.type) {
-        throw "Encounted token of a wrong type";
+      if (frontToken.type != validationToken.type) {
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_COND_EXPR_WRONG_TOKEN_TYPE +
+          ErrorMessage::APPEND_TOKEN_RECEIVED +
+          frontToken.value
+        );
       }
     }
     else {
       // Check exact match otherwise
-      if (frontToken != token) {
-        throw "Expected " + token.value + " but encountered " + frontToken.value;
+      if (frontToken != validationToken) {
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_COND_EXPR_WRONG_TOKEN_VALUE +
+          ErrorMessage::APPEND_TOKEN_EXPECTED +
+          validationToken.value +
+          ErrorMessage::APPEND_TOKEN_RECEIVED +
+          frontToken.value
+        );
       }
     }
 
@@ -271,7 +293,11 @@ namespace ExprProcessor {
 
       if (isOperand) {
         if (!expectOperand) {
-          throw "Syntax Error! Expected operator between 2 operands!";
+          throw SyntaxError(
+            ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_NON_OPERATOR_TOKEN +
+            ErrorMessage::APPEND_TOKEN_RECEIVED +
+            next.value
+          );
         }
         expectOperand = false;
 
@@ -279,7 +305,11 @@ namespace ExprProcessor {
       }
       else if (isOperator) {
         if (expectOperand) {
-          throw "Syntax Error! Expected operand but got an operator!";
+          throw SyntaxError(
+            ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_NON_OPERAND_TOKEN +
+            ErrorMessage::APPEND_TOKEN_RECEIVED +
+            next.value
+          );
         }
         expectOperand = true;
 
@@ -292,18 +322,30 @@ namespace ExprProcessor {
       }
       else if (next == LEFT_PARENTHESIS) {
         if (!expectOperand) {
-          throw "Syntax Error! Expected operator before \"(\"!";
+          throw SyntaxError(
+            ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_NON_OPERATOR_TOKEN +
+            ErrorMessage::APPEND_TOKEN_RECEIVED +
+            next.value
+          );
         }
 
         stack.push(next);
       }
       else if (next == RIGHT_PARENTHESIS) {
         if (expectOperand) {
-          throw "Syntax Error! Expected operand before \")\"!";
+          throw SyntaxError(
+            ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_NON_OPERAND_TOKEN +
+            ErrorMessage::APPEND_TOKEN_RECEIVED +
+            next.value
+          );
         }
 
         if (stack.empty()) {
-          throw "Syntax Error! Mismatched parenthesis in expression!";
+          throw SyntaxError(
+            ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_MISMATCHED_PARENTHESIS +
+            ErrorMessage::APPEND_TOKEN_RECEIVED +
+            next.value
+          );
         }
 
         while (stack.top() != LEFT_PARENTHESIS) {
@@ -311,20 +353,32 @@ namespace ExprProcessor {
           stack.pop();
 
           if (stack.empty()) { // Missing '(' to pop
-            throw "Syntax Error! Mismatched parenthesis in expression!";
+            throw SyntaxError(
+              ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_MISMATCHED_PARENTHESIS +
+              ErrorMessage::APPEND_TOKEN_RECEIVED +
+              next.value
+            );
           }
         }
 
         stack.pop(); //Pop '(' in the stack
       }
       else { // Invalid tokens. e.g. '{', '<', '_'
-        throw "Syntax Error! Invalid token for expression!";
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_INVALID_TOKEN +
+          ErrorMessage::APPEND_TOKEN_RECEIVED +
+          next.value
+        );
       }
     }
 
     while (!stack.empty()) {
       if (stack.top() == LEFT_PARENTHESIS) {
-        throw "Syntax Error! Mismatched parenthesis in expression!";
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_MISMATCHED_PARENTHESIS +
+          ErrorMessage::APPEND_TOKEN_RECEIVED +
+          stack.top().value
+        );
       }
       postfixExprTokens.emplace_back(stack.top());
       stack.pop();
@@ -335,7 +389,7 @@ namespace ExprProcessor {
   // Validates postfix expr
   void AssignExprParser::validatePostfixExpr() {
     if (postfixExprTokens.empty()) {
-      throw "Syntax Error! Expression cannot be empty!";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_EMPTY_EXPRESSION);
     }
 
     std::stack<Token> stack;
@@ -352,16 +406,15 @@ namespace ExprProcessor {
       }
       else if (isOperator) { // operator
         if (stack.empty()) {
-          throw "Syntax Error! Operator XXX requires 2 operands!";
+          throw SyntaxError(ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_INVALID_EXPRESSION);
         }
         stack.pop();
         if (stack.empty()) {
-          throw "Syntax Error! Operator XXX requires 2 operands!";
+          throw SyntaxError(ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_INVALID_EXPRESSION);
         }
         stack.pop();
         // Creates a dummy token as the result of the subexpression for validation
-        Token dummyResult = { TokenType::IDENTIFIER, "dummy" };
-        stack.push(dummyResult);
+        stack.push(DUMMY_RESULT);
       }
       else {
         assert(false);
@@ -370,11 +423,11 @@ namespace ExprProcessor {
 
     // At this point, stack should have exactly one element which is the result
     if (stack.empty()) {
-      throw "Syntax Error! Invalid expression!";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_INVALID_EXPRESSION);
     }
     stack.pop(); // pop result
     if (!stack.empty()) {
-      throw "Syntax Error! Invalid expression!";
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_INVALID_EXPRESSION);
     }
   }
 }

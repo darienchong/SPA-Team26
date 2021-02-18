@@ -1,9 +1,12 @@
 #include "SimpleParser.h"
 
+#include <assert.h>
 #include <list>
 #include <string>
 #include <vector>
 
+#include "Token.h"
+#include "SpaException.h"
 #include "ExprParser.h"
 #include "Pkb.h"
 
@@ -41,18 +44,22 @@ namespace SourceProcessor {
     return stmtNum;
   }
 
-  // Might need to modify error message!!!
+  // Should only be called after getFrontToken()
+  // Pre-condition: tokens will never be empty
   void SimpleParser::removeFrontToken() {
     if (tokens.empty()) {
-      throw "No more tokens to remove!";
+      assert(false);
     }
     tokens.pop_front();
   }
 
-  // Might need to modify error message!!!
   Token SimpleParser::getFrontToken() {
     if (tokens.empty()) {
-      throw "Syntax Error! Not enough tokens!";
+      throw SyntaxError(
+        ErrorMessage::SYNTAX_ERROR_NOT_ENOUGHT_TOKENS +
+        ErrorMessage::APPEND_STMT_NUMBER +
+        std::to_string(getStmtNum())
+      );
     }
     return tokens.front();
   }
@@ -65,35 +72,56 @@ namespace SourceProcessor {
     return currentProc;
   }
 
-  // TODO: modify error messages to look "nicer"
-  std::string SimpleParser::validate(const Token& token) {
+  std::string SimpleParser::validate(const Token& validationToken) {
     Token front = getFrontToken();
     removeFrontToken();
 
-    if (front == token || (token.type == front.type && token.value.empty())) {
-      return front.value;
+    bool isValidateTokenType = validationToken.value.empty();
+    if (isValidateTokenType) {
+      if (validationToken.type != front.type) {
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_WRONG_TOKEN_TYPE +
+          ErrorMessage::APPEND_TOKEN_RECEIVED +
+          front.value +
+          ErrorMessage::APPEND_STMT_NUMBER +
+          std::to_string(getStmtNum())
+        );
+      }
+    }
+    else {
+      if (validationToken != front) {
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_WRONG_TOKEN_VALUE +
+          ErrorMessage::APPEND_TOKEN_EXPECTED +
+          validationToken.value +
+          ErrorMessage::APPEND_TOKEN_RECEIVED +
+          front.value +
+          ErrorMessage::APPEND_STMT_NUMBER +
+          std::to_string(getStmtNum())
+        );
+      }
     }
 
-    throw "Syntax Error! Expected XXX but got YYY!";
+    return front.value;
   }
 
+  // Valid number tokens should be guarenteed by Tokeniser
   void SimpleParser::validateNumToken() {
     Token front = getFrontToken();
 
     if (front.value.size() > 1 && front.value.front() == '0') {
-      throw "Syntax Error! Numbers cannot start with 0!";
+      assert(false);
     }
   }
 
-  // TODO: uncomment the method pkb.addConst() after pkb side finish its implementation
   std::string SimpleParser::parseAssignExpr() {
     std::list<Token> infixExprTokens;
     while (!tokens.empty()) {
       Token next = getFrontToken();
-      if (next == SEMICOLON) { // encountered ';'
+      if (next == SEMICOLON) { // check for end of assign stmt
         break;
       }
-      if (next.type == CONST.type) {
+      else if (next.type == CONST.type) {
         validateNumToken();
       }
       infixExprTokens.emplace_back(next);
@@ -101,47 +129,17 @@ namespace SourceProcessor {
     }
 
     ExprProcessor::AssignExprParser exprParser(infixExprTokens);
-    exprParser.parse();
-    std::unordered_set<std::string> variablesUsed = exprParser.getVariables();
-    std::unordered_set<std::string> constantsUsed = exprParser.getConstants();
-
-    // add variables and Uses relation for stmt-var to pkb
-    for (const std::string& variable : variablesUsed) {
-      pkb.addUses(getStmtNum(), variable);
-      pkb.addUses(getCurrentProc(), variable);
-      pkb.addVar(variable);
+    try {
+      exprParser.parse();
     }
-    // add constants to pkb
-    for (const std::string& constants : constantsUsed) {
-      //pkb.addConst(constants); // method not implemented yet
+    catch (const ExprProcessor::SyntaxError& e) {
+      throw SyntaxError(
+        std::string(e.what()) +
+        ErrorMessage::APPEND_STMT_NUMBER +
+        std::to_string(getStmtNum())
+      );
     }
 
-    return exprParser.getPostfixExprString();
-  }
-
-  // TODO: uncomment call to pkb.addConst() after pkb side finish implementing!!!!
-  void SimpleParser::parseCondExpr() {
-    std::list<Token> infixExprTokens;
-    // might need to change
-    auto it = tokens.begin();
-    while (it != tokens.end() && std::next(it) != tokens.end()) {
-      Token current = getFrontToken();
-      Token next = *std::next(it);
-
-      bool isEndOfCondExpr = current == RIGHT_PARENTHESIS && (next == THEN || next == LEFT_BRACE);
-      if (isEndOfCondExpr) {
-        break;
-      }
-      if (current.type == CONST.type) {
-        validateNumToken();
-      }
-      infixExprTokens.emplace_back(current);
-      it++;
-      removeFrontToken();
-    }
-
-    ExprProcessor::CondExprParser exprParser(infixExprTokens);
-    exprParser.parse();
     std::unordered_set<std::string> variablesUsed = exprParser.getVariables();
     std::unordered_set<std::string> constantsUsed = exprParser.getConstants();
 
@@ -152,7 +150,53 @@ namespace SourceProcessor {
       pkb.addVar(variable); // add vars
     }
     for (const std::string& constants : constantsUsed) {
-      //pkb.addConst(constants); // add consts
+      pkb.addConst(constants); // add consts
+    }
+
+    return exprParser.getPostfixExprString();
+  }
+
+  void SimpleParser::parseCondExpr() {
+    std::list<Token> infixExprTokens;
+    auto it = tokens.begin();
+    while (it != tokens.end() && std::next(it) != tokens.end()) {
+      Token current = getFrontToken();
+      Token next = *std::next(it);
+
+      bool isEndOfCondExpr = current == RIGHT_PARENTHESIS && (next == THEN || next == LEFT_BRACE);
+      if (isEndOfCondExpr) {
+        break;
+      }
+      else if (current.type == CONST.type) {
+        validateNumToken();
+      }
+      infixExprTokens.emplace_back(current);
+      it++;
+      removeFrontToken();
+    }
+
+    ExprProcessor::CondExprParser exprParser(infixExprTokens);
+    try {
+      exprParser.parse();
+    }
+    catch (const ExprProcessor::SyntaxError& e) {
+      throw SyntaxError(
+        std::string(e.what()) +
+        ErrorMessage::APPEND_STMT_NUMBER +
+        std::to_string(getStmtNum())
+      );
+    }
+    std::unordered_set<std::string> variablesUsed = exprParser.getVariables();
+    std::unordered_set<std::string> constantsUsed = exprParser.getConstants();
+
+    // adding information to pkb
+    for (const std::string& variable : variablesUsed) {
+      pkb.addUses(getStmtNum(), variable); // add Uses relation for stmt-var
+      pkb.addUses(getCurrentProc(), variable); // add Uses relation for proc-var
+      pkb.addVar(variable); // add vars
+    }
+    for (const std::string& constants : constantsUsed) {
+      pkb.addConst(constants); // add consts
     }
   }
 
@@ -260,24 +304,26 @@ namespace SourceProcessor {
     return stmtNum;
   }
 
-  // TODO: Iteration 2
-  int SimpleParser::parseCall() {
-    return 0;
-  }
-
-  // TODO: modify error message + change return type if needed
   int SimpleParser::parseStmt(int first) {
     Token keyword = getFrontToken();
     int stmt;
 
     if (keyword.type != NAME.type) {
-      throw "Syntax Error! Unable to parse statement at #stmtNo";
+      throw SyntaxError(
+        ErrorMessage::SYNTAX_ERROR_UNKNOWN_STMT_TYPE +
+        ErrorMessage::APPEND_STMT_NUMBER +
+        std::to_string(getStmtNum())
+      );
     }
     else {
       auto it = std::next(tokens.begin());
 
       if (it == tokens.end()) {
-        throw "Syntax Error! Not enough tokens!";
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_NOT_ENOUGHT_TOKENS +
+          ErrorMessage::APPEND_STMT_NUMBER +
+          std::to_string(getStmtNum())
+        );
       }
 
       if (*it == ASSIGN_OP) {
@@ -295,15 +341,16 @@ namespace SourceProcessor {
       else if (keyword == PRINT) {
         stmt = parsePrint();
       }
-      else if (keyword == CALL) {
-        stmt = parseCall();
-      }
       else {
-        throw "Syntax Error! Unknown statement type!";
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_UNKNOWN_STMT_TYPE +
+          ErrorMessage::APPEND_STMT_NUMBER +
+          std::to_string(getStmtNum())
+        );
       }
     }
 
-    // adding information to pkb if first != statement - basically a statement cannot follow itself
+    // Check if statement is itself
     if (first != stmt) {
       pkb.addFollows(first, stmt); // add Follows relation for stmt-stmt
     }
@@ -312,23 +359,26 @@ namespace SourceProcessor {
     return stmt;
   }
 
-  // TODO: modify error message if needed
   void SimpleParser::parseStmtLst(int parent, int first) {
-    bool isEmpty = true;
+    bool isStmtLstEmpty = true;
     int stmt = first;
     while (!tokens.empty() && tokens.front() != RIGHT_BRACE) {
       stmt = parseStmt(stmt);
 
-      // adding information to pkb if a parent statement exists
-      if (parent != 0) {
+      bool isAtTopLevel = parent == 0;
+      if (!isAtTopLevel) {
         pkb.addParent(parent, stmt); // add Parents relation for stmt-stmt
       }
 
-      isEmpty = false;
+      isStmtLstEmpty = false;
     }
 
-    if (isEmpty) {
-      throw "Syntax Error! Statement list cannot be empty!";
+    if (isStmtLstEmpty) {
+      throw SyntaxError(
+        ErrorMessage::SYNTAX_ERROR_EMPTY_STMT_LIST +
+        ErrorMessage::APPEND_STMT_NUMBER +
+        std::to_string(first)
+      );
     }
   }
 
@@ -344,30 +394,26 @@ namespace SourceProcessor {
   }
 
   void SimpleParser::parseProgram() {
-    // can remove this empty program check if already handled by tokeniser - ie guaranteed that the list is not empty when parsing
-    if (tokens.empty()) {
-      throw "Program cannot be empty!";
-    }
-    // code for iteration 2 onwards after multiple procs allowed
+    // Multiple procedure allowed for iteration 2 onwards
     //while (!tokens.empty()) {
     //  parseProcedure();
     //}
 
-    // code for iteration 1
+    // Single procedure for iteration 1
     parseProcedure();
     if (!tokens.empty()) {
-      throw "Error! Extra tokens at the end of the procedure! Only 1 procedure allowed for Iteration 1!";
+      throw SyntaxError(
+        ErrorMessage::SYNTAX_ERROR_ADDITIONAL_TOKENS +
+        ErrorMessage::APPEND_TOKEN_RECEIVED +
+        tokens.front().value
+      );
     }
   }
 
-  SimpleParser::SimpleParser(Pkb& pkb, std::list<Token> tokens) : pkb(pkb), tokens(tokens) {};
-  SimpleParser::~SimpleParser() {};
+  SimpleParser::SimpleParser(Pkb& pkb, std::list<Token> tokens)
+    : pkb(pkb), tokens(tokens) {};
 
   void SimpleParser::parse() {
     parseProgram();
-  }
-
-  Pkb SimpleParser::getPkb() {
-    return pkb;
   }
 }

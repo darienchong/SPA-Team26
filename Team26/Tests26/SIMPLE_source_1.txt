@@ -1,0 +1,32 @@
+Procedure program1 {
+  read x;
+  read limit;
+  i = 0;
+  j = 0;
+  k = 0;
+  result = 				0;
+  addition = 1;
+if(x%2==0)then{while(i<x){while (j < x) {
+
+
+
+
+        while(k < x) {result = result + 1;k = k + 1;}j = j + 1;
+      }i = i + 1;
+    }         
+  } else                   {
+    if (x >= limit) then {
+      while (i <= 1000) {
+        if (i % 3 == 0) then {
+          addition = addition + 1;
+        } else {
+          result = result + addition;
+        }
+        i = i + 1;
+      }
+    } else {
+      result = x * (addition + 10);
+    }
+  }
+  print result;
+}

@@ -10,17 +10,18 @@
 #include "ExprParser.h"
 
 namespace {
-  Tokeniser tokeniser;
-
   std::list<Token> expressionStringToTokens(std::string& string) {
     std::stringstream ss;
     ss << string << std::endl;
-    return tokeniser.tokenise(ss);
+    return Tokeniser()
+      .notAllowingLeadingZeroes()
+      .consumingWhitespace()
+      .tokenise(ss);
   }
 }
 
 //==================//
-// CondExprParser //
+//  CondExprParser  //
 //==================//
 
 TEST_CASE("Valid conditional expressions", "[ExprParser][CondExprParser]") {
@@ -117,6 +118,148 @@ TEST_CASE("Valid conditional expressions", "[ExprParser][CondExprParser]") {
 }
 
 TEST_CASE("Invalid conditional expressions", "[ExprParser][CondExprParser]") {
+  SECTION("Empty conditional expression") {
+    std::string string("");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("Empty parenthesis") {
+    std::string string("()");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("(var_name) cond_op (const)") {
+    std::string string("(a) || (3)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  // should be the same as prev, but write just in case
+  SECTION("(rel_factor) cond_op (rel_factor)") {
+    std::string string("(a) && (z+2)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("(rel_expr) cond_op (rel_factor)") {
+    std::string string("(b1G==b4l75) || (D33zNu75)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("! (rel_factor)") {
+    std::string string("!(h1D4D)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("(rel_expr) cond_op (rel_expr) cond_op (rel_expr)") {
+    std::string string("(a<=b) || (c>d) && (e!=f)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("(rel_expr) ! (rel_expr)") {
+    std::string string("(a<=b) ! (c>d)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("! (rel_expr) cond_op (rel_expr)") {
+    std::string string("! (a<=b) && (c>d)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("assign_expr") {
+    std::string string("x=3");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("(rel_expr) cond_op (assign_expr)") {
+    std::string string("(a<=b) && (x=3)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("rel_factor rel_op rel_factor rel_op rel_factor") {
+    std::string string("a == b == c");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("(rel_factor rel_op rel_factor) rel_op rel_factor") {
+    std::string string("(a == b) == c");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("rel_factor rel_op rel_expr") {
+    std::string string("a == (b+3+d/3<4)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("rel_expr rel_op rel_expr") {
+    std::string string("(b+3+d/3<4) == (b+3+d/3<4)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("Invalid rel_expr 1") {
+    std::string string("a == b+3/-d * f");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("Invalid rel_expr 2") {
+    std::string string("a == b+3/(-d * f)");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("Invalid token") {
+    std::string string("(!(a*3%1==(3/d-4))) || ((A;B) && (!(5<=0)))");
+    std::list<Token> condExprTokens = expressionStringToTokens(string);
+    ExprProcessor::CondExprParser parser(condExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("Mismatched parenthesis") {
+    SECTION("Extra '('") {
+      std::string string("(!(a*3%4>(3/d-4))) || ((A!=B) && (!(5<=0))");
+      std::list<Token> condExprTokens = expressionStringToTokens(string);
+      ExprProcessor::CondExprParser parser(condExprTokens);
+      REQUIRE_THROWS(parser.parse());
+    }
+
+    SECTION("Extra ')'") {
+      std::string string("(!(a*3%4>(3/d-4))) || ((A!=B) && (!(5<=0))))");
+      std::list<Token> condExprTokens = expressionStringToTokens(string);
+      ExprProcessor::CondExprParser parser(condExprTokens);
+      REQUIRE_THROWS(parser.parse());
+    }
+  }
 }
 
 //==================//
@@ -204,6 +347,22 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
     }
+
+  SECTION("Invalid variable with operators") {
+    SECTION("variable operator") {
+      std::string string("a+");
+      std::list<Token> assignExprTokens = expressionStringToTokens(string);
+      ExprProcessor::AssignExprParser parser(assignExprTokens);
+      REQUIRE_THROWS(parser.parse());
+    }
+
+    SECTION("operator variable") {
+      std::string string("% a");
+      std::list<Token> assignExprTokens = expressionStringToTokens(string);
+      ExprProcessor::AssignExprParser parser(assignExprTokens);
+      REQUIRE_THROWS(parser.parse());
+    }
+  }
  }
 
 // Invalid consts, eg "0314" would be handled by tokeniser and will not reach AssignExprParser
@@ -255,6 +414,22 @@ TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprPa
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
     }
+
+  SECTION("Invalid constant with operators") {
+    SECTION("constant operator") {
+      std::string string("1 *");
+      std::list<Token> assignExprTokens = expressionStringToTokens(string);
+      ExprProcessor::AssignExprParser parser(assignExprTokens);
+      REQUIRE_THROWS(parser.parse());
+    }
+
+    SECTION("operator constant") {
+      std::string string("+ 1");
+      std::list<Token> assignExprTokens = expressionStringToTokens(string);
+      ExprProcessor::AssignExprParser parser(assignExprTokens);
+      REQUIRE_THROWS(parser.parse());
+    }
+  }
  }
 
 TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprParser]") {
@@ -1142,6 +1317,20 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
 TEST_CASE("Assignment expressions - others", "[ExprParser][AssignExprParser]") {
   SECTION("Empty assignment") {
     std::string string("");
+    std::list<Token> assignExprTokens = expressionStringToTokens(string);
+    ExprProcessor::AssignExprParser parser(assignExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("Empty parenthesis") {
+    std::string string("()");
+    std::list<Token> assignExprTokens = expressionStringToTokens(string);
+    ExprProcessor::AssignExprParser parser(assignExprTokens);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("Operator only") {
+    std::string string("+");
     std::list<Token> assignExprTokens = expressionStringToTokens(string);
     ExprProcessor::AssignExprParser parser(assignExprTokens);
     REQUIRE_THROWS(parser.parse());
