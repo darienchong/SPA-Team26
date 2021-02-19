@@ -278,7 +278,7 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed = { "x" };
     std::unordered_set<std::string> expectedConstantsUsed;
-    std::string expectedPostFixString ("x");
+    std::string expectedPostFixString("x");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -333,20 +333,20 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
   }
 
   SECTION("Valid multi-length letter-integer-mix variable") {
-      std::string string("a1b23c567fsf98n0y040");
-      std::list<Token> assignExprTokens = expressionStringToTokens(string);
-      ExprProcessor::AssignExprParser parser(assignExprTokens);
-      parser.parse();
-      std::unordered_set<std::string> resultVariablesUsed = parser.getVariables();
-      std::unordered_set<std::string> resultConstantsUsed = parser.getConstants();
-      std::string resultPostFixString = parser.getPostfixExprString();
-      std::unordered_set<std::string> expectedVariableUsed = { "a1b23c567fsf98n0y040" };
-      std::unordered_set<std::string> expectedConstantsUsed;
-      std::string expectedPostFixString("a1b23c567fsf98n0y040");
-      REQUIRE(resultVariablesUsed == expectedVariableUsed);
-      REQUIRE(resultConstantsUsed == expectedConstantsUsed);
-      REQUIRE(resultPostFixString == expectedPostFixString);
-    }
+    std::string string("a1b23c567fsf98n0y040");
+    std::list<Token> assignExprTokens = expressionStringToTokens(string);
+    ExprProcessor::AssignExprParser parser(assignExprTokens);
+    parser.parse();
+    std::unordered_set<std::string> resultVariablesUsed = parser.getVariables();
+    std::unordered_set<std::string> resultConstantsUsed = parser.getConstants();
+    std::string resultPostFixString = parser.getPostfixExprString();
+    std::unordered_set<std::string> expectedVariableUsed = { "a1b23c567fsf98n0y040" };
+    std::unordered_set<std::string> expectedConstantsUsed;
+    std::string expectedPostFixString("a1b23c567fsf98n0y040");
+    REQUIRE(resultVariablesUsed == expectedVariableUsed);
+    REQUIRE(resultConstantsUsed == expectedConstantsUsed);
+    REQUIRE(resultPostFixString == expectedPostFixString);
+  }
 
   SECTION("Invalid variable with operators") {
     SECTION("variable operator") {
@@ -363,7 +363,7 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
       REQUIRE_THROWS(parser.parse());
     }
   }
- }
+}
 
 // Invalid consts, eg "0314" would be handled by tokeniser and will not reach AssignExprParser
 TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprParser]") {
@@ -400,20 +400,20 @@ TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprPa
   }
 
   SECTION("Valid multi-length constant") {
-      std::string string("1234567890");
-      std::list<Token> assignExprTokens = expressionStringToTokens(string);
-      ExprProcessor::AssignExprParser parser(assignExprTokens);
-      parser.parse();
-      std::unordered_set<std::string> resultVariablesUsed = parser.getVariables();
-      std::unordered_set<std::string> resultConstantsUsed = parser.getConstants();
-      std::string resultPostFixString = parser.getPostfixExprString();
-      std::unordered_set<std::string> expectedVariableUsed;
-      std::unordered_set<std::string> expectedConstantsUsed = { "1234567890" };
-      std::string expectedPostFixString("1234567890");
-      REQUIRE(resultVariablesUsed == expectedVariableUsed);
-      REQUIRE(resultConstantsUsed == expectedConstantsUsed);
-      REQUIRE(resultPostFixString == expectedPostFixString);
-    }
+    std::string string("1234567890");
+    std::list<Token> assignExprTokens = expressionStringToTokens(string);
+    ExprProcessor::AssignExprParser parser(assignExprTokens);
+    parser.parse();
+    std::unordered_set<std::string> resultVariablesUsed = parser.getVariables();
+    std::unordered_set<std::string> resultConstantsUsed = parser.getConstants();
+    std::string resultPostFixString = parser.getPostfixExprString();
+    std::unordered_set<std::string> expectedVariableUsed;
+    std::unordered_set<std::string> expectedConstantsUsed = { "1234567890" };
+    std::string expectedPostFixString("1234567890");
+    REQUIRE(resultVariablesUsed == expectedVariableUsed);
+    REQUIRE(resultConstantsUsed == expectedConstantsUsed);
+    REQUIRE(resultPostFixString == expectedPostFixString);
+  }
 
   SECTION("Invalid constant with operators") {
     SECTION("constant operator") {
@@ -430,7 +430,7 @@ TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprPa
       REQUIRE_THROWS(parser.parse());
     }
   }
- }
+}
 
 TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprParser]") {
   SECTION("Invalid double variables (no operators between)") {

@@ -67,7 +67,8 @@ namespace {
 namespace Pql {
   // Constructor
   PqlParser::PqlParser(const std::list<Token>& tokens)
-    : tokens(tokens) {}
+    : tokens(tokens) {
+  }
 
   Pql::Query PqlParser::parseQuery() {
     Pql::Query pqlQuery; // Mutating pqlOuery object directly to avoid unnecessary copying.
@@ -216,20 +217,16 @@ namespace Pql {
     if (relationToken == Pql::FOLLOWS) {
       clauseUnderConstruction.setType(isTransitiveRelation ? Pql::ClauseType::FOLLOWS_T : Pql::ClauseType::FOLLOWS);
       parseStmtAndStmtArgs(clauseUnderConstruction);
-    }
-    else if (relationToken == Pql::PARENT) {
+    } else if (relationToken == Pql::PARENT) {
       clauseUnderConstruction.setType(isTransitiveRelation ? Pql::ClauseType::PARENT_T : Pql::ClauseType::PARENT);
       parseStmtAndStmtArgs(clauseUnderConstruction);
-    }
-    else if (relationToken == Pql::USES) {
+    } else if (relationToken == Pql::USES) {
       clauseUnderConstruction.setType(Pql::ClauseType::USES_S);
       parseStmtAndEntArgs(clauseUnderConstruction);
-    }
-    else if (relationToken == Pql::MODIFIES) {
+    } else if (relationToken == Pql::MODIFIES) {
       clauseUnderConstruction.setType(Pql::ClauseType::MODIFIES_S);
       parseStmtAndEntArgs(clauseUnderConstruction);
-    }
-    else {
+    } else {
       throw Pql::SyntaxError(
         Pql::ErrorMessage::SYNTAX_ERROR_INVALID_RELATION +
         Pql::ErrorMessage::APPEND_TOKEN_RECEIVED +
@@ -338,18 +335,15 @@ namespace Pql {
       }
 
       clauseUnderConstruction.addParam(Pql::Entity(entityType, frontToken.value));
-    }
-    else if (frontToken == Pql::UNDERSCORE) {
+    } else if (frontToken == Pql::UNDERSCORE) {
       validateAndGetAndConsumeWhitespaces(Pql::UNDERSCORE);
 
       clauseUnderConstruction.addParam(Pql::Entity(Pql::EntityType::WILDCARD, frontToken.value));
-    }
-    else if (frontToken.type == TokenType::NUMBER) {
+    } else if (frontToken.type == TokenType::NUMBER) {
       validateAndGetAndConsumeWhitespaces(Pql::NUMBER);
 
       clauseUnderConstruction.addParam(Pql::Entity(Pql::EntityType::LINE_NUMBER, frontToken.value));
-    }
-    else {
+    } else {
       throw Pql::SyntaxError(
         Pql::ErrorMessage::SYNTAX_ERROR_WRONG_TOKEN_TYPE +
         Pql::ErrorMessage::APPEND_TOKEN_RECEIVED +
@@ -388,13 +382,11 @@ namespace Pql {
       }
 
       clauseUnderConstruction.addParam(Pql::Entity(entityType, frontToken.value));
-    }
-    else if (frontToken == Pql::UNDERSCORE) {
+    } else if (frontToken == Pql::UNDERSCORE) {
       validateAndGetAndConsumeWhitespaces(Pql::UNDERSCORE);
 
       clauseUnderConstruction.addParam(Pql::Entity(Pql::EntityType::WILDCARD, frontToken.value));
-    }
-    else if (frontToken == Pql::QUOTE) {
+    } else if (frontToken == Pql::QUOTE) {
       validateAndGetAndConsumeWhitespaces(Pql::QUOTE);
 
       const Token& variableNameToken = validateAndGetAndConsumeWhitespaces(Pql::IDENTIFIER);
@@ -402,8 +394,7 @@ namespace Pql {
       validateAndGetAndConsumeWhitespaces(Pql::QUOTE);
 
       clauseUnderConstruction.addParam(Pql::Entity(Pql::EntityType::VARIABLE_NAME, variableNameToken.value));
-    }
-    else {
+    } else {
       throw Pql::SyntaxError(
         Pql::ErrorMessage::SYNTAX_ERROR_WRONG_TOKEN_TYPE +
         Pql::ErrorMessage::APPEND_TOKEN_RECEIVED +
@@ -422,15 +413,13 @@ namespace Pql {
     // Check for ‘_’ OR ‘"’
     if (frontToken == Pql::QUOTE) {
       parseExpression(clauseUnderConstruction, true);
-    }
-    else {
+    } else {
       validateAndGetAndConsumeWhitespaces(Pql::UNDERSCORE);
 
       if (!tokens.empty() && tokens.front() == Pql::QUOTE) {
         parseExpression(clauseUnderConstruction, false);
         validateAndGet(Pql::UNDERSCORE);
-      }
-      else {
+      } else {
         clauseUnderConstruction.addParam(Pql::Entity(Pql::EntityType::WILDCARD, "_"));
       }
       consumeFrontWhitespaceTokens();
@@ -448,8 +437,7 @@ namespace Pql {
       if (currentToken.type == Pql::NUMBER.type) { // Remove leading zero for const by casting to int and back to string
         const Token noLeadingZeroConstToken = { currentToken.type, std::to_string(std::stoi(currentToken.value)) };
         infixExpressionTokens.emplace_back(noLeadingZeroConstToken);
-      }
-      else {
+      } else {
         infixExpressionTokens.emplace_back(tokens.front());
       }
       tokens.pop_front();
@@ -488,8 +476,7 @@ namespace Pql {
           frontToken.value
         );
       }
-    }
-    else {
+    } else {
       // Check exact match otherwise
       if (frontToken != validationToken) {
         throw Pql::SyntaxError(
@@ -513,8 +500,7 @@ namespace Pql {
 
       if (isFrontTokenWhitespace) {
         tokens.pop_front();
-      }
-      else {
+      } else {
         break;
       }
     }

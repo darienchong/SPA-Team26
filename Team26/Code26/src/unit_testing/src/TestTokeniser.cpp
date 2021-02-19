@@ -42,7 +42,7 @@ TEST_CASE("[TestTokeniser] Sanity check") {
 TEST_CASE("[TestTokeniser] Delimiter, single") {
   std::stringstream stream = strToStream("{");
   std::list<Token> tokens = tokeniser.tokenise(stream);
-  
+
   Token token = tokens.front();
   REQUIRE(token.type == TokenType::DELIMITER);
   REQUIRE(token.value == "{");
@@ -91,7 +91,7 @@ TEST_CASE("[TestTokeniser] Identifier, negative") {
 TEST_CASE("[TestTokeniser] Operator, single-char, single") {
   std::stringstream stream = strToStream("!");
   std::list<Token> tokens = tokeniser.tokenise(stream);
-  
+
   Token token = tokens.front();
   REQUIRE(token.type == TokenType::OPERATOR);
   REQUIRE(token.value == "!");
@@ -154,7 +154,7 @@ TEST_CASE("[TestTokeniser] Number, multiple-digit, negative") {
 
 TEST_CASE("[TestTokeniser] Number, leading zero, multiple-digit, positive") {
   Tokeniser allowLeadingZeroTokeniser;
-  
+
   std::stringstream stream = strToStream("0001");
   std::list<Token> tokens = allowLeadingZeroTokeniser.allowingLeadingZeroes().tokenise(stream);
   Token token = tokens.front();
@@ -165,9 +165,9 @@ TEST_CASE("[TestTokeniser] Number, leading zero, multiple-digit, positive") {
 
 TEST_CASE("[TestTokeniser] Whitespace not consumed") {
   std::stringstream stream = strToStream("Follows *");
-  
+
   std::list<Token> tokens = tokeniser.notConsumingWhitespace().tokenise(stream);
-  std::list<std::string> expectedValues = { "Follows", " ", "*", "\n"};
+  std::list<std::string> expectedValues = { "Follows", " ", "*", "\n" };
   std::list<std::string>::const_iterator expectedValuesItr = expectedValues.begin();
 
   for (Token token : tokens) {

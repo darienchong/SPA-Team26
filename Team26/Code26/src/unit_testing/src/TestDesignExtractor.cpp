@@ -19,7 +19,7 @@ TEST_CASE("[TestDesignExtractor] ParentT extraction") {
   pkb.addParent(1, 2);
   pkb.addParent(2, 3);
   pkb.addParent(3, 4);
-  
+
   designExtractor.extractDesignAbstractions(pkb);
   Table parentTTable = pkb.getParentTTable();
 

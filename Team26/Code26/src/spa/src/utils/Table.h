@@ -150,7 +150,7 @@ public:
 
   /**
    * Joins two tables using natural join.
-   * 
+   *
    * The data from the other table would be added to the original table.
    * The other table remains unaltered.
    *
@@ -160,7 +160,7 @@ public:
 
   /**
    * Joins two tables using cross join.
-   * 
+   *
    * The data from the other table would be added to the original table.
    * The other table remains unaltered.
    *
@@ -171,7 +171,7 @@ public:
   /**
    * Joins two tables using inner join based on the specified index pairs.
    * The index pairs must contain the index of the first table and then the second table.
-   * 
+   *
    * The data from the other table would be added to the original table.
    * The other table remains unaltered.
    *
@@ -206,7 +206,7 @@ public:
 
   /**
    * Deletes a row from the Table.
-   * 
+   *
    * @param row The specified row.
    * @return True if a row is deleted. Otherwise, false
    */

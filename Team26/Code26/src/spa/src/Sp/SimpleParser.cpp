@@ -87,8 +87,7 @@ namespace SourceProcessor {
           std::to_string(getStmtNum())
         );
       }
-    }
-    else {
+    } else {
       if (validationToken != front) {
         throw SyntaxError(
           ErrorMessage::SYNTAX_ERROR_WRONG_TOKEN_VALUE +
@@ -120,8 +119,7 @@ namespace SourceProcessor {
       Token next = getFrontToken();
       if (next == SEMICOLON) { // check for end of assign stmt
         break;
-      }
-      else if (next.type == CONST.type) {
+      } else if (next.type == CONST.type) {
         validateNumToken();
       }
       infixExprTokens.emplace_back(next);
@@ -131,8 +129,7 @@ namespace SourceProcessor {
     ExprProcessor::AssignExprParser exprParser(infixExprTokens);
     try {
       exprParser.parse();
-    }
-    catch (const ExprProcessor::SyntaxError& e) {
+    } catch (const ExprProcessor::SyntaxError& e) {
       throw SyntaxError(
         std::string(e.what()) +
         ErrorMessage::APPEND_STMT_NUMBER +
@@ -165,8 +162,7 @@ namespace SourceProcessor {
       bool isEndOfCondExpr = current == RIGHT_PARENTHESIS && (next == THEN || next == LEFT_BRACE);
       if (isEndOfCondExpr) {
         break;
-      }
-      else if (current.type == CONST.type) {
+      } else if (current.type == CONST.type) {
         validateNumToken();
       }
       infixExprTokens.emplace_back(current);
@@ -177,8 +173,7 @@ namespace SourceProcessor {
     ExprProcessor::CondExprParser exprParser(infixExprTokens);
     try {
       exprParser.parse();
-    }
-    catch (const ExprProcessor::SyntaxError& e) {
+    } catch (const ExprProcessor::SyntaxError& e) {
       throw SyntaxError(
         std::string(e.what()) +
         ErrorMessage::APPEND_STMT_NUMBER +
@@ -309,8 +304,7 @@ namespace SourceProcessor {
         ErrorMessage::APPEND_STMT_NUMBER +
         std::to_string(getStmtNum())
       );
-    }
-    else {
+    } else {
       auto it = std::next(tokens.begin());
 
       if (it == tokens.end()) {
@@ -323,20 +317,15 @@ namespace SourceProcessor {
 
       if (*it == ASSIGN_OP) {
         stmt = parseAssign();
-      }
-      else if (keyword == IF) {
+      } else if (keyword == IF) {
         stmt = parseIf();
-      }
-      else if (keyword == WHILE) {
+      } else if (keyword == WHILE) {
         stmt = parseWhile();
-      }
-      else if (keyword == READ) {
+      } else if (keyword == READ) {
         stmt = parseRead();
-      }
-      else if (keyword == PRINT) {
+      } else if (keyword == PRINT) {
         stmt = parsePrint();
-      }
-      else {
+      } else {
         throw SyntaxError(
           ErrorMessage::SYNTAX_ERROR_UNKNOWN_STMT_TYPE +
           ErrorMessage::APPEND_STMT_NUMBER +
@@ -406,7 +395,8 @@ namespace SourceProcessor {
   }
 
   SimpleParser::SimpleParser(Pkb& pkb, std::list<Token> tokens)
-    : pkb(pkb), tokens(tokens) {};
+    : pkb(pkb), tokens(tokens) {
+  };
 
   void SimpleParser::parse() {
     parseProgram();

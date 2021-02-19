@@ -219,13 +219,13 @@ namespace Pql {
     void parseExpression(Pql::Clause& clauseUnderConstruction, bool isExactMatch);
 
     /**
-     * Validate and get the next token against the given token that should be expected. Also consume any 
-     * following whitespaces. If the given token has a value, check for an exact match. Otherwise, check 
+     * Validate and get the next token against the given token that should be expected. Also consume any
+     * following whitespaces. If the given token has a value, check for an exact match. Otherwise, check
      * that the token type matches.
-     * 
+     *
      * NOTE: Validation and consumption of whitespaces are bundled into a function for convenience because
-     * only in rare ocassion, consumption of whitespaces is not needed. In most cases, validation and 
-     * consumption of whitespaces are performed in sequence. 
+     * only in rare ocassion, consumption of whitespaces is not needed. In most cases, validation and
+     * consumption of whitespaces are performed in sequence.
      *
      * @param token Token to be validated against.
      * @return Next token if valid. Otherwise, throw a SyntaxError.

@@ -86,7 +86,7 @@ Select s such that Uses(s, "countFizzBuzz")
 18 - Uses
 variable v;
 Select v such that Uses(23, v)
-countFizz countBuzz countFizzBuzz
+countFizz, countBuzz, countFizzBuzz
 5000
 19 - Uses
 while w;

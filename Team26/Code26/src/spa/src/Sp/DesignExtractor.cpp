@@ -40,7 +40,7 @@ namespace {
    * This construction is because our adjacency list is
    * used as a 2d matrix of boolean entries, but is structurally a map, hence
    * the need for these wrappers.
-   * 
+   *
    * @param adjList The adjacency list to use.
    * @param key The key to use.
    * @param value The value to use.
@@ -49,7 +49,7 @@ namespace {
    */
   bool getFromAdjList(std::map<std::string, std::unordered_set<std::string>>& adjList,
     std::string key, std::string value) {
-    
+
     bool isKeyNotInAdjList = (adjList.count(key) == 0);
     if (isKeyNotInAdjList) {
       return false;
@@ -75,7 +75,7 @@ namespace {
   /**
    * Helper method for implementation of Warshall's algorithm.
    * Performs row-wise a_i := a_i OR a_j.
-   * 
+   *
    * @param adjList The adjacency list to use.
    * @param i The number to use for index i.
    * @param j The number to use for index j.
@@ -123,7 +123,7 @@ namespace {
    * Uses Warshall's Algorithm to populate the adjacency list given.
    * See https://www.dartmouth.edu/~matc/DiscreteMath/V.6.pdf for more
    * details.
-   * 
+   *
    * @param adjList The adjacency list to use/modify.
    * @param n The total number of statements (vertices in graph).
    */
@@ -141,15 +141,15 @@ namespace {
    * Given a table, generates the transitive closure
    * of the table. We assume that the table tabulates
    * a binary relation (call it R) where
-   * 
+   *
    *     <x, y> in table <=> R(x, y) holds.
-   * 
-   * This method generates a table that forms the 
+   *
+   * This method generates a table that forms the
    * transitive closure of the table i.e.
-   * 
+   *
    *     for all x, y, z, if R(x, y) and R(y, z)
    *     then R(x, z)
-   * 
+   *
    * @param table The table to use when generating
    *     the transitive closure.
    * @param The total number of statements.
@@ -189,24 +189,24 @@ namespace {
    * Populates a given table with indirect relations.
    * We have a table with a number of direct relations.
    * We wish to implement a new indirect relation, defined so: where
-   * 
+   *
    *   R(x, y) indicates an existing relation in the first table,
    *   P(x, y) indicates an existing relation in the second table,
-   * 
+   *
    * If it is the case that
-   * 
+   *
    *   1) P(x, y)
    *   2) R(y, z)
-   * 
-   * Then we have a new indirect relation to be put in the 
+   *
+   * Then we have a new indirect relation to be put in the
    * first table, R(x, z).
-   * 
+   *
    * @param table The table to use/modify.
    * @param parentTTable The second table to refer to.
    * @returns The table with new indirect relation entries.
    */
   Table fillIndirectRelation(Table table, Table parentTTable) {
-    bool isTableColumnCountNotTwo = (table.getHeader().size() != 2) || 
+    bool isTableColumnCountNotTwo = (table.getHeader().size() != 2) ||
       (parentTTable.getHeader().size() != 2);
 
     if (isTableColumnCountNotTwo) {
@@ -224,13 +224,13 @@ namespace {
   /**
    * Given the Parent() relations between statements, writes in all the
    * transitive Parent*() relations.
-   * 
-   * Pre-conditions: 
+   *
+   * Pre-conditions:
    *   1) Requires that all the Parent() relations be populated
    *      in the PKB first.
    *   2) Requires that pkb.getStmtTable().size() returns the total
    *      number of statements in the PKB.
-   * 
+   *
    * @param pkb The PKB to refer to.
    * @returns
    */
@@ -243,12 +243,12 @@ namespace {
       pkb.addParentT(parent, child);
     }
   }
-  
+
   /**
    * Given the Follows() relations between statements, writes in all the
    * transitive Follows*() relations.
    *
-   * Pre-conditions: 
+   * Pre-conditions:
    *   1) Requires that all the Follows() relations be populated
    *      in the PKB first.
    *   2) Requires that pkb.getStmtTable().size() returns the total
@@ -258,7 +258,7 @@ namespace {
    * @returns
    */
   void fillFollowsTTable(Pkb& pkb) {
-    Table followsTTable = generateTransitiveClosure(pkb.getFollowsTable(), 
+    Table followsTTable = generateTransitiveClosure(pkb.getFollowsTable(),
       pkb.getStmtTable().size());
     for (std::vector<std::string> row : followsTTable.getData()) {
       int followed = std::stoi(row[0]);
@@ -270,9 +270,9 @@ namespace {
   /**
    * Populates the PKB's Uses table with all indirect relations (i.e. Uses() relations
    * other than Uses(s, v) and Uses(if, v) where the variable appears in the conditional.
-   * 
+   *
    * Requires that the ParentTTable be populated first.
-   * 
+   *
    * @param pkb The PKB to use/modify.
    * @returns
    */
@@ -290,7 +290,7 @@ namespace {
    * other than Modifies(s, v).
    *
    * Requires that the ParentTTable be populated first.
-   * 
+   *
    * @param pkb The PKB to use/modify.
    * @returns
    */

@@ -9,7 +9,7 @@
 namespace {
   /**
    * Checks if a given character is a delimiter or not.
-   * 
+   *
    * @param c The character to check.
    * @returns `true` if the character is a delimiter, `false` otherwise.
    */
@@ -20,7 +20,7 @@ namespace {
 
   /**
    * Constructs a Token from a delimiter.
-   * 
+   *
    * @param stream The stream to read from.
    * @returns Token representing a delimiter. Throws std::invalid_argument
    *    if a non-delimiter character is encountered.
@@ -28,7 +28,7 @@ namespace {
   Token constructDelimiter(std::istream& stream) {
     TokenType type = TokenType::DELIMITER;
     std::string value;
-    
+
     bool isNextCharDelimiter = isDelimiter(stream.peek());
     if (isNextCharDelimiter) {
       value.push_back(stream.get());
@@ -42,7 +42,7 @@ namespace {
   /**
    * Constructs a Token from an identifier.
    * Identifiers cannot have a digit as the first character.
-   * 
+   *
    * @param stream The stream to read from.
    * @returns Token representing an identifier.
    */
@@ -70,7 +70,7 @@ namespace {
   /**
    * Constructs a Token from a number.
    * Numbers cannot have 0 as the first digit.
-   * 
+   *
    * @param stream The stream to read from.
    * @returns Token representing a number.
    */
@@ -97,13 +97,13 @@ namespace {
     }
 
     return { type, value };
-  
+
   }
 
   /**
    * Checks if a character is a single-character operator.
    * Operators can be single character (e.g. +) or double character (e.g. <=).
-   * 
+   *
    * @param c The character to check.
    * @returns `true` if the character is a single-character operator, `false` otherwise.
    */
@@ -119,7 +119,7 @@ namespace {
    * their own, but are also the first character of a double-character operator
    * (e.g. < is valid, but so is <=).
    * Operators can be single character (e.g. +) or double character (e.g. <=).
-   * 
+   *
    * @param c The character to check.
    * @returns `true` if the character is the first char of a double-character
    *    operator, `false` otherwise.
@@ -132,7 +132,7 @@ namespace {
 
   /**
    * Check if a character is the first character of two-character
-   * operator that expects an = as the second character. 
+   * operator that expects an = as the second character.
    * These operators are valid only as double-character operator
    * (e.g. ! is not valid, but != is).
    * Operators can be single character (e.g. +) or double character (e.g. <=).
@@ -194,7 +194,7 @@ namespace {
 
   /**
    * Constructs a Token from an operator.
-   * 
+   *
    * @param stream The stream to read from.
    * @returns Token representing an operator.
    */
@@ -206,7 +206,7 @@ namespace {
     // we see, since some operators consist of two characters e.g. <=
     // We thus need to also perform checks to ensure that the two character
     // operators are valid e.g. we allow <= but not !<
- 
+
     if (!isOperator(stream.peek())) {
       throw std::invalid_argument("[Tokeniser::constructOperator]: Expected one of +-*/%>=<!&| but got " + stream.peek());
     }
@@ -215,7 +215,7 @@ namespace {
       value.push_back(stream.get());
       return { type, value };
     }
-    
+
     // We distinguish the cases where the operator is valid with or without
     // an = after it, and the cases where the operator is invalid without 
     // an = after it. Right now, there aren't any operators that are invalid
@@ -282,7 +282,7 @@ namespace {
   Token constructWhitespace(std::istream& stream) {
     TokenType type = TokenType::WHITESPACE;
     std::string value;
-    
+
     if (!std::isspace(stream.peek())) {
       throw std::invalid_argument("[Tokeniser::constructWhitespace]: Expected whitespace character but got " + stream.peek());
     }
@@ -293,7 +293,7 @@ namespace {
   /**
    * Help to discard whitespace characters.
    * Advances the stream until it encounters a non-whitespace character.
-   * 
+   *
    * @param stream The stream to read from.
    */
   void consumeWhitespace(std::istream& stream) {
@@ -303,7 +303,7 @@ namespace {
   }
 }
 
-std::list<Token> Tokeniser::tokenise(std::istream &stream) {
+std::list<Token> Tokeniser::tokenise(std::istream& stream) {
   std::list<Token> tokens;
 
   while (stream.peek() != EOF) {

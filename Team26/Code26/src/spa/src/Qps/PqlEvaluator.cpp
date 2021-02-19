@@ -14,7 +14,8 @@
 namespace Pql {
   // Constructor
   PqlEvaluator::PqlEvaluator(Pkb& pkb, Pql::Query& query, std::list<std::string>& results)
-    : pkb(pkb), query(query), results(results) {}
+    : pkb(pkb), query(query), results(results) {
+  }
 
   // Executes query and extract results
   void PqlEvaluator::evaluateQuery() {
@@ -75,8 +76,7 @@ namespace Pql {
       if (table.empty()) {
         // short circuit
         return Table(0);
-      }
-      else {
+      } else {
         // natural join on finalResultTable
         finalResultTable.naturalJoin(table);
       }
@@ -169,8 +169,7 @@ namespace Pql {
 
     if (lhsEntity.isSynonym()) { // Guarenteed to be of type VARIABLE
       header2 = lhsEntity.getValue();
-    }
-    else if (lhsEntity.isVariableName()) {
+    } else if (lhsEntity.isVariableName()) {
       Table lhsTable({ "" });
       lhsTable.insertRow({ lhsEntity.getValue() });
       table.innerJoin(lhsTable, 1, 0); // inner join on second column of table
@@ -182,8 +181,7 @@ namespace Pql {
       Table rhsTable({ "" });
       rhsTable.insertRow({ postfixExpr });
       table.innerJoin(rhsTable, 2, 0); // inner join on third column of table
-    }
-    else if (rhsEntity.isSubExpression()) {
+    } else if (rhsEntity.isSubExpression()) {
       for (std::vector<std::string> row : table.getData()) {
         int hey = row[2].find(postfixExpr);
         if (row[2].find(postfixExpr) == std::string::npos) {

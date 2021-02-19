@@ -16,7 +16,8 @@
 #include "Tokeniser.h"
 
 Spa::Spa()
-  : pkb(Pkb()) {}
+  : pkb(Pkb()) {
+}
 
 void Spa::parseSourceFile(const std::string& filename) {
   std::ifstream sourceFile(filename);
@@ -36,11 +37,9 @@ void Spa::parseSourceFile(const std::string& filename) {
     parser.parse();
     DesignExtractor().extractDesignAbstractions(pkb);
 
-  }
-  catch (const std::exception& e) {
+  } catch (const std::exception& e) {
     std::cout << e.what() << std::endl;
-  }
-  catch (...) {
+  } catch (...) {
     std::cout << "OOPS! An unexpected error occured!";
   }
 }
@@ -56,11 +55,9 @@ void Spa::evaluateQuery(const std::string& queryString, std::list<std::string>& 
     Pql::Query queryStruct = parser.parseQuery();
     Pql::PqlEvaluator evaluator(pkb, queryStruct, results);
     evaluator.evaluateQuery();
-  }
-  catch (const std::exception& e) {
+  } catch (const std::exception& e) {
     std::cout << e.what() << std::endl;
-  }
-  catch (...) {
+  } catch (...) {
     std::cout << "OOPS! An unexpected error occured!";
   }
 }

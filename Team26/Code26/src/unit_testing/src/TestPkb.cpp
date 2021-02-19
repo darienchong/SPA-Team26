@@ -37,7 +37,7 @@ TEST_CASE("[TestPkb] ifTable Insertion") {
   auto dataCopy = pkb.getIfTable().getData();
   REQUIRE(dataCopy.find({ "12" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({"12"}));
+  REQUIRE(stmtDataCopy.count({ "12" }));
 }
 
 TEST_CASE("[TestPkb] whileTable Insertion") {
@@ -46,7 +46,7 @@ TEST_CASE("[TestPkb] whileTable Insertion") {
   auto dataCopy = pkb.getWhileTable().getData();
   REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({"15"}));
+  REQUIRE(stmtDataCopy.count({ "15" }));
 }
 
 TEST_CASE("[TestPkb] readTable Insertion") {
@@ -55,7 +55,7 @@ TEST_CASE("[TestPkb] readTable Insertion") {
   auto dataCopy = pkb.getReadTable().getData();
   REQUIRE(dataCopy.find({ "15" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({"15"}));
+  REQUIRE(stmtDataCopy.count({ "15" }));
 }
 
 TEST_CASE("[TestPkb] printTable Insertion") {
@@ -64,7 +64,7 @@ TEST_CASE("[TestPkb] printTable Insertion") {
   auto dataCopy = pkb.getPrintTable().getData();
   REQUIRE(dataCopy.find({ "526" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({"526"}));
+  REQUIRE(stmtDataCopy.count({ "526" }));
 }
 
 TEST_CASE("[TestPkb] assignTable Insertion") {
@@ -73,7 +73,7 @@ TEST_CASE("[TestPkb] assignTable Insertion") {
   auto dataCopy = pkb.getAssignTable().getData();
   REQUIRE(dataCopy.find({ "32" }) != dataCopy.end());
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({"32"}));
+  REQUIRE(stmtDataCopy.count({ "32" }));
 }
 
 TEST_CASE("[TestPkb] addFollows") {
@@ -174,7 +174,7 @@ TEST_CASE("[TestPkb] getFollows") {
   pkb.addFollows(3, 4);
   pkb.addFollows(2, 5);
   Table table = pkb.getFollower(2);
-  REQUIRE(table.getData().count({"5"}));
+  REQUIRE(table.getData().count({ "5" }));
 }
 
 TEST_CASE("[TestPkb] getFollowedBy") {
@@ -183,7 +183,7 @@ TEST_CASE("[TestPkb] getFollowedBy") {
   pkb.addFollows(3, 4);
   pkb.addFollows(2, 5);
   Table table = pkb.getFollowedBy(2);
-  REQUIRE(table.getData().count({"1"}));
+  REQUIRE(table.getData().count({ "1" }));
 }
 
 TEST_CASE("[TestPkb] getFollowerT") {
@@ -191,15 +191,15 @@ TEST_CASE("[TestPkb] getFollowerT") {
   pkb.addFollows(1, 2);
   pkb.addFollows(2, 5);
   pkb.addFollows(3, 4);
-  
+
   pkb.addFollowsT(1, 2);
   pkb.addFollowsT(1, 5);
   pkb.addFollowsT(2, 5);
   pkb.addFollowsT(3, 4);
-  
+
   Table table = pkb.getFollowerT(1);
-  REQUIRE(table.getData().count({"2"}));
-  REQUIRE(table.getData().count({"5"}));
+  REQUIRE(table.getData().count({ "2" }));
+  REQUIRE(table.getData().count({ "5" }));
 }
 
 TEST_CASE("[TestPkb] getFollowedByT") {
@@ -214,8 +214,8 @@ TEST_CASE("[TestPkb] getFollowedByT") {
   pkb.addFollowsT(3, 4);
 
   Table table = pkb.getFollowedByT(5);
-  REQUIRE(table.getData().count({"1"}));
-  REQUIRE(table.getData().count({"2"}));
+  REQUIRE(table.getData().count({ "1" }));
+  REQUIRE(table.getData().count({ "2" }));
 }
 
 TEST_CASE("[TestPkb] getParent") {
@@ -224,7 +224,7 @@ TEST_CASE("[TestPkb] getParent") {
   pkb.addParent(3, 4);
   pkb.addParent(2, 5);
   Table table = pkb.getParent(5);
-  REQUIRE(table.getData().count({"2"}));
+  REQUIRE(table.getData().count({ "2" }));
 }
 
 TEST_CASE("[TestPkb] getChild") {
@@ -233,7 +233,7 @@ TEST_CASE("[TestPkb] getChild") {
   pkb.addParent(3, 4);
   pkb.addParent(2, 5);
   Table table = pkb.getChild(1);
-  REQUIRE(table.getData().count({"2"}));
+  REQUIRE(table.getData().count({ "2" }));
 }
 
 TEST_CASE("[TestPkb] getParentT") {
@@ -248,8 +248,8 @@ TEST_CASE("[TestPkb] getParentT") {
   pkb.addParentT(3, 4);
 
   Table table = pkb.getParentT(5);
-  REQUIRE(table.getData().count({"1"}));
-  REQUIRE(table.getData().count({"2"}));
+  REQUIRE(table.getData().count({ "1" }));
+  REQUIRE(table.getData().count({ "2" }));
 }
 
 TEST_CASE("[TestPkb] getChildT") {
@@ -264,8 +264,8 @@ TEST_CASE("[TestPkb] getChildT") {
   pkb.addParentT(3, 4);
 
   Table table = pkb.getChildT(1);
-  REQUIRE(table.getData().count({"2"}));
-  REQUIRE(table.getData().count({"5"}));
+  REQUIRE(table.getData().count({ "2" }));
+  REQUIRE(table.getData().count({ "5" }));
 }
 
 TEST_CASE("[TestPkb] getUses") {
@@ -273,10 +273,10 @@ TEST_CASE("[TestPkb] getUses") {
   pkb.addUsesS(1, "x");
   pkb.addUsesS(2, "y");
   Table table = pkb.getUses("x");
-  REQUIRE(table.getData().count({"1"}));
+  REQUIRE(table.getData().count({ "1" }));
   pkb.addUsesS(2, "x");
   table = pkb.getUses("x");
-  REQUIRE(table.getData().count({"2"}));
+  REQUIRE(table.getData().count({ "2" }));
 }
 
 TEST_CASE("[TestPkb] getUsedBy") {
@@ -287,10 +287,10 @@ TEST_CASE("[TestPkb] getUsedBy") {
 
   SECTION("used by statement") {
     Table table = pkb.getUsedBy(1);
-    REQUIRE(table.getData().count({"x"}));
+    REQUIRE(table.getData().count({ "x" }));
     table = pkb.getUsedBy(2);
-    REQUIRE(table.getData().count({"x"}));
-    REQUIRE(table.getData().count({"y"}));
+    REQUIRE(table.getData().count({ "x" }));
+    REQUIRE(table.getData().count({ "y" }));
   }
 }
 
@@ -299,10 +299,10 @@ TEST_CASE("[TestPkb] getModifies") {
   pkb.addModifiesS(1, "x");
   pkb.addModifiesS(2, "y");
   Table table = pkb.getModifies("x");
-  REQUIRE(table.getData().count({"1"}));
+  REQUIRE(table.getData().count({ "1" }));
   pkb.addModifiesS(2, "x");
   table = pkb.getModifies("x");
-  REQUIRE(table.getData().count({"2"}));
+  REQUIRE(table.getData().count({ "2" }));
 }
 
 TEST_CASE("[TestPkb] getModifiedBy") {
@@ -313,9 +313,9 @@ TEST_CASE("[TestPkb] getModifiedBy") {
 
   SECTION("modified by statement") {
     Table table = pkb.getModifiedBy(1);
-    REQUIRE(table.getData().count({"x"}));
+    REQUIRE(table.getData().count({ "x" }));
     table = pkb.getModifiedBy(2);
-    REQUIRE(table.getData().count({"x"}));
-    REQUIRE(table.getData().count({"y"}));
+    REQUIRE(table.getData().count({ "x" }));
+    REQUIRE(table.getData().count({ "y" }));
   }
 }

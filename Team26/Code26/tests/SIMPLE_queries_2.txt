@@ -23,17 +23,17 @@ stmt s; while w;
 Select s such that Follows(w, s)
 24
 5000
-6 - Follows
+6 - Follows*
 stmt s;
 Select s such that Follows*(s, s)
 
 5000
-7 - Follows
+7 - Follows*
 stmt s; if f;
 Select s such that Follows*(f, s)
 23
 5000
-8 - Follows
+8 - Follows*
 stmt s;
 Select s such that Follows*(7, s)
 24, 25, 26, 27

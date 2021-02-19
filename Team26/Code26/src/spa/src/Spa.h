@@ -6,9 +6,9 @@
 #include "Pkb.h"
 
 class Spa {
-/**
- * Static Program Analyzer (SPA) library API
-*/
+  /**
+   * Static Program Analyzer (SPA) library API
+   */
 private:
   Pkb pkb;
 public:

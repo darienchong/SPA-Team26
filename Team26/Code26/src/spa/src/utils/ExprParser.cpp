@@ -62,11 +62,9 @@ namespace ExprProcessor {
       validateAndConsume(LEFT_PARENTHESIS);
       parseCondExpr();
       validateAndConsume(RIGHT_PARENTHESIS);
-    }
-    else if (currentToken == LEFT_PARENTHESIS) {
+    } else if (currentToken == LEFT_PARENTHESIS) {
       parseCondSubExpr();
-    }
-    else {
+    } else {
       parseRelExpr();
     }
   }
@@ -93,17 +91,14 @@ namespace ExprProcessor {
           validateAndConsume(LEFT_PARENTHESIS);
           parseCondExpr();
           validateAndConsume(RIGHT_PARENTHESIS);
-        }
-        catch (const SyntaxError&) {
+        } catch (const SyntaxError&) {
           it = secondTempPosition;
           parseRelExpr();
         }
-      }
-      else {
+      } else {
         throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_INVALID_COND_SUB_EXPR);
       }
-    }
-    catch (const SyntaxError&) {
+    } catch (const SyntaxError&) {
       it = tempPosition;
       parseRelExpr();
     }
@@ -157,8 +152,7 @@ namespace ExprProcessor {
     if (currentToken == LEFT_PARENTHESIS) {
       parseExpr();
       validateAndConsume(RIGHT_PARENTHESIS);
-    }
-    else if (!isVarOrConst) {
+    } else if (!isVarOrConst) {
       throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_INVALID_FACTOR);
     }
     // Else isVarOrConst is true, do nothing
@@ -181,8 +175,7 @@ namespace ExprProcessor {
           frontToken.value
         );
       }
-    }
-    else {
+    } else {
       // Check exact match otherwise
       if (frontToken != validationToken) {
         throw SyntaxError(
@@ -203,8 +196,7 @@ namespace ExprProcessor {
     return token == COND_EXPR_AND || token == COND_EXPR_OR;
   }
 
-  bool CondExprParser::isRelExprOperator(const Token& token)
-  {
+  bool CondExprParser::isRelExprOperator(const Token& token) {
     return token == REL_EXPR_OP_GRT ||
       token == REL_EXPR_OP_GEQ ||
       token == REL_EXPR_OP_LET ||
@@ -227,7 +219,8 @@ namespace ExprProcessor {
   //==================//
 
   AssignExprParser::AssignExprParser(std::list<Token>& infixExprTokens)
-    : tokens(infixExprTokens) {}
+    : tokens(infixExprTokens) {
+  }
 
 
   void AssignExprParser::parse() {
@@ -240,13 +233,15 @@ namespace ExprProcessor {
     return postfixExprTokens;
   }
 
+  // Add spaces at the start and end so that 
+  // " fizz " will not be a substring of " fizzBuzz "
+  // Otherwise, "fizz" is a substring of "fizzBuzz"
   std::string AssignExprParser::getPostfixExprString() {
-    std::string resultString;
+    std::string resultString = " ";
     for (const Token& token : postfixExprTokens) {
       resultString.append(token.value);
       resultString.append(" ");
     }
-    resultString.pop_back(); // remove last space
     return resultString;
   }
 
@@ -270,7 +265,6 @@ namespace ExprProcessor {
     return resultSet;
   }
 
-  // Used in postFix() - rmb to change to overloading
   int AssignExprParser::getOperatorPrecedence(Token& token) {
     if (token == EXPR_OP_MOD || token == EXPR_OP_TIMES || token == EXPR_OP_DIVIDE) {
       return 2;
@@ -302,8 +296,7 @@ namespace ExprProcessor {
         expectOperand = false;
 
         postfixExprTokens.emplace_back(next);
-      }
-      else if (isOperator) {
+      } else if (isOperator) {
         if (expectOperand) {
           throw SyntaxError(
             ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_NON_OPERAND_TOKEN +
@@ -319,8 +312,7 @@ namespace ExprProcessor {
           stack.pop();
         }
         stack.push(next);
-      }
-      else if (next == LEFT_PARENTHESIS) {
+      } else if (next == LEFT_PARENTHESIS) {
         if (!expectOperand) {
           throw SyntaxError(
             ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_NON_OPERATOR_TOKEN +
@@ -330,8 +322,7 @@ namespace ExprProcessor {
         }
 
         stack.push(next);
-      }
-      else if (next == RIGHT_PARENTHESIS) {
+      } else if (next == RIGHT_PARENTHESIS) {
         if (expectOperand) {
           throw SyntaxError(
             ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_NON_OPERAND_TOKEN +
@@ -362,8 +353,7 @@ namespace ExprProcessor {
         }
 
         stack.pop(); //Pop '(' in the stack
-      }
-      else { // Invalid tokens. e.g. '{', '<', '_'
+      } else { // Invalid tokens. e.g. '{', '<', '_'
         throw SyntaxError(
           ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_INVALID_TOKEN +
           ErrorMessage::APPEND_TOKEN_RECEIVED +
@@ -403,8 +393,7 @@ namespace ExprProcessor {
       bool isOperator = front == EXPR_OP_PLUS || front == EXPR_OP_MINUS || front == EXPR_OP_TIMES || front == EXPR_OP_DIVIDE || front == EXPR_OP_MOD;;
       if (isOperand) {
         stack.push(front);
-      }
-      else if (isOperator) { // operator
+      } else if (isOperator) { // operator
         if (stack.empty()) {
           throw SyntaxError(ErrorMessage::SYNTAX_ERROR_ASSIGN_EXPR_INVALID_EXPRESSION);
         }
@@ -415,8 +404,7 @@ namespace ExprProcessor {
         stack.pop();
         // Creates a dummy token as the result of the subexpression for validation
         stack.push(DUMMY_RESULT);
-      }
-      else {
+      } else {
         assert(false);
       }
     }

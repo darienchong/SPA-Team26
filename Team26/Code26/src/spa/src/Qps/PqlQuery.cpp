@@ -4,10 +4,12 @@
 
 // Entity methods
 Pql::Entity::Entity()
-  : type(Pql::EntityType::UNDEFINED) {}
+  : type(Pql::EntityType::UNDEFINED) {
+}
 
 Pql::Entity::Entity(const Pql::EntityType& type, const std::string& value)
-  : type(type), value(value) {}
+  : type(type), value(value) {
+}
 
 Pql::EntityType Pql::Entity::getType() const {
   return type;
@@ -47,10 +49,12 @@ bool Pql::Entity::isSynonym() const {
 
 // Clause methods
 Pql::Clause::Clause()
-  : type(ClauseType::UNDEFINED) {}
+  : type(ClauseType::UNDEFINED) {
+}
 
 Pql::Clause::Clause(const Pql::ClauseType& type, const std::vector<Pql::Entity>& params)
-  : type(type), params(params) {}
+  : type(type), params(params) {
+}
 
 Pql::ClauseType Pql::Clause::getType() const {
   return type;

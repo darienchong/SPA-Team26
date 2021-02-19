@@ -32,8 +32,7 @@ void Table::setHeader(const Row& newHeader) {
     bool isDuplicate = (name != "") && prevNames.count(name);
     if (isDuplicate) {
       throw std::invalid_argument("Non-empty column name could not be duplicated");
-    }
-    else {
+    } else {
       prevNames.emplace(name);
     }
   }
@@ -96,8 +95,7 @@ void Table::dropColumn(int index) {
   // Clear data if there is only one column, otherwise erase column
   if (header.size() == 1) {
     data.clear();
-  }
-  else {
+  } else {
     header.erase(header.begin() + index);
     RowSet newData;
     for (Row row : data) {
@@ -117,8 +115,7 @@ void Table::filterColumn(int index, const std::unordered_set<std::string>& value
   for (auto it = data.begin(); it != data.end(); ) {
     if (!values.count(it->at(index))) {
       it = data.erase(it);
-    }
-    else {
+    } else {
       it++;
     }
   }
@@ -160,8 +157,7 @@ void Table::naturalJoin(const Table& otherTable) {
   bool hasCommonHeaders = !indexPairs.empty();
   if (hasCommonHeaders) {
     innerJoin(otherTable, indexPairs);
-  }
-  else {
+  } else {
     crossJoin(otherTable);
   }
 }
