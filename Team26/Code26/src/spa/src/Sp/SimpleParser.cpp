@@ -56,7 +56,7 @@ namespace SourceProcessor {
   Token SimpleParser::getFrontToken() {
     if (tokens.empty()) {
       throw SyntaxError(
-        ErrorMessage::SYNTAX_ERROR_NOT_ENOUGHT_TOKENS +
+        ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS +
         ErrorMessage::APPEND_STMT_NUMBER +
         std::to_string(getStmtNum())
       );
@@ -145,8 +145,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (const std::string& variable : variablesUsed) {
-      pkb.addUses(getStmtNum(), variable); // add Uses relation for stmt-var
-      pkb.addUses(getCurrentProc(), variable); // add Uses relation for proc-var
+      pkb.addUsesS(getStmtNum(), variable); // add Uses relation for stmt-var
       pkb.addVar(variable); // add vars
     }
     for (const std::string& constants : constantsUsed) {
@@ -191,8 +190,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (const std::string& variable : variablesUsed) {
-      pkb.addUses(getStmtNum(), variable); // add Uses relation for stmt-var
-      pkb.addUses(getCurrentProc(), variable); // add Uses relation for proc-var
+      pkb.addUsesS(getStmtNum(), variable); // add Uses relation for stmt-var
       pkb.addVar(variable); // add vars
     }
     for (const std::string& constants : constantsUsed) {
@@ -259,8 +257,7 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addVar(varName); // add variable
     pkb.addRead(stmtNum); // add read stmts
-    pkb.addModifies(stmtNum, varName); // add Modifies relation for stmt-var
-    pkb.addModifies(getCurrentProc(), varName); // add Modifies relation for proc-var
+    pkb.addModifiesS(stmtNum, varName); // add Modifies relation for stmt-var
 
     return stmtNum;
   }
@@ -277,8 +274,7 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addVar(varName); // add variable
     pkb.addPrint(stmtNum); // add print stmts
-    pkb.addUses(stmtNum, varName); // add Uses relation for stmt-var
-    pkb.addUses(getCurrentProc(), varName); // add Uses relation for proc-var
+    pkb.addUsesS(stmtNum, varName); // add Uses relation for stmt-var
 
     return stmtNum;
   }
@@ -297,8 +293,7 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addVar(varName); // add variable
     pkb.addAssign(stmtNum); /// add assign stmts
-    pkb.addModifies(stmtNum, varName);
-    pkb.addModifies(getCurrentProc(), varName);
+    pkb.addModifiesS(stmtNum, varName);
     pkb.addPatternAssign(stmtNum, varName, exprString);
 
     return stmtNum;
@@ -320,7 +315,7 @@ namespace SourceProcessor {
 
       if (it == tokens.end()) {
         throw SyntaxError(
-          ErrorMessage::SYNTAX_ERROR_NOT_ENOUGHT_TOKENS +
+          ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS +
           ErrorMessage::APPEND_STMT_NUMBER +
           std::to_string(getStmtNum())
         );

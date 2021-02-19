@@ -1,3 +1,5 @@
+#include "catch.hpp"
+
 #include <iostream>
 #include <list>
 #include <string>
@@ -7,15 +9,15 @@
 #include "PqlQuery.h"
 #include "Token.h"
 #include "Tokeniser.h"
-#include "catch.hpp"
 
 namespace {
-  Tokeniser tokeniser;
-
   std::list<Token> queryStringToTokens(std::string& queryString) {
     std::stringstream ss;
     ss << queryString << std::endl;
-    return tokeniser.tokenise(ss);
+    return Tokeniser()
+      .allowingLeadingZeroes()
+      .notConsumingWhitespace()
+      .tokenise(ss);
   }
 }
 
@@ -27,7 +29,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select s
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -46,7 +48,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select r1
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -66,7 +68,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select pr
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -85,7 +87,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select p such that Follows(p, w)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -108,7 +110,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select p such that Follows*(p, w)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -131,7 +133,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select p such that Parent(w, p)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -154,7 +156,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select p such that Parent*(w, p)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -177,7 +179,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select v such that Uses(s, v)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -200,7 +202,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select s such that Modifies(s, v)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -216,14 +218,14 @@ TEST_CASE("[TestPqlParser] Valid Query") {
     REQUIRE(parsingResult == expectedResult);
   }
 
-  SECTION("Single pattern clause") {
+  SECTION("Single pattern clause - 1") {
     // PQL query to test
     std::string queryString(R"(
       variable v; assign a;
       Select a pattern a(v, _"x"_)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -240,6 +242,30 @@ TEST_CASE("[TestPqlParser] Valid Query") {
     REQUIRE(parsingResult == expectedResult);
   }
 
+  SECTION("Single pattern clause - 2") {
+    // PQL query to test
+    std::string queryString(R"(
+      variable v; assign a;
+      Select a pattern a(v, "x + y * z")
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.setTarget(Pql::Entity(Pql::EntityType::ASSIGN, "a"));
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::PATTERN_ASSIGN, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a"),
+      Pql::Entity(Pql::EntityType::VARIABLE, "v"),
+      Pql::Entity(Pql::EntityType::EXPRESSION, "x y z * +")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+  }
+
   SECTION("Combination of such that and pattern clause") {
     // PQL query to test
     std::string queryString(R"(
@@ -247,7 +273,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       Select ifs such that Modifies(ifs, "x") pattern a("x", _"x"_)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -274,12 +300,12 @@ TEST_CASE("[TestPqlParser] Valid Query") {
       stmt s       ; variable      
                   v   , v2
         ;assign a;
-      Select s      such 
-             that Follows* (    2,s)pattern a
+      Select s      such that
+                Follows* (    2,s)pattern a
       (v, _"x"_)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     // Get parsing result
     Pql::Query parsingResult = pqlParser.parseQuery();
@@ -304,7 +330,7 @@ TEST_CASE("[TestPqlParser] Valid Query") {
 TEST_CASE("[TestPqlParser] Query with Syntax Error") {
   SECTION("Empty query string") {
     std::list<Token> emptyList;
-    PqlParser pqlParser(emptyList);
+    Pql::PqlParser pqlParser(emptyList);
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 
@@ -314,7 +340,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       hello h; Select h;
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -325,7 +351,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       stmt s; Select s;
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -336,7 +362,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       stmt s Select s;
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -348,7 +374,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       Select s such that Follows *(1, s)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -360,7 +386,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       Select s such that Parent *(1, s)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -372,7 +398,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       Select s1 pattern a(_, _"x"_) such that Follows*(1, s1)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -384,7 +410,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       Select s1 such that Follows*(1, s1) and Parent(s1, s2)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -396,7 +422,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       Select s1 such that Follows*(1, s1) such that Parent(s1, s2)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -408,7 +434,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       Select a1 pattern a1(_, _"x"_) and a2("z", _"y"_)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -420,19 +446,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       Select a1 pattern a1(_, _"x"_) pattern a2("z", _"y"_)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Wrong expression-spec") {
-    // PQL query to test
-    std::string queryString(R"(
-      assign a1, a2; 
-      Select a1 pattern a1(_, "x")
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -444,7 +458,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
       Select a1
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -458,7 +472,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -469,7 +483,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -481,7 +495,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s pattern s(_, _"x"_)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -493,7 +507,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s pattern s(w, _"x"_)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -505,7 +519,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s pattern s(_, _";"_)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -517,7 +531,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s such that Follows(pr, s)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -529,7 +543,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s such that Follows(s, v)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -541,7 +555,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s such that Follows(v, s)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -553,7 +567,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s such that Follows(s, pr)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -565,7 +579,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s such that Uses(pr, s)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -577,7 +591,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s such that Uses(s, pr)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -589,7 +603,7 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s such that Modifies(v, s)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
@@ -601,9 +615,8 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
       Select s1 such that Modifies(s1, s2)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
-    PqlParser pqlParser(queryTokens);
+    Pql::PqlParser pqlParser(queryTokens);
 
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 }
-

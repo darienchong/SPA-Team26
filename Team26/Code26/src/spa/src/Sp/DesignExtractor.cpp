@@ -277,11 +277,11 @@ namespace {
    * @returns
    */
   void fillUsesTable(Pkb& pkb) {
-    Table newUsesTable = fillIndirectRelation(pkb.getUsesTable(), pkb.getParentTTable());
-    for (std::vector<std::string> row : newUsesTable.getData()) {
-      std::string proc = row[0];
+    Table newUsesSTable = fillIndirectRelation(pkb.getUsesSTable(), pkb.getParentTTable());
+    for (std::vector<std::string> row : newUsesSTable.getData()) {
+      int stmtNum = std::stoi(row[0]);
       std::string var = row[1];
-      pkb.addUses(proc, var);
+      pkb.addUsesS(stmtNum, var);
     }
   }
 
@@ -295,11 +295,11 @@ namespace {
    * @returns
    */
   void fillModifiesTable(Pkb& pkb) {
-    Table newModifiesTable = fillIndirectRelation(pkb.getModifiesTable(), pkb.getParentTTable());
-    for (std::vector<std::string> row : newModifiesTable.getData()) {
-      std::string stmtNum = row[0];
+    Table newModifiesSTable = fillIndirectRelation(pkb.getModifiesSTable(), pkb.getParentTTable());
+    for (std::vector<std::string> row : newModifiesSTable.getData()) {
+      int stmtNum = std::stoi(row[0]);
       std::string var = row[1];
-      pkb.addModifies(stmtNum, var);
+      pkb.addModifiesS(stmtNum, var);
     }
   }
 }

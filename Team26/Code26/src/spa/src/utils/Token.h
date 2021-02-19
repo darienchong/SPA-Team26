@@ -18,7 +18,10 @@ enum class TokenType {
   NUMBER,
 
   // Operators on numbers e.g. +
-  OPERATOR
+  OPERATOR,
+
+  // White space (single) character e.g. <SPACE>
+  WHITESPACE
 };
 
 /**

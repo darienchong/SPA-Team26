@@ -132,27 +132,27 @@ TEST_CASE("[TestPkb] addParentT(int, int)") {
   }
 }
 
-TEST_CASE("[TestPkb] addUses") {
+TEST_CASE("[TestPkb] addUsesS") {
   Pkb pkb;
 
   SECTION("Check valid insertion") {
-    pkb.addUses(5, "x");
-    pkb.addUses("main", "y");
-    auto dataCopy = pkb.getUsesTable().getData();
+    pkb.addUsesS(5, "x");
+    pkb.addUsesS(7, "y");
+    auto dataCopy = pkb.getUsesSTable().getData();
     REQUIRE(dataCopy.count({ "5", "x" }) == 1);
-    REQUIRE(dataCopy.count({ "main", "y" }) == 1);
+    REQUIRE(dataCopy.count({ "7", "y" }) == 1);
   }
 }
 
-TEST_CASE("[TestPkb] addModifies") {
+TEST_CASE("[TestPkb] addModifiesS") {
   Pkb pkb;
 
   SECTION("Check valid insertion") {
-    pkb.addModifies(5, "x");
-    pkb.addModifies("main", "y");
-    auto dataCopy = pkb.getModifiesTable().getData();
+    pkb.addModifiesS(5, "x");
+    pkb.addModifiesS(7, "y");
+    auto dataCopy = pkb.getModifiesSTable().getData();
     REQUIRE(dataCopy.count({ "5", "x" }) == 1);
-    REQUIRE(dataCopy.count({ "main", "y" }) == 1);
+    REQUIRE(dataCopy.count({ "7", "y" }) == 1);
   }
 }
 
@@ -270,21 +270,20 @@ TEST_CASE("[TestPkb] getChildT") {
 
 TEST_CASE("[TestPkb] getUses") {
   Pkb pkb;
-  pkb.addUses(1, "x");
-  pkb.addUses(2, "y");
+  pkb.addUsesS(1, "x");
+  pkb.addUsesS(2, "y");
   Table table = pkb.getUses("x");
   REQUIRE(table.getData().count({"1"}));
-  pkb.addUses(2, "x");
+  pkb.addUsesS(2, "x");
   table = pkb.getUses("x");
   REQUIRE(table.getData().count({"2"}));
 }
 
 TEST_CASE("[TestPkb] getUsedBy") {
   Pkb pkb;
-  pkb.addUses(1, "x");
-  pkb.addUses(2, "y");
-  pkb.addUses(2, "x");
-  pkb.addUses("proc1", "x");
+  pkb.addUsesS(1, "x");
+  pkb.addUsesS(2, "y");
+  pkb.addUsesS(2, "x");
 
   SECTION("used by statement") {
     Table table = pkb.getUsedBy(1);
@@ -293,30 +292,24 @@ TEST_CASE("[TestPkb] getUsedBy") {
     REQUIRE(table.getData().count({"x"}));
     REQUIRE(table.getData().count({"y"}));
   }
-
-  SECTION("used by procedure") {
-    Table table = pkb.getUsedBy("proc1");
-    REQUIRE(table.getData().count({"x"}));
-  }
 }
 
 TEST_CASE("[TestPkb] getModifies") {
   Pkb pkb;
-  pkb.addModifies(1, "x");
-  pkb.addModifies(2, "y");
+  pkb.addModifiesS(1, "x");
+  pkb.addModifiesS(2, "y");
   Table table = pkb.getModifies("x");
   REQUIRE(table.getData().count({"1"}));
-  pkb.addModifies(2, "x");
+  pkb.addModifiesS(2, "x");
   table = pkb.getModifies("x");
   REQUIRE(table.getData().count({"2"}));
 }
 
 TEST_CASE("[TestPkb] getModifiedBy") {
   Pkb pkb;
-  pkb.addModifies(1, "x");
-  pkb.addModifies(2, "y");
-  pkb.addModifies(2, "x");
-  pkb.addModifies("proc1", "x");
+  pkb.addModifiesS(1, "x");
+  pkb.addModifiesS(2, "y");
+  pkb.addModifiesS(2, "x");
 
   SECTION("modified by statement") {
     Table table = pkb.getModifiedBy(1);
@@ -324,10 +317,5 @@ TEST_CASE("[TestPkb] getModifiedBy") {
     table = pkb.getModifiedBy(2);
     REQUIRE(table.getData().count({"x"}));
     REQUIRE(table.getData().count({"y"}));
-  }
-
-  SECTION("modified by procedure") {
-    Table table = pkb.getModifiedBy("proc1");
-    REQUIRE(table.getData().count({"x"}));
   }
 }

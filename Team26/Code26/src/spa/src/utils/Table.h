@@ -1,15 +1,26 @@
 #pragma once
 
 #include <string>
-#include <set>
+#include <unordered_set>
 #include <vector>
+#include <functional>
+
+typedef std::vector<std::string> Row;
+struct StringVectorHash {
+  size_t operator()(Row const& strings) const {
+    std::string concatenatedString;
+    for (const std::string& string : strings) {
+      concatenatedString.append(string);
+    }
+    return std::hash<std::string>{}(concatenatedString);
+  }
+};
+typedef std::unordered_set<Row, StringVectorHash> RowSet;
 
 class Table {
-  typedef std::vector<std::string> Row;
-
 private:
   Row header;
-  std::set<Row> data;
+  RowSet data;
 
 public:
   /**
@@ -53,7 +64,7 @@ public:
   /**
    * @return The data of the table.
    */
-  std::set<Row> getData() const;
+  RowSet getData() const;
 
   /**
    * Returns a column of the Table under the specified header.
@@ -61,7 +72,7 @@ public:
    * @param headerTitle The specified header.
    * @return The column data under the header.
    */
-  std::set<std::string> getColumn(const std::string& headerTitle) const;
+  std::unordered_set<std::string> getColumn(const std::string& headerTitle) const;
 
   /**
    * Returns a column of the Table under the specified header.
@@ -69,7 +80,7 @@ public:
    * @param headerTitle The specified header.
    * @return The column data under the header.
    */
-  std::set<Row> getColumns(const Row& headerTitles) const;
+  RowSet getColumns(const Row& headerTitles) const;
 
   /**
    * Returns the column index of the Table under the specified header.
@@ -115,7 +126,7 @@ public:
    * @param index The column index to be based on for filtering the Table.
    * @param values A set of values to be checked upon when filtering the Table.
    */
-  void filterColumn(int index, const std::set<std::string>& values);
+  void filterColumn(int index, const std::unordered_set<std::string>& values);
 
   /**
    * Filter the table rows based on the values for a particular column.
@@ -126,7 +137,7 @@ public:
    * @param columnName The header to be based on for filtering the Table.
    * @param values A set of values to be checked upon when filtering the Table.
    */
-  void filterColumn(const std::string& columnName, const std::set<std::string>& values);
+  void filterColumn(const std::string& columnName, const std::unordered_set<std::string>& values);
 
   /**
    * Concatenates two tables with the same header size.
@@ -167,7 +178,7 @@ public:
    * @param otherTable The other table.
    * @param indexPairs The index pairs representing the column index for each table.
    */
-  void innerJoin(const Table& otherTable, std::vector<std::pair<int, int>>& indexPairs);
+  void innerJoin(const Table& otherTable, const std::vector<std::pair<int, int>>& indexPairs);
 
   /**
    * Joins two tables using inner join based on the specified indices.
@@ -176,10 +187,10 @@ public:
    * The other table remains unaltered.
    *
    * @param otherTable The other table.
-   * @param firstTableIndex The index of the original table.
-   * @param secondTableIndex The index of the other table.
+   * @param thisTableIndex The index of the original table.
+   * @param otherTableIndex The index of the other table.
    */
-  void innerJoin(const Table& otherTable, int firstTableIndex, int secondTableIndex);
+  void innerJoin(const Table& otherTable, int thisTableIndex, int otherTableIndex);
 
   /**
    * Joins two tables using inner join based on the specified common header.
@@ -197,8 +208,9 @@ public:
    * Deletes a row from the Table.
    * 
    * @param row The specified row.
+   * @return True if a row is deleted. Otherwise, false
    */
-  void deleteRow(const Row& row);
+  bool deleteRow(const Row& row);
 
   /**
    * @return Returns the number of rows of the Table data.

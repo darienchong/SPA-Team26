@@ -7,7 +7,6 @@
 #include <iostream>
 
 namespace {
-  const static Token WHITESPACE{ TokenType::DELIMITER, " " };
   /**
    * Checks if a given character is a delimiter or not.
    * 
@@ -275,7 +274,24 @@ namespace {
   }
 
   /**
-   * Help to discard whitespace characters (meaningless during parsing).
+   * Constructs a Token from a whitespace.
+   *
+   * @param stream The stream to read from.
+   * @returns Token representing a single whitespace character.
+   */
+  Token constructWhitespace(std::istream& stream) {
+    TokenType type = TokenType::WHITESPACE;
+    std::string value;
+    
+    if (!std::isspace(stream.peek())) {
+      throw std::invalid_argument("[Tokeniser::constructWhitespace]: Expected whitespace character but got " + stream.peek());
+    }
+    value.push_back(stream.get());
+    return { type, value };
+  }
+
+  /**
+   * Help to discard whitespace characters.
    * Advances the stream until it encounters a non-whitespace character.
    * 
    * @param stream The stream to read from.
@@ -305,8 +321,7 @@ std::list<Token> Tokeniser::tokenise(std::istream &stream) {
       tokens.push_back(constructOperator(stream));
     } else if (isWhitespace) {
       if (!isConsumeWhitespace) {
-        stream.get();
-        tokens.push_back(WHITESPACE);
+        tokens.push_back(constructWhitespace(stream));
       } else {
         consumeWhitespace(stream);
       }

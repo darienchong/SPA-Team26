@@ -94,7 +94,7 @@ namespace ExprProcessor {
           parseCondExpr();
           validateAndConsume(RIGHT_PARENTHESIS);
         }
-        catch (const SyntaxError& e) {
+        catch (const SyntaxError&) {
           it = secondTempPosition;
           parseRelExpr();
         }
@@ -103,7 +103,7 @@ namespace ExprProcessor {
         throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_INVALID_COND_SUB_EXPR);
       }
     }
-    catch (const SyntaxError& e) {
+    catch (const SyntaxError&) {
       it = tempPosition;
       parseRelExpr();
     }
@@ -166,7 +166,7 @@ namespace ExprProcessor {
 
   void CondExprParser::validateAndConsume(const Token& validationToken) {
     if (it == tokens.end()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_NOT_ENOUGHT_TOKENS);
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_NOT_ENOUGH_TOKENS);
     }
 
     const Token frontToken = *it;

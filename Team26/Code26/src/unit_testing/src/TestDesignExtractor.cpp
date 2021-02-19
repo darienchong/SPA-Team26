@@ -72,13 +72,13 @@ TEST_CASE("[TestDesignExtractor] Indirect Uses extraction") {
 
   pkb.addParent(1, 2);
   pkb.addParent(2, 3);
-  pkb.addUses(3, "z");
+  pkb.addUsesS(3, "z");
 
   designExtractor.extractDesignAbstractions(pkb);
-  Table usesTable = pkb.getUsesTable();
+  Table usesSTable = pkb.getUsesSTable();
 
-  REQUIRE(usesTable.contains({ "1", "z" }));
-  REQUIRE(usesTable.size() == 3);
+  REQUIRE(usesSTable.contains({ "1", "z" }));
+  REQUIRE(usesSTable.size() == 3);
 }
 
 TEST_CASE("[TestDesignExtractor] Indirect Modifies extraction") {
@@ -92,12 +92,12 @@ TEST_CASE("[TestDesignExtractor] Indirect Modifies extraction") {
 
   pkb.addParent(1, 2);
   pkb.addParent(2, 3);
-  pkb.addModifies(3, "z");
+  pkb.addModifiesS(3, "z");
 
   designExtractor.extractDesignAbstractions(pkb);
-  Table modifiesTable = pkb.getModifiesTable();
+  Table modifiesSTable = pkb.getModifiesSTable();
 
-  REQUIRE(modifiesTable.contains({ "1", "z" }));
-  REQUIRE(modifiesTable.size() == 3);
+  REQUIRE(modifiesSTable.contains({ "1", "z" }));
+  REQUIRE(modifiesSTable.size() == 3);
 }
 

@@ -1,5 +1,8 @@
 #include "catch.hpp"
 
+#include <vector>
+#include <unordered_set>
+
 #include "Table.h"
 
 TEST_CASE("[TestTable] New Table") {
@@ -96,7 +99,7 @@ TEST_CASE("[TestTable] Get Data") {
     REQUIRE(table.getData().count({"1", "11"}) == 1);
     REQUIRE(table.getColumns({"1"}).count({"33"}) == 1);
     REQUIRE(!table.getColumns({"1"}).count({"3"}));
-    REQUIRE(table.getColumn("0") == std::set<std::string> { "1", "2", "3" });
+    REQUIRE(table.getColumn("0") == std::unordered_set<std::string> { "1", "2", "3" });
   }
 
   SECTION ("invalid column name") {
@@ -146,7 +149,7 @@ TEST_CASE("[TestTable] Filter Column") {
     Table table({"a", "b"});
     table.insertRow({"1", "11"});
     table.insertRow({"2", "22"});
-    table.filterColumn("b", std::set<std::string>{"11"});
+    table.filterColumn("b", std::unordered_set<std::string>{"11"});
     REQUIRE(!table.contains({"2", "22"}));
     REQUIRE(table.contains({"1", "11"}));
   }
@@ -155,7 +158,7 @@ TEST_CASE("[TestTable] Filter Column") {
     Table table({"a", "b"});
     table.insertRow({"1", "11"});
     table.insertRow({"2", "22"});
-    table.filterColumn("b", std::set<std::string>{});
+    table.filterColumn("b", std::unordered_set<std::string>{});
     REQUIRE(table.empty());
   }
 
@@ -163,7 +166,7 @@ TEST_CASE("[TestTable] Filter Column") {
     Table table({"a", "b"});
     table.insertRow({"1", "11"});
     table.insertRow({"2", "22"});
-    table.filterColumn("a", std::set<std::string>{"3"});
+    table.filterColumn("a", std::unordered_set<std::string>{"3"});
     REQUIRE(table.empty());
   }
 
@@ -171,7 +174,7 @@ TEST_CASE("[TestTable] Filter Column") {
     Table table({"a", "b"});
     table.insertRow({"1", "11"});
     table.insertRow({"2", "22"});
-    REQUIRE_THROWS(table.filterColumn("c", std::set<std::string>{"11"}));
+    REQUIRE_THROWS(table.filterColumn("c", std::unordered_set<std::string>{"11"}));
   }
 }
 
@@ -291,8 +294,8 @@ TEST_CASE("[TestTable] delete row") {
     table1.insertRow({ "3", "33" });
     std::vector<std::string> row1({ "2","22" });
     std::vector<std::string> row2({ "1","11" });
-    table1.deleteRow(row1);
-    table1.deleteRow(row2);
+    REQUIRE(table1.deleteRow(row1) == true);
+    REQUIRE(table1.deleteRow(row2) == true);
     REQUIRE(table1.size() == 1);
   }
 
@@ -301,12 +304,12 @@ TEST_CASE("[TestTable] delete row") {
     table1.insertRow({ "1", "11" });
     table1.insertRow({ "2", "22" });
     std::vector<std::string> row({ "3","33" });
-    REQUIRE_THROWS(table1.deleteRow(row));
+    REQUIRE(table1.deleteRow(row) == false);
   }
 
   SECTION("delete row for empty table") {
     Table table1({ "a", "b" });
     std::vector<std::string> row({ "3","33" });
-    REQUIRE_THROWS(table1.deleteRow(row));
+    REQUIRE(table1.deleteRow(row) == false);
   }
 }

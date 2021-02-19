@@ -108,36 +108,20 @@ public:
   void addParentT(int parent, int child);
 
   /**
-   * Adds the Row {stmtNo, var} into usesTable.
+   * Adds the Row {stmtNo, var} into usesSTable.
    *
    * @param stmtNo Statement number of the statement which uses var
    * @param var Variable or constant name which is used by the statement
    */
-  void addUses(int stmtNo, std::string var);
+  void addUsesS(int stmtNo, std::string var);
 
   /**
-   * Adds the Row {proc, var} into usesTable.
-   *
-   * @param proc Name of Procedure which uses var
-   * @param var Variable or constant name which is used by the statement
-   */
-  void addUses(std::string proc, std::string var);
-
-  /**
-   * Adds the Row {stmtNo, var} into modifiesTable.
+   * Adds the Row {stmtNo, var} into modifiesSTable.
    *
    * @param stmtNo Statement number of the statement which modifies var
    * @param var Variable or constant name which is modified by the statement
    */
-  void addModifies(int stmtNo, std::string var);
-
-  /**
-   * Adds the Row {proc, var} into modifiesTable.
-   *
-   * @param proc Name of Procedure which modifies var
-   * @param var Variable or constant name which is modified by the statement
-   */
-  void addModifies(std::string proc, std::string var);
+  void addModifiesS(int stmtNo, std::string var);
 
   /**
    * Adds the Row {stmtNo, lhs, rhs} int patterTable.
@@ -215,14 +199,14 @@ public:
   Table getParentTTable() const;
 
   /**
-   * @return usesTable
+   * @return usesSTable
    */
-  Table getUsesTable() const;
+  Table getUsesSTable() const;
 
   /**
-   * @return modifiesTable
+   * @return modifiesSTable
    */
-  Table getModifiesTable() const;
+  Table getModifiesSTable() const;
 
   /**
    * @return patterAssignTable
@@ -322,16 +306,6 @@ public:
   Table getUsedBy(int stmtNo) const;
 
   /**
-   * Finds all variables that are used by procName and returns them as a Table with
-   * one column. The function addIndirectUses() must be called before calling
-   * this function in order for this function to also return the indirect uses relations.
-   *
-   * @param procName Name of the procedure for which we will get the variables used.
-   * @return Table containing the variable names that is used by the procedure.
-   */
-  Table getUsedBy(std::string procName) const;
-
-  /**
    * Finds statement numbers and procedure names that modify varName and returns them as a
    * Table with one column. The function addIndirectModify() must be called before calling
    * this function in order for this function to also return the indirect modify relations.
@@ -351,16 +325,6 @@ public:
    */
   Table getModifiedBy(int stmtNo) const;
 
-  /**
-   * Finds all variables that are modified by procName and returns them as a Table with
-   * one column. The function addIndirectModifies() must be called before calling
-   * this function in order for this function to also return the indirect modify relations.
-   *
-   * @param procName Name of the procedure for which we will get the variables modified.
-   * @return Table containing the variable names that is modified by the procedure.
-   */
-  Table getModifiedBy(std::string procName) const;
-
 private:
   Table varTable{ 1 };
   Table stmtTable{ 1 };
@@ -377,7 +341,7 @@ private:
   Table followsTTable{ 2 };
   Table parentTable{ 2 };
   Table parentTTable{ 2 };
-  Table usesTable{ 2 };
-  Table modifiesTable{ 2 };
+  Table usesSTable{ 2 };
+  Table modifiesSTable{ 2 };
   Table patternAssignTable{ 3 };
 };

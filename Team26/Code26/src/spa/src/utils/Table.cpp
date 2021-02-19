@@ -2,9 +2,10 @@
 
 #include <string>
 #include <stack>
-#include <set>
+#include <unordered_set>
 #include <stdexcept>
 #include <unordered_map>
+#include <stdexcept>
 #include <utility>
 
 Table::Table() {
@@ -22,53 +23,56 @@ Table::Table(Row newHeader) {
 }
 
 void Table::setHeader(const Row& newHeader) {
-  std::set<std::string> prevNames;
+  if (newHeader.size() != header.size()) {
+    throw std::invalid_argument("Header size does not match");
+  }
+
+  std::unordered_set<std::string> prevNames;
   for (std::string name : newHeader) {
     bool isDuplicate = (name != "") && prevNames.count(name);
     if (isDuplicate) {
-      throw "Non-empty  column name could not be duplicated";
-    } else {
+      throw std::invalid_argument("Non-empty column name could not be duplicated");
+    }
+    else {
       prevNames.emplace(name);
     }
   }
 
-  if (newHeader.size() != header.size()) {
-    throw "Header size does not match";
-  }
+
   header = newHeader;
 }
 
 void Table::insertRow(Row row) {
   if (row.size() != header.size()) {
-    throw "Row should be of length " + std::to_string(header.size());
+    throw std::invalid_argument("Row should be of length " + std::to_string(header.size()));
   }
   data.emplace(row);
 }
 
-Table::Row Table::getHeader() const {
+Row Table::getHeader() const {
   return header;
 }
 
-std::set<Table::Row> Table::getData() const {
+RowSet Table::getData() const {
   return data;
 }
 
-std::set<std::string> Table::getColumn(const std::string& headerTitle) const {
+std::unordered_set<std::string> Table::getColumn(const std::string& headerTitle) const {
   int index = getColumnIndex(headerTitle);
-  std::set<std::string> column;
+  std::unordered_set<std::string> column;
   for (Row row : data) {
     column.emplace(row[index]);
   }
   return column;
 }
 
-std::set<Table::Row> Table::getColumns(const Row& headerTitles) const {
+RowSet Table::getColumns(const Row& headerTitles) const {
   std::vector<int> indexList;
   for (const std::string& headerTitle : headerTitles) {
     indexList.push_back(getColumnIndex(headerTitle));
   }
 
-  std::set<Row> result;
+  RowSet result;
   for (Row row : data) {
     Row curr;
     for (int i : indexList) {
@@ -85,16 +89,17 @@ int Table::getColumnIndex(const std::string& headerTitle) const {
       return i;
     }
   }
-  throw "Column with name:" + headerTitle + " not found";
+  throw std::invalid_argument("Column with name:" + headerTitle + " not found");
 }
 
 void Table::dropColumn(int index) {
   // Clear data if there is only one column, otherwise erase column
   if (header.size() == 1) {
     data.clear();
-  } else {
+  }
+  else {
     header.erase(header.begin() + index);
-    std::set<Row> newData;
+    RowSet newData;
     for (Row row : data) {
       row.erase(row.begin() + index);
       newData.emplace(row);
@@ -108,26 +113,27 @@ void Table::dropColumn(const std::string& headerTitle) {
   dropColumn(index);
 }
 
-void Table::filterColumn(int index, const std::set<std::string>& values) {
+void Table::filterColumn(int index, const std::unordered_set<std::string>& values) {
   for (auto it = data.begin(); it != data.end(); ) {
     if (!values.count(it->at(index))) {
       it = data.erase(it);
-    } else {
+    }
+    else {
       it++;
     }
   }
 }
 
-void Table::filterColumn(const std::string& columnName, const std::set<std::string>& values) {
+void Table::filterColumn(const std::string& columnName, const std::unordered_set<std::string>& values) {
   int index = getColumnIndex(columnName);
   filterColumn(index, values);
 }
 
 void Table::concatenate(Table& otherTable) {
   if (header.size() != otherTable.getHeader().size()) {
-    throw "Concatenation requires table with the same number of columns";
+    throw std::invalid_argument("Concatenation requires table with the same number of columns");
   }
-  for (Row row : otherTable.getData()) {
+  for (const Row& row : otherTable.getData()) {
     data.emplace(row);
   }
 }
@@ -149,18 +155,20 @@ bool Table::empty() const {
 // else, cross product
 void Table::naturalJoin(const Table& otherTable) {
   // get pairs of columns with the same name
-  std::vector<std::pair<int, int>> indexPairs = getColumnIndexPairs(otherTable);
+  const std::vector<std::pair<int, int>>& indexPairs = getColumnIndexPairs(otherTable);
 
-  if (indexPairs.empty()) { // cross-product if no common headers
-    crossJoin(otherTable);
-  } else { // natural join -> change to hash naturalJoin ?
+  bool hasCommonHeaders = !indexPairs.empty();
+  if (hasCommonHeaders) {
     innerJoin(otherTable, indexPairs);
+  }
+  else {
+    crossJoin(otherTable);
   }
 }
 
 std::vector<std::pair<int, int>> Table::getColumnIndexPairs(const Table& otherTable) const {
   std::vector<std::pair<int, int>> indexPairs;
-  Row otherHeader = otherTable.getHeader();
+  const Row& otherHeader = otherTable.getHeader();
 
   for (size_t i = 0; i < header.size(); ++i) {
     if (header[i] == "") {
@@ -175,11 +183,11 @@ std::vector<std::pair<int, int>> Table::getColumnIndexPairs(const Table& otherTa
 }
 
 void Table::crossJoin(const Table& otherTable) {
-  std::set<Row> newData;
-  Table::Row otherHeader = otherTable.getHeader();
+  RowSet newData;
+  const Row& otherHeader = otherTable.getHeader();
   header.insert(header.end(), otherHeader.begin(), otherHeader.end());
   for (const Row& row : data) {
-    for (Row otherRow : otherTable.data) {
+    for (const Row& otherRow : otherTable.getData()) {
       Row newRow = row;
       newRow.insert(newRow.end(), otherRow.begin(), otherRow.end());
       newData.emplace(newRow);
@@ -188,10 +196,10 @@ void Table::crossJoin(const Table& otherTable) {
   data = std::move(newData);
 }
 
-void Table::innerJoin(const Table& otherTable, std::vector<std::pair<int, int>>& indexPairs) {
-  std::set<Row> newData;
-  const Table::Row otherHeader = otherTable.getHeader();
-  std::set<int> droppedIndexes;
+void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, int>>& indexPairs) {
+  RowSet newData;
+  const Row& otherHeader = otherTable.getHeader();
+  std::unordered_set<int> droppedIndexes;
 
   for (std::pair<int, int> pair : indexPairs) {
     droppedIndexes.emplace(pair.second);
@@ -203,10 +211,10 @@ void Table::innerJoin(const Table& otherTable, std::vector<std::pair<int, int>>&
     }
   }
 
-  for (Row row : data) {
-    for (Row otherRow : otherTable.data) {
+  for (const Row& row : data) {
+    for (const Row& otherRow : otherTable.getData()) {
       bool keepRow = true;
-      for (std::pair<int, int> pair : indexPairs) {
+      for (const std::pair<int, int>& pair : indexPairs) {
         bool isMatchingPair = row[pair.first] == otherRow[pair.second];
         if (!isMatchingPair) {
           keepRow = false;
@@ -228,9 +236,9 @@ void Table::innerJoin(const Table& otherTable, std::vector<std::pair<int, int>>&
   data = std::move(newData);
 }
 
-void Table::innerJoin(const Table& otherTable, int firstTableIndex, int secondTableIndex) {
+void Table::innerJoin(const Table& otherTable, int thisTableIndex, int otherTableIndex) {
   std::vector<std::pair<int, int>> indexPairs;
-  indexPairs.emplace_back(firstTableIndex, secondTableIndex);
+  indexPairs.emplace_back(thisTableIndex, otherTableIndex);
   innerJoin(otherTable, indexPairs);
 }
 
@@ -240,11 +248,7 @@ void Table::innerJoin(const Table& otherTable, const std::string& commonHeader) 
   innerJoin(otherTable, firstTableIndex, secondTableIndex);
 }
 
-void Table::deleteRow(const Row& row) {
-  auto index = find(data.begin(), data.end(), row);
-  if (index != data.end()) {
-    data.erase(row);
-  } else {
-    throw "Row not found when trying to delete row.";
-  }
+bool Table::deleteRow(const Row& row) {
+  int numRowErased = data.erase(row);
+  return numRowErased == 1;
 }

@@ -3,6 +3,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unordered_set>
+#include <stdexcept>
 
 #include "Table.h"
 
@@ -60,7 +62,7 @@ void Pkb::addAssign(int stmtNo) {
 
 void Pkb::addFollows(int followed, int follower) {
   if (followed >= follower) {
-    throw "Follower should come after followed";
+    throw std::invalid_argument("Follower should come after followed");
   }
   std::vector<std::string> vect{ std::to_string(followed), std::to_string(follower) };
   followsTable.insertRow(vect);
@@ -68,7 +70,7 @@ void Pkb::addFollows(int followed, int follower) {
 
 void Pkb::addFollowsT(int followed, int follower) {
   if (followed >= follower) {
-    throw "Follower should come after followed";
+    throw std::invalid_argument("Follower should come after followed");
   }
   std::vector<std::string> vect{ std::to_string(followed), std::to_string(follower) };
   followsTTable.insertRow(vect);
@@ -76,7 +78,7 @@ void Pkb::addFollowsT(int followed, int follower) {
 
 void Pkb::addParent(int parent, int child) {
   if (parent >= child) {
-    throw "Parent should come before child";
+    throw std::invalid_argument("Parent should come before child");
   }
   std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
   parentTable.insertRow(vect);
@@ -84,30 +86,20 @@ void Pkb::addParent(int parent, int child) {
 
 void Pkb::addParentT(int parent, int child) {
   if (parent >= child) {
-    throw "Parent should come before child";
+    throw std::invalid_argument("Parent should come before child");
   }
   std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
   parentTTable.insertRow(vect);
 }
 
-void Pkb::addUses(int stmtNo, std::string var) {
+void Pkb::addUsesS(int stmtNo, std::string var) {
   std::vector<std::string> vect{ std::to_string(stmtNo), std::move(var) };
-  usesTable.insertRow(vect);
+  usesSTable.insertRow(vect);
 }
 
-void Pkb::addUses(std::string proc, std::string var) {
-  std::vector<std::string> vect{ std::move(proc) , std::move(var) };
-  usesTable.insertRow(vect);
-}
-
-void Pkb::addModifies(int stmtNo, std::string var) {
+void Pkb::addModifiesS(int stmtNo, std::string var) {
   std::vector<std::string> vect{ std::to_string(stmtNo), std::move(var) };
-  modifiesTable.insertRow(vect);
-}
-
-void Pkb::addModifies(std::string proc, std::string var) {
-  std::vector<std::string> vect{ std::move(proc) , std::move(var) };
-  modifiesTable.insertRow(vect);
+  modifiesSTable.insertRow(vect);
 }
 
 void Pkb::addPatternAssign(int stmtNo, std::string lhs, std::string rhs) {
@@ -129,104 +121,90 @@ Table Pkb::getFollowsTable() const { return followsTable; }
 Table Pkb::getFollowsTTable() const { return followsTTable; }
 Table Pkb::getParentTable() const { return parentTable; }
 Table Pkb::getParentTTable() const { return parentTTable; }
-Table Pkb::getUsesTable() const { return usesTable; }
-Table Pkb::getModifiesTable() const { return modifiesTable; }
+Table Pkb::getUsesSTable() const { return usesSTable; }
+Table Pkb::getModifiesSTable() const { return modifiesSTable; }
 Table Pkb::getPatternAssignTable() const { return patternAssignTable; }
 
 Table Pkb::getFollower(int stmtNo) const {
   Table filterTable = followsTable;
-  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getFollowedBy(int stmtNo) const {
   Table filterTable = followsTable;
-  filterTable.filterColumn(1, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.filterColumn(1, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getFollowerT(int stmtNo) const {
   Table filterTable = followsTTable;
-  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getFollowedByT(int stmtNo) const {
   Table filterTable = followsTTable;
-  filterTable.filterColumn(1, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.filterColumn(1, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getParent(int stmtNo) const {
   Table filterTable = parentTable;
-  filterTable.filterColumn(1, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.filterColumn(1, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getChild(int stmtNo) const {
   Table filterTable = parentTable;
-  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getParentT(int stmtNo) const {
   Table filterTable = parentTTable;
-  filterTable.filterColumn(1, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.filterColumn(1, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getChildT(int stmtNo) const {
   Table filterTable = parentTTable;
-  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
+  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getUses(std::string varName) const {
-  Table filterTable = usesTable;
-  filterTable.filterColumn(1, std::set<std::string> {std::move(varName)});
+  Table filterTable = usesSTable;
+  filterTable.filterColumn(1, std::unordered_set<std::string> {std::move(varName)});
   filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getUsedBy(int stmtNo) const {
-  Table filterTable = usesTable;
-  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(0);
-  return filterTable;
-}
-
-Table Pkb::getUsedBy(std::string procName) const {
-  Table filterTable = usesTable;
-  filterTable.filterColumn(0, std::set<std::string> {std::move(procName)});
+  Table filterTable = usesSTable;
+  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(0);
   return filterTable;
 }
 
 Table Pkb::getModifies(std::string varName) const {
-  Table filterTable = modifiesTable;
-  filterTable.filterColumn(1, std::set<std::string> {std::move(varName)});
+  Table filterTable = modifiesSTable;
+  filterTable.filterColumn(1, std::unordered_set<std::string> {std::move(varName)});
   filterTable.dropColumn(1);
   return filterTable;
 }
 
 Table Pkb::getModifiedBy(int stmtNo) const {
-  Table filterTable = modifiesTable;
-  filterTable.filterColumn(0, std::set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(0);
-  return filterTable;
-}
-
-Table Pkb::getModifiedBy(std::string procName) const {
-  Table filterTable = modifiesTable;
-  filterTable.filterColumn(0, std::set<std::string> {std::move(procName)});
+  Table filterTable = modifiesSTable;
+  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(0);
   return filterTable;
 }
