@@ -278,7 +278,7 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed = { "x" };
     std::unordered_set<std::string> expectedConstantsUsed;
-    std::string expectedPostFixString("x");
+    std::string expectedPostFixString(" x ");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -294,7 +294,7 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed = { "abcdefghijklmnopqrstuvwxyz" };
     std::unordered_set<std::string> expectedConstantsUsed;
-    std::string expectedPostFixString("abcdefghijklmnopqrstuvwxyz");
+    std::string expectedPostFixString(" abcdefghijklmnopqrstuvwxyz ");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -310,7 +310,7 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed = { "ABCDEFGHIJKLMNOPQRSTUVWXYZ" };
     std::unordered_set<std::string> expectedConstantsUsed;
-    std::string expectedPostFixString("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+    std::string expectedPostFixString(" ABCDEFGHIJKLMNOPQRSTUVWXYZ ");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -326,7 +326,7 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed = { "jksJFeijKSJlmcJLezZnkEPx" };
     std::unordered_set<std::string> expectedConstantsUsed;
-    std::string expectedPostFixString("jksJFeijKSJlmcJLezZnkEPx");
+    std::string expectedPostFixString(" jksJFeijKSJlmcJLezZnkEPx ");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -342,7 +342,7 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed = { "a1b23c567fsf98n0y040" };
     std::unordered_set<std::string> expectedConstantsUsed;
-    std::string expectedPostFixString("a1b23c567fsf98n0y040");
+    std::string expectedPostFixString(" a1b23c567fsf98n0y040 ");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -377,7 +377,7 @@ TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed;
     std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-    std::string expectedPostFixString("1");
+    std::string expectedPostFixString(" 1 ");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -393,7 +393,7 @@ TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed;
     std::unordered_set<std::string> expectedConstantsUsed = { "0" };
-    std::string expectedPostFixString("0");
+    std::string expectedPostFixString(" 0 ");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -409,7 +409,7 @@ TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprPa
     std::string resultPostFixString = parser.getPostfixExprString();
     std::unordered_set<std::string> expectedVariableUsed;
     std::unordered_set<std::string> expectedConstantsUsed = { "1234567890" };
-    std::string expectedPostFixString("1234567890");
+    std::string expectedPostFixString(" 1234567890 ");
     REQUIRE(resultVariablesUsed == expectedVariableUsed);
     REQUIRE(resultConstantsUsed == expectedConstantsUsed);
     REQUIRE(resultPostFixString == expectedPostFixString);
@@ -474,7 +474,7 @@ TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
       std::unordered_set<std::string> expectedConstantsUsed;
-      std::string expectedPostFixString("x y +");
+      std::string expectedPostFixString(" x y + ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -506,7 +506,7 @@ TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
       std::unordered_set<std::string> expectedConstantsUsed;
-      std::string expectedPostFixString("x y -");
+      std::string expectedPostFixString(" x y - ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -538,7 +538,7 @@ TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
       std::unordered_set<std::string> expectedConstantsUsed;
-      std::string expectedPostFixString("x y *");
+      std::string expectedPostFixString(" x y * ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -570,7 +570,7 @@ TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
       std::unordered_set<std::string> expectedConstantsUsed;
-      std::string expectedPostFixString("x y /");
+      std::string expectedPostFixString(" x y / ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -602,7 +602,7 @@ TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
       std::unordered_set<std::string> expectedConstantsUsed;
-      std::string expectedPostFixString("x y %");
+      std::string expectedPostFixString(" x y % ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -666,7 +666,7 @@ TEST_CASE("Assignment expressions - double constants", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed;
       std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-      std::string expectedPostFixString("1 2 +");
+      std::string expectedPostFixString(" 1 2 + ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -698,7 +698,7 @@ TEST_CASE("Assignment expressions - double constants", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed;
       std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-      std::string expectedPostFixString("1 2 -");
+      std::string expectedPostFixString(" 1 2 - ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -730,7 +730,7 @@ TEST_CASE("Assignment expressions - double constants", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed;
       std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-      std::string expectedPostFixString("1 2 *");
+      std::string expectedPostFixString(" 1 2 * ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -762,7 +762,7 @@ TEST_CASE("Assignment expressions - double constants", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed;
       std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-      std::string expectedPostFixString("1 2 /");
+      std::string expectedPostFixString(" 1 2 / ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -794,7 +794,7 @@ TEST_CASE("Assignment expressions - double constants", "[ExprParser][AssignExprP
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed;
       std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-      std::string expectedPostFixString("1 2 %");
+      std::string expectedPostFixString(" 1 2 % ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -835,7 +835,7 @@ TEST_CASE("Assignment expressions - single variable single constant", "[ExprPars
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x" };
       std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-      std::string expectedPostFixString("x 1 +");
+      std::string expectedPostFixString(" x 1 + ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -867,7 +867,7 @@ TEST_CASE("Assignment expressions - single variable single constant", "[ExprPars
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x" };
       std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-      std::string expectedPostFixString("1 x -");
+      std::string expectedPostFixString(" 1 x - ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -899,7 +899,7 @@ TEST_CASE("Assignment expressions - single variable single constant", "[ExprPars
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x" };
       std::unordered_set<std::string> expectedConstantsUsed = { "2" };
-      std::string expectedPostFixString("x 2 *");
+      std::string expectedPostFixString(" x 2 * ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -931,7 +931,7 @@ TEST_CASE("Assignment expressions - single variable single constant", "[ExprPars
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x" };
       std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-      std::string expectedPostFixString("1 x /");
+      std::string expectedPostFixString(" 1 x / ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -963,7 +963,7 @@ TEST_CASE("Assignment expressions - single variable single constant", "[ExprPars
       std::string resultPostFixString = parser.getPostfixExprString();
       std::unordered_set<std::string> expectedVariableUsed = { "x" };
       std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-      std::string expectedPostFixString("1 x %");
+      std::string expectedPostFixString(" 1 x % ");
       REQUIRE(resultVariablesUsed == expectedVariableUsed);
       REQUIRE(resultConstantsUsed == expectedConstantsUsed);
       REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1039,7 +1039,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x" };
         std::unordered_set<std::string> expectedConstantsUsed;
-        std::string expectedPostFixString("x");
+        std::string expectedPostFixString(" x ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1055,7 +1055,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed;
         std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-        std::string expectedPostFixString("1");
+        std::string expectedPostFixString(" 1 ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1071,7 +1071,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-        std::string expectedPostFixString("1 x +");
+        std::string expectedPostFixString(" 1 x + ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1103,7 +1103,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "z" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-        std::string expectedPostFixString("x 1 z + +");
+        std::string expectedPostFixString(" x 1 z + + ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1119,7 +1119,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "z" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1" };
-        std::string expectedPostFixString("x 1 + z +");
+        std::string expectedPostFixString(" x 1 + z + ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1158,7 +1158,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-        std::string expectedPostFixString("x 1 * y 2 * +");
+        std::string expectedPostFixString(" x 1 * y 2 * + ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1174,7 +1174,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-        std::string expectedPostFixString("x 1 y + * 2 *");
+        std::string expectedPostFixString(" x 1 y + * 2 * ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1190,7 +1190,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-        std::string expectedPostFixString("x 1 * y 2 * +");
+        std::string expectedPostFixString(" x 1 * y 2 * + ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1206,7 +1206,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-        std::string expectedPostFixString("x 1 * y 2 * +");
+        std::string expectedPostFixString(" x 1 * y 2 * + ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1222,7 +1222,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-        std::string expectedPostFixString("x 1 * y 2 * +");
+        std::string expectedPostFixString(" x 1 * y 2 * + ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1238,7 +1238,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-        std::string expectedPostFixString("x 1 y 2 * + *");
+        std::string expectedPostFixString(" x 1 y 2 * + * ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1254,7 +1254,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "x", "y" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1", "2" };
-        std::string expectedPostFixString("x 1 * y + 2 *");
+        std::string expectedPostFixString(" x 1 * y + 2 * ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1272,7 +1272,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "a", "b", "c", "d", "e", "f", "g", "h", "i" };
         std::unordered_set<std::string> expectedConstantsUsed;
-        std::string expectedPostFixString("a b c d * e - * f g h * + * + i -");
+        std::string expectedPostFixString(" a b c d * e - * f g h * + * + i - ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1288,7 +1288,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "var1340", "varY", "varZ", "v13dj3d0a3kd" };
         std::unordered_set<std::string> expectedConstantsUsed = { "1", "2", "3", "4", "6", "8", "9", "29", "45", "57", "74", "76", "96" };
-        std::string expectedPostFixString("96 9 * var1340 4 * + 2 + 76 8 varY - * 2 * 8 / 6 * - 45 1 varZ 1 * 4 / + 57 2 / 9 / 29 * 6 + + v13dj3d0a3kd 4 / - / + 3 + 4 - 74 2 * +");
+        std::string expectedPostFixString(" 96 9 * var1340 4 * + 2 + 76 8 varY - * 2 * 8 / 6 * - 45 1 varZ 1 * 4 / + 57 2 / 9 / 29 * 6 + + v13dj3d0a3kd 4 / - / + 3 + 4 - 74 2 * + ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);
@@ -1304,7 +1304,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
         std::string resultPostFixString = parser.getPostfixExprString();
         std::unordered_set<std::string> expectedVariableUsed = { "A", "B", "C", "D", "E", "F", "G" };
         std::unordered_set<std::string> expectedConstantsUsed;
-        std::string expectedPostFixString("A B + C * D E - F G + * -");
+        std::string expectedPostFixString(" A B + C * D E - F G + * - ");
         REQUIRE(resultVariablesUsed == expectedVariableUsed);
         REQUIRE(resultConstantsUsed == expectedConstantsUsed);
         REQUIRE(resultPostFixString == expectedPostFixString);

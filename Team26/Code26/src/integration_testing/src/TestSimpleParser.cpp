@@ -297,7 +297,7 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       Table modifiesSTable = pkb.getModifiesSTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString("y");
+      std::string expectedPostFixString(" y ");
 
       REQUIRE(procTable.contains({ "computeAverage" }));
       REQUIRE(procTable.size() == 1);
@@ -330,7 +330,7 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       Table modifiesSTable = pkb.getModifiesSTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString("0");
+      std::string expectedPostFixString(" 0 ");
 
       REQUIRE(procTable.contains({ "computeAverage" }));
       REQUIRE(procTable.size() == 1);
@@ -363,8 +363,8 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       Table followsTable = pkb.getFollowsTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString1("0");
-      std::string expectedPostFixString2("x");
+      std::string expectedPostFixString1(" 0 ");
+      std::string expectedPostFixString2(" x ");
 
       REQUIRE(procTable.contains({ "computeAverage" }));
       REQUIRE(procTable.size() == 1);
@@ -405,7 +405,7 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       Table modifiesSTable = pkb.getModifiesSTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString("a b c d * e - * f g h * + * + i -");
+      std::string expectedPostFixString(" a b c d * e - * f g h * + * + i - ");
 
       REQUIRE(procTable.contains({ "geeks" }));
       REQUIRE(procTable.size() == 1);
@@ -454,7 +454,7 @@ TEST_CASE("Valid assign statement", "[SimpleParser][Assign]") {
       Table modifiesSTable = pkb.getModifiesSTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString("96 9 * var1340 4 * + 2 + 76 8 varY - * 2 * 8 / 6 * - 45 1 varZ 1 * 4 / + 57 2 / 9 / 29 * 6 + + v13dj3d0a3kd 4 / - / + 3 + 4 - 74 2 * +");
+      std::string expectedPostFixString(" 96 9 * var1340 4 * + 2 + 76 8 varY - * 2 * 8 / 6 * - 45 1 varZ 1 * 4 / + 57 2 / 9 / 29 * 6 + + v13dj3d0a3kd 4 / - / + 3 + 4 - 74 2 * + ");
 
       REQUIRE(procTable.contains({ "f" }));
       REQUIRE(procTable.size() == 1);
@@ -608,7 +608,7 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
     Table parentTable = pkb.getParentTable();
     Table patternAssignTable = pkb.getPatternAssignTable();
 
-    std::string expectedPostFixString("1");
+    std::string expectedPostFixString(" 1 ");
 
     REQUIRE(procTable.contains({ "then" }));
     REQUIRE(procTable.size() == 1);
@@ -675,8 +675,8 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
       Table parentTable = pkb.getParentTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString1("x");
-      std::string expectedPostFixString2("y");
+      std::string expectedPostFixString1(" x ");
+      std::string expectedPostFixString2(" y ");
 
       REQUIRE(procTable.contains({ "then" }));
       REQUIRE(procTable.size() == 1);
@@ -777,10 +777,10 @@ TEST_CASE("Valid if statement", "[SimpleParser][If]") {
       Table parentTable = pkb.getParentTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString1("y1");
-      std::string expectedPostFixString2("3");
-      std::string expectedPostFixString3("6");
-      std::string expectedPostFixString4("f g 5 / +");
+      std::string expectedPostFixString1(" y1 ");
+      std::string expectedPostFixString2(" 3 ");
+      std::string expectedPostFixString3(" 6 ");
+      std::string expectedPostFixString4(" f g 5 / + ");
 
       REQUIRE(procTable.contains({ "a" }));
       REQUIRE(procTable.size() == 1);
@@ -1061,7 +1061,7 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
       Table parentTable = pkb.getParentTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString("i 1 +");
+      std::string expectedPostFixString(" i 1 + ");
 
       REQUIRE(procTable.contains({ "i" }));
       REQUIRE(procTable.size() == 1);
@@ -1140,11 +1140,11 @@ TEST_CASE("Valid while statement", "[SimpleParser][While]") {
       Table parentTable = pkb.getParentTable();
       Table patternAssignTable = pkb.getPatternAssignTable();
 
-      std::string expectedPostFixString1("print 1 +");
-      std::string expectedPostFixString2("read 3 /");
-      std::string expectedPostFixString3("if 2 *");
-      std::string expectedPostFixString4("while 0 %");
-      std::string expectedPostFixString5("call call -");
+      std::string expectedPostFixString1(" print 1 + ");
+      std::string expectedPostFixString2(" read 3 / ");
+      std::string expectedPostFixString3(" if 2 * ");
+      std::string expectedPostFixString4(" while 0 % ");
+      std::string expectedPostFixString5(" call call - ");
 
       REQUIRE(procTable.contains({ "i" }));
       REQUIRE(procTable.size() == 1);
@@ -1274,9 +1274,9 @@ TEST_CASE("Loops", "[SimpleParser][Assign][If][Print][Read][While]") {
     Table parentTable = pkb.getParentTable();
     Table patternAssignTable = pkb.getPatternAssignTable();
 
-    std::string expectedPostFixString1("42");
-    std::string expectedPostFixString2("read");
-    std::string expectedPostFixString3("life 1 -");
+    std::string expectedPostFixString1(" 42 ");
+    std::string expectedPostFixString2(" read ");
+    std::string expectedPostFixString3(" life 1 - ");
 
     REQUIRE(procTable.contains({ "proc" }));
     REQUIRE(procTable.size() == 1);
@@ -1389,7 +1389,7 @@ TEST_CASE("Loops", "[SimpleParser][Assign][If][Print][Read][While]") {
     Table parentTable = pkb.getParentTable();
     Table patternAssignTable = pkb.getPatternAssignTable();
 
-    std::string expectedPostFixString("call procedure +");
+    std::string expectedPostFixString(" call procedure + ");
 
     REQUIRE(procTable.contains({ "main" }));
     REQUIRE(procTable.size() == 1);

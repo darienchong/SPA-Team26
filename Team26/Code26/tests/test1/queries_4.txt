@@ -1,0 +1,20 @@
+1 - Syntax Error - Iteration 1 no call design-entity
+stmt s; call c;
+Select s
+
+1000
+2 - Semantic Error - Iteration 1 Uses LHS cannot be prodcedure
+procedure pr; variable v;
+Select pr such that Uses(pr, v)
+
+1000
+3 - Semantic Error Iteration 1 Modifies LHS cannot be prodcedure
+procedure pr; variable v;
+Select pr such that Modifies(pr, v)
+
+1000
+4 - No error Iteration 1 Modifies and Uses should allow for _ on LHS
+variable v;
+Select v such that Modifies(_, v)
+x
+1000

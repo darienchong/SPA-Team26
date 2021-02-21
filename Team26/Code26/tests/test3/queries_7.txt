@@ -1,0 +1,20 @@
+1 - Syntax Error - Invalid syn-assign for pattern
+if ifs;
+Select ifs pattern ifs(_, _)
+
+5000
+2 - Syntax Error - Invalid syn-assign for pattern
+while w;
+Select w pattern w(_, _)
+
+5000
+3 - Semantic Error - Invalid entRef for pattern
+assign a; if ifs;
+Select a pattern a(ifs, _)
+
+5000
+4 - Semantic Error - Invalid entRef for pattern
+assign a; while w;
+Select a pattern a(w, _)
+
+5000

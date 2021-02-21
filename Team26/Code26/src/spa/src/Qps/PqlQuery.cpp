@@ -19,6 +19,10 @@ std::string Pql::Entity::getValue() const {
   return value;
 }
 
+bool Pql::Entity::isStmtNumber() const {
+  return type == Pql::EntityType::STMT_NUMBER;
+}
+
 bool Pql::Entity::isVariableName() const {
   return type == Pql::EntityType::VARIABLE_NAME;
 }

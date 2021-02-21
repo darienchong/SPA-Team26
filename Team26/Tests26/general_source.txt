@@ -1,0 +1,5 @@
+procedure
+general{read
+x;while	(x !=0)
+
+{x=x- 1;}}

@@ -1,9 +1,9 @@
-1 - 
+1 - Error
 stmt s;
 select s such that Follows(s, 5)
 
 5000
-2 - 
+2 - Error
 
 Select s such that Follows(s, 5)
 
@@ -98,57 +98,72 @@ variable v;
 Select v such that Modifies(_, v)
 count1, count2, iterations, levels, val1, val2
 5000
-21 - Combination
+21 - Pattern
+variable v; assign a;
+Select v pattern a(v, "0")
+val2, count2, iterations
+5000
+22 - Pattern
+assign a;
+Select a pattern a("myCount", _)
+
+5000
+23 - Pattern
+assign a;
+Select a pattern a(_, _"val1-1"_)
+13, 19
+5000
+24 - Combination
 assign a; variable v;
 Select a such that Uses(a, v) pattern a (v, _)
 10, 11, 14, 17, 18, 20, 21, 23
 5000
-22 - Combination
+25 - Combination
 assign a; if f;
 Select f such that Parent(f, a) pattern a (_, _"count1"_)
 9, 16
 5000
-23 - Combination
+26 - Combination
 assign a; while w;
 Select a such that Parent*(w, a) pattern a ("val1", _)
 10, 14, 17, 22
 5000
-24 - Combination
+27 - Combination
 assign a; stmt s;
 Select s such that Follows(s, a) pattern a ("val1", _"val2"_)
 21
 5000
-25 - Combination
-assign a; stmt s; variable v;
-Select s such that Follows*(s, a) pattern a (v, v)
-
-5000
-26 - Combination
-assign a; if f; variable v;
-Select f such that Parent*(s, a) pattern a (v, v)
-
-5000
-27 - Combination
-assign a; while w; variable v;
-Select w such that Parent*(w, a) pattern a (v, v)
-
-5000
 28 - Combination
+assign a; stmt s; variable v;
+Select s such that Follows*(s, a) pattern a (v, "((count1) * 002) + count2")
+17
+5000
+29 - Combination
+assign a; if f; variable v;
+Select f such that Parent*(f, a) pattern a (v, _"count2 * 2"_)
+8, 16
+5000
+30 - Combination
+assign a; while w; variable v;
+Select w such that Uses(w, v) pattern a (v, "1")
+7
+5000
+31 - Combination
 assign a;
 Select a such that Uses(a, "val1") pattern a ("val2", _)
 13, 19
 5000
-29 - Combination
+32 - Combination
 assign a;
 Select a such that Uses(a, "iterations") pattern a ("iterations", _)
 23
 5000
-30 - Combination
+33 - Combination
 assign a; variable v;
-Select v such that Modifies(a, v) pattern a (_, v)
-
+Select v such that Modifies(a, v) pattern a (_, _"count1"_)
+count1, count2
 5000
-31 - Combination
+34 - Combination
 assign a; variable v;
 Select a such that Modifies(a, "count2") pattern a (_, _"count1"_)
 15, 21

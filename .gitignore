@@ -1,9 +1,13 @@
 # Visual Studio cache
 .vs/
 
+# Visual Studio Code cache
+.vscode/
+
 # CMake build folder
 Team26/Code26/build*
 
 # xml output files from autotester
+Team26/Code26/tests/out/
 Team26/Code26/tests/*.xml
 Team26/Tests26/*.xml

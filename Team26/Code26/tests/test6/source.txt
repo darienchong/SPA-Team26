@@ -9,8 +9,8 @@ procedure fizzbuzz {
 
   while (n > 0) {
     while (x < n) {
-      if (x % 3 == 0 || x % 5 == 0) then {
-        if (x % 3 == 0 && x % 5 == 0) then {
+      if ((x % 3 == 0) || (x % 5 == 0)) then {
+        if ((x % 3 == 0) && (x % 5 == 0)) then {
           print fizz;
           print buzz;
           countFizzBuzz = countFizzBuzz + 1;

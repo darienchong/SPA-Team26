@@ -21,257 +21,577 @@ namespace {
   }
 }
 
-TEST_CASE("[TestPqlParser] Valid Query") {
-  SECTION("Single declaration, Single Select") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; 
-      Select s
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
+TEST_CASE("[TestPqlParser] Valid Query", "[PqlParser][Tokeniser]") {
+  SECTION("Declarations", "[declaration]") {
+    SECTION("Single declaration, Single Select") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; 
+        Select s
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
 
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
 
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::STMT, "s"));
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::STMT, "s"));
 
-    REQUIRE(parsingResult == expectedResult);
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Multiple declarations in single declaration statement") {
+      // PQL query to test
+      std::string queryString(R"(
+        read r1, r2; 
+        Select r1
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::READ, "r1"));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Multiple declarations of same type in multiple declaration statement") {
+      // PQL query to test
+      std::string queryString(R"(
+        print p1; print p2; 
+        Select p1
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p1"));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Multiple declarations of different types in multiple declaration statement") {
+      // PQL query to test
+      std::string queryString(R"(
+        constant c; read r; 
+        Select c
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::CONSTANT, "c"));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("All types of declarations") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; read r; print p; while w; if ifs; assign a; 
+        variable v; constant c; procedure pr; 
+        Select pr
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PROCEDURE, "pr"));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
   }
 
-  SECTION("Multiple declarations") {
-    // PQL query to test
-    std::string queryString(R"(
-      read r1, r2; 
-      Select r1
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
+  SECTION("Such that clause", "[suchthat-cl]") {
+    SECTION("Follows(synonym, synonym)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p; while w;
+          Select p such that Follows(p, w)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
 
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
 
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::READ, "r1"));
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS, {
+        Pql::Entity(Pql::EntityType::PRINT, "p"),
+        Pql::Entity(Pql::EntityType::WHILE, "w")
+        }));
 
-    REQUIRE(parsingResult == expectedResult);
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Follows(wildcard, wildcard)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p;
+          Select p such that Follows(_, _)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS, {
+        Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+        Pql::Entity(Pql::EntityType::WILDCARD, "_")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Follows(stmtNum, stmtNum)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p;
+          Select p such that Follows(5, 6)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS, {
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "5"),
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "6")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Follows*(synonym, synonym)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p; while w;
+          Select p such that Follows*(p, w)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS_T, {
+        Pql::Entity(Pql::EntityType::PRINT, "p"),
+        Pql::Entity(Pql::EntityType::WHILE, "w")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Follows*(wildcard, wildcard)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p;
+          Select p such that Follows*(_, _)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS_T, {
+        Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+        Pql::Entity(Pql::EntityType::WILDCARD, "_")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Follows*(stmtNum, stmtNum)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p;
+          Select p such that Follows*(5, 6)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS_T, {
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "5"),
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "6")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Parent(synonym, synonym)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p; while w;
+          Select p such that Parent(w, p)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PARENT, {
+        Pql::Entity(Pql::EntityType::WHILE, "w"),
+        Pql::Entity(Pql::EntityType::PRINT, "p")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Parent(_, _)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p;
+          Select p such that Parent(_, _)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PARENT, {
+        Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+        Pql::Entity(Pql::EntityType::WILDCARD, "_")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Parent(5, 6)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p;
+          Select p such that Parent(5, 6)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PARENT, {
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "5"),
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "6")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Parent*(synonym, synonym)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p; while w;
+          Select p such that Parent*(w, p)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PARENT_T, {
+        Pql::Entity(Pql::EntityType::WHILE, "w"),
+        Pql::Entity(Pql::EntityType::PRINT, "p")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Parent*(_, _)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p;
+          Select p such that Parent*(_, _)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PARENT_T, {
+        Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+        Pql::Entity(Pql::EntityType::WILDCARD, "_")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Parent*(5, 6)") {
+      // PQL query to test
+      std::string queryString(R"(
+          print p;
+          Select p such that Parent*(5, 6)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PARENT_T, {
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "5"),
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "6")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Uses(synonym, synonym)") {
+      // PQL query to test
+      std::string queryString(R"(
+          stmt s; variable v;
+          Select v such that Uses(s, v)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::VARIABLE, "v"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::USES_S, {
+        Pql::Entity(Pql::EntityType::STMT, "s"),
+        Pql::Entity(Pql::EntityType::VARIABLE, "v")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Uses(stmtNum, variableName)") {
+      // PQL query to test
+      std::string queryString(R"(
+          stmt s;
+          Select s such that Uses(7, "x")
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::STMT, "s"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::USES_S, {
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "7"),
+        Pql::Entity(Pql::EntityType::VARIABLE_NAME, "x")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Uses(_, variableName) - For Iteration 1 only") {  // Valid for Iteration 1
+      // PQL query to test
+      std::string queryString(R"(
+          stmt s;
+          Select s such that Uses(_, "x")
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::STMT, "s"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::USES_S, {
+        Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+        Pql::Entity(Pql::EntityType::VARIABLE_NAME, "x")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+    SECTION("Modifies(synonym, synonym)") {
+      // PQL query to test
+      std::string queryString(R"(
+          stmt s; variable v;
+          Select v such that Modifies(s, v)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::VARIABLE, "v"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::MODIFIES_S, {
+        Pql::Entity(Pql::EntityType::STMT, "s"),
+        Pql::Entity(Pql::EntityType::VARIABLE, "v")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("Modifies(stmtNum, variableName)") {
+      // PQL query to test
+      std::string queryString(R"(
+          stmt s;
+          Select s such that Modifies(7, "x")
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::STMT, "s"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::MODIFIES_S, {
+        Pql::Entity(Pql::EntityType::STMT_NUMBER, "7"),
+        Pql::Entity(Pql::EntityType::VARIABLE_NAME, "x")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
   }
 
-  SECTION("All types of declarations") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; read r; print p; while w; if ifs; assign a; 
-      variable v; constant c; procedure pr; 
-      Select pr
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
+  SECTION("Pattern clause", "[pattern-cl]") {
+    SECTION("pattern(_, _)") {
+      // PQL query to test
+      std::string queryString(R"(
+          assign a;
+          Select a pattern a(_, _)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
 
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
 
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::PROCEDURE, "pr"));
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::ASSIGN, "a"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PATTERN_ASSIGN, {
+        Pql::Entity(Pql::EntityType::ASSIGN, "a"),
+        Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+        Pql::Entity(Pql::EntityType::WILDCARD, "_")
+        }));
 
-    REQUIRE(parsingResult == expectedResult);
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("pattern(synonym, subExpr)") {
+      // PQL query to test
+      std::string queryString(R"(
+          variable v; assign a;
+          Select a pattern a(v, _"x + y * z"_)
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::ASSIGN, "a"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PATTERN_ASSIGN, {
+        Pql::Entity(Pql::EntityType::ASSIGN, "a"),
+        Pql::Entity(Pql::EntityType::VARIABLE, "v"),
+        Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " x y z * + ")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
+
+    SECTION("pattern(varName, expr)") {
+      // PQL query to test
+      std::string queryString(R"(
+          assign a;
+          Select a pattern a("z", "x + y * z")
+        )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      // Get parsing result
+      Pql::Query parsingResult = pqlParser.parseQuery();
+
+      // Build expected result
+      Pql::Query expectedResult;
+      expectedResult.setTarget(Pql::Entity(Pql::EntityType::ASSIGN, "a"));
+      expectedResult.addClause(Pql::Clause(Pql::ClauseType::PATTERN_ASSIGN, {
+        Pql::Entity(Pql::EntityType::ASSIGN, "a"),
+        Pql::Entity(Pql::EntityType::VARIABLE_NAME, "z"),
+        Pql::Entity(Pql::EntityType::EXPRESSION, " x y z * + ")
+        }));
+
+      REQUIRE(parsingResult == expectedResult);
+    }
   }
 
-  SECTION("Single such that clause - Follows") {
+  SECTION("Combination of such that and pattern clause", "[suchthat-cl][pattern-cl]") {
     // PQL query to test
     std::string queryString(R"(
-      print p; while w;
-      Select p such that Follows(p, w)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
-
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
-    expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS, {
-      Pql::Entity(Pql::EntityType::PRINT, "p"),
-      Pql::Entity(Pql::EntityType::WHILE, "w")
-      }));
-
-    REQUIRE(parsingResult == expectedResult);
-  }
-
-  SECTION("Single such that clause - Follows*") {
-    // PQL query to test
-    std::string queryString(R"(
-      print p; while w;
-      Select p such that Follows*(p, w)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
-
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
-    expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS_T, {
-      Pql::Entity(Pql::EntityType::PRINT, "p"),
-      Pql::Entity(Pql::EntityType::WHILE, "w")
-      }));
-
-    REQUIRE(parsingResult == expectedResult);
-  }
-
-  SECTION("Single such that clause - Parent") {
-    // PQL query to test
-    std::string queryString(R"(
-      print p; while w;
-      Select p such that Parent(w, p)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
-
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
-    expectedResult.addClause(Pql::Clause(Pql::ClauseType::PARENT, {
-      Pql::Entity(Pql::EntityType::WHILE, "w"),
-      Pql::Entity(Pql::EntityType::PRINT, "p")
-      }));
-
-    REQUIRE(parsingResult == expectedResult);
-  }
-
-  SECTION("Single such that clause - Parent*") {
-    // PQL query to test
-    std::string queryString(R"(
-      print p; while w;
-      Select p such that Parent*(w, p)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
-
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::PRINT, "p"));
-    expectedResult.addClause(Pql::Clause(Pql::ClauseType::PARENT_T, {
-      Pql::Entity(Pql::EntityType::WHILE, "w"),
-      Pql::Entity(Pql::EntityType::PRINT, "p")
-      }));
-
-    REQUIRE(parsingResult == expectedResult);
-  }
-
-  SECTION("Single such that clause - Uses") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; variable v;
-      Select v such that Uses(s, v)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
-
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::VARIABLE, "v"));
-    expectedResult.addClause(Pql::Clause(Pql::ClauseType::USES_S, {
-      Pql::Entity(Pql::EntityType::STMT, "s"),
-      Pql::Entity(Pql::EntityType::VARIABLE, "v")
-      }));
-
-    REQUIRE(parsingResult == expectedResult);
-  }
-
-  SECTION("Single such that clause - Modifies") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; variable v;
-      Select s such that Modifies(s, v)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
-
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::STMT, "s"));
-    expectedResult.addClause(Pql::Clause(Pql::ClauseType::MODIFIES_S, {
-      Pql::Entity(Pql::EntityType::STMT, "s"),
-      Pql::Entity(Pql::EntityType::VARIABLE, "v")
-      }));
-
-    REQUIRE(parsingResult == expectedResult);
-  }
-
-  SECTION("Single pattern clause - 1") {
-    // PQL query to test
-    std::string queryString(R"(
-      variable v; assign a;
-      Select a pattern a(v, _"x"_)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
-
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::ASSIGN, "a"));
-    expectedResult.addClause(Pql::Clause(Pql::ClauseType::PATTERN_ASSIGN, {
-      Pql::Entity(Pql::EntityType::ASSIGN, "a"),
-      Pql::Entity(Pql::EntityType::VARIABLE, "v"),
-      Pql::Entity(Pql::EntityType::SUB_EXPRESSION, "x")
-      }));
-
-    REQUIRE(parsingResult == expectedResult);
-  }
-
-  SECTION("Single pattern clause - 2") {
-    // PQL query to test
-    std::string queryString(R"(
-      variable v; assign a;
-      Select a pattern a(v, "x + y * z")
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    // Get parsing result
-    Pql::Query parsingResult = pqlParser.parseQuery();
-
-    // Build expected result
-    Pql::Query expectedResult;
-    expectedResult.setTarget(Pql::Entity(Pql::EntityType::ASSIGN, "a"));
-    expectedResult.addClause(Pql::Clause(Pql::ClauseType::PATTERN_ASSIGN, {
-      Pql::Entity(Pql::EntityType::ASSIGN, "a"),
-      Pql::Entity(Pql::EntityType::VARIABLE, "v"),
-      Pql::Entity(Pql::EntityType::EXPRESSION, "x y z * +")
-      }));
-
-    REQUIRE(parsingResult == expectedResult);
-  }
-
-  SECTION("Combination of such that and pattern clause") {
-    // PQL query to test
-    std::string queryString(R"(
-      if ifs; assign a;
-      Select ifs such that Modifies(ifs, "x") pattern a("x", _"x"_)
-    )");
+        if ifs; assign a;
+        Select ifs such that Modifies(ifs, "x") pattern a("x", _"x"_)
+      )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
     Pql::PqlParser pqlParser(queryTokens);
 
@@ -288,22 +608,23 @@ TEST_CASE("[TestPqlParser] Valid Query") {
     expectedResult.addClause(Pql::Clause(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::VARIABLE_NAME, "x"),
-      Pql::Entity(Pql::EntityType::SUB_EXPRESSION, "x")
+      Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " x ")
       }));
 
     REQUIRE(parsingResult == expectedResult);
   }
 
-  SECTION("Inconsistent spacing") {
+  SECTION("Irregular spacing") {
     // PQL query to test
-    std::string queryString(R"(
-      stmt s       ; variable      
-                  v   , v2
-        ;assign a;
-      Select s      such that
-                Follows* (    2,s)pattern a
-      (v, _"x"_)
-    )");
+    std::string queryString;
+    queryString
+      .append("stmt s   \v    ; variable    \n")
+      .append("  \f   v   , v2\n")
+      .append(" ;assign a;\n")
+      .append("  Select s   \t   such that\n")
+      .append("    \t    \f   Follows* (   \v 2,s)pattern a\r\n")
+      .append("  \r  (v, _\"x\"_)");
+
     std::list<Token> queryTokens = queryStringToTokens(queryString);
     Pql::PqlParser pqlParser(queryTokens);
 
@@ -314,20 +635,21 @@ TEST_CASE("[TestPqlParser] Valid Query") {
     Pql::Query expectedResult;
     expectedResult.setTarget(Pql::Entity(Pql::EntityType::STMT, "s"));
     expectedResult.addClause(Pql::Clause(Pql::ClauseType::FOLLOWS_T, {
-      Pql::Entity(Pql::EntityType::LINE_NUMBER, "2"),
+      Pql::Entity(Pql::EntityType::STMT_NUMBER, "2"),
       Pql::Entity(Pql::EntityType::STMT, "s")
       }));
     expectedResult.addClause(Pql::Clause(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::VARIABLE, "v"),
-      Pql::Entity(Pql::EntityType::SUB_EXPRESSION, "x")
+      Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " x ")
       }));
 
     REQUIRE(parsingResult == expectedResult);
   }
 }
 
-TEST_CASE("[TestPqlParser] Query with Syntax Error") {
+
+TEST_CASE("[TestPqlParser] Query with Syntax Error", "[PqlParser][Tokeniser]") {
   SECTION("Empty query string") {
     std::list<Token> emptyList;
     Pql::PqlParser pqlParser(emptyList);
@@ -338,6 +660,18 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
     // PQL query to test
     std::string queryString(R"(
       hello h; Select h;
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    REQUIRE_THROWS(pqlParser.parseQuery());
+  }
+
+  SECTION("Missing symbols") {
+    // PQL query to test
+    std::string queryString(R"(
+      assign a1 a2; 
+      Select a1
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
     Pql::PqlParser pqlParser(queryTokens);
@@ -360,6 +694,18 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
     // PQL query to test
     std::string queryString(R"(
       stmt s Select s;
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    REQUIRE_THROWS(pqlParser.parseQuery());
+  }
+
+  SECTION("'such' and 'that' separated by more than a space") {
+    // PQL query to test
+    std::string queryString(R"(
+      stmt s;
+      Select s such  that Follows(1, s)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
     Pql::PqlParser pqlParser(queryTokens);
@@ -403,7 +749,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 
-  SECTION("More than one such that clause - 1") {
+  SECTION("More than one such that clause - using 'and'") {
     // PQL query to test
     std::string queryString(R"(
       stmt s1, s2; 
@@ -415,7 +761,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 
-  SECTION("More than one such that clause - 2") {
+  SECTION("More than one such that clause - using 'such that'") {
     // PQL query to test
     std::string queryString(R"(
       stmt s1, s2; 
@@ -427,7 +773,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 
-  SECTION("More than one pattern clause - 1") {
+  SECTION("More than one pattern clause - using 'and'") {
     // PQL query to test
     std::string queryString(R"(
       assign a1, a2; 
@@ -439,7 +785,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 
-  SECTION("More than one pattern clause - 2") {
+  SECTION("More than one pattern clause - using 'pattern'") {
     // PQL query to test
     std::string queryString(R"(
       assign a1, a2; 
@@ -451,12 +797,12 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 
-  SECTION("Missing symbols") {
+  SECTION("Wrong expression-spec for Pattern clause") {
     // PQL query to test
     std::string queryString(R"(
-      assign a1 a2; 
-      Select a1
-    )");
+        stmt s; while w;
+        Select s pattern s(_, _";"_)
+      )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
     Pql::PqlParser pqlParser(queryTokens);
 
@@ -465,7 +811,19 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error") {
 }
 
 TEST_CASE("[PqlParser] Query with Semantic Error") {
-  SECTION("Repeated declarations") {
+  SECTION("Repeated declarations of same name - same types") {
+    // PQL query to test
+    std::string queryString(R"(
+      while s; while s; 
+      Select s
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    REQUIRE_THROWS(pqlParser.parseQuery());
+  }
+
+  SECTION("Repeated declarations of same name - different types") {
     // PQL query to test
     std::string queryString(R"(
       while s; assign s; 
@@ -477,10 +835,22 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 
-  SECTION("Selecting undeclared synonym") {
+  SECTION("Using undeclared synonym - in Select") {
     // PQL query to test
     std::string queryString(R"(
       Select s
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    REQUIRE_THROWS(pqlParser.parseQuery());
+  }
+
+  SECTION("Using undeclared synonym - in Select") {
+    // PQL query to test
+    std::string queryString(R"(
+      stmt s;
+      Select s such that Follows(a, s)
     )");
     std::list<Token> queryTokens = queryStringToTokens(queryString);
     Pql::PqlParser pqlParser(queryTokens);
@@ -500,123 +870,114 @@ TEST_CASE("[PqlParser] Query with Semantic Error") {
     REQUIRE_THROWS(pqlParser.parseQuery());
   }
 
-  SECTION("Pattern LHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; while w;
-      Select s pattern s(w, _"x"_)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
+  SECTION("Illegal arguments") {
+    SECTION("Pattern LHS") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; while w;
+        Select s pattern s(w, _"x"_)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
 
-    REQUIRE_THROWS(pqlParser.parseQuery());
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("Follows LHS") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; procedure pr;
+        Select s such that Follows(pr, s)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("Follows RHS") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; variable v;
+        Select s such that Follows(s, v)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("Parent LHS") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; variable v;
+        Select s such that Follows(v, s)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("Parent RHS") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; procedure pr;
+        Select s such that Follows(s, pr)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("Uses LHS - For Iteration 1 Only") {  // Invalid for Iteration 1
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; procedure pr;
+        Select s such that Uses(pr, s)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("Uses RHS") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; procedure pr;
+        Select s such that Uses(s, pr)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("Modifies LHS") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s; variable v;
+        Select s such that Modifies(v, s)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("Modifies RHS is invalid") {
+      // PQL query to test
+      std::string queryString(R"(
+        stmt s1, s2
+        Select s1 such that Modifies(s1, s2)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
   }
 
-  SECTION("Pattern RHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; while w;
-      Select s pattern s(_, _";"_)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Follows LHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; procedure pr;
-      Select s such that Follows(pr, s)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Follows RHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; variable v;
-      Select s such that Follows(s, v)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Parent LHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; variable v;
-      Select s such that Follows(v, s)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Parent RHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; procedure pr;
-      Select s such that Follows(s, pr)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Uses LHS is invalid") {  // Invalid for Iteration 1
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; procedure pr;
-      Select s such that Uses(pr, s)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Uses RHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; procedure pr;
-      Select s such that Uses(s, pr)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Modifies LHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s; variable v;
-      Select s such that Modifies(v, s)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
-
-  SECTION("Modifies RHS is invalid") {
-    // PQL query to test
-    std::string queryString(R"(
-      stmt s1, s2
-      Select s1 such that Modifies(s1, s2)
-    )");
-    std::list<Token> queryTokens = queryStringToTokens(queryString);
-    Pql::PqlParser pqlParser(queryTokens);
-
-    REQUIRE_THROWS(pqlParser.parseQuery());
-  }
 }

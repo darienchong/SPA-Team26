@@ -1,0 +1,85 @@
+1 - General/Error
+
+Select v such that Uses(10,v)
+
+5000
+2 - General/Error
+stmt s;
+Select s such that Follow (s,14)
+
+5000
+3 - General/Error
+variable v
+Select v
+
+5000
+4 - General/Error
+variable v;
+Select v;
+
+5000
+5 - General/Error
+variable v; stmt;
+Select v
+
+5000
+6 - General/Error
+variable v;
+select v
+
+5000
+7 - General/Error
+stmt s;
+Select s such  that Follows(s,14)
+
+5000
+8 - General/Error
+stmt s;
+Select s such that Follows *(s,14)
+
+5000
+9 - General/Error
+stmt s;
+Select s such that Parent            *(s,14)
+
+5000
+10 - General/Error
+stmt w; stmt 25f57s00;
+Select w such that Uses(w, 25f57s00)
+
+5000
+11 - General/Error
+stmt w; stmt 2!#45*7s00;
+Select w such that Follows(w, 25f57s00)
+
+5000
+12 - General/Error
+stmt w; stmt  s*3+4;
+Select w such that Follows*(w, 3)
+
+5000
+13 - General/Error
+stmt w; stmt  s*;
+Select w such that Follows*(w, 3)
+
+5000
+14 - General/Valid
+stmt s, s1,s2       ,               s3;variable v; 
+Select    s   such that  Follows                                    (s   ,   14     )
+13
+5000
+15 - General/Valid
+stmt s1, s2, s4, s6, s9, ssssss, sfeaffs, s13455, S2; stmt s3; 
+Select S2 such that Follows(s3,S2)
+2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+5000
+16 - General/Error
+call c; stmt  s;
+Select s such that Follows*(12, s)
+
+5000
+17 - General/Error
+assign c; stmt  c;
+Select c such that Follows*(12, c)
+
+5000

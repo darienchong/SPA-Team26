@@ -17,7 +17,7 @@ namespace Pql {
     PROCEDURE,
 
     // other-entities
-    LINE_NUMBER,
+    STMT_NUMBER,
     WILDCARD,
     VARIABLE_NAME,
     SUB_EXPRESSION,
@@ -75,6 +75,13 @@ namespace Pql {
      * @return Entity value.
      */
     std::string getValue() const;
+
+    /**
+     * Checks if the entity is a statement number.
+     *
+     * @return True if the entity is a statement number. Otherwise, false.
+     */
+    bool isStmtNumber() const;
 
     /**
      * Checks if the entity is a variable name.

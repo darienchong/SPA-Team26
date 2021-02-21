@@ -1,0 +1,42 @@
+procedure MultipleDeepNesting {
+  read nest1;
+  if (a != 0) then {
+    while (b != 0) {
+      while (c != 0) {
+        if (d != 0) then {
+          if (e % 3 != 0) then {
+            print nest1;
+            e = e - d - c - b - a;
+          } else {
+            while (f != 0) {
+              print e;
+              f = f - 1;
+            }
+            a = a - b * c * d * e;
+          }
+        } else {
+          read nest2;
+        }
+      }
+    }
+    nest1 = nest1 + nest2;
+  } else {
+    while (i != 0) {
+      while (j != 0) {
+        while (k != 0) {
+          while (l != 0) {
+            while (m != 0) {
+              while (n != 0) {
+                while (o != 0) {
+                  while (p != 0) {
+                    print nest1;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

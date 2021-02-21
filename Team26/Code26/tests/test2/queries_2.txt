@@ -1,0 +1,285 @@
+1 - Follows/Error
+variable v;
+Select v such that Follows(10,v)
+
+5000
+2 - Follows/Error
+procedure p; stmt s;
+Select s such that Follows(10, p)
+
+5000
+3 - Follows/Error
+constant c; stmt s;
+Select s such that Follows(c, s)
+
+5000
+4 - Follows/Error
+call c; stmt s;
+Select s such that Follows(c, s)
+
+5000
+5 - Follows/Valid
+read r; assign a;
+Select r such that Follows(a, r)
+4, 6, 8, 12
+5000
+6 - Follows/Valid
+print p; if ifs;
+Select p such that Follows(p, ifs)
+
+5000
+7 - Follows/Valid
+print p; stmt s;
+Select p such that Follows(10, s)
+2, 9, 13, 15, 17, 18
+5000
+8 - Follows*/Error
+read r;
+Select r such that Follows* (-33, r)
+
+5000
+9 - Follows*/Error
+read r;
+Select r such that Follows* (r, 0)
+
+5000
+10 - Follows*/Valid
+read r;
+Select r such that Follows* (20, r)
+
+5000
+11 - Follows*/Valid
+read r;
+Select r such that Follows*                                            (11, r)
+12
+5000
+12 - Follows*/Valid
+assign a ;
+Select a such that Follows*(10, a)
+11, 14, 16, 19, 20
+5000
+13 - Follows*/Valid
+stmt a ;
+Select a such that Follows*(10, a)
+11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+5000
+14 - Follows*/Error
+read r;
+Select r such that Follows* (3, 2)
+
+5000
+15 - Follows*/Error
+read r;
+Select r such that Follows(3, 3)
+
+5000
+16 - Parent/Error
+variable v;
+Select v such that Parent(10,v)
+
+5000
+17 - Parent/Error
+procedure p; stmt s;
+Select s such that Parent(10, p)
+
+5000
+18 - Parent/Error
+constant c; stmt s;
+Select s such that Parent(c, s)
+
+5000
+19 - Parent/Error
+call c; stmt s;
+Select s such that Parent(s, c)
+
+5000
+20 - Parent/Valid
+if ifs; assign a;
+Select a such that Parent(ifs, a)
+
+5000
+21 - Parent/Valid
+while w; print p;
+Select w such that Parent(w, p)
+
+5000
+22 - Parent/Valid
+stmt w;
+Select w such that Parent(w, 14)
+
+5000
+23 - Parent/Valid
+stmt w;
+Select w such that Parent(w, 2545700000)
+
+5000
+24 - Uses/Error
+variable v; constant c;
+Select v such that Uses(3, c)
+
+5000
+25 - Uses/Error
+variable v; stmt s;
+Select v such that Uses(3, s)
+
+5000
+26 - Uses/Error
+variable v;procedure p;
+Select v such that Uses(3, p)
+
+5000
+27 - Uses/Error
+variable v; constant c;
+Select v such that Uses(c, v)
+
+5000
+28 - Uses/Error
+variable v;procedure p;
+Select v such that Uses(p, v)
+
+5000
+29 - Uses/Error
+variable v; call c;
+Select v such that Uses(c, v)
+
+5000
+30 - Uses/Valid
+variable v; if ifs;
+Select v such that Uses(ifs, v)
+
+5000
+31 - Uses/Valid
+variable v; while w;
+Select v such that Uses(w, v)
+
+5000
+32 - Uses/Valid
+variable v; print p;
+Select v such that Uses(p, v)
+print, call, errors, read, while, if
+5000
+33 - Uses/Valid
+variable v;assign a;
+Select v such that Uses(a, v)
+call, procedure, a, b, c, d, e, f, g, h, i, while, pen, apple, pineapple, pinepineappleapplepen, pineapplepen, C47Lm370n1gHt
+5000
+34 - Uses/Valid
+variable v; print p; read r;
+Select r such that Uses(p, v)
+4, 6, 8, 10, 12
+5000
+35 - Uses/Valid
+variable v; 
+Select v such that Uses(9, v)
+call
+5000
+36 - Uses/Valid
+stmt s;
+Select s such that Uses(s, "pen")
+16, 19
+5000
+37 - Uses/Valid
+stmt s;
+Select s such that Uses(21, "pen")
+
+5000
+38 - Uses/Error
+variable v;
+Select v such that Uses(0, v)
+
+5000
+39 - Uses/Error
+variable v;
+Select v such that Uses(-34, v)
+
+5000
+40 - Uses/Valid
+variable v;
+Select v such that Uses(_, v)
+call, print, procedure, a, b, c, d, e, f, g, h, i, while, errors, C47Lm370n1gHt, read, pen, apple, if, pineapple, pineapplepen, pinepineappleapplepen
+5000
+41 - Modifies/Error
+variable v; constant c;
+Select v such that Modifies(3, c)
+
+5000
+42 - Modifies/Error
+variable v; stmt s;
+Select v such that Modifies(3, s)
+
+5000
+43 - Modifies/Error
+variable v;procedure p;
+Select v such that Modifies(3, p)
+
+5000
+44 - Modifies/Error
+variable v; constant c;
+Select v such that Modifies(c, v)
+
+5000
+45 - Modifies/Error
+variable v;procedure p;
+Select v such that Modifies(p, v)
+
+5000
+46 - Modifies/Error
+variable v; call c;
+Select v such that Modifies(c, v)
+
+5000
+47 - Modifies/Valid
+variable v; if ifs;
+Select v such that Modifies(ifs, v)
+
+5000
+48 - Modifies/Valid
+variable v; while w;
+Select v such that Modifies(w, v)
+
+5000
+49 - Modifies/Valid
+variable v; read p;
+Select v such that Modifies(p, v)
+print, call, read, while, if
+5000
+50 - Modifies/Valid
+variable v;assign a;
+Select v such that Modifies(a, v)
+print, read, while, exampleReport, if, call, applepen, Pineapplepen, Applepen
+5000
+51 - Modifies/Valid
+variable v; print p; read r;
+Select p such that Modifies(r, v)
+2, 9, 13, 15, 17, 18
+5000
+52 - Modifies/Valid
+variable v; 
+Select v such that Modifies(10, v)
+print
+5000
+53 - Modifies/Valid
+stmt s;
+Select s such that Modifies(s, "applepen")
+16
+5000
+54 - Modifies/Valid
+stmt s;
+Select s such that Modifies(21, "applepen")
+
+5000
+55 - Modifies/Error
+variable v;
+Select v such that Modifies(0, v)
+
+5000
+56 - Modifies/Error
+variable v;
+Select v such that Modifies(-34, v)
+
+5000
+57 - Modifies/Valid
+variable v;
+Select v such that Modifies(_, v)
+read, if, while, exampleReport, print, call, applepen, Pineapplepen, Applepen
+5000

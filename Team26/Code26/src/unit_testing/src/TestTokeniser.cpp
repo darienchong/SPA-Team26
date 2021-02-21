@@ -34,11 +34,6 @@ namespace {
   Tokeniser tokeniser;
 }
 
-TEST_CASE("[TestTokeniser] Sanity check") {
-  REQUIRE(1 == 1);
-}
-
-
 TEST_CASE("[TestTokeniser] Delimiter, single") {
   std::stringstream stream = strToStream("{");
   std::list<Token> tokens = tokeniser.tokenise(stream);

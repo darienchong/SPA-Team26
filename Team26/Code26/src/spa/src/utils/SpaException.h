@@ -105,6 +105,7 @@ namespace Pql {
     const static std::string SEMANTIC_ERROR_NON_ASSIGN_SYNONYM = "Expected a synonym of type assign but encounted another type.";
     const static std::string SEMANTIC_ERROR_NON_STMT_REF = "Expected a stmtRef but encounted other design entity.";
     const static std::string SEMANTIC_ERROR_NON_ENT_REF = "Expected a entRef but encounted other design entity.";
+    const static std::string SEMANTIC_ERROR_ZERO_STMT_NUMBER = "Encountered 0 as a statement number.";
 
     // =================
     // Appended Message

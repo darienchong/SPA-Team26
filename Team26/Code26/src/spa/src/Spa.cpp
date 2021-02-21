@@ -38,8 +38,10 @@ void Spa::parseSourceFile(const std::string& filename) {
     DesignExtractor().extractDesignAbstractions(pkb);
 
   } catch (const std::exception& e) {
+    pkb = Pkb();
     std::cout << e.what() << std::endl;
   } catch (...) {
+    pkb = Pkb();
     std::cout << "OOPS! An unexpected error occured!";
   }
 }
