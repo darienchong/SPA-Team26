@@ -40,7 +40,7 @@ namespace ExprProcessor {
 
   class CondExprParser {
   private:
-    std::list<Token> tokens;
+    std::list<Token>& tokens;
     std::list<Token>::iterator it;
 
   public:
@@ -61,14 +61,14 @@ namespace ExprProcessor {
      *
      * @return Unordered set of variables used in the expression.
      */
-    std::unordered_set<std::string> getVariables();
+    std::unordered_set<std::string> getVariables() const;
 
     /**
      * Returns an unordered set of constants used in the expression.
      *
      * @return Unordered set of constants used in the expression.
      */
-    std::unordered_set<std::string> getConstants();
+    std::unordered_set<std::string> getConstants() const;
 
   private:
     void parseCondExpr();
@@ -79,10 +79,10 @@ namespace ExprProcessor {
     void parseTerm();
     void parseFactor();
     void validateAndConsume(const Token& validationToken);
-    bool isCondExprBinaryOperator(const Token& token);
-    bool isRelExprOperator(const Token& token);
-    bool isExprOperator(const Token& token);
-    bool isTermOperator(const Token& token);
+    bool isCondExprBinaryOperator(const Token& token) const;
+    bool isRelExprOperator(const Token& token) const;
+    bool isExprOperator(const Token& token) const;
+    bool isTermOperator(const Token& token) const;
 
 
   };
@@ -90,7 +90,7 @@ namespace ExprProcessor {
   class AssignExprParser {
   private:
     std::list<Token> postfixExprTokens;
-    std::list<Token> tokens;
+    std::list<Token>& tokens;
 
   public:
     /**
@@ -106,37 +106,29 @@ namespace ExprProcessor {
     void parse();
 
     /**
-     * Returns a list of tokens in postfix format order.
-     *
-     * @return List of tokens in postfix format order.
-     */
-    std::list<Token> getPostfixExprTokens();  // May not be needed
-
-
-    /**
      * Returns a string representation of the expression in postfix format.
      *
      * @return String representation of the expression in postfix format.
      */
-    std::string getPostfixExprString();
+    std::string getPostfixExprString() const;
 
     /**
      * Returns a unordered set of variables used in the expression.
      *
      * @return Unordered set of variables used in the expression.
      */
-    std::unordered_set<std::string> getVariables();
+    std::unordered_set<std::string> getVariables() const;
 
     /**
      * Returns a unordered set of constants used in the expression.
      *
      * @return Unordered set of constants used in the expression.
      */
-    std::unordered_set<std::string> getConstants();
+    std::unordered_set<std::string> getConstants() const;
 
   private:
     void generatePostfixExpr();
     void validatePostfixExpr();
-    int getOperatorPrecedence(Token& token);
+    int getOperatorPrecedence(const Token& token) const;
   };
 }

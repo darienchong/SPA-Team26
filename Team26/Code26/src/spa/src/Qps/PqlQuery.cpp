@@ -51,6 +51,26 @@ bool Pql::Entity::isSynonym() const {
     type == Pql::EntityType::PROCEDURE;
 }
 
+bool Pql::Entity::isStmtSynonym() const {
+  return type == Pql::EntityType::STMT;
+}
+
+bool Pql::Entity::isReadSynonym() const {
+  return type == Pql::EntityType::READ;
+}
+
+bool Pql::Entity::isPrintSynonym() const {
+  return type == Pql::EntityType::PRINT;
+}
+
+bool Pql::Entity::isWhileSynonym() const {
+  return type == Pql::EntityType::WHILE;
+}
+
+bool Pql::Entity::isIfSynonym() const {
+  return type == Pql::EntityType::IF;
+}
+
 // Clause methods
 Pql::Clause::Clause()
   : type(ClauseType::UNDEFINED) {
@@ -58,6 +78,7 @@ Pql::Clause::Clause()
 
 Pql::Clause::Clause(const Pql::ClauseType& type, const std::vector<Pql::Entity>& params)
   : type(type), params(params) {
+  this->params.reserve(3); // Max number of params is 3
 }
 
 Pql::ClauseType Pql::Clause::getType() const {

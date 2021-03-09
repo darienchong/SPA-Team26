@@ -19,7 +19,15 @@ namespace Pql {
      *
      * @return Table containing the result.
      */
-    Table executeQuery();
+    Table executeQuery() const;
+
+    /**
+     * Check if any clause in the query can be short-circuited. 
+     * Short-circuit means that the result will be empty. 
+     * 
+     * @return True if the query can be short-circuited. Otherwise, false.
+     */
+    bool canShortCircuit();
 
     /**
      * Executes a given clause and returns the clause result table.
@@ -27,7 +35,7 @@ namespace Pql {
      * @param clause Clause to be executed.
      * @return Clause result table.
      */
-    Table executeClause(Pql::Clause clause);
+    Table executeClause(const Pql::Clause& clause) const;
 
     /**
      * Constructs a clause result table given a such that clause.
@@ -35,7 +43,7 @@ namespace Pql {
      * @param table Table to be constructed.
      * @param clause Such that clause object.
      */
-    void constructTableFromClause(Table& clauseResultTable, Pql::Clause clause);
+    void constructTableFromClause(Table& clauseResultTable, const Pql::Clause& clause) const;
 
     /**
      * Constructs a clause result table given a clause of type PATTERN_ASSIGN.
@@ -43,7 +51,7 @@ namespace Pql {
      * @param clauseResultTable Table to be constructed.
      * @param clause Pattern assign clause object.
      */
-    void constructPatternAssignTableFromClause(Table& clauseResultTable, Pql::Clause& clause);
+    void constructPatternAssignTableFromClause(Table& clauseResultTable, const Pql::Clause& clause) const;
 
     /**
      * Helper function to get the corresponding Table from the PKB when given an entity.
@@ -52,14 +60,14 @@ namespace Pql {
      * @param entity Given entity to retrieve the corresponding table from PKB.
      * @return Table corresponding to the given entity.
      */
-    Table getTableFromEntity(const Pql::Entity& entity);
+    Table getTableFromEntity(const Pql::Entity& entity) const;
 
     /**
      * @brief Extracts the result from the given Table and populates the results list of the PqlEvaluator.
      *
      * @param resultTable Final result table from execution of all clauses.
      */
-    void extractResults(Table& resultTable);
+    void extractResults(const Table& resultTable) const;
 
   public:
     /**

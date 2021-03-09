@@ -40,7 +40,7 @@ public:
    *
    * @param newHeader A vector of strings corresponding to the header titles.
    */
-  explicit Table(Row newHeader);
+  explicit Table(const Row& header);
 
   /**
    * Replaces the current headers with new headers.

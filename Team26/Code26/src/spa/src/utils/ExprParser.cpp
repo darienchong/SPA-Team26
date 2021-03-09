@@ -31,7 +31,7 @@ namespace ExprProcessor {
     }
   }
 
-  std::unordered_set<std::string> CondExprParser::getVariables() {
+  std::unordered_set<std::string> CondExprParser::getVariables() const {
     std::unordered_set<std::string> resultSet;
     for (const Token& token : tokens) {
       if (token.type == NAME.type) {
@@ -41,7 +41,7 @@ namespace ExprProcessor {
     return resultSet;
   }
 
-  std::unordered_set<std::string> CondExprParser::getConstants() {
+  std::unordered_set<std::string> CondExprParser::getConstants() const {
     std::unordered_set<std::string> resultSet;
     for (const Token& token : tokens) {
       if (token.type == CONST.type) {
@@ -56,7 +56,7 @@ namespace ExprProcessor {
       throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS);
     }
 
-    Token currentToken = *it;
+    Token& currentToken = *it;
     if (currentToken == COND_EXPR_NOT) {
       validateAndConsume(COND_EXPR_NOT);
       validateAndConsume(LEFT_PARENTHESIS);
@@ -83,7 +83,7 @@ namespace ExprProcessor {
         throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS);
       }
 
-      Token condExprBinaryOperatorToken = *it;
+      Token& condExprBinaryOperatorToken = *it;
       ++it;
       if (isCondExprBinaryOperator(condExprBinaryOperatorToken)) {
         std::list<Token>::iterator secondTempPosition = it;
@@ -110,7 +110,7 @@ namespace ExprProcessor {
     if (it == tokens.end()) {
       throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS);
     }
-    Token currentToken = *it;
+    Token& currentToken = *it;
     ++it;
 
     if (!isRelExprOperator(currentToken)) {
@@ -145,10 +145,10 @@ namespace ExprProcessor {
       throw SyntaxError(ErrorMessage::SYNTAX_ERROR_COND_EXPR_ADDITIONAL_TOKENS);
     }
 
-    Token currentToken = *it;
+    const Token& currentToken = *it;
     ++it;
 
-    bool isVarOrConst = currentToken.type == NAME.type || currentToken.type == CONST.type;
+    const bool isVarOrConst = currentToken.type == NAME.type || currentToken.type == CONST.type;
     if (currentToken == LEFT_PARENTHESIS) {
       parseExpr();
       validateAndConsume(RIGHT_PARENTHESIS);
@@ -165,7 +165,7 @@ namespace ExprProcessor {
 
     const Token frontToken = *it;
 
-    bool isValidateTokenType = validationToken.value.empty();
+    const bool isValidateTokenType = validationToken.value.empty();
     if (isValidateTokenType) {
       // Check type only for empty token value
       if (frontToken.type != validationToken.type) {
@@ -192,11 +192,11 @@ namespace ExprProcessor {
     ++it;
   }
 
-  bool CondExprParser::isCondExprBinaryOperator(const Token& token) {
+  bool CondExprParser::isCondExprBinaryOperator(const Token& token) const {
     return token == COND_EXPR_AND || token == COND_EXPR_OR;
   }
 
-  bool CondExprParser::isRelExprOperator(const Token& token) {
+  bool CondExprParser::isRelExprOperator(const Token& token) const {
     return token == REL_EXPR_OP_GRT ||
       token == REL_EXPR_OP_GEQ ||
       token == REL_EXPR_OP_LET ||
@@ -206,11 +206,11 @@ namespace ExprProcessor {
   }
 
 
-  bool CondExprParser::isExprOperator(const Token& token) {
+  bool CondExprParser::isExprOperator(const Token& token) const {
     return token == EXPR_OP_PLUS || token == EXPR_OP_MINUS;
   }
 
-  bool CondExprParser::isTermOperator(const Token& token) {
+  bool CondExprParser::isTermOperator(const Token& token) const {
     return token == EXPR_OP_TIMES || token == EXPR_OP_DIVIDE || token == EXPR_OP_MOD;
   }
 
@@ -228,15 +228,10 @@ namespace ExprProcessor {
     validatePostfixExpr();
   }
 
-
-  std::list<Token> AssignExprParser::getPostfixExprTokens() {
-    return postfixExprTokens;
-  }
-
   // Add spaces at the start and end so that 
   // " fizz " will not be a substring of " fizzBuzz "
   // Otherwise, "fizz" is a substring of "fizzBuzz"
-  std::string AssignExprParser::getPostfixExprString() {
+  std::string AssignExprParser::getPostfixExprString() const {
     std::string resultString = " ";
     for (const Token& token : postfixExprTokens) {
       resultString.append(token.value);
@@ -245,7 +240,7 @@ namespace ExprProcessor {
     return resultString;
   }
 
-  std::unordered_set<std::string> AssignExprParser::getVariables() {
+  std::unordered_set<std::string> AssignExprParser::getVariables() const {
     std::unordered_set<std::string> resultSet;
     for (const Token& token : postfixExprTokens) {
       if (token.type == NAME.type) {
@@ -255,7 +250,7 @@ namespace ExprProcessor {
     return resultSet;
   }
 
-  std::unordered_set<std::string> AssignExprParser::getConstants() {
+  std::unordered_set<std::string> AssignExprParser::getConstants() const {
     std::unordered_set<std::string> resultSet;
     for (const Token& token : postfixExprTokens) {
       if (token.type == CONST.type) {
@@ -265,13 +260,14 @@ namespace ExprProcessor {
     return resultSet;
   }
 
-  int AssignExprParser::getOperatorPrecedence(Token& token) {
+  int AssignExprParser::getOperatorPrecedence(const Token& token) const {
     if (token == EXPR_OP_MOD || token == EXPR_OP_TIMES || token == EXPR_OP_DIVIDE) {
       return 2;
     }
     if (token == EXPR_OP_PLUS || token == EXPR_OP_MINUS) {
       return 1;
     }
+    assert(false);
     return 0;
   }
 
@@ -280,10 +276,10 @@ namespace ExprProcessor {
     bool expectOperand = true;
 
     while (!tokens.empty()) {
-      Token next = tokens.front();
+      const Token next = tokens.front();
       tokens.pop_front();
-      bool isOperator = next == EXPR_OP_PLUS || next == EXPR_OP_MINUS || next == EXPR_OP_TIMES || next == EXPR_OP_DIVIDE || next == EXPR_OP_MOD;
-      bool isOperand = next.type == NAME.type || next.type == CONST.type;
+      const bool isOperator = next == EXPR_OP_PLUS || next == EXPR_OP_MINUS || next == EXPR_OP_TIMES || next == EXPR_OP_DIVIDE || next == EXPR_OP_MOD;
+      const bool isOperand = next.type == NAME.type || next.type == CONST.type;
 
       if (isOperand) {
         if (!expectOperand) {
@@ -386,11 +382,11 @@ namespace ExprProcessor {
     std::list<Token> postfixExprTokens(this->postfixExprTokens); // duplicate postfixExprTokens for validation
 
     while (!postfixExprTokens.empty()) {
-      Token front = postfixExprTokens.front();
+      const Token front = postfixExprTokens.front();
       postfixExprTokens.pop_front();
 
-      bool isOperand = front.type == CONST.type || front.type == NAME.type;
-      bool isOperator = front == EXPR_OP_PLUS || front == EXPR_OP_MINUS || front == EXPR_OP_TIMES || front == EXPR_OP_DIVIDE || front == EXPR_OP_MOD;;
+      const bool isOperand = front.type == CONST.type || front.type == NAME.type;
+      const bool isOperator = front == EXPR_OP_PLUS || front == EXPR_OP_MINUS || front == EXPR_OP_TIMES || front == EXPR_OP_DIVIDE || front == EXPR_OP_MOD;;
       if (isOperand) {
         stack.push(front);
       } else if (isOperator) { // operator

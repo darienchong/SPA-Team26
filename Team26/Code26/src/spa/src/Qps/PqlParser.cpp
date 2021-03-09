@@ -66,7 +66,7 @@ namespace {
 
 namespace Pql {
   // Constructor
-  PqlParser::PqlParser(const std::list<Token>& tokens)
+  PqlParser::PqlParser(std::list<Token>& tokens)
     : tokens(tokens) {
   }
 
@@ -196,7 +196,7 @@ namespace Pql {
     // Do not consume space yet
     // Handle Follow* and Parent* - Ensure no space between relation and *
     bool isTransitiveRelation = false;
-    bool isNextTokenStar = !tokens.empty() && tokens.front() == STAR;
+    const bool isNextTokenStar = !tokens.empty() && tokens.front() == STAR;
     if (isNextTokenStar) {
       if (!canBeTransitive(relationToken)) {
         throw SyntaxError(
@@ -242,7 +242,7 @@ namespace Pql {
   void PqlParser::parsePatternClause(Query& queryUnderConstruction) {
     validateAndGetAndConsumeWhitespaces(PATTERN);
 
-    Token& assignSynonymToken = validateAndGetAndConsumeWhitespaces(IDENTIFIER);
+    const Token& assignSynonymToken = validateAndGetAndConsumeWhitespaces(IDENTIFIER);
 
     if (!isSynonymDeclared(assignSynonymToken.value)) {
       throw SemanticError(
@@ -325,7 +325,7 @@ namespace Pql {
         );
       }
 
-      const EntityType entityType = declaredSynonyms[frontToken.value];
+      const EntityType& entityType = declaredSynonyms[frontToken.value];
       if (!isStmtRef(entityType)) {
         throw SemanticError(
           ErrorMessage::SEMANTIC_ERROR_NON_STMT_REF +
@@ -343,7 +343,7 @@ namespace Pql {
       validateAndGetAndConsumeWhitespaces(NUMBER);
 
       std::string removedLeadingZerosNumber = std::to_string(std::stoi(frontToken.value));
-      bool isStmtNumberZero = removedLeadingZerosNumber == "0";
+      const bool isStmtNumberZero = removedLeadingZerosNumber == "0";
       if (isStmtNumberZero) {
         throw SemanticError(ErrorMessage::SEMANTIC_ERROR_ZERO_STMT_NUMBER);
       }
@@ -378,7 +378,7 @@ namespace Pql {
         );
       }
 
-      const EntityType entityType = declaredSynonyms[frontToken.value];
+      const EntityType& entityType = declaredSynonyms[frontToken.value];
       if (!isEntRef(entityType)) {
         throw SemanticError(
           ErrorMessage::SEMANTIC_ERROR_NON_ENT_REF +
@@ -433,7 +433,7 @@ namespace Pql {
   }
 
   // '"' factor '"'
-  void PqlParser::parseExpression(Clause& clauseUnderConstruction, bool isExactMatch) {
+  void PqlParser::parseExpression(Clause& clauseUnderConstruction, const bool isExactMatch) {
     validateAndGetAndConsumeWhitespaces(QUOTE);
 
     // Create a list of infix expression tokens
@@ -441,7 +441,7 @@ namespace Pql {
     while (!tokens.empty() && tokens.front() != QUOTE) {
       const Token currentToken = tokens.front();
       if (currentToken.type == NUMBER.type) { // Remove leading zero for const by casting to int and back to string
-        const Token noLeadingZeroConstToken = { currentToken.type, std::to_string(std::stoi(currentToken.value)) };
+        const Token& noLeadingZeroConstToken = { currentToken.type, std::to_string(std::stoi(currentToken.value)) };
         infixExpressionTokens.emplace_back(noLeadingZeroConstToken);
       } else {
         infixExpressionTokens.emplace_back(tokens.front());
@@ -475,7 +475,7 @@ namespace Pql {
     }
 
     const Token frontToken = tokens.front();
-    bool isCheckTokenType = validationToken.value.empty();
+    const bool isCheckTokenType = validationToken.value.empty();
 
     if (isCheckTokenType) {
       // Check token type
@@ -506,7 +506,7 @@ namespace Pql {
 
   void PqlParser::consumeFrontWhitespaceTokens() {
     while (!tokens.empty()) {
-      bool isFrontTokenWhitespace = tokens.front().type == WHITESPACE.type;
+      const bool isFrontTokenWhitespace = tokens.front().type == WHITESPACE.type;
 
       if (isFrontTokenWhitespace) {
         tokens.pop_front();

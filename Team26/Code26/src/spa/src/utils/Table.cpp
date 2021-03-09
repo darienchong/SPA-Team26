@@ -13,13 +13,14 @@ Table::Table() {
 }
 
 Table::Table(int n) {
+  header.reserve(n); // Optimization to avoid resizing
   for (int i = 0; i < n; i++) {
     header.push_back(std::to_string(i));
   }
 }
 
-Table::Table(Row newHeader) {
-  header = std::move(newHeader);
+Table::Table(const Row& newHeader)
+  : header(newHeader) {
 }
 
 void Table::setHeader(const Row& newHeader) {
@@ -67,11 +68,13 @@ std::unordered_set<std::string> Table::getColumn(const std::string& headerTitle)
 
 RowSet Table::getColumns(const Row& headerTitles) const {
   std::vector<int> indexList;
+  indexList.reserve(headerTitles.size()); // Optimization to avoid resizing
   for (const std::string& headerTitle : headerTitles) {
     indexList.push_back(getColumnIndex(headerTitle));
   }
 
   RowSet result;
+  result.reserve(size()); // Optimization to avoid rehashing
   for (Row row : data) {
     Row curr;
     for (int i : indexList) {
@@ -98,6 +101,7 @@ void Table::dropColumn(int index) {
   } else {
     header.erase(header.begin() + index);
     RowSet newData;
+    newData.reserve(size()); // Optimization to avoid rehashing
     for (Row row : data) {
       row.erase(row.begin() + index);
       newData.emplace(row);
@@ -107,7 +111,7 @@ void Table::dropColumn(int index) {
 }
 
 void Table::dropColumn(const std::string& headerTitle) {
-  int index = getColumnIndex(headerTitle);
+  const int index = getColumnIndex(headerTitle);
   dropColumn(index);
 }
 
@@ -122,7 +126,7 @@ void Table::filterColumn(int index, const std::unordered_set<std::string>& value
 }
 
 void Table::filterColumn(const std::string& columnName, const std::unordered_set<std::string>& values) {
-  int index = getColumnIndex(columnName);
+  const int index = getColumnIndex(columnName);
   filterColumn(index, values);
 }
 
@@ -154,7 +158,7 @@ void Table::naturalJoin(const Table& otherTable) {
   // get pairs of columns with the same name
   const std::vector<std::pair<int, int>>& indexPairs = getColumnIndexPairs(otherTable);
 
-  bool hasCommonHeaders = !indexPairs.empty();
+  const bool hasCommonHeaders = !indexPairs.empty();
   if (hasCommonHeaders) {
     innerJoin(otherTable, indexPairs);
   } else {
@@ -170,7 +174,7 @@ std::vector<std::pair<int, int>> Table::getColumnIndexPairs(const Table& otherTa
     if (header[i] == "") {
       continue;
     }
-    bool isInOtherHeader = std::find(otherHeader.begin(), otherHeader.end(), header[i]) != otherHeader.end();
+    const bool isInOtherHeader = std::find(otherHeader.begin(), otherHeader.end(), header[i]) != otherHeader.end();
     if (isInOtherHeader) {
       indexPairs.emplace_back(i, otherTable.getColumnIndex(header[i]));
     }
@@ -180,6 +184,7 @@ std::vector<std::pair<int, int>> Table::getColumnIndexPairs(const Table& otherTa
 
 void Table::crossJoin(const Table& otherTable) {
   RowSet newData;
+  newData.reserve(size() * otherTable.size()); // Optimization to avoid resizing
   const Row& otherHeader = otherTable.getHeader();
   header.insert(header.end(), otherHeader.begin(), otherHeader.end());
   for (const Row& row : data) {
@@ -233,14 +238,13 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
 }
 
 void Table::innerJoin(const Table& otherTable, int thisTableIndex, int otherTableIndex) {
-  std::vector<std::pair<int, int>> indexPairs;
-  indexPairs.emplace_back(thisTableIndex, otherTableIndex);
+  std::vector<std::pair<int, int>> indexPairs{ {thisTableIndex, otherTableIndex} };
   innerJoin(otherTable, indexPairs);
 }
 
 void Table::innerJoin(const Table& otherTable, const std::string& commonHeader) {
-  int firstTableIndex = getColumnIndex(commonHeader);
-  int secondTableIndex = otherTable.getColumnIndex(commonHeader);
+  const int firstTableIndex = getColumnIndex(commonHeader);
+  const int secondTableIndex = otherTable.getColumnIndex(commonHeader);
   innerJoin(otherTable, firstTableIndex, secondTableIndex);
 }
 

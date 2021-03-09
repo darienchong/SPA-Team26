@@ -118,6 +118,42 @@ namespace Pql {
      */
     bool isSynonym() const;
 
+    /**
+     * Checks if the entity is a 'stmt' synonym type.
+     *
+     * @return True if the entity is a container synonym type. Otherwise, false.
+     */
+    bool isStmtSynonym() const;
+
+    /**
+     * Checks if the entity is a 'read' synonym type.
+     *
+     * @return True if the entity is a print synonym type. Otherwise, false.
+     */
+    bool isReadSynonym() const;
+
+    /**
+     * Checks if the entity is a 'print' synonym type.
+     *
+     * @return True if the entity is a print synonym type. Otherwise, false.
+     */
+    bool isPrintSynonym() const;
+
+    /**
+     * Checks if the entity is a 'while' synonym type.
+     *
+     * @return True if the entity is a container synonym type. Otherwise, false.
+     */
+    bool isWhileSynonym() const;
+
+    /**
+     * Checks if the entity is a 'if' synonym type.
+     *
+     * @return True if the entity is a container synonym type. Otherwise, false.
+     */
+    bool isIfSynonym() const;
+
+
     // Operator overloading
     friend bool operator==(const Entity& lhs, const Entity& rhs) {
       return lhs.type == rhs.type && lhs.value == rhs.value;

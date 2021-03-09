@@ -11,6 +11,17 @@
 #include "Pkb.h"
 #include "Table.h"
 
+namespace {
+
+  bool isSameTypeAndArguement(const Pql::Entity& e1, const Pql::Entity& e2) {
+    return e1.getType() == e2.getType() && e1.getValue() == e2.getValue();
+  }
+
+  bool isLhsSmallerThanRhs(const Pql::Entity& e1, const Pql::Entity& e2) {
+    return e1.getValue() < e2.getValue();
+  }
+}
+
 namespace Pql {
   // Constructor
   PqlEvaluator::PqlEvaluator(Pkb& pkb, Query& query, std::list<std::string>& results)
@@ -19,15 +30,72 @@ namespace Pql {
 
   // Executes query and extract results
   void PqlEvaluator::evaluateQuery() {
-    // Can perform preprocessing here
-    Table resultTable = executeQuery();
-    extractResults(resultTable);
+    if (!canShortCircuit()) {
+      extractResults(executeQuery());
+    }
+    // Do nothing if can short-circuit
+  }
+
+  bool PqlEvaluator::canShortCircuit() {
+    const std::vector<Clause>& clauses = query.getClauses();
+    for (const Clause& clause : clauses) {
+      const std::vector<Entity>& params = clause.getParams();
+      switch (clause.getType()) {
+      case ClauseType::FOLLOWS:
+      case ClauseType::FOLLOWS_T:
+      {
+        const Entity& lhsEntity = params[0];
+        const Entity& rhsEntity = params[1];
+        if (isSameTypeAndArguement(lhsEntity, rhsEntity)) {
+          return true;
+        }
+        if (lhsEntity.isStmtNumber() && rhsEntity.isStmtNumber()) { // check if lhs stmt number is equal or larger than rhs stmt number
+          return !isLhsSmallerThanRhs(lhsEntity, rhsEntity);
+        }
+      }
+      break;
+      case ClauseType::PARENT:
+      case ClauseType::PARENT_T:
+      {
+        const Entity& lhsEntity = params[0];
+        const Entity& rhsEntity = params[1];
+        if (isSameTypeAndArguement(lhsEntity, rhsEntity)) {
+          return true;
+        }
+        if (lhsEntity.isStmtNumber() && rhsEntity.isStmtNumber()) { // Check if lhs stmt number is equal or larger than rhs stmt number
+          return !isLhsSmallerThanRhs(lhsEntity, rhsEntity);
+        }
+        if (lhsEntity.isSynonym()) { // Check if lhs is a container stmt
+          return !(lhsEntity.isStmtSynonym() || lhsEntity.isWhileSynonym() || lhsEntity.isIfSynonym());
+        }
+      }
+      break;
+      case ClauseType::USES_S:
+      {
+        const Entity& lhsEntity = params[0];
+        if (lhsEntity.isReadSynonym()) {
+          return true;
+        }
+      }
+      break;
+      case ClauseType::MODIFIES_S:
+      {
+        const Entity& lhsEntity = params[0];
+        if (lhsEntity.isPrintSynonym()) {
+          return true;
+        }
+      }
+      break;
+      }
+    }
+    return false;
   }
 
   //  Executes query and returns the result table
-  Table PqlEvaluator::executeQuery() {
-    std::vector<Clause> clauses = query.getClauses();
+  Table PqlEvaluator::executeQuery() const {
+    const std::vector<Clause>& clauses = query.getClauses();
     std::vector<Table> clauseResultTables;
+    clauseResultTables.reserve(clauses.size()); // Optimization to avoid resizing of vector
     for (const Clause& clause : clauses) {
       Table clauseResult = executeClause(clause);
       clauseResultTables.emplace_back(clauseResult);
@@ -35,9 +103,8 @@ namespace Pql {
 
     // Set finalResultTable as a table of the query target design entity type. 
     Table finalResultTable;
-    Entity queryTarget = query.getTarget();
-    EntityType queryTargetType = queryTarget.getType();
-    switch (queryTargetType) {
+    const Entity& queryTarget = query.getTarget();
+    switch (queryTarget.getType()) {
     case EntityType::STMT:
       finalResultTable = pkb.getStmtTable();
       break;
@@ -75,7 +142,7 @@ namespace Pql {
     for (const Table& table : clauseResultTables) {
       if (table.empty()) {
         // short circuit
-        return Table(0);
+        return Table();
       } else {
         // natural join on finalResultTable
         finalResultTable.naturalJoin(table);
@@ -86,9 +153,9 @@ namespace Pql {
 
   // Execute a given clause
   // Returns the clause result table
-  Table PqlEvaluator::executeClause(Clause clause) {
+  Table PqlEvaluator::executeClause(const Clause& clause) const {
     Table clauseResultTable;
-    ClauseType clauseType = clause.getType();
+    const ClauseType& clauseType = clause.getType();
     switch (clauseType) {
     case ClauseType::FOLLOWS:
       clauseResultTable = pkb.getFollowsTable();
@@ -127,10 +194,10 @@ namespace Pql {
   }
 
   // Constructs Design Abstraction table from given clause
-  void PqlEvaluator::constructTableFromClause(Table& clauseResultTable, Clause clause) {
-    std::vector< Entity> params = clause.getParams();
-    Entity lhsEntity = params[0];
-    Entity rhsEntity = params[1];
+  void PqlEvaluator::constructTableFromClause(Table& clauseResultTable, const Clause& clause) const {
+    const std::vector<Entity>& params = clause.getParams();
+    const Entity& lhsEntity = params[0];
+    const Entity& rhsEntity = params[1];
     std::string header1 = "";
     std::string header2 = "";
 
@@ -156,16 +223,14 @@ namespace Pql {
   }
 
   // Constructs Pattern Assign table from given clause
-  void PqlEvaluator::constructPatternAssignTableFromClause(Table& clauseResultTable, Clause& clause) {
-    std::vector< Entity> params = clause.getParams();
+  void PqlEvaluator::constructPatternAssignTableFromClause(Table& clauseResultTable, const Clause& clause) const {
+    const std::vector<Entity>& params = clause.getParams();
 
-    Entity synonymEntity = params[0];
-    Entity lhsEntity = params[1];
-    Entity rhsEntity = params[2];
+    const Entity& synonymEntity = params[0];
+    const Entity& lhsEntity = params[1];
+    const Entity& rhsEntity = params[2];
 
-    std::string header1 = synonymEntity.getValue();
-    std::string header2 = "";
-    std::string header3 = "";
+    std::string header2 = ""; // only second header can have different possible values
 
     if (lhsEntity.isSynonym()) { // Guarenteed to be of type VARIABLE
       header2 = lhsEntity.getValue();
@@ -190,14 +255,14 @@ namespace Pql {
       }
     }
     // else wildcard. do not join with any tables. 
-    clauseResultTable.setHeader({ header1, header2, header3 });
+
+    clauseResultTable.setHeader({ synonymEntity.getValue(), header2, "" });
   }
 
   // Get table from given entity 
   // If entity is a line number or variable name, return a table with a row with the entity's value.
-  Table PqlEvaluator::getTableFromEntity(const Entity& entity) {
-    EntityType entityType = entity.getType();
-    switch (entityType) {
+  Table PqlEvaluator::getTableFromEntity(const Entity& entity) const {
+    switch (entity.getType()) {
     case EntityType::STMT:
       return pkb.getStmtTable();
     case EntityType::READ:
@@ -225,19 +290,20 @@ namespace Pql {
     }
     default:
       assert(false);
-      return Table(0);
+      return Table();
     }
   }
 
   // Extract query result from result table
-  void PqlEvaluator::extractResults(Table& resultTable) {
+  void PqlEvaluator::extractResults(const Table& resultTable) const {
     if (resultTable.empty()) {
       return;
     }
-    std::string headerName = query.getTarget().getValue();
+    const std::string& headerName = query.getTarget().getValue();
     int col = resultTable.getColumnIndex(headerName);
     std::unordered_set<std::string> set; // for checking of repeated elements
-    for (const auto& row : resultTable.getData()) {
+    set.reserve(resultTable.size()); // optimization to avoid rehashing
+    for (const Row& row : resultTable.getData()) {
       std::string element = row[col];
       if (set.count(element) == 0) {
         set.emplace(element);

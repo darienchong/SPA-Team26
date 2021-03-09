@@ -93,7 +93,7 @@ namespace Pql {
    */
   class PqlParser {
   private:
-    std::list<Token> tokens;
+    std::list<Token>& tokens;
     std::unordered_map<std::string, Pql::EntityType> declaredSynonyms;
 
   public:
@@ -102,7 +102,7 @@ namespace Pql {
      *
      * @param tokens List of tokens to be parsed.
      */
-    PqlParser(const std::list<Token>& tokens);
+    PqlParser(std::list<Token>& tokens);
 
     /**
     * Parses the PQL query and returns a query representation object.
@@ -216,7 +216,7 @@ namespace Pql {
      * @param clauseUnderConstruction Clause representation object that is under construction.
      * @param isExactMatch True to parse the expression as type EXPRESSION, else type will be SUB_EXPRESSION.
      */
-    void parseExpression(Pql::Clause& clauseUnderConstruction, bool isExactMatch);
+    void parseExpression(Pql::Clause& clauseUnderConstruction, const bool isExactMatch);
 
     /**
      * Validate and get the next token against the given token that should be expected. Also consume any
