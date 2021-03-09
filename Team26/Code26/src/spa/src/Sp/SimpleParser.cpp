@@ -143,6 +143,7 @@ namespace SourceProcessor {
     // adding information to pkb
     for (const std::string& variable : variablesUsed) {
       pkb.addUsesS(getStmtNum(), variable); // add Uses relation for stmt-var
+      pkb.addUsesP(getCurrentProc(), variable); // add Uses relation for proc-var
       pkb.addVar(variable); // add vars
     }
     for (const std::string& constants : constantsUsed) {
@@ -152,7 +153,7 @@ namespace SourceProcessor {
     return exprParser.getPostfixExprString();
   }
 
-  void SimpleParser::parseCondExpr() {
+  std::unordered_set<std::string> SimpleParser::parseCondExpr() {
     std::list<Token> infixExprTokens;
     auto it = tokens.begin();
     while (it != tokens.end() && std::next(it) != tokens.end()) {
@@ -186,18 +187,21 @@ namespace SourceProcessor {
     // adding information to pkb
     for (const std::string& variable : variablesUsed) {
       pkb.addUsesS(getStmtNum(), variable); // add Uses relation for stmt-var
+      pkb.addUsesP(getCurrentProc(), variable); // add Uses relation for proc-var
       pkb.addVar(variable); // add vars
     }
     for (const std::string& constants : constantsUsed) {
       pkb.addConst(constants); // add consts
     }
+
+    return variablesUsed;
   }
 
   int SimpleParser::parseIf() {
     // grammar: 'if' '(' cond_expr ')'
     validate(IF);
     validate(LEFT_PARENTHESIS);
-    parseCondExpr();
+    std::unordered_set<std::string> variablesUsed = parseCondExpr();
     validate(RIGHT_PARENTHESIS);
 
     int stmtNum = getStmtNum();
@@ -205,6 +209,9 @@ namespace SourceProcessor {
 
     // adding information to pkb
     pkb.addIf(stmtNum); // add if stmts
+    for (const std::string& variable : variablesUsed) {
+      pkb.addPatternIf(stmtNum, variable); // add if stmt control variable
+    }
 
     // grammar: 'then' '{' stmtLst '}' 'else' '{' stmtLst '}'
     validate(THEN);
@@ -223,7 +230,7 @@ namespace SourceProcessor {
     // grammar: 'while' '(' cond_expr ')'
     validate(WHILE);
     validate(LEFT_PARENTHESIS);
-    parseCondExpr();
+    std::unordered_set<std::string> variablesUsed = parseCondExpr();
     validate(RIGHT_PARENTHESIS);
 
     int stmtNum = getStmtNum();
@@ -231,11 +238,30 @@ namespace SourceProcessor {
 
     // adding information to pkb
     pkb.addWhile(stmtNum); // add while stmts
+    for (const std::string& variable : variablesUsed) {
+      pkb.addPatternWhile(stmtNum, variable); // add while stmt control variable
+    }
 
     // grammar: '{' stmtLst '}'
     validate(LEFT_BRACE);
     parseStmtLst(stmtNum, getStmtNum());
     validate(RIGHT_BRACE);
+
+    return stmtNum;
+  }
+
+  int SimpleParser::parseCall() {
+    validate(CALL);
+    std::string procName = validate(NAME);
+    validate(SEMICOLON);
+
+    int stmtNum = getStmtNum();
+    incStmtNum();
+
+    // adding information to pkb
+    pkb.addCall(stmtNum); // add call stmts
+    pkb.addCalls(getCurrentProc(), procName); // add proc-proc calls relation
+    pkb.addCallProcTable(stmtNum, procName); // add stmt-proc
 
     return stmtNum;
   }
@@ -252,7 +278,9 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addVar(varName); // add variable
     pkb.addRead(stmtNum); // add read stmts
+    pkb.addReadVarTable(stmtNum, varName); // add stmt-var
     pkb.addModifiesS(stmtNum, varName); // add Modifies relation for stmt-var
+    pkb.addModifiesP(getCurrentProc(), varName); // add Modifies relation for proc-var
 
     return stmtNum;
   }
@@ -269,7 +297,9 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addVar(varName); // add variable
     pkb.addPrint(stmtNum); // add print stmts
+    pkb.addPrintVarTable(stmtNum, varName); // add stmt-var
     pkb.addUsesS(stmtNum, varName); // add Uses relation for stmt-var
+    pkb.addUsesP(getCurrentProc(), varName); // add Uses relation for proc-var
 
     return stmtNum;
   }
@@ -288,8 +318,9 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addVar(varName); // add variable
     pkb.addAssign(stmtNum); /// add assign stmts
-    pkb.addModifiesS(stmtNum, varName);
-    pkb.addPatternAssign(stmtNum, varName, exprString);
+    pkb.addModifiesS(stmtNum, varName); // add Modifies relation for stmt-var
+    pkb.addModifiesP(getCurrentProc(), varName); // add Modifies relation for proc-var
+    pkb.addPatternAssign(stmtNum, varName, exprString); // add assign expr pattern
 
     return stmtNum;
   }
@@ -325,7 +356,11 @@ namespace SourceProcessor {
         stmt = parseRead();
       } else if (keyword == PRINT) {
         stmt = parsePrint();
-      } else {
+      }
+      else if (keyword == CALL) {
+        stmt = parseCall();
+      }
+      else {
         throw SyntaxError(
           ErrorMessage::SYNTAX_ERROR_UNKNOWN_STMT_TYPE +
           ErrorMessage::APPEND_STMT_NUMBER +
@@ -379,18 +414,8 @@ namespace SourceProcessor {
 
   void SimpleParser::parseProgram() {
     // Multiple procedure allowed for iteration 2 onwards
-    //while (!tokens.empty()) {
-    //  parseProcedure();
-    //}
-
-    // Single procedure for iteration 1
-    parseProcedure();
-    if (!tokens.empty()) {
-      throw SyntaxError(
-        ErrorMessage::SYNTAX_ERROR_ADDITIONAL_TOKENS +
-        ErrorMessage::APPEND_TOKEN_RECEIVED +
-        tokens.front().value
-      );
+    while (!tokens.empty()) {
+      parseProcedure();
     }
   }
 

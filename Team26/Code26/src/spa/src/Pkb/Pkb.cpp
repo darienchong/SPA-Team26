@@ -10,6 +10,46 @@
 
 Pkb::Pkb() = default;
 
+void Pkb::addModifiesP(std::string proc, std::string var) {
+
+}
+
+void Pkb::addUsesP(std::string proc, std::string var) {
+
+}
+
+void Pkb::addPatternIf(int stmtNum, std::string var) {
+
+}
+
+void Pkb::addPatternWhile(int stmtNum, std::string var) {
+
+}
+
+void Pkb::addCall(int stmtNo) {
+
+}
+
+void Pkb::addCalls(std::string caller, std::string called) {
+
+}
+
+void Pkb::addCallsT(std::string caller, std::string called) {
+
+}
+
+void Pkb::addCallProcTable(int stmtNo, std::string proc) {
+
+}
+
+void Pkb::addReadVarTable(int stmtNo, std::string var) {
+
+}
+
+void Pkb::addPrintVarTable(int stmtNo, std::string var) {
+
+}
+
 void Pkb::addVar(std::string var) {
   std::vector<std::string> vect{ std::move(var) };
   varTable.insertRow(vect);

@@ -12,6 +12,18 @@ public:
    */
   Pkb();
 
+  // stubs to fill
+  void addModifiesP(std::string proc, std::string var);
+  void addUsesP(std::string proc, std::string var);
+  void addPatternIf(int stmtNum, std::string var);
+  void addPatternWhile(int stmtNum, std::string var);
+  void addCall(int stmtNo);
+  void addCalls(std::string caller, std::string called);
+  void addCallsT(std::string caller, std::string called);
+  void addCallProcTable(int stmtNo, std::string proc);
+  void addReadVarTable(int stmtNo, std::string var);
+  void addPrintVarTable(int stmtNo, std::string var);
+
   /**
    * Adds a variable name into varTable.
    *

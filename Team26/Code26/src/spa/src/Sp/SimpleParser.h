@@ -92,8 +92,9 @@ namespace SourceProcessor {
      * the variables and constants used in the expression respectively.
      * Adds the Uses relation for stmt-var and proc-var, and variables and constants present into the Pkb.
      *
+     * @returns std::unordered_set<std::string> The set of control variables in the conditional expression.
      */
-    void parseCondExpr();
+    std::unordered_set<std::string> parseCondExpr();
 
     /**
      * Parses tokens into an IF statement and returns its statement number.
@@ -114,9 +115,15 @@ namespace SourceProcessor {
     int parseWhile();
 
     /**
+     * Parses tokens into a CALL statement and returns its statement number.
+     * Adds the call statement and proc-proc relation into the Pkb.
+     *
+     * @returns int Statement number of the CALL statement.
+     */
+    int parseCall();
+
+    /**
      * Parses tokens into a READ statement and returns its statement number.
-     * Calls parseCondExpr() to parse its conditional expression,
-     * then parseStmtLst() to parse the statements in its statement list.
      * Adds the read statement and Modifies relation for stmt-var and proc-var into the Pkb.
      *
      * @returns int Statement number of the READ statement.
