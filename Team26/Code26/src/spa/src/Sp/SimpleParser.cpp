@@ -261,7 +261,7 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addCall(stmtNum); // add call stmts
     pkb.addCalls(getCurrentProc(), procName); // add proc-proc calls relation
-    pkb.addCallProcTable(stmtNum, procName); // add stmt-proc
+    pkb.addCallProc(stmtNum, procName); // add stmt-proc
 
     return stmtNum;
   }
@@ -278,7 +278,7 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addVar(varName); // add variable
     pkb.addRead(stmtNum); // add read stmts
-    pkb.addReadVarTable(stmtNum, varName); // add stmt-var
+    pkb.addReadVar(stmtNum, varName); // add stmt-var
     pkb.addModifiesS(stmtNum, varName); // add Modifies relation for stmt-var
     pkb.addModifiesP(getCurrentProc(), varName); // add Modifies relation for proc-var
 
@@ -297,7 +297,7 @@ namespace SourceProcessor {
     // adding information to pkb
     pkb.addVar(varName); // add variable
     pkb.addPrint(stmtNum); // add print stmts
-    pkb.addPrintVarTable(stmtNum, varName); // add stmt-var
+    pkb.addPrintVar(stmtNum, varName); // add stmt-var
     pkb.addUsesS(stmtNum, varName); // add Uses relation for stmt-var
     pkb.addUsesP(getCurrentProc(), varName); // add Uses relation for proc-var
 

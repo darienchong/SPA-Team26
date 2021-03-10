@@ -11,43 +11,71 @@
 Pkb::Pkb() = default;
 
 void Pkb::addModifiesP(std::string proc, std::string var) {
-
+  std::vector<std::string> vect{ proc, std::move(var) };
+  modifiesPTable.insertRow(vect);
 }
 
 void Pkb::addUsesP(std::string proc, std::string var) {
-
+  std::vector<std::string> vect{ proc, std::move(var) };
+  usesPTable.insertRow(vect);
 }
 
 void Pkb::addPatternIf(int stmtNum, std::string var) {
-
+  std::vector<std::string> vect{ std::to_string(stmtNum), std::move(var) };
+  patternIfTable.insertRow(vect);
 }
 
 void Pkb::addPatternWhile(int stmtNum, std::string var) {
-
+  std::vector<std::string> vect{ std::to_string(stmtNum), std::move(var) };
+  patternWhileTable.insertRow(vect);
 }
 
 void Pkb::addCall(int stmtNo) {
-
+  std::vector<std::string> vect{ std::to_string(stmtNo) };
+  callTable.insertRow(vect);
+  stmtTable.insertRow(vect);
 }
 
 void Pkb::addCalls(std::string caller, std::string called) {
-
+  std::vector<std::string> vect{ caller, called };
+  callsTable.insertRow(vect);
 }
 
 void Pkb::addCallsT(std::string caller, std::string called) {
-
+  std::vector<std::string> vect{ caller, called };
+  callsTTable.insertRow(vect);
 }
 
-void Pkb::addCallProcTable(int stmtNo, std::string proc) {
-
+void Pkb::addNext(int prev, int next) {
+  std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
+  nextTable.insertRow(vect);
+}
+void Pkb::addNextT(int prev, int next) {
+  std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
+  nextTTable.insertRow(vect);
+}
+void Pkb::addAffect(int affecter, int affected) {
+  std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
+  affectsTable.insertRow(vect);
+}
+void Pkb::addAffectT(int affecter, int affected) {
+  std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
+  affectsTTable.insertRow(vect);
 }
 
-void Pkb::addReadVarTable(int stmtNo, std::string var) {
-
+void Pkb::addCallProc(int stmtNo, std::string proc) {
+  std::vector<std::string> vect{ std::to_string((stmtNo)), proc };
+  callProcTable.insertRow(vect);
 }
 
-void Pkb::addPrintVarTable(int stmtNo, std::string var) {
+void Pkb::addReadVar(int stmtNo, std::string var) {
+  std::vector<std::string> vect{ std::to_string((stmtNo)), var };
+  readVarTable.insertRow(vect);
+}
 
+void Pkb::addPrintVar(int stmtNo, std::string var) {
+  std::vector<std::string> vect{ std::to_string((stmtNo)), var };
+  printVarTable.insertRow(vect);
 }
 
 void Pkb::addVar(std::string var) {
@@ -164,6 +192,21 @@ Table Pkb::getParentTTable() const { return parentTTable; }
 Table Pkb::getUsesSTable() const { return usesSTable; }
 Table Pkb::getModifiesSTable() const { return modifiesSTable; }
 Table Pkb::getPatternAssignTable() const { return patternAssignTable; }
+
+Table Pkb::getCallTable() const { return callTable; }
+Table Pkb::getCallsTable() const { return callsTable; }
+Table Pkb::getCallsTTable() const { return callsTTable; }
+Table Pkb::getNextTable() const { return nextTable; }
+Table Pkb::getNextTTable() const { return nextTTable; }
+Table Pkb::getAffectsTable() const { return affectsTable; }
+Table Pkb::getAffectsTTable() const { return affectsTTable; }
+Table Pkb::getUsesPTable() const { return usesPTable; }
+Table Pkb::getModifiesPTable() const { return modifiesPTable; }
+Table Pkb::getCallProcTable() const { return callProcTable; }
+Table Pkb::getReadVarTable() const { return readVarTable; }
+Table Pkb::getPrintVarTable() const { return printVarTable; }
+Table Pkb::getPatternIfTable() const { return patternIfTable; }
+Table Pkb::getPatternWhileTable() const { return patternWhileTable; }
 
 Table Pkb::getFollower(int stmtNo) const {
   Table filterTable = followsTable;

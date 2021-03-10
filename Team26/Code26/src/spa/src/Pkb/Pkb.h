@@ -12,18 +12,6 @@ public:
    */
   Pkb();
 
-  // stubs to fill
-  void addModifiesP(std::string proc, std::string var);
-  void addUsesP(std::string proc, std::string var);
-  void addPatternIf(int stmtNum, std::string var);
-  void addPatternWhile(int stmtNum, std::string var);
-  void addCall(int stmtNo);
-  void addCalls(std::string caller, std::string called);
-  void addCallsT(std::string caller, std::string called);
-  void addCallProcTable(int stmtNo, std::string proc);
-  void addReadVarTable(int stmtNo, std::string var);
-  void addPrintVarTable(int stmtNo, std::string var);
-
   /**
    * Adds a variable name into varTable.
    *
@@ -88,6 +76,13 @@ public:
   void addAssign(int stmtNo);
 
   /**
+   * Adds stmtNo into callTable and stmtTable.
+   *
+   * @param stmtNo Statement number to be inserted
+   */
+  void addCall(int stmtNo);
+
+  /**
    * Adds the Row {followed, follower} into followsTable.
    *
    * @param followed Statement number of the preceding statement
@@ -128,6 +123,14 @@ public:
   void addUsesS(int stmtNo, std::string var);
 
   /**
+   * Adds the Row {proc, var} into usesPTable.
+   *
+   * @param proc Name of procedure which uses var
+   * @param var Variable or constant name which is used by the procedure
+   */
+  void addUsesP(std::string proc, std::string var);
+
+  /**
    * Adds the Row {stmtNo, var} into modifiesSTable.
    *
    * @param stmtNo Statement number of the statement which modifies var
@@ -136,7 +139,64 @@ public:
   void addModifiesS(int stmtNo, std::string var);
 
   /**
-   * Adds the Row {stmtNo, lhs, rhs} int patterTable.
+   * Adds the Row {proc, var} into modifiesPTable.
+   *
+   * @param proc Name of procedure which modifies var
+   * @param var Variable or constant name which is modified by the procedure
+   */
+  void addModifiesP(std::string proc, std::string var);
+
+  /**
+   * Adds the Row {caller, called} into callsTable.
+   *
+   * @param followed Name of the caller Procedure
+   * @param follower Name of the Procedure being called
+   */
+  void addCalls(std::string caller, std::string called);
+
+  /**
+   * Adds the Row {caller, called} into callsTTable.
+   *
+   * @param followed Name of the transitive caller Procedure
+   * @param follower Name of the Procedure being transitively called
+   */
+  void addCallsT(std::string caller, std::string called);
+
+  /**
+   * Adds the Row {prev, next} into nextTable.
+   *
+   * @param prev Statement number of the statement executed first
+   * @param next Statement number of the statement which can be executed immediately after prev in some execution sequence
+   */
+  void addNext(int prev, int next);
+
+  /**
+   * Adds the Row {prev, next} into nextTTable.
+   *
+   * @param prev Statement number of the statement executed first
+   * @param next Statement number of the statement which can be executed after prev in some execution sequence
+   */
+  void addNextT(int prev, int next);
+
+  /**
+   * Adds the Row {affecter, affected} into affectsTable.
+   *
+   * @param prev Statement number of the statement which modifies a variable used in affected
+   * @param next Statement number of the statement uses a variable modified by prev
+   */
+  void addAffect(int affecter, int affected);
+
+  /**
+   * Adds the Row {affecter, affected} into affectsTTable.
+   *
+   * @param prev Statement number of the statement which modifies a variable used in affected
+   * @param next Statement number of the statement uses a variable modified by prev
+   */
+  void addAffectT(int affecter, int affected);
+
+
+  /**
+   * Adds the Row {stmtNo, lhs, rhs} into patterTable.
    *
    * @param stmtNo Statement number of the assign statement
    * @param lhs String of the left hand side of the assign statement
@@ -144,6 +204,46 @@ public:
    * assign statement
    */
   void addPatternAssign(int stmtNo, std::string lhs, std::string rhs);
+
+  /**
+   * Adds the Row {stmtNo, var} int patternIfTable.
+   *
+   * @param stmtNo Statement number of the if statement
+   * @param var Name of variable within the condition of the if statement
+   */
+  void addPatternIf(int stmtNum, std::string var);
+
+  /**
+   * Adds the Row {stmtNo, var} into patternWhileTable.
+   *
+   * @param stmtNo Statement number of the while statement
+   * @param var Name of variable within the condition of the while statement
+   */
+  void addPatternWhile(int stmtNum, std::string var);
+
+  /**
+  * Adds the Row {stmtNo, proc} into callProcTable.
+  *
+  * @param stmtNo Statement number of the call statement
+  * @param var Name of procedure being called by stmtNo
+  */
+  void addCallProc(int stmtNo, std::string proc);
+
+  /**
+  * Adds the Row {stmtNo, var} into readVarTable.
+  *
+  * @param stmtNo Statement number of the read statement
+  * @param var Name of variable being read
+  */
+  void addReadVar(int stmtNo, std::string var);
+
+  /**
+  * Adds the Row {stmtNo, var} into printVarTable.
+  *
+  * @param stmtNo Statement number of the print statement
+  * @param var Name of variable being printed
+  */
+  void addPrintVar(int stmtNo, std::string var);
 
   /**
    * @return varTable
@@ -221,9 +321,79 @@ public:
   Table getModifiesSTable() const;
 
   /**
-   * @return patterAssignTable
+   * @return patternAssignTable
    */
   Table getPatternAssignTable() const;
+
+  /**
+   * @return callTable
+   */
+  Table getCallTable() const;
+
+  /**
+   * @return callsTable
+   */
+  Table getCallsTable() const;
+
+  /**
+   * @return callsTTable
+   */
+  Table getCallsTTable() const;
+
+  /**
+   * @return nextTable
+   */
+  Table getNextTable() const;
+
+  /**
+   * @return nextTTable
+   */
+  Table getNextTTable() const;
+
+  /**
+   * @return affectsTable
+   */
+  Table getAffectsTable() const;
+
+  /**
+   * @return affectTTable
+   */
+  Table getAffectsTTable() const;
+
+  /**
+   * @return usesPTable
+   */
+  Table getUsesPTable() const;
+
+  /**
+   * @return modifiesPTable
+   */
+  Table getModifiesPTable() const;
+
+  /**
+   * @return callProcTable
+   */
+  Table getCallProcTable() const;
+
+  /**
+   * @return readVarTable
+   */
+  Table getReadVarTable() const;
+
+  /**
+   * @return printVarTable
+   */
+  Table getPrintVarTable() const;
+
+  /**
+   * @return patternIfTable
+   */
+  Table getPatternIfTable() const;
+
+  /**
+   * @return patternWhileTable
+   */
+  Table getPatternWhileTable() const;
 
   /**
    * Finds statement number which directly follow {@param stmtNo} and returns it as
@@ -337,6 +507,7 @@ public:
    */
   Table getModifiedBy(int stmtNo) const;
 
+
 private:
   Table varTable{ 1 };
   Table stmtTable{ 1 };
@@ -348,12 +519,28 @@ private:
   Table readTable{ 1 };
   Table printTable{ 1 };
   Table assignTable{ 1 };
+  Table callTable{ 1 };
 
   Table followsTable{ 2 };
   Table followsTTable{ 2 };
   Table parentTable{ 2 };
   Table parentTTable{ 2 };
   Table usesSTable{ 2 };
+  Table usesPTable{ 2 };
   Table modifiesSTable{ 2 };
+  Table modifiesPTable{ 2 };
+  Table callsTable{ 2 };
+  Table callsTTable{ 2 };
+  Table nextTable{ 2 };
+  Table nextTTable{ 2 };
+  Table affectsTable{ 2 };
+  Table affectsTTable{ 2 };
+
+  Table callProcTable{ 2 };
+  Table readVarTable{ 2 };
+  Table printVarTable{ 2 };
+
   Table patternAssignTable{ 3 };
+  Table patternIfTable{ 2 };
+  Table patternWhileTable{ 2 };
 };
