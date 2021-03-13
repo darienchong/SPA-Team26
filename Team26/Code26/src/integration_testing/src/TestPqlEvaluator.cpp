@@ -120,7 +120,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select") {
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::STMT, "s");
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
 
     // Get Evaluation result
     std::list<std::string> evaluationResult;
@@ -143,9 +143,9 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::STMT, "s");
     Pql::Clause clause(Pql::ClauseType::FOLLOWS,
-      { Pql::Entity(Pql::EntityType::STMT_NUMBER, "1") , Pql::Entity(Pql::EntityType::STMT_NUMBER, "2") });
+      { Pql::Entity(Pql::EntityType::NUMBER, "1") , Pql::Entity(Pql::EntityType::NUMBER, "2") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -167,9 +167,9 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::STMT, "s");
     Pql::Clause clause(Pql::ClauseType::PARENT_T,
-      { Pql::Entity(Pql::EntityType::STMT, "s") , Pql::Entity(Pql::EntityType::STMT_NUMBER, "6") });
+      { Pql::Entity(Pql::EntityType::STMT, "s") , Pql::Entity(Pql::EntityType::NUMBER, "6") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -191,9 +191,9 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::STMT, "s");
     Pql::Clause clause(Pql::ClauseType::FOLLOWS_T,
-      { Pql::Entity(Pql::EntityType::STMT_NUMBER, "1") , Pql::Entity(Pql::EntityType::STMT, "s") });
+      { Pql::Entity(Pql::EntityType::NUMBER, "1") , Pql::Entity(Pql::EntityType::STMT, "s") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -217,7 +217,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     Pql::Clause clause(Pql::ClauseType::FOLLOWS_T,
       { Pql::Entity(Pql::EntityType::WILDCARD, "_") , Pql::Entity(Pql::EntityType::STMT, "3") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -239,9 +239,9 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::READ, "r");
     Pql::Clause clause(Pql::ClauseType::PARENT,
-      { Pql::Entity(Pql::EntityType::STMT_NUMBER, "4") , Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+      { Pql::Entity(Pql::EntityType::NUMBER, "4") , Pql::Entity(Pql::EntityType::WILDCARD, "_") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -265,7 +265,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     Pql::Clause clause(Pql::ClauseType::MODIFIES_S,
       { Pql::Entity(Pql::EntityType::WILDCARD, "_") , Pql::Entity(Pql::EntityType::VARIABLE, "v") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -289,7 +289,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     Pql::Clause clause(Pql::ClauseType::FOLLOWS,
       { Pql::Entity(Pql::EntityType::STMT, "s") , Pql::Entity(Pql::EntityType::WILDCARD, "_") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -313,7 +313,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     Pql::Clause clause(Pql::ClauseType::USES_S,
       { Pql::Entity(Pql::EntityType::WILDCARD, "_") , Pql::Entity(Pql::EntityType::WILDCARD, "_") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -336,7 +336,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     Pql::Clause clause(Pql::ClauseType::FOLLOWS,
       { Pql::Entity(Pql::EntityType::STMT, "s1") , Pql::Entity(Pql::EntityType::STMT, "s2") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -360,7 +360,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     Pql::Clause clause(Pql::ClauseType::PARENT,
       { Pql::Entity(Pql::EntityType::WHILE, "w") , Pql::Entity(Pql::EntityType::STMT, "s2") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -387,7 +387,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
       Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
       Pql::Entity(Pql::EntityType::VARIABLE, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, "0") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -410,9 +410,9 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
     Pql::Entity target(Pql::EntityType::ASSIGN, "a1");
     Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a2"),
-      Pql::Entity(Pql::EntityType::VARIABLE_NAME, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 ") });
+      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -435,9 +435,9 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
     Pql::Entity target(Pql::EntityType::ASSIGN, "a");
     Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
-      Pql::Entity(Pql::EntityType::VARIABLE_NAME, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 ") });
+      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -461,9 +461,9 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
     Pql::Entity target(Pql::EntityType::ASSIGN, "a");
     Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
-      Pql::Entity(Pql::EntityType::VARIABLE_NAME, "a"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 ") });
+      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -485,9 +485,9 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
     Pql::Entity target(Pql::EntityType::ASSIGN, "a");
     Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
-      Pql::Entity(Pql::EntityType::VARIABLE_NAME, "a"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -512,7 +512,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -537,7 +537,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 a * ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -562,7 +562,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 a * ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -587,7 +587,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single pattern assign 
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause);
 
     // Get Evaluation result
@@ -611,12 +611,12 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::ASSIGN, "a");
     Pql::Clause clause1(Pql::ClauseType::PARENT, {
-      Pql::Entity(Pql::EntityType::STMT_NUMBER, "5"), Pql::Entity(Pql::EntityType::ASSIGN, "a") });
+      Pql::Entity(Pql::EntityType::NUMBER, "5"), Pql::Entity(Pql::EntityType::ASSIGN, "a") });
     Pql::Clause clause2(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 a * ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause1);
     query.addClause(clause2);
 
@@ -644,7 +644,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 a * ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause1);
     query.addClause(clause2);
 
@@ -672,7 +672,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause1);
     query.addClause(clause2);
 
@@ -700,7 +700,7 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::EXPRESSION, " a b + ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause1);
     query.addClause(clause2);
 
@@ -723,12 +723,12 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::STMT, "s");
     Pql::Clause clause1(Pql::ClauseType::USES_S, {
-      Pql::Entity(Pql::EntityType::ASSIGN, "a"), Pql::Entity(Pql::EntityType::VARIABLE_NAME, "b") });
+      Pql::Entity(Pql::EntityType::ASSIGN, "a"), Pql::Entity(Pql::EntityType::NAME, "b") });
     Pql::Clause clause2(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
-      Pql::Entity(Pql::EntityType::VARIABLE_NAME, "a"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 ") });
+      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 ") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause1);
     query.addClause(clause2);
 
@@ -751,12 +751,12 @@ TEST_CASE("[TestPqlEvaluator] Valid Query, Single Select, Single such that claus
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::STMT, "s");
     Pql::Clause clause1(Pql::ClauseType::MODIFIES_S, {
-      Pql::Entity(Pql::EntityType::ASSIGN, "a"), Pql::Entity(Pql::EntityType::VARIABLE_NAME, "d") });
+      Pql::Entity(Pql::EntityType::ASSIGN, "a"), Pql::Entity(Pql::EntityType::NAME, "d") });
     Pql::Clause clause2(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
     Pql::Query query;
-    query.setTarget(target);
+    query.addTarget(target);
     query.addClause(clause1);
     query.addClause(clause2);
 

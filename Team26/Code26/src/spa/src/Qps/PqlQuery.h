@@ -5,39 +5,62 @@
 
 namespace Pql {
   enum class EntityType {
+    // default
+    UNDEFINED,
+
     // design-entities
     STMT,
     READ,
     PRINT,
+    CALL,
     WHILE,
     IF,
     ASSIGN,
     VARIABLE,
     CONSTANT,
+    PROG_LINE,
     PROCEDURE,
 
     // other-entities
-    STMT_NUMBER,
+    NUMBER,
     WILDCARD,
-    VARIABLE_NAME,
+    NAME,
     SUB_EXPRESSION,
-    EXPRESSION,
+    EXPRESSION
+  };
 
+  enum class AttributeRefType {
     // default
-    UNDEFINED
+    NONE,
+
+    PROC_NAME,
+    VAR_NAME,
+    VALUE,
+    STMT_NUMBER
   };
 
   enum class ClauseType {
+    // default
+    UNDEFINED,
+
     FOLLOWS,
     FOLLOWS_T,
     PARENT,
     PARENT_T,
+    CALLS,
+    CALLS_T,
+    NEXT,
+    NEXT_T,
+    AFFECTS,
+    AFFECTS_T,
     USES_S,
+    USES_P,
     MODIFIES_S,
+    MODIFIES_P,
     PATTERN_ASSIGN,
-
-    // default
-    UNDEFINED
+    PATTERN_IF,
+    PATTERN_WHILE,
+    WITH
   };
 
   /**
@@ -47,6 +70,7 @@ namespace Pql {
   private:
     EntityType type;
     std::string value;
+    AttributeRefType attributeRefType;
 
   public:
     /**
@@ -63,6 +87,15 @@ namespace Pql {
     Entity(const EntityType& type, const std::string& value);
 
     /**
+     * Constructor.
+     *
+     * @param type Entity type.
+     * @param value Entity value.
+     * @param attrivuteRef attribute reference type.
+     */
+    Entity(const EntityType& type, const std::string& value, const AttributeRefType& attributeRefType);
+
+    /**
      * Get the entity type.
      *
      * @return Entity type.
@@ -70,25 +103,39 @@ namespace Pql {
     EntityType getType() const;
 
     /**
-     * Get the entity value
+     * Get the entity value.
      *
      * @return Entity value.
      */
     std::string getValue() const;
 
     /**
-     * Checks if the entity is a statement number.
+     * Get the entity attribute reference type.
      *
-     * @return True if the entity is a statement number. Otherwise, false.
+     * @return Entity attribute reference type.
      */
-    bool isStmtNumber() const;
+    AttributeRefType getAttributeRefType() const;
 
     /**
-     * Checks if the entity is a variable name.
+     * Checks if the entity is an attribute reference.
      *
-     * @return True if the entity is a variable name. Otherwise, false.
+     * @return True if the entity is an attribute reference. Otherwise, false.
      */
-    bool isVariableName() const;
+    bool isAttributeRef() const;
+
+    /**
+     * Checks if the entity is a number.
+     *
+     * @return True if the entity is a number. Otherwise, false.
+     */
+    bool isNumber() const;
+
+    /**
+     * Checks if the entity is a name.
+     *
+     * @return True if the entity is a name. Otherwise, false.
+     */
+    bool isName() const;
 
     /**
      * Checks if the entity is a wildcard.
@@ -156,7 +203,7 @@ namespace Pql {
 
     // Operator overloading
     friend bool operator==(const Entity& lhs, const Entity& rhs) {
-      return lhs.type == rhs.type && lhs.value == rhs.value;
+      return lhs.type == rhs.type && lhs.value == rhs.value && lhs.attributeRefType == rhs.attributeRefType;
     }
 
     friend bool operator!=(const Entity& lhs, const Entity& rhs) {
@@ -225,33 +272,40 @@ namespace Pql {
   */
   class Query {
   private:
-    Entity target;
+    std::vector<Entity> targets;
     std::vector<Clause> clauses;
 
   public:
     /**
-     * Get the query target.
+     * Checks if the query object is a BOOLEAN query. A boolean query have no targets.
      *
-     * @return Query target.
+     * @return True if the PQL query is a BOOLEAN query.
      */
-    Entity getTarget() const;
+    bool isBoolean() const;
 
     /**
-     * Get the query clauses.
+     * Gets the query targets.
+     *
+     * @return Vector of query targets.
+     */
+    std::vector<Entity> getTargets() const;
+
+    /**
+     * Gets the query clauses.
      *
      * @return Vector of clauses.
      */
     std::vector<Clause> getClauses() const;
 
     /**
-     * Sets the target to be selected.
+     * Adds a select target to the query obect. Must be added in left-right order.
      *
-     * @param target Synonym to be selected.
+     * @param target Target to be selected.
     */
-    void setTarget(const Entity target);
+    void addTarget(const Entity target);
 
     /**
-     * Add a clause to the query object. Clauses can be added in any order.
+     * Adds a clause to the query object. Clauses can be added in any order.
      *
      * @param clause Clause to be added.
     */
@@ -259,7 +313,7 @@ namespace Pql {
 
     // Operator overloading
     friend bool operator==(const Query& lhs, const Query& rhs) {
-      return lhs.target == rhs.target && lhs.clauses == rhs.clauses;
+      return lhs.targets == rhs.targets && lhs.clauses == rhs.clauses;
     }
   };
 }

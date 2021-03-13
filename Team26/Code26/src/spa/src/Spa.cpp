@@ -23,7 +23,7 @@ void Spa::parseSourceFile(const std::string& filename) {
   std::ifstream sourceFile(filename);
   if (!sourceFile.is_open()) {
     std::cout << "Unable to open source file" << std::endl;
-    exit(EXIT_FAILURE);
+    exit(EXIT_SUCCESS);
   }
 
   try {

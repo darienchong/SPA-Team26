@@ -2,114 +2,134 @@
 
 #include <string>
 
-// Entity methods
-Pql::Entity::Entity()
-  : type(Pql::EntityType::UNDEFINED) {
-}
+namespace Pql {
+  // Entity methods
+  Entity::Entity()
+    : type(EntityType::UNDEFINED), attributeRefType(AttributeRefType::NONE) {
+  }
 
-Pql::Entity::Entity(const Pql::EntityType& type, const std::string& value)
-  : type(type), value(value) {
-}
+  Entity::Entity(const EntityType& type, const std::string& value)
+    : type(type), value(value), attributeRefType(AttributeRefType::NONE) {
+  }
 
-Pql::EntityType Pql::Entity::getType() const {
-  return type;
-}
+  Entity::Entity(const EntityType& type, const std::string& value, const AttributeRefType& attributeRefType)
+    : type(type), value(value), attributeRefType(attributeRefType) {
+  }
 
-std::string Pql::Entity::getValue() const {
-  return value;
-}
+  EntityType Entity::getType() const {
+    return type;
+  }
 
-bool Pql::Entity::isStmtNumber() const {
-  return type == Pql::EntityType::STMT_NUMBER;
-}
+  std::string Entity::getValue() const {
+    return value;
+  }
 
-bool Pql::Entity::isVariableName() const {
-  return type == Pql::EntityType::VARIABLE_NAME;
-}
+  AttributeRefType Entity::getAttributeRefType() const {
+    return attributeRefType;
+  }
 
-bool Pql::Entity::isWildcard() const {
-  return type == Pql::EntityType::WILDCARD;
-}
+  bool Entity::isAttributeRef() const {
+    return attributeRefType != AttributeRefType::NONE;
+  }
 
-bool Pql::Entity::isSubExpression() const {
-  return type == Pql::EntityType::SUB_EXPRESSION;
-}
+  bool Entity::isNumber() const {
+    return type == EntityType::NUMBER;
+  }
 
-bool Pql::Entity::isExpression() const {
-  return type == Pql::EntityType::EXPRESSION;
-}
+  bool Entity::isName() const {
+    return type == EntityType::NAME;
+  }
 
-bool Pql::Entity::isSynonym() const {
-  return type == Pql::EntityType::STMT ||
-    type == Pql::EntityType::READ ||
-    type == Pql::EntityType::PRINT ||
-    type == Pql::EntityType::WHILE ||
-    type == Pql::EntityType::IF ||
-    type == Pql::EntityType::ASSIGN ||
-    type == Pql::EntityType::VARIABLE ||
-    type == Pql::EntityType::CONSTANT ||
-    type == Pql::EntityType::PROCEDURE;
-}
+  bool Entity::isWildcard() const {
+    return type == EntityType::WILDCARD;
+  }
 
-bool Pql::Entity::isStmtSynonym() const {
-  return type == Pql::EntityType::STMT;
-}
+  bool Entity::isSubExpression() const {
+    return type == EntityType::SUB_EXPRESSION;
+  }
 
-bool Pql::Entity::isReadSynonym() const {
-  return type == Pql::EntityType::READ;
-}
+  bool Entity::isExpression() const {
+    return type == EntityType::EXPRESSION;
+  }
 
-bool Pql::Entity::isPrintSynonym() const {
-  return type == Pql::EntityType::PRINT;
-}
+  bool Entity::isSynonym() const {
+    return type == EntityType::STMT ||
+      type == EntityType::READ ||
+      type == EntityType::PRINT ||
+      type == EntityType::CALL ||
+      type == EntityType::WHILE ||
+      type == EntityType::IF ||
+      type == EntityType::ASSIGN ||
+      type == EntityType::VARIABLE ||
+      type == EntityType::CONSTANT ||
+      type == EntityType::PROG_LINE ||
+      type == EntityType::PROCEDURE;
+  }
 
-bool Pql::Entity::isWhileSynonym() const {
-  return type == Pql::EntityType::WHILE;
-}
+  bool Entity::isStmtSynonym() const {
+    return type == EntityType::STMT;
+  }
 
-bool Pql::Entity::isIfSynonym() const {
-  return type == Pql::EntityType::IF;
-}
+  bool Entity::isReadSynonym() const {
+    return type == EntityType::READ;
+  }
 
-// Clause methods
-Pql::Clause::Clause()
-  : type(ClauseType::UNDEFINED) {
-}
+  bool Entity::isPrintSynonym() const {
+    return type == EntityType::PRINT;
+  }
 
-Pql::Clause::Clause(const Pql::ClauseType& type, const std::vector<Pql::Entity>& params)
-  : type(type), params(params) {
-  this->params.reserve(3); // Max number of params is 3
-}
+  bool Entity::isWhileSynonym() const {
+    return type == EntityType::WHILE;
+  }
 
-Pql::ClauseType Pql::Clause::getType() const {
-  return type;
-}
+  bool Entity::isIfSynonym() const {
+    return type == EntityType::IF;
+  }
 
-std::vector<Pql::Entity> Pql::Clause::getParams() const {
-  return params;
-}
+  // Clause methods
+  Clause::Clause()
+    : type(ClauseType::UNDEFINED) {
+  }
 
-void Pql::Clause::setType(const ClauseType type) {
-  this->type = type;
-}
+  Clause::Clause(const ClauseType& type, const std::vector<Entity>& params)
+    : type(type), params(params) {
+      this->params.reserve(3); // Max number of params is 3
+  }
 
-void Pql::Clause::addParam(const Entity param) {
-  params.emplace_back(param);
-}
+  ClauseType Clause::getType() const {
+    return type;
+  }
 
-// Query methods
-Pql::Entity Pql::Query::getTarget() const {
-  return target;
-}
+  std::vector<Entity> Clause::getParams() const {
+    return params;
+  }
 
-std::vector<Pql::Clause> Pql::Query::getClauses() const {
-  return clauses;
-}
+  void Clause::setType(const ClauseType type) {
+    this->type = type;
+  }
 
-void Pql::Query::setTarget(const Pql::Entity target) {
-  this->target = target;
-}
+  void Clause::addParam(const Entity param) {
+    params.emplace_back(param);
+  }
 
-void Pql::Query::addClause(const Clause clause) {
-  clauses.emplace_back(clause);
+  // Query methods
+  bool Query::isBoolean() const {
+    return targets.empty();
+  }
+
+  std::vector<Entity> Query::getTargets() const {
+    return targets;
+  }
+
+  std::vector<Clause> Query::getClauses() const {
+    return clauses;
+  }
+
+  void Query::addTarget(const Entity target) {
+    targets.emplace_back(target);
+  }
+
+  void Query::addClause(const Clause clause) {
+    clauses.emplace_back(clause);
+  }
 }

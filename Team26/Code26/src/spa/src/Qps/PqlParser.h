@@ -14,12 +14,21 @@
  * Standard tokens in a PQL query.
  */
 namespace Pql {
+  /**
+   * Enum used for parsing of multiple clauses.
+   */
+  enum class ParsingClauseType {
+    UNDEFINED,
+    SUCH_THAT,
+    PATTERN,
+    WITH
+  };
+
   // =================================
   // General - Used for type checking
   // =================================
   const static Token IDENTIFIER{ TokenType::IDENTIFIER, "" };
   const static Token NUMBER{ TokenType::NUMBER, "" };
-  const static Token WHITESPACE{ TokenType::WHITESPACE, "" };
 
   // =============================================
   // Specific - Used to check for specific values
@@ -33,6 +42,9 @@ namespace Pql {
   const static Token SUCH{ TokenType::IDENTIFIER, "such" };
   const static Token THAT{ TokenType::IDENTIFIER, "that" };
   const static Token PATTERN{ TokenType::IDENTIFIER, "pattern" };
+  const static Token WITH{ TokenType::IDENTIFIER, "with" };
+  const static Token AND{ TokenType::IDENTIFIER, "and" };
+  const static Token BOOLEAN{ TokenType::IDENTIFIER, "BOOLEAN" };
 
   // Symbols
   const static Token COMMA{ TokenType::DELIMITER, "," };
@@ -41,51 +53,84 @@ namespace Pql {
   const static Token LEFT_PARENTHESIS{ TokenType::DELIMITER, "(" };
   const static Token RIGHT_PARENTHESIS{ TokenType::DELIMITER, ")" };
   const static Token QUOTE{ TokenType::DELIMITER, "\"" };
+  const static Token DOT{ TokenType::DELIMITER, "." };
+  const static Token NUMBER_SIGN{ TokenType::DELIMITER, "#" };
   const static Token STAR{ TokenType::OPERATOR, "*" };
+  const static Token LEFT_ANGLE_BRACKET{ TokenType::OPERATOR, "<" };
+  const static Token RIGHT_ANGLE_BRACKET{ TokenType::OPERATOR, ">" };
+  const static Token EQUAL{ TokenType::OPERATOR, "=" };
 
-
-  // design-entity : ‘stmt’ | ‘read’ | ‘print’ | ‘while’ | ‘if’ | ‘assign’ | ‘variable’ | ‘constant’ | ‘procedure’
+  // design-entity : 'stmt' | 'read' | 'print' | 'call' | 'while' | 'if' | 'assign' | 'variable' |
+  //                 'constant' | 'procedure' | 'proc_line'
   const static Token STMT{ TokenType::IDENTIFIER, "stmt" };
   const static Token READ{ TokenType::IDENTIFIER, "read" };
   const static Token PRINT{ TokenType::IDENTIFIER, "print" };
+  const static Token CALL{ TokenType::IDENTIFIER, "call" };
   const static Token WHILE{ TokenType::IDENTIFIER, "while" };
   const static Token IF{ TokenType::IDENTIFIER, "if" };
   const static Token ASSIGN{ TokenType::IDENTIFIER, "assign" };
   const static Token VARIABLE{ TokenType::IDENTIFIER, "variable" };
   const static Token CONSTANT{ TokenType::IDENTIFIER, "constant" };
+  const static Token PROG{ TokenType::IDENTIFIER, "prog" };
+  const static Token LINE{ TokenType::IDENTIFIER, "line" };
   const static Token PROCEDURE{ TokenType::IDENTIFIER, "procedure" };
 
-  // relRef: ModifiesS | UsesS | Parent | ParentT | Follows | FollowsT
+  // attrName : 'procName'| 'varName' | 'value' | 'stmt#'
+  const static Token PROC_NAME{ TokenType::IDENTIFIER, "procName" };
+  const static Token VAR_NAME{ TokenType::IDENTIFIER, "varName" };
+  const static Token VALUE{ TokenType::IDENTIFIER, "value" };
+
+  // STMT already defined
+
+  // relRef : ModifiesS | UsesS | Parent | ParentT | Follows | FollowsT | Calls | CallsT | Next | 
+  //          NextT | Affects | AffectsT
   const static Token MODIFIES{ TokenType::IDENTIFIER, "Modifies" };
   const static Token USES{ TokenType::IDENTIFIER, "Uses" };
   const static Token PARENT{ TokenType::IDENTIFIER, "Parent" };
   const static Token FOLLOWS{ TokenType::IDENTIFIER, "Follows" };
+  const static Token CALLS{ TokenType::IDENTIFIER, "Calls" };
+  const static Token NEXT{ TokenType::IDENTIFIER, "Next" };
+  const static Token AFFECTS{ TokenType::IDENTIFIER, "Affects" };
 
   /**
    * Map that maps a given token to the corresponding entity type.
    */
-  const static std::map<Token, Pql::EntityType> tokenToDesignEntityTypeMapper({
-    {Pql::STMT, Pql::EntityType::STMT},
-    {Pql::READ, Pql::EntityType::READ},
-    {Pql::PRINT, Pql::EntityType::PRINT},
-    {Pql::WHILE, Pql::EntityType::WHILE},
-    {Pql::IF, Pql::EntityType::IF},
-    {Pql::ASSIGN, Pql::EntityType::ASSIGN},
-    {Pql::VARIABLE, Pql::EntityType::VARIABLE},
-    {Pql::CONSTANT, Pql::EntityType::CONSTANT},
-    {Pql::PROCEDURE, Pql::EntityType::PROCEDURE}
+  const static std::map<Token, EntityType> tokenToDesignEntityTypeMapper({
+      {STMT, EntityType::STMT},
+      {READ, EntityType::READ},
+      {PRINT, EntityType::PRINT},
+      {CALL, EntityType::CALL},
+      {WHILE, EntityType::WHILE},
+      {IF, EntityType::IF},
+      {ASSIGN, EntityType::ASSIGN},
+      {VARIABLE, EntityType::VARIABLE},
+      {CONSTANT, EntityType::CONSTANT},
+      {PROG, EntityType::PROG_LINE},
+      {PROCEDURE, EntityType::PROCEDURE}
+    });
+
+  /**
+   * Map that maps a given token to the corresponding attribute reference type.
+   */
+  const static std::map<Token, AttributeRefType> tokenToAttributeRefTypeMapper({
+      {PROC_NAME, AttributeRefType::PROC_NAME},
+      {VAR_NAME, AttributeRefType::VAR_NAME},
+      {VALUE, AttributeRefType::VALUE},
+      {STMT, AttributeRefType::STMT_NUMBER}
     });
 
   /**
    * Set that contains the entity types that refers to a statement.
    */
-  const static std::unordered_set<Pql::EntityType> synonymStmtEntityTypes({
-    Pql::EntityType::STMT,
-    Pql::EntityType::READ,
-    Pql::EntityType::PRINT,
-    Pql::EntityType::WHILE,
-    Pql::EntityType::IF,
-    Pql::EntityType::ASSIGN
+  const static std::unordered_set<EntityType> synonymStmtEntityTypes({
+      EntityType::STMT,
+      EntityType::READ,
+      EntityType::PRINT,
+      EntityType::CALL,
+      EntityType::WHILE,
+      EntityType::IF,
+      EntityType::ASSIGN,
+      EntityType::PROG_LINE
     });
 
   /**
@@ -94,7 +139,7 @@ namespace Pql {
   class PqlParser {
   private:
     std::list<Token>& tokens;
-    std::unordered_map<std::string, Pql::EntityType> declaredSynonyms;
+    std::unordered_map<std::string, EntityType> declaredSynonyms;
 
   public:
     /**
@@ -109,7 +154,7 @@ namespace Pql {
     *
     * @return Query representation object.
     */
-    Pql::Query parseQuery();
+    Query parseQuery();
 
   private:
     /**
@@ -127,7 +172,7 @@ namespace Pql {
      *
      * @param designEntityType Design entity type of the synonym to be parsed.
      */
-    void parseDeclarationSynonym(const Pql::EntityType& designEntityType);
+    void parseDeclarationSynonym(const EntityType& designEntityType);
 
     /**
      * Parses the body of a PQL query and stores the query representation in the given query that is
@@ -135,15 +180,23 @@ namespace Pql {
      *
      * @param queryUnderConstruction Query representation object that is under construction.
      */
-    void parseBody(Pql::Query& queryUnderConstruction);
+    void parseBody(Query& queryUnderConstruction);
 
     /**
-     * Parses the select target of the PQL query and stores the result in the query representation
+     * Parses the select targets of the PQL query and stores the result in the query representation
      * under construction.
      *
      * @param queryUnderConstruction Query representation object that is under construction.
      */
-    void parseSelectTarget(Pql::Query& queryUnderConstruction);
+    void parseSelectTargets(Query& queryUnderConstruction);
+
+    /**
+     * Parses a single select target of the PQL query and stores the result in the query representation
+     * under construction.
+     *
+     * @param queryUnderConstruction Query representation object that is under construction.
+     */
+    void parseSelectTarget(Query& queryUnderConstruction);
 
     /**
      * Parses all the clauses of the PQL query and stores the result in the query representation
@@ -151,7 +204,7 @@ namespace Pql {
      *
      * @param queryUnderConstruction Query representation object that is under construction.
      */
-    void parseClauses(Pql::Query& queryUnderConstruction);
+    void parseClauses(Query& queryUnderConstruction);
 
     /**
      * Parses a such that clause of the PQL query and stores the result in the query representation
@@ -159,7 +212,7 @@ namespace Pql {
      *
      * @param queryUnderConstruction Query representation object that is under construction.
      */
-    void parseSuchThatClause(Pql::Query& queryUnderConstruction);
+    void parseSuchThatClause(Query& queryUnderConstruction);
 
     /**
      * Parses a pattern clause of the PQL query and stores the result in the query representation
@@ -167,7 +220,138 @@ namespace Pql {
      *
      * @param queryUnderConstruction Query representation object that is under construction.
      */
-    void parsePatternClause(Pql::Query& queryUnderConstruction);
+    void parsePatternClause(Query& queryUnderConstruction);
+
+    /**
+     * Parses a with clause of the PQL query and stores the result in the query representation
+     * under construction.
+     *
+     * @param queryUnderConstruction Query representation object that is under construction.
+     */
+    void parseWithClause(Query& queryUnderConstruction);
+
+    /**
+     * Parses the Follows clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseFollowsClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Follows* clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseFollowsTClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Parent clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseParentClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Parent* clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseParentTClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Calls clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseCallsClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Calls* clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseCallsTClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Next clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseNextClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Next* clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseNextTClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Affects clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseAffectsClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Affects* clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseAffectsTClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Uses clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseUsesClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the Modifies clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseModifiesClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses a pattern assign clause of the PQL query and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     * @param synonymName synonym name of the pattern if clause
+     */
+    void parsePatternAssignClause(Clause& clauseUnderConstruction, const std::string& synonymName);
+
+    /**
+     * Parses a pattern if clause of the PQL query and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     * @param synonymName synonym name of the pattern if clause
+     */
+    void parsePatternIfClause(Clause& clauseUnderConstruction, const std::string& synonymName);
+
+    /**
+     * Parses a pattern while clause of the PQL query and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     * @param synonymName synonym name of the pattern while clause
+     */
+    void parsePatternWhileClause(Clause& clauseUnderConstruction, const std::string& synonymName);
 
     /**
      * Parses a pair of stmtRef, stmtRef arguments from the clause of the PQL query and stores the
@@ -175,15 +359,23 @@ namespace Pql {
      *
      * @param clauseUnderConstruction Clause representation object that is under construction.
      */
-    void parseStmtAndStmtArgs(Pql::Clause& clauseUnderConstruction);
+    void parseStmtAndStmtArgs(Clause& clauseUnderConstruction);
 
     /**
-     * Parses a pair of stmtRef, entRef arguments from the clause of the PQL query and stores the
+     * Parses a pair of procRef, procRef arguments from the clause of the PQL query and stores the
      * result in the clause representation under construction.
      *
      * @param clauseUnderConstruction Clause representation object that is under construction.
      */
-    void parseStmtAndEntArgs(Pql::Clause& clauseUnderConstruction);
+    void parseProcAndProcArgs(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses a ref argument from the with clause of the PQL query and stores the result in the
+     * clause representation under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseRef(Clause& clauseUnderConstruction);
 
     /**
      * Parses a stmtRef argument from the clause of the PQL query and stores the result in the
@@ -191,15 +383,23 @@ namespace Pql {
      *
      * @param clauseUnderConstruction Clause representation object that is under construction.
      */
-    void parseStmtRef(Pql::Clause& clauseUnderConstruction);
+    void parseStmtRef(Clause& clauseUnderConstruction);
 
     /**
-     * Parses an entRef argument from the clause of the PQL query and stores the result in the
-     * clause representation under construction.
+     * Parses a varRef (variable type entRef) argument from the clause of the PQL query and stores
+     * the result in the clause representation under construction.
      *
      * @param clauseUnderConstruction Clause representation object that is under construction.
      */
-    void parseEntRef(Pql::Clause& clauseUnderConstruction);
+    void parseVarRef(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses a procRef (variable type entRef) argument from the clause of the PQL query and stores
+     * the result in the clause representation under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseProcRef(Clause& clauseUnderConstruction);
 
     /**
      * Parses an expression-spec argument from the clause of the PQL query and stores the result in
@@ -207,7 +407,7 @@ namespace Pql {
      *
      * @param clauseUnderConstruction Clause representation object that is under construction.
      */
-    void parseExprSpec(Pql::Clause& clauseUnderConstruction);
+    void parseExprSpec(Clause& clauseUnderConstruction);
 
     /**
      * Parses an expression from the clause of the PQL query and stores the result in the clause
@@ -216,7 +416,7 @@ namespace Pql {
      * @param clauseUnderConstruction Clause representation object that is under construction.
      * @param isExactMatch True to parse the expression as type EXPRESSION, else type will be SUB_EXPRESSION.
      */
-    void parseExpression(Pql::Clause& clauseUnderConstruction, const bool isExactMatch);
+    void parseExpression(Clause& clauseUnderConstruction, const bool isExactMatch);
 
     /**
      * Validate and get the next token against the given token that should be expected. Also consume any

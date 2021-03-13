@@ -10,7 +10,7 @@
 namespace Pql {
   class PqlEvaluator {
   private:
-    Pql::Query& query;
+    Query& query;
     Pkb& pkb;
     std::list<std::string>& results;
 
@@ -35,7 +35,7 @@ namespace Pql {
      * @param clause Clause to be executed.
      * @return Clause result table.
      */
-    Table executeClause(const Pql::Clause& clause) const;
+    Table executeClause(const Clause& clause) const;
 
     /**
      * Constructs a clause result table given a such that clause.
@@ -43,7 +43,7 @@ namespace Pql {
      * @param table Table to be constructed.
      * @param clause Such that clause object.
      */
-    void constructTableFromClause(Table& clauseResultTable, const Pql::Clause& clause) const;
+    void constructTableFromClause(Table& clauseResultTable, const Clause& clause) const;
 
     /**
      * Constructs a clause result table given a clause of type PATTERN_ASSIGN.
@@ -51,7 +51,7 @@ namespace Pql {
      * @param clauseResultTable Table to be constructed.
      * @param clause Pattern assign clause object.
      */
-    void constructPatternAssignTableFromClause(Table& clauseResultTable, const Pql::Clause& clause) const;
+    void constructPatternAssignTableFromClause(Table& clauseResultTable, const Clause& clause) const;
 
     /**
      * Helper function to get the corresponding Table from the PKB when given an entity.
@@ -60,7 +60,7 @@ namespace Pql {
      * @param entity Given entity to retrieve the corresponding table from PKB.
      * @return Table corresponding to the given entity.
      */
-    Table getTableFromEntity(const Pql::Entity& entity) const;
+    Table getTableFromEntity(const Entity& entity) const;
 
     /**
      * @brief Extracts the result from the given Table and populates the results list of the PqlEvaluator.
@@ -77,7 +77,7 @@ namespace Pql {
      * @param query Query representation object.
      * @param results Result list to be filled.
      */
-    PqlEvaluator(Pkb& pkb, Pql::Query& query, std::list<std::string>& results);
+    PqlEvaluator(Pkb& pkb, Query& query, std::list<std::string>& results);
 
     /**
      * @brief Evaluates the query using the given PKB and stores the result in the results list of the PqlEvaluator.

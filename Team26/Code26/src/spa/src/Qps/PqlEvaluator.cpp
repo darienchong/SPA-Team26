@@ -49,7 +49,7 @@ namespace Pql {
         if (isSameTypeAndArguement(lhsEntity, rhsEntity)) {
           return true;
         }
-        if (lhsEntity.isStmtNumber() && rhsEntity.isStmtNumber()) { // check if lhs stmt number is equal or larger than rhs stmt number
+        if (lhsEntity.isNumber() && rhsEntity.isNumber()) { // check if lhs stmt number is equal or larger than rhs stmt number
           return !isLhsSmallerThanRhs(lhsEntity, rhsEntity);
         }
       }
@@ -62,7 +62,7 @@ namespace Pql {
         if (isSameTypeAndArguement(lhsEntity, rhsEntity)) {
           return true;
         }
-        if (lhsEntity.isStmtNumber() && rhsEntity.isStmtNumber()) { // Check if lhs stmt number is equal or larger than rhs stmt number
+        if (lhsEntity.isNumber() && rhsEntity.isNumber()) { // Check if lhs stmt number is equal or larger than rhs stmt number
           return !isLhsSmallerThanRhs(lhsEntity, rhsEntity);
         }
         if (lhsEntity.isSynonym()) { // Check if lhs is a container stmt
@@ -103,8 +103,10 @@ namespace Pql {
 
     // Set finalResultTable as a table of the query target design entity type. 
     Table finalResultTable;
-    const Entity& queryTarget = query.getTarget();
-    switch (queryTarget.getType()) {
+    const std::vector<Entity>& queryTargets = query.getTargets();
+    const Entity& queryTarget = queryTargets[0];
+    const EntityType queryTargetType = queryTarget.getType();
+    switch (queryTargetType) {
     case EntityType::STMT:
       finalResultTable = pkb.getStmtTable();
       break;
@@ -234,7 +236,7 @@ namespace Pql {
 
     if (lhsEntity.isSynonym()) { // Guarenteed to be of type VARIABLE
       header2 = lhsEntity.getValue();
-    } else if (lhsEntity.isVariableName()) {
+    } else if (lhsEntity.isName()) {
       Table lhsTable({ "" });
       lhsTable.insertRow({ lhsEntity.getValue() });
       clauseResultTable.innerJoin(lhsTable, 1, 0); // inner join on second column of table
@@ -281,8 +283,8 @@ namespace Pql {
       return pkb.getConstTable();
     case EntityType::PROCEDURE:
       return pkb.getProcTable();
-    case EntityType::STMT_NUMBER:
-    case EntityType::VARIABLE_NAME:
+    case EntityType::NUMBER:
+    case EntityType::NAME:
     {
       Table table({ "" });
       table.insertRow({ entity.getValue() });
@@ -299,7 +301,7 @@ namespace Pql {
     if (resultTable.empty()) {
       return;
     }
-    const std::string& headerName = query.getTarget().getValue();
+    const std::string& headerName = query.getTargets()[0].getValue();
     int col = resultTable.getColumnIndex(headerName);
     std::unordered_set<std::string> set; // for checking of repeated elements
     set.reserve(resultTable.size()); // optimization to avoid rehashing

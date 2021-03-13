@@ -3,10 +3,6 @@
 #include "Table.h"
 #include "DesignExtractor.h"
 
-TEST_CASE("[TestDesignExtractor] Sanity check") {
-  REQUIRE(1 == 1);
-}
-
 TEST_CASE("[TestDesignExtractor] ParentT extraction") {
   Pkb pkb;
   DesignExtractor designExtractor;

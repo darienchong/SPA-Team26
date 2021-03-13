@@ -14,7 +14,7 @@ namespace {
    * @returns `true` if the character is a delimiter, `false` otherwise.
    */
   bool isDelimiter(char c) {
-    std::unordered_set<char> delims{ '{' , '}', '(', ')', ';', '_', '"', ',' };
+    std::unordered_set<char> delims{ '{' , '}', '(', ')', ';', '_', '"', ',', '.', '#' };
     return delims.count(c) > 0;
   }
 

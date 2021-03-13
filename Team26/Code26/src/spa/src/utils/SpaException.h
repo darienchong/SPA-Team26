@@ -97,7 +97,7 @@ namespace Pql {
     const static std::string SYNTAX_ERROR_WRONG_TOKEN_VALUE = "Expected token of a different value.";
     const static std::string SYNTAX_ERROR_INVALID_DESIGN_ENTITY = "Encountered an invalid design entity for declaration.";
     const static std::string SYNTAX_ERROR_INVALID_RELATION = "Encountered an invalid relation for such that clause.";
-
+    const static std::string SYNTAX_ERROR_INVALID_ATTRIBUTE_NAME = "Expected an attribute name but encountered an invalid token.";
 
     // Semantic Errors
     const static std::string SEMANTIC_ERROR_DUPLICATE_SYNONYM_DECLARATION = "Encountered an already declared synonym.";
@@ -106,6 +106,8 @@ namespace Pql {
     const static std::string SEMANTIC_ERROR_NON_STMT_REF = "Expected a stmtRef but encounted other design entity.";
     const static std::string SEMANTIC_ERROR_NON_ENT_REF = "Expected a entRef but encounted other design entity.";
     const static std::string SEMANTIC_ERROR_ZERO_STMT_NUMBER = "Encountered 0 as a statement number.";
+    const static std::string SEMANTIC_ERROR_INVALID_WILDCARD = "Encountered _ but is ambiguous.";
+    const static std::string SEMANTIC_ERROR_INVALID_ATTRIBUTE_NAME = "Encountered an invalid attribute name for a specific synonym.";
 
     // =================
     // Appended Message
