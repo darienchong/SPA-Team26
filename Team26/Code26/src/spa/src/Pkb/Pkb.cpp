@@ -54,11 +54,11 @@ void Pkb::addNextT(int prev, int next) {
   std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
   nextTTable.insertRow(vect);
 }
-void Pkb::addAffect(int affecter, int affected) {
+void Pkb::addAffects(int affecter, int affected) {
   std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
   affectsTable.insertRow(vect);
 }
-void Pkb::addAffectT(int affecter, int affected) {
+void Pkb::addAffectsT(int affecter, int affected) {
   std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
   affectsTTable.insertRow(vect);
 }
@@ -66,16 +66,19 @@ void Pkb::addAffectT(int affecter, int affected) {
 void Pkb::addCallProc(int stmtNo, std::string proc) {
   std::vector<std::string> vect{ std::to_string((stmtNo)), proc };
   callProcTable.insertRow(vect);
+  callProcMapper[stmtNo] = proc;
 }
 
 void Pkb::addReadVar(int stmtNo, std::string var) {
   std::vector<std::string> vect{ std::to_string((stmtNo)), var };
   readVarTable.insertRow(vect);
+  readVarMapper[stmtNo] = var;
 }
 
 void Pkb::addPrintVar(int stmtNo, std::string var) {
   std::vector<std::string> vect{ std::to_string((stmtNo)), var };
   printVarTable.insertRow(vect);
+  printVarMapper[stmtNo] = var;
 }
 
 void Pkb::addVar(std::string var) {
@@ -290,4 +293,31 @@ Table Pkb::getModifiedBy(int stmtNo) const {
   filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
   filterTable.dropColumn(0);
   return filterTable;
+}
+
+std::string Pkb::getProcNameFromCallStmt(int stmtNo) {
+  bool isValidCallStmt = callTable.contains({std::to_string(stmtNo)});
+  if(isValidCallStmt) {
+    return callProcMapper.at(stmtNo);
+  } else {
+    return "";
+  }
+}
+
+std::string Pkb::getVarNameFromReadStmt(int stmtNo) {
+  bool isValidReadStmt = readTable.contains({std::to_string(stmtNo)});
+  if(isValidReadStmt) {
+    return readVarMapper.at(stmtNo);
+  } else {
+    return "";
+  }
+}
+
+std::string Pkb::getVarNameFromPrintStmt(int stmtNo) {
+  bool isValidPrintStmt = printTable.contains({std::to_string(stmtNo)});
+  if(isValidPrintStmt) {
+    return printVarMapper.at(stmtNo);
+  } else {
+    return "";
+  }
 }

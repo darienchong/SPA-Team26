@@ -3,6 +3,7 @@
 #include "Table.h"
 
 #include <map>
+#include <unordered_map>
 
 class Pkb {
 
@@ -184,7 +185,7 @@ public:
    * @param prev Statement number of the statement which modifies a variable used in affected
    * @param next Statement number of the statement uses a variable modified by prev
    */
-  void addAffect(int affecter, int affected);
+  void addAffects(int affecter, int affected);
 
   /**
    * Adds the Row {affecter, affected} into affectsTTable.
@@ -192,7 +193,7 @@ public:
    * @param prev Statement number of the statement which modifies a variable used in affected
    * @param next Statement number of the statement uses a variable modified by prev
    */
-  void addAffectT(int affecter, int affected);
+  void addAffectsT(int affecter, int affected);
 
 
   /**
@@ -507,6 +508,32 @@ public:
    */
   Table getModifiedBy(int stmtNo) const;
 
+  /**
+   * If the stmtNo is of a call statement, will return the name of the procedure
+   * being called by stmtNo. Otherwise, returns empty String.
+   *
+   * @param stmtNo Statement number of a call statement
+   * @return Name of procedure being called by stmtNo
+   */
+  std::string getProcNameFromCallStmt(int stmtNo);
+
+  /**
+   * If the stmtNo is of a read statement, will return the name of the variable
+   * being read by stmtNo. Otherwise, returns empty String.
+   *
+   * @param stmtNo Statement number of a read statement
+   * @return Name of var being read by stmtNo
+   */
+  std::string getVarNameFromReadStmt(int stmtNo);
+
+  /**
+   * If the stmtNo is of a print statement, will return the name of the variable
+   * being printed by stmtNo. Otherwise, returns empty String.
+   *
+   * @param stmtNo Statement number of a print statement
+   * @return Name of var being printed by stmtNo
+   */
+  std::string getVarNameFromPrintStmt(int stmtNo);
 
 private:
   Table varTable{ 1 };
@@ -543,4 +570,8 @@ private:
   Table patternAssignTable{ 3 };
   Table patternIfTable{ 2 };
   Table patternWhileTable{ 2 };
+
+  std::unordered_map<int, std::string> callProcMapper;
+  std::unordered_map<int, std::string> readVarMapper;
+  std::unordered_map<int, std::string> printVarMapper;
 };

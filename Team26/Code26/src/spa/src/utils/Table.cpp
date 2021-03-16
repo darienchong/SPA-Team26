@@ -200,33 +200,56 @@ void Table::crossJoin(const Table& otherTable) {
 void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, int>>& indexPairs) {
   RowSet newData;
   const Row& otherHeader = otherTable.getHeader();
-  std::unordered_set<int> droppedIndexes;
+  std::vector<int> droppedSecondIndexes;
+  std::vector<int> droppedFirstIndexes;
 
   for (std::pair<int, int> pair : indexPairs) {
-    droppedIndexes.emplace(pair.second);
+    droppedFirstIndexes.emplace_back(pair.first);
+    droppedSecondIndexes.emplace_back(pair.second);
   }
 
   for (size_t i = 0; i < otherHeader.size(); i++) {
-    if (!droppedIndexes.count(i)) {
+    bool isInToDrop = std::find(droppedSecondIndexes.begin(), droppedSecondIndexes.end(), i) != droppedSecondIndexes.end();
+    if (!isInToDrop) {
       header.emplace_back(otherHeader[i]);
     }
   }
 
+  // Build phase: construct hash table mapping from common attributes to rows
+  std::unordered_map<int, std::vector<Row>> hashmap;
   for (const Row& row : data) {
-    for (const Row& otherRow : otherTable.getData()) {
-      bool keepRow = true;
-      for (const std::pair<int, int>& pair : indexPairs) {
-        bool isMatchingPair = row[pair.first] == otherRow[pair.second];
-        if (!isMatchingPair) {
-          keepRow = false;
-          break;
-        }
-      }
-      if (keepRow) {
+    std::string concatStr;
+    for (int i : droppedFirstIndexes) {
+      concatStr.append(row[i] + " ");
+    }
+    int key = std::hash<std::string>{}(concatStr);
+
+    bool isInMap = hashmap.find(key) != hashmap.end();
+    if (!isInMap) {
+      std::vector<Row> vect{ row };
+      hashmap[key] = vect;
+    }
+    else {
+      hashmap.at(key).emplace_back(row);
+    }
+  }
+
+  // Probe phase: find relevant rows in hash table
+  for (const Row& otherRow : otherTable.getData()) {
+    std::string concatStr;
+    for (int i : droppedSecondIndexes) {
+      concatStr.append(otherRow[i] + " ");
+    }
+    int key = std::hash<std::string>{}(concatStr);
+
+    bool isInMap = hashmap.find(key) != hashmap.end();
+    if (isInMap) {
+      std::vector<Row> rows = hashmap.at(key);
+      for (const Row& row : rows) { // do cross product on relevant rows
         Row newRow = row;
-        for (size_t i = 0; i < otherRow.size(); i++) {
-          bool isToDrop = droppedIndexes.count(i);
-          if (!isToDrop) {
+        for (int i = 0; i < otherHeader.size(); i++) {
+          bool isInToDrop = std::find(droppedSecondIndexes.begin(), droppedSecondIndexes.end(), i) != droppedSecondIndexes.end();
+          if (!isInToDrop) {
             newRow.emplace_back(otherRow[i]);
           }
         }

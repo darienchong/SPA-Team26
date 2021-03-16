@@ -141,6 +141,20 @@ TEST_CASE("[TestPkb] addUsesS") {
     auto dataCopy = pkb.getUsesSTable().getData();
     REQUIRE(dataCopy.count({ "5", "x" }) == 1);
     REQUIRE(dataCopy.count({ "7", "y" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addUsesP") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addUsesP("foo", "x");
+    pkb.addUsesP("bar", "y");
+    auto dataCopy = pkb.getUsesPTable().getData();
+    REQUIRE(dataCopy.count({ "foo", "x" }) == 1);
+    REQUIRE(dataCopy.count({ "bar", "y" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
   }
 }
 
@@ -153,6 +167,104 @@ TEST_CASE("[TestPkb] addModifiesS") {
     auto dataCopy = pkb.getModifiesSTable().getData();
     REQUIRE(dataCopy.count({ "5", "x" }) == 1);
     REQUIRE(dataCopy.count({ "7", "y" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addModifiesP") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addModifiesP("foo", "x");
+    pkb.addModifiesP("bar", "y");
+    auto dataCopy = pkb.getModifiesPTable().getData();
+    REQUIRE(dataCopy.count({ "foo", "x" }) == 1);
+    REQUIRE(dataCopy.count({ "bar", "y" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addCalls") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addCalls("main", "foo");
+    pkb.addCalls("foo", "bar");
+    auto dataCopy = pkb.getCallsTable().getData();
+    REQUIRE(dataCopy.count({ "main", "foo" }) == 1);
+    REQUIRE(dataCopy.count({ "foo", "bar" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addCallsT") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addCallsT("main", "foo");
+    pkb.addCallsT("foo", "bar");
+    pkb.addCallsT("main", "bar");
+    auto dataCopy = pkb.getCallsTTable().getData();
+    REQUIRE(dataCopy.count({ "main", "foo" }) == 1);
+    REQUIRE(dataCopy.count({ "foo", "bar" }) == 1);
+    REQUIRE(dataCopy.count({ "main", "bar" }) == 1);
+    REQUIRE(dataCopy.size() == 3);
+  }
+}
+
+TEST_CASE("[TestPkb] addNext") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addNext(3, 4);
+    pkb.addNext(4, 5);
+    auto dataCopy = pkb.getNextTable().getData();
+    REQUIRE(dataCopy.count({ "3", "4" }) == 1);
+    REQUIRE(dataCopy.count({ "4", "5" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addNextT") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addNextT(3, 4);
+    pkb.addNextT(4, 5);
+    pkb.addNextT(3, 5);
+    auto dataCopy = pkb.getNextTTable().getData();
+    REQUIRE(dataCopy.count({ "3", "4" }) == 1);
+    REQUIRE(dataCopy.count({ "4", "5" }) == 1);
+    REQUIRE(dataCopy.count({ "3", "5" }) == 1);
+    REQUIRE(dataCopy.size() == 3);
+  }
+}
+
+TEST_CASE("[TestPkb] addAffects") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addAffects(3, 4);
+    pkb.addAffects(4, 7);
+    auto dataCopy = pkb.getAffectsTable().getData();
+    REQUIRE(dataCopy.count({ "3", "4" }) == 1);
+    REQUIRE(dataCopy.count({ "4", "7" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addAffectsT") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addAffectsT(3, 4);
+    pkb.addAffectsT(4, 7);
+    pkb.addAffectsT(3, 7);
+    auto dataCopy = pkb.getAffectsTTable().getData();
+    REQUIRE(dataCopy.count({ "3", "4" }) == 1);
+    REQUIRE(dataCopy.count({ "4", "7" }) == 1);
+    REQUIRE(dataCopy.count({ "3", "7" }) == 1);
+    REQUIRE(dataCopy.size() == 3);
   }
 }
 
@@ -167,6 +279,73 @@ TEST_CASE("[TestPkb] addPatternAssign") {
     REQUIRE(dataCopy.count({ "7", "_", "b c * a +" }) == 1);
   }
 }
+
+TEST_CASE("[TestPkb] addPatternIf") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addPatternIf(1, "count");
+    pkb.addPatternIf(70, "a");
+    auto dataCopy = pkb.getPatternIfTable().getData();
+    REQUIRE(dataCopy.count({ "1", "count" }) == 1);
+    REQUIRE(dataCopy.count({ "70", "a" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addPatternWhile") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addPatternWhile(4, "count");
+    pkb.addPatternWhile(100, "i");
+    auto dataCopy = pkb.getPatternWhileTable().getData();
+    REQUIRE(dataCopy.count({ "4", "count" }) == 1);
+    REQUIRE(dataCopy.count({ "100", "i" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addCallProc") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addCallProc(4, "proc1");
+    pkb.addCallProc(20, "proc2");
+    auto dataCopy = pkb.getCallProcTable().getData();
+    REQUIRE(dataCopy.count({ "4", "proc1" }) == 1);
+    REQUIRE(dataCopy.count({ "20", "proc2" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addReadVar") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addReadVar(1, "x");
+    pkb.addReadVar(3, "y");
+    auto dataCopy = pkb.getReadVarTable().getData();
+    REQUIRE(dataCopy.count({ "1", "x" }) == 1);
+    REQUIRE(dataCopy.count({ "3", "y" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] addPrintVar") {
+  Pkb pkb;
+
+  SECTION("Check valid insertion") {
+    pkb.addPrintVar(1, "x");
+    pkb.addPrintVar(3, "y");
+    auto dataCopy = pkb.getPrintVarTable().getData();
+    REQUIRE(dataCopy.count({ "1", "x" }) == 1);
+    REQUIRE(dataCopy.count({ "3", "y" }) == 1);
+    REQUIRE(dataCopy.size() == 2);
+  }
+}
+
+
 
 TEST_CASE("[TestPkb] getFollows") {
   Pkb pkb;
