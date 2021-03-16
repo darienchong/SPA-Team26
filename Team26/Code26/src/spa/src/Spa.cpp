@@ -35,7 +35,7 @@ void Spa::parseSourceFile(const std::string& filename) {
 
     SourceProcessor::SimpleParser parser(pkb, tokens);
     parser.parse();
-    DesignExtractor().extractDesignAbstractions(pkb);
+    DesignExtractor(pkb).extractDesignAbstractions();
 
   } catch (const std::exception& e) {
     pkb = Pkb();

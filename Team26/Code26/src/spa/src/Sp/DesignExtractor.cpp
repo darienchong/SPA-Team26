@@ -1,5 +1,7 @@
 #include "DesignExtractor.h"
 
+#include <assert.h>
+
 #include <string>
 #include <vector>
 #include <stdexcept>
@@ -8,6 +10,7 @@
 
 #include "Table.h"
 #include "Pkb.h"
+#include "AdjList.h"
 
 namespace {
   static const std::string GENERATE_TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG =
@@ -16,167 +19,61 @@ namespace {
   static const std::string FILL_INDIRECT_RELATION_HEADER_SIZE_NEQ_2_ERROR_MSG =
     "[DesignExtractor::fillIndirectRelation]: Both tables must have two columns.";
 
-  /**
-   * Helper method to insert a key-value pair into the adjacency list.
-   * Handles edge cases e.g. first insertion (creating the set).
-   *
-   * @param adjList The adjacency list to modify.
-   * @param key The key in the key-value pair.
-   * @param value The value in the key-value pair.
-   * @returns
-   */
-  void insertIntoAdjList(std::map<std::string, std::unordered_set<std::string>>& adjList,
-    std::string key, std::string value) {
-    bool isFirstTimePlacingIntoAdjList = (adjList.count(key) == 0);
-    if (isFirstTimePlacingIntoAdjList) {
-      std::unordered_set<std::string> temp{ value };
-      adjList.emplace(key, temp);
-    } else {
-      adjList.at(key).insert(value);
-    }
-  }
+  static const std::string CYCLE_EXISTS_ERROR_MSG =
+    "[DesignExtractor::verifyNoCyclicCalls]: Cycle detected.";
 
   /**
-   * This construction is because our adjacency list is
-   * used as a 2d matrix of boolean entries, but is structurally a map, hence
-   * the need for these wrappers.
-   *
-   * @param adjList The adjacency list to use.
-   * @param key The key to use.
-   * @param value The value to use.
-   * @returns `true` if the given key-value pair is in the adjacency list,
-   *     `false` otherwise.
-   */
-  bool getFromAdjList(std::map<std::string, std::unordered_set<std::string>>& adjList,
-    std::string key, std::string value) {
-
-    bool isKeyNotInAdjList = (adjList.count(key) == 0);
-    if (isKeyNotInAdjList) {
-      return false;
-    }
-
-    std::unordered_set<std::string> setOfPossibleValues = adjList.at(key);
-    bool isValueNotInSet = (setOfPossibleValues.count(value) == 0);
-    if (isValueNotInSet) {
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * Overload for ease of use.
-   */
-  bool getFromAdjList(std::map<std::string, std::unordered_set<std::string>>& adjList,
-    int key, int value) {
-    return getFromAdjList(adjList, std::to_string(key), std::to_string(value));
-  }
-
-  /**
-   * Helper method for implementation of Warshall's algorithm.
-   * Performs row-wise a_i := a_i OR a_j.
-   *
-   * @param adjList The adjacency list to use.
-   * @param i The number to use for index i.
-   * @param j The number to use for index j.
-   * @param n The maximum row length (table size).
-   */
-  void warshallRowOperation(std::map<std::string, std::unordered_set<std::string>>& adjList,
-    int i, int j, int n) {
-    std::string iAsString = std::to_string(i);
-    std::string jAsString = std::to_string(j);
-
-    // Handle the simple cases first.
-    // If there is no row at j (i.e. every entry in the jth row is 0)
-    // then we do nothing (since x OR 0 = x)
-    // If there is no row at i (i.e. every entry in the ith row is 0)
-    // then we copy over the jth row to the ith row.
-    bool isIthRowEmpty = (adjList.count(iAsString) == 0);
-    bool isJthRowEmpty = (adjList.count(jAsString) == 0);
-
-    if (isJthRowEmpty) {
-      return;
-    }
-
-    if (isIthRowEmpty) {
-      std::unordered_set<std::string> copyOfJthRow = adjList.at(jAsString);
-      adjList.emplace(iAsString, copyOfJthRow);
-      return;
-    }
-
-    // Otherwise, both the ith and jth rows are non-empty.
-    // We perform 'bitwise' operations (one entry at a time).
-    std::unordered_set<std::string> newIthRow;
-    for (int k = 1; k <= n; k++) {
-      bool ithRowKthEntry = getFromAdjList(adjList, i, k);
-      bool jthRowKthEntry = getFromAdjList(adjList, j, k);
-      bool bitwiseOr = ithRowKthEntry || jthRowKthEntry;
-      if (bitwiseOr) {
-        newIthRow.insert(std::to_string(k));
-      }
-    }
-    adjList.erase(iAsString);
-    adjList.emplace(iAsString, newIthRow);
-  }
-
-  /**
-   * Uses Warshall's Algorithm to populate the adjacency list given.
-   * See https://www.dartmouth.edu/~matc/DiscreteMath/V.6.pdf for more
-   * details.
-   *
-   * @param adjList The adjacency list to use/modify.
-   * @param n The total number of statements (vertices in graph).
-   */
-  void applyWarshallAlgorithm(std::map<std::string, std::unordered_set<std::string>>& adjList, int n) {
-    for (int j = 1; j <= n; j++) {
-      for (int i = 1; i <= n; i++) {
-        if (getFromAdjList(adjList, i, j)) {
-          warshallRowOperation(adjList, i, j, n);
-        }
-      }
-    }
-  }
-
-  /**
-   * Given a table, generates the transitive closure
-   * of the table. We assume that the table tabulates
+   * Given a table, generates the transitive closure 
+   * of the table. We assume that the table tabulates 
    * a binary relation (call it R) where
    *
    *     <x, y> in table <=> R(x, y) holds.
    *
-   * This method generates a table that forms the
-   * transitive closure of the table i.e.
+   * This method generates a table that forms the 
+   * transitive closure of the table i.e. 
    *
    *     for all x, y, z, if R(x, y) and R(y, z)
    *     then R(x, z)
    *
    * @param table The table to use when generating
-   *     the transitive closure.
-   * @param The total number of statements.
-   * @returns A Table with entries as detailed above.
+   *     the transitive closure. 
+   * @param listOfEntities The list of all entities in the table. 
+   * @returns A Table with entries as detailed above. 
    */
-  Table generateTransitiveClosure(Table table, int numOfStmt) {
+  Table generateTransitiveClosure(const Table& table, const std::list<std::string>& listOfEntities) {
+    int numEntities = listOfEntities.size();
     Table newTable = table;
     if (table.getHeader().size() != 2) {
       throw std::invalid_argument(GENERATE_TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG);
     }
 
-    // We insert the initial relations into the adjacency list
-    // for use in the Warshall algorithm later.
-    std::map<std::string, std::unordered_set<std::string>> adjList;
-    for (std::vector<std::string> row : table.getData()) {
-      insertIntoAdjList(adjList, row[0], row[1]);
+    // Tables may sometimes have non-numerical entries.
+    // We use this to perform conversion to and from.
+    std::map<std::string, int> nameToNum;
+    std::map<int, std::string> numToName;
+    int counter = 1;
+    for (const std::string name : listOfEntities) {
+      nameToNum.emplace(name, counter);
+      numToName.emplace(counter, name);
+      counter++;
     }
 
-    applyWarshallAlgorithm(adjList, numOfStmt);
+    // We insert the initial relations into the adjacency list
+    // for use in the Warshall algorithm later.
+    AdjList adjList(numEntities);
+    for (const Row row : table.getData()) {
+      adjList.insert(nameToNum.at(row[0]), nameToNum.at(row[1]));
+    }
+
+    adjList.applyWarshallAlgorithm();
 
     // For each true entry in the transitive
     // closure matrix, add a new row to the 
     // table to return.
-    for (int i = 1; i <= numOfStmt; i++) {
-      for (int j = 1; j <= numOfStmt; j++) {
-        if (getFromAdjList(adjList, i, j)) {
-          std::vector<std::string> newRow = { std::to_string(i), std::to_string(j) };
+    for (int i = 1; i <= numEntities; i++) {
+      for (int j = 1; j <= numEntities; j++) {
+        if (adjList.get(i, j)) {
+          Row newRow = { numToName.at(i), numToName.at(j) };
           newTable.insertRow(newRow);
         }
       }
@@ -186,8 +83,8 @@ namespace {
   }
 
   /**
-   * Populates a given table with indirect relations.
-   * We have a table with a number of direct relations.
+   * Populates a given table with indirect relations. 
+   * We have a table with a number of direct relations. 
    * We wish to implement a new indirect relation, defined so: where
    *
    *   R(x, y) indicates an existing relation in the first table,
@@ -205,7 +102,7 @@ namespace {
    * @param parentTTable The second table to refer to.
    * @returns The table with new indirect relation entries.
    */
-  Table fillIndirectRelation(Table table, Table parentTTable) {
+  Table fillIndirectRelation(Table table, const Table& parentTTable) {
     bool isTableColumnCountNotTwo = (table.getHeader().size() != 2) ||
       (parentTTable.getHeader().size() != 2);
 
@@ -235,9 +132,14 @@ namespace {
    * @returns
    */
   void fillParentTTable(Pkb& pkb) {
+    std::list<std::string> procList;
+    for (const Row row : pkb.getStmtTable().getData()) {
+      procList.push_back(row[0]);
+    }
+
     Table parentTTable = generateTransitiveClosure(pkb.getParentTable(),
-      pkb.getStmtTable().size());
-    for (std::vector<std::string> row : parentTTable.getData()) {
+      procList);
+    for (const Row row : parentTTable.getData()) {
       int parent = std::stoi(row[0]);
       int child = std::stoi(row[1]);
       pkb.addParentT(parent, child);
@@ -258,9 +160,14 @@ namespace {
    * @returns
    */
   void fillFollowsTTable(Pkb& pkb) {
+    std::list<std::string> stmtList;
+    for (const Row row : pkb.getStmtTable().getData()) {
+      stmtList.push_back(row[0]);
+    }
+
     Table followsTTable = generateTransitiveClosure(pkb.getFollowsTable(),
-      pkb.getStmtTable().size());
-    for (std::vector<std::string> row : followsTTable.getData()) {
+      stmtList);
+    for (const Row row : followsTTable.getData()) {
       int followed = std::stoi(row[0]);
       int follower = std::stoi(row[1]);
       pkb.addFollowsT(followed, follower);
@@ -268,17 +175,44 @@ namespace {
   }
 
   /**
-   * Populates the PKB's Uses table with all indirect relations (i.e. Uses() relations
-   * other than Uses(s, v) and Uses(if, v) where the variable appears in the conditional.
-   *
-   * Requires that the ParentTTable be populated first.
+   * Given the Calls() relations between procedures, writes in all the 
+   * transitive Calls*() relations.
+   * 
+   * Pre-conditions:
+   *   1) Requires that all the Calls() relations be populated 
+   *      in the PKB first.
+   *   2) Requires that pkb.getProcTable() returns a table
+   *      containing all the procedures in the program.
+   * 
+   * @param pkb The PKB to refer to.
+   * @returns
+   */
+  void fillCallsTTable(Pkb& pkb) {
+    std::list<std::string> procList;
+    for (const Row row : pkb.getProcTable().getData()) {
+      procList.push_back(row[0]);
+    }
+
+    Table callsTTable = generateTransitiveClosure(pkb.getCallsTable(),
+      procList);
+    for (const Row row : callsTTable.getData()) {
+      pkb.addCallsT(row[0], row[1]);
+    }
+  }
+
+  /**
+   * Populates the PKB's UsesS table with all Uses(s, v) relations between
+   * container statements s and variables v.
+   * 
+   * Requires that the Uses() relations between assignments/print statements and 
+   * variables, as well as the ParentTTable be populated first.
    *
    * @param pkb The PKB to use/modify.
    * @returns
    */
-  void fillUsesTable(Pkb& pkb) {
+  void fillUsesSTable(Pkb& pkb) {
     Table newUsesSTable = fillIndirectRelation(pkb.getUsesSTable(), pkb.getParentTTable());
-    for (std::vector<std::string> row : newUsesSTable.getData()) {
+    for (const Row row : newUsesSTable.getData()) {
       int stmtNum = std::stoi(row[0]);
       std::string var = row[1];
       pkb.addUsesS(stmtNum, var);
@@ -286,33 +220,273 @@ namespace {
   }
 
   /**
-   * Populates the PKB's Modifies table with all indirect relations (i.e. Modifies() relations
-   * other than Modifies(s, v).
+   * Populates the PKB's ModifiesS table with all Modifies(s, v) relations between
+   * container statements s and variables v.
    *
-   * Requires that the ParentTTable be populated first.
+   * Requires that the Modifies() relations between assignments/read statements and
+   * variables, as well as the ParentTTable be populated first.
    *
    * @param pkb The PKB to use/modify.
    * @returns
    */
-  void fillModifiesTable(Pkb& pkb) {
+  void fillModifiesSTable(Pkb& pkb) {
     Table newModifiesSTable = fillIndirectRelation(pkb.getModifiesSTable(), pkb.getParentTTable());
-    for (std::vector<std::string> row : newModifiesSTable.getData()) {
+    for (const Row row : newModifiesSTable.getData()) {
       int stmtNum = std::stoi(row[0]);
       std::string var = row[1];
       pkb.addModifiesS(stmtNum, var);
     }
   }
+
+  /**
+   * Helper method to get all the procedures directly called by procName. 
+   * Requires that the callsTable be populated.
+   * 
+   * @param pkb The PKB to refer to.
+   * @param procName The procedure to check against.
+   */
+  std::unordered_set<std::string> getProceduresCalledBy(Pkb &pkb, std::string procName) {
+    Table callsTable = pkb.getCallsTable();
+    std::unordered_set<std::string> toReturn;
+
+    for (const Row row : callsTable.getData()) {
+      bool isProcNameCaller = (row[0] == procName);
+      if (isProcNameCaller) {
+        toReturn.insert(row[1]);
+      }
+    }
+
+    return toReturn;
+  }
+
+  /**
+   * Populates the UsesP table with all indirect Uses(p, v) relations between
+   * procedures p and variables v. Direct relations are when Uses(p, v) holds because
+   * there exists some statement s in p such that Uses(s, v) holds.
+   * 
+   * Requires that the following be computed first:
+   * 1) All other types of Uses() relations
+   * 2) callsTable
+   * 
+   * @param pkb The PKB to use/modify.
+   * @returns
+   */
+  void fillUsesPTable(Pkb& pkb) {
+    // Key idea:
+    // 1) Construct a graph where an E(p1, p2) holds if p2 calls p1
+    //    i.e. an inversion of the usual procedure call graph.
+    // 2) Get a topological ordering of this graph.
+    // 3) Compute the Uses(p, v) relations in this order.
+    //    The idea is that if p2 calls p1, then p2 depends
+    //    on p1 (we need to compute the Uses(p, v) for p1
+    //    before we compute Uses(p, v) for p2). Since we inverted
+    //    the edge directions, the topological order guarantees that
+    //    E(p1, p2) => p1 comes before p2 in the topological ordering.
+    // Same logic should work for ModifiesP as well.
+
+    Table callsTable = pkb.getCallsTable();
+    AdjList invertedProcGraph(pkb.getProcTable().size());
+
+    // We need to build a bijective mapping between
+    // node numbers and procedure names since our 
+    // adjacency list only allows numeric identifiers
+    // for the graph vertices.
+ 
+    // Maps procedure names to a vertex number.
+    std::map<std::string, int> procNameToNum;
+    // Maps vertex numbers back to a procedure name.
+    std::map<int, std::string> numToProcName;
+
+    int counter = 1;
+    for (const Row row : pkb.getProcTable().getData()) {
+      std::string procName = row[0];
+      procNameToNum.emplace(procName, counter);
+      numToProcName.emplace(counter, procName);
+      counter++;
+    }
+
+    assert(counter == (pkb.getProcTable().size() + 1));
+
+    // Populate the graph
+    for (const Row row : callsTable.getData()) {
+      std::string caller = row[0];
+      std::string callee = row[1];
+      invertedProcGraph.insert(procNameToNum.at(callee), procNameToNum.at(caller));
+    }
+
+    std::list<int> topoOrder = invertedProcGraph.topologicalOrder();
+
+    // Now we compute the Uses(p, v) relations in topological order.
+    for (int nodeNum : topoOrder) {
+      std::string procName = numToProcName.at(nodeNum);
+
+      // No need to compute "direct" Uses(p, v) 
+      // i.e. relations where some stmt s in p satisfies Uses(s, v)
+      // since that is done by the parser. We just add the relations from
+      // procedures that are called by our current procedure.
+
+      std::unordered_set<std::string> proceduresCalledByProcName = getProceduresCalledBy(pkb, procName);
+      for (const Row row : pkb.getUsesPTable().getData()) {
+        bool isFirstArgCalledByProcName = (proceduresCalledByProcName.count(row[0]) > 0);
+        std::string var = row[1];
+        if (isFirstArgCalledByProcName) {
+          pkb.addUsesP(procName, var);
+        }
+      }
+    }
+  }
+
+  /**
+   * Populates the ModifiesP table with all indirect Modifies(p, v) relations between
+   * procedures p and variables v. Direct relations are when Modifies(p, v) holds because
+   * there exists some statement s in p such that Modifies(s, v) holds.
+   *
+   * Requires that all other types of Modifies() relations, as well as
+   * the ParentTTable be populated first.
+   *
+   * @param pkb The PKB to use/modify.
+   * @returns
+   */
+  void fillModifiesPTable(Pkb& pkb) {
+    Table callsTable = pkb.getCallsTable();
+    AdjList invertedProcGraph(pkb.getProcTable().size());
+
+    // We need to build a bijective mapping between
+    // node numbers and procedure names since our 
+    // adjacency list only allows numeric identifiers
+    // for the graph vertices.
+
+    // Maps procedure names to a vertex number.
+    std::map<std::string, int> procNameToNum;
+    // Maps vertex numbers back to a procedure name.
+    std::map<int, std::string> numToProcName;
+
+    int counter = 1;
+    for (const Row row : pkb.getProcTable().getData()) {
+      std::string procName = row[0];
+      procNameToNum.emplace(procName, counter);
+      numToProcName.emplace(counter, procName);
+      counter++;
+    }
+
+    // After mapping all the procedures, the counter
+    // should be equal to the number of procedures,
+    // plus 1.
+    assert(counter == (pkb.getProcTable().size() + 1));
+
+    // Populate the graph
+    for (const Row row : callsTable.getData()) {
+      std::string caller = row[0];
+      std::string callee = row[1];
+      invertedProcGraph.insert(procNameToNum.at(callee), procNameToNum.at(caller));
+    }
+
+    std::list<int> topoOrder = invertedProcGraph.topologicalOrder();
+
+    // Now we compute the Uses(p, v) relations in topological order.
+    for (int nodeNum : topoOrder) {
+      std::string procName = numToProcName.at(nodeNum);
+
+      // No need to compute "direct" Uses(p, v) 
+      // i.e. relations where some stmt s in p satisfies Uses(s, v)
+      // since that is done by the parser. We just add the relations from
+      // procedures that are called by our current procedure.
+
+      std::unordered_set<std::string> proceduresCalledByProcName = getProceduresCalledBy(pkb, procName);
+      for (const Row row : pkb.getModifiesPTable().getData()) {
+        bool isFirstArgCalledByProcName = (proceduresCalledByProcName.count(row[0]) > 0);
+        std::string var = row[1];
+        if (isFirstArgCalledByProcName) {
+          pkb.addModifiesP(procName, var);
+        }
+      }
+    }
+  }
+
+  /**
+   * Verifies that no cyclic calls are made.
+   * e.g. where A -> B indicates that A calls B, we verify
+   * that no situation of the form A -> B -> C -> ... -> A exists.
+   * If any cyclic calls are found, a std::logic_error exception is thrown.
+   * 
+   * Requires that the callsTable be populated first.
+   * 
+   * @param pkb The PKB to reference.
+   * @returns none
+   */
+  void verifyNoCyclicCalls(Pkb& pkb) {
+    // Key idea:
+    // 1) Get the topological order of the procedure calls
+    // 2) Check if the number of vertices (procedures) in the order
+    //    equals the total number of procedures. If not, a cycle exists.
+    AdjList procGraph(pkb.getProcTable().size());
+
+    std::map<std::string, int> procNameToNum;
+    std::map<int, std::string> numToProcName;
+
+    int counter = 1;
+    for (const Row row : pkb.getProcTable().getData()) {
+      std::string procName = row[0];
+      procNameToNum.emplace(procName, counter);
+      numToProcName.emplace(counter, procName);
+      counter++;
+    }
+
+    for (const Row row : pkb.getCallsTable().getData()) {
+      std::string caller = row[0];
+      std::string callee = row[1];
+      procGraph.insert(procNameToNum.at(caller), procNameToNum.at(callee));
+    }
+
+    std::list<int> topoOrder = procGraph.topologicalOrder();
+    bool isCycleExists = (topoOrder.size() != pkb.getProcTable().size());
+
+    if (isCycleExists) {
+      throw std::logic_error(CYCLE_EXISTS_ERROR_MSG + 
+        " (expected topological order of length " + 
+        std::to_string(pkb.getProcTable().size()) + 
+        ", but got " + std::to_string(topoOrder.size()) + 
+        ".)");
+    }
+  }
+
+  /**
+   * Verifies that no calls to non-existent procedures exist.
+   * If any are found, a std::logic_error exception is thrown.
+   * 
+   * @returns none
+   */
+  void verifyNoCallsToNonExistentProcedures(Pkb& pkb) {
+    // Table mapping call stmt# to procedure called.
+    Table callProcTable = pkb.getCallProcTable();
+
+    // Table detailing all procedures.
+    Table procTable = pkb.getProcTable();
+
+    for (const Row row : callProcTable.getData()) {
+      bool isCallToExistentProcedure = procTable.getData().count({ row[1] }) > 0;
+      if (!isCallToExistentProcedure) {
+        throw std::logic_error("[DesignExtractor::verifyNoCallsToNonExistent"
+          "Procedures] Call to non-existent procedure (" + row[1] + ") found"
+          "at line " + row[0] + ".");
+      }
+    }
+  }
 }
 
-DesignExtractor::DesignExtractor() {
-}
-
-DesignExtractor::~DesignExtractor() {
-}
-
-void DesignExtractor::extractDesignAbstractions(Pkb& pkb) {
+// TODO: Should the verification calls be extracted and called somewhere else?
+void DesignExtractor::extractDesignAbstractions() {
   fillParentTTable(pkb);
   fillFollowsTTable(pkb);
-  fillUsesTable(pkb);
-  fillModifiesTable(pkb);
+  fillUsesSTable(pkb);
+  fillModifiesSTable(pkb);
+
+  verifyNoCyclicCalls(pkb);
+  verifyNoCallsToNonExistentProcedures(pkb);
+
+  // Calls that require as a pre-condition
+  // that no cyclic calls exist.
+  fillCallsTTable(pkb);
+  fillUsesPTable(pkb);
+  fillModifiesPTable(pkb);
 }
