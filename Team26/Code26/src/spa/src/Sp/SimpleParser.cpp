@@ -208,20 +208,43 @@ namespace SourceProcessor {
     incStmtNum();
 
     // adding information to pkb
+    for (int i : prevStmts) {
+      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+    }
     pkb.addIf(stmtNum); // add if stmts
     for (const std::string& variable : variablesUsed) {
       pkb.addPatternIf(stmtNum, variable); // add if stmt control variable
     }
 
-    // grammar: 'then' '{' stmtLst '}' 'else' '{' stmtLst '}'
+    // update prevStmts
+    prevStmts.clear();
+    prevStmts.emplace_back(stmtNum);
+
+    // grammar: 'then' '{' stmtLst '}'
     validate(THEN);
     validate(LEFT_BRACE);
     parseStmtLst(stmtNum, getStmtNum());
     validate(RIGHT_BRACE);
+
+    std::vector<int> lastStmtsIfBranch;
+    for (int i : prevStmts) {
+      lastStmtsIfBranch.emplace_back(i);
+    }
+
+    // update prevStmts
+    prevStmts.clear();
+    prevStmts.emplace_back(stmtNum);
+
+    // grammar: 'else' '{' stmtLst '}'
     validate(ELSE);
     validate(LEFT_BRACE);
     parseStmtLst(stmtNum, getStmtNum());
     validate(RIGHT_BRACE);
+
+    // update prevStmts
+    for (int i : lastStmtsIfBranch) {
+      prevStmts.emplace_back(i);
+    }
 
     return stmtNum;
   }
@@ -237,15 +260,31 @@ namespace SourceProcessor {
     incStmtNum();
 
     // adding information to pkb
+    for (int i : prevStmts) {
+      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+    }
     pkb.addWhile(stmtNum); // add while stmts
     for (const std::string& variable : variablesUsed) {
       pkb.addPatternWhile(stmtNum, variable); // add while stmt control variable
     }
 
+    // update prevStmts
+    prevStmts.clear();
+    prevStmts.emplace_back(stmtNum);
+
     // grammar: '{' stmtLst '}'
     validate(LEFT_BRACE);
     parseStmtLst(stmtNum, getStmtNum());
     validate(RIGHT_BRACE);
+
+    // adding information to pkb
+    for (int i : prevStmts) {
+      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+    }
+
+    // update prevStmts
+    prevStmts.clear();
+    prevStmts.emplace_back(stmtNum);
 
     return stmtNum;
   }
@@ -259,9 +298,16 @@ namespace SourceProcessor {
     incStmtNum();
 
     // adding information to pkb
+    for (int i : prevStmts) {
+      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+    }
     pkb.addCall(stmtNum); // add call stmts
     pkb.addCalls(getCurrentProc(), procName); // add proc-proc calls relation
     pkb.addCallProc(stmtNum, procName); // add stmt-proc
+
+    // update prevStmts
+    prevStmts.clear();
+    prevStmts.emplace_back(stmtNum);
 
     return stmtNum;
   }
@@ -276,11 +322,18 @@ namespace SourceProcessor {
     incStmtNum();
 
     // adding information to pkb
+    for (int i : prevStmts) {
+      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+    }
     pkb.addVar(varName); // add variable
     pkb.addRead(stmtNum); // add read stmts
     pkb.addReadVar(stmtNum, varName); // add stmt-var
     pkb.addModifiesS(stmtNum, varName); // add Modifies relation for stmt-var
     pkb.addModifiesP(getCurrentProc(), varName); // add Modifies relation for proc-var
+
+    // update prevStmts
+    prevStmts.clear();
+    prevStmts.emplace_back(stmtNum);
 
     return stmtNum;
   }
@@ -295,11 +348,18 @@ namespace SourceProcessor {
     incStmtNum();
 
     // adding information to pkb
+    for (int i : prevStmts) {
+      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+    }
     pkb.addVar(varName); // add variable
     pkb.addPrint(stmtNum); // add print stmts
     pkb.addPrintVar(stmtNum, varName); // add stmt-var
     pkb.addUsesS(stmtNum, varName); // add Uses relation for stmt-var
     pkb.addUsesP(getCurrentProc(), varName); // add Uses relation for proc-var
+
+    // update prevStmts
+    prevStmts.clear();
+    prevStmts.emplace_back(stmtNum);
 
     return stmtNum;
   }
@@ -316,11 +376,18 @@ namespace SourceProcessor {
     incStmtNum();
 
     // adding information to pkb
+    for (int i : prevStmts) {
+      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+    }
     pkb.addVar(varName); // add variable
     pkb.addAssign(stmtNum); /// add assign stmts
     pkb.addModifiesS(stmtNum, varName); // add Modifies relation for stmt-var
     pkb.addModifiesP(getCurrentProc(), varName); // add Modifies relation for proc-var
     pkb.addPatternAssign(stmtNum, varName, exprString); // add assign expr pattern
+
+    // update prevStmts
+    prevStmts.clear();
+    prevStmts.emplace_back(stmtNum);
 
     return stmtNum;
   }
@@ -402,6 +469,9 @@ namespace SourceProcessor {
   }
 
   void SimpleParser::parseProcedure() {
+    prevStmts.clear();
+    int start = getStmtNum();
+
     // grammar: 'procedure' proc_name '{' '}'
     validate(PROCEDURE);
     std::string procName = validate(NAME);
@@ -410,6 +480,9 @@ namespace SourceProcessor {
     validate(LEFT_BRACE);
     parseStmtLst(0, getStmtNum());
     validate(RIGHT_BRACE);
+
+    int end = getStmtNum() - 1;
+    pkb.addProcStmtRange(start, end, procName); // add stmt num range to pkb
   }
 
   void SimpleParser::parseProgram() {

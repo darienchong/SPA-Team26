@@ -1,9 +1,11 @@
 #pragma once
 
-#include "Table.h"
-
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
+
+#include "Table.h"
+#include "Cfg.h"
 
 class Pkb {
 
@@ -12,6 +14,23 @@ public:
    * Constructor of Pkb.
    */
   Pkb();
+
+  /**
+   * Adds the start and end statement (both inclusive) number range for each procedure.
+   *
+   * @param start Statement number of the first statement in the procedure.
+   * @param end Statement number of the last statement in the procedure.
+   * @param procName Procedure name for which the statements belongs to. 
+   */
+  void addProcStmtRange(int start, int end, std::string procName);
+
+  /**
+   * Adds the statement numbers to CFG and populates Next relation.
+   *
+   * @param parent Statement number of the statement executed first.
+   * @param child Statement number of the statement which can be executed immediately after parent in some execution sequence.
+   */
+  void addCfgLink(int parent, int child);
 
   /**
    * Adds a variable name into varTable.
@@ -397,116 +416,24 @@ public:
   Table getPatternWhileTable() const;
 
   /**
-   * Finds statement number which directly follow {@param stmtNo} and returns it as
-   * a Table with one column.
+   * Finds and returns the assign statement numbers that are uses the given variable. If no
+   * assign statement uses the variable, returns an empty result. This function must be 
+   * called after the Design Extractor extracts all the design abstractions.
    *
-   * @param stmtNo Statement number for which we will get the follower.
-   * @return Table containing the follower.
+   * @param varName Variable name to check.
+   * @return Set of assign statement numbers that uses the variable.
    */
-  Table getFollower(int stmtNo) const;
+   std::unordered_set<int> getAssignUses(const std::string& varName) const;
 
   /**
-   * Finds the statement number which directly precede {@param stmtNo} and returns it as
-   * a Table with one column.
+   * Finds and returns the variables that are modified by the given statement number. If no 
+   * variable is modified, returns an empty result. This function must be called after the 
+   * Design Extractor extracts all the design abstractions.
    *
-   * @param stmtNo Statement number for which we will get the preceding statement number.
-   * @return Table containing the preceding statement number.
+   * @param stmtNo Statement number to check.
+   * @return Set of variables modified.
    */
-  Table getFollowedBy(int stmtNo) const;
-
-  /**
-   * Finds all statement number that directly or indirectly follow {@param stmtNo} and returns
-   * them as a Table with one column.
-   *
-   * @param stmtNo Statement number for which we will get the followers.
-   * @return Table containing the followers.
-   */
-  Table getFollowerT(int stmtNo) const;
-
-  /**
-   * Finds all statement number which directly precede {@param stmtNo} and returns them as
-   * a Table with one column.
-   *
-   * @param stmtNo Statement number for which we will get the preceding statement numbers.
-   * @return Table containing the preceding statement numbers.
-   */
-  Table getFollowedByT(int stmtNo) const;
-
-  /**
-   * Finds statement number which is the direct parent of  {@param stmtNo} and returns
-   * it as a Table with one column.
-   *
-   * @param stmtNo Statement number for which we will get the parent.
-   * @return Table containing the parent statement number.
-   */
-  Table getParent(int stmtNo) const;
-
-  /**
-   * Finds statement number which is the direct child of  {@param stmtNo} and returns
-   * it as a Table with one column.
-   *
-   * @param stmtNo Statement number for which we will get the child.
-   * @return Table containing the child statement number.
-   */
-  Table getChild(int stmtNo) const;
-
-  /**
-   * Finds all statement number which are the ancestor of  {@param stmtNo} and returns
-   * them as a Table with one column.
-   *
-   * @param stmtNo Statement number for which we will get the ancestors.
-   * @return Table containing the ancestor statement numbers.
-   */
-  Table getParentT(int stmtNo) const;
-
-  /**
-  * Finds all statement number which are the descendant of  {@param stmtNo} and returns
-  * them as a Table with one column.
-  *
-  * @param stmtNo Statement number for which we will get the descendants.
-  * @return Table containing the descendant statement numbers.
-  */
-  Table getChildT(int stmtNo) const;
-
-  /**
-   * Finds statement numbers and procedure names that use varName and returns them as a
-   * Table with one column. The function addIndirectUses() must be called before calling
-   * this function in order for this function to also return the indirect uses relations.
-   *
-   * @param varName Variable name for which we get the users.
-   * @return Table containing the line number or procedure name of users.
-   */
-  Table getUses(std::string varName) const;
-
-  /**
-   * Finds all variables that are used by the stmtNo and returns them as a Table with
-   * one column. The function addIndirectUses() must be called before calling
-   * this function in order for this function to also return the indirect uses relations.
-   *
-   * @param stmtNo Statement number for which we will get the variables used.
-   * @return Table containing the variable names that is used by the statement.
-   */
-  Table getUsedBy(int stmtNo) const;
-
-  /**
-   * Finds statement numbers and procedure names that modify varName and returns them as a
-   * Table with one column. The function addIndirectModify() must be called before calling
-   * this function in order for this function to also return the indirect modify relations.
-   *
-   * @param varName Variable name for which we get the modifiers.
-   * @return Table containing the line number or procedure name of modifiers.
-   */
-  Table getModifies(std::string varName) const;
-
-  /**
-   * Finds all variables that are modified by the stmtNo and returns them as a Table with
-   * one column. The function addIndirectModify() must be called before calling
-   * this function in order for this function to also return the indirect modify relations.
-   *
-   * @param stmtNo Statement number for which we will get the variables modified.
-   * @return Table containing the variable names that is modified by the statement.
-   */
-  Table getModifiedBy(int stmtNo) const;
+  std::unordered_set<std::string> getModifiedBy(const int stmtNo) const;
 
   /**
    * If the stmtNo is of a call statement, will return the name of the procedure
@@ -515,7 +442,7 @@ public:
    * @param stmtNo Statement number of a call statement
    * @return Name of procedure being called by stmtNo
    */
-  std::string getProcNameFromCallStmt(int stmtNo);
+  std::string getProcNameFromCallStmt(const int stmtNo) const;
 
   /**
    * If the stmtNo is of a read statement, will return the name of the variable
@@ -524,7 +451,7 @@ public:
    * @param stmtNo Statement number of a read statement
    * @return Name of var being read by stmtNo
    */
-  std::string getVarNameFromReadStmt(int stmtNo);
+  std::string getVarNameFromReadStmt(const int stmtNo) const;
 
   /**
    * If the stmtNo is of a print statement, will return the name of the variable
@@ -533,9 +460,29 @@ public:
    * @param stmtNo Statement number of a print statement
    * @return Name of var being printed by stmtNo
    */
-  std::string getVarNameFromPrintStmt(int stmtNo);
+  std::string getVarNameFromPrintStmt(const int stmtNo) const;
+
+  /**
+ * Finds the set of nodes directly following the node of interest in the CFG.
+ * If there are no nodes following, will return an empty set.
+ *
+ * @param node Node of interest.
+ * @return Unordered set of nodes.
+ */
+  std::unordered_set<int> getNextStmtFromCfg(const int node) const;
+
+  /**
+   * Returns true if both statements are from the same procedure, false otherwise.
+   *
+   * @param stmt1 First statement number to compare.
+   * @param stmt2 Second statement number to compare.
+   * @return bool true/false depending on whether the statements are from the same procedure.
+   */
+  bool isSameProc(const int stmt1, const int stmt2) const;
 
 private:
+  Cfg cfg;
+  
   Table varTable{ 1 };
   Table stmtTable{ 1 };
   Table procTable{ 1 };
@@ -574,4 +521,5 @@ private:
   std::unordered_map<int, std::string> callProcMapper;
   std::unordered_map<int, std::string> readVarMapper;
   std::unordered_map<int, std::string> printVarMapper;
+  std::unordered_map<int, std::string> stmtProcMapper;
 };

@@ -2,6 +2,7 @@
 
 #include <list>
 #include <string>
+#include <vector>
 
 #include "ExprParser.h"
 #include "Pkb.h"
@@ -15,6 +16,7 @@ namespace SourceProcessor {
     std::list<Token> tokens;
     int stmtNum = 1;
     Pkb& pkb;
+    std::vector<int> prevStmts;
 
     // Functions
 

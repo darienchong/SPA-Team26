@@ -1,5 +1,8 @@
 #include "catch.hpp"
 
+#include <string>
+#include <unordered_set>
+
 #include "Pkb.h"
 
 TEST_CASE("[TestPkb] varTable Insertion") {
@@ -345,143 +348,21 @@ TEST_CASE("[TestPkb] addPrintVar") {
   }
 }
 
-
-
-TEST_CASE("[TestPkb] getFollows") {
+TEST_CASE("[TestPkb] getAssignUses") {
   Pkb pkb;
-  pkb.addFollows(1, 2);
-  pkb.addFollows(3, 4);
-  pkb.addFollows(2, 5);
-  Table table = pkb.getFollower(2);
-  REQUIRE(table.getData().count({ "5" }));
-}
-
-TEST_CASE("[TestPkb] getFollowedBy") {
-  Pkb pkb;
-  pkb.addFollows(1, 2);
-  pkb.addFollows(3, 4);
-  pkb.addFollows(2, 5);
-  Table table = pkb.getFollowedBy(2);
-  REQUIRE(table.getData().count({ "1" }));
-}
-
-TEST_CASE("[TestPkb] getFollowerT") {
-  Pkb pkb;
-  pkb.addFollows(1, 2);
-  pkb.addFollows(2, 5);
-  pkb.addFollows(3, 4);
-
-  pkb.addFollowsT(1, 2);
-  pkb.addFollowsT(1, 5);
-  pkb.addFollowsT(2, 5);
-  pkb.addFollowsT(3, 4);
-
-  Table table = pkb.getFollowerT(1);
-  REQUIRE(table.getData().count({ "2" }));
-  REQUIRE(table.getData().count({ "5" }));
-}
-
-TEST_CASE("[TestPkb] getFollowedByT") {
-  Pkb pkb;
-  pkb.addFollows(1, 2);
-  pkb.addFollows(2, 5);
-  pkb.addFollows(3, 4);
-
-  pkb.addFollowsT(1, 2);
-  pkb.addFollowsT(1, 5);
-  pkb.addFollowsT(2, 5);
-  pkb.addFollowsT(3, 4);
-
-  Table table = pkb.getFollowedByT(5);
-  REQUIRE(table.getData().count({ "1" }));
-  REQUIRE(table.getData().count({ "2" }));
-}
-
-TEST_CASE("[TestPkb] getParent") {
-  Pkb pkb;
-  pkb.addParent(1, 2);
-  pkb.addParent(3, 4);
-  pkb.addParent(2, 5);
-  Table table = pkb.getParent(5);
-  REQUIRE(table.getData().count({ "2" }));
-}
-
-TEST_CASE("[TestPkb] getChild") {
-  Pkb pkb;
-  pkb.addParent(1, 2);
-  pkb.addParent(3, 4);
-  pkb.addParent(2, 5);
-  Table table = pkb.getChild(1);
-  REQUIRE(table.getData().count({ "2" }));
-}
-
-TEST_CASE("[TestPkb] getParentT") {
-  Pkb pkb;
-  pkb.addParent(1, 2);
-  pkb.addParent(2, 5);
-  pkb.addParent(3, 4);
-
-  pkb.addParentT(1, 2);
-  pkb.addParentT(1, 5);
-  pkb.addParentT(2, 5);
-  pkb.addParentT(3, 4);
-
-  Table table = pkb.getParentT(5);
-  REQUIRE(table.getData().count({ "1" }));
-  REQUIRE(table.getData().count({ "2" }));
-}
-
-TEST_CASE("[TestPkb] getChildT") {
-  Pkb pkb;
-  pkb.addParent(1, 2);
-  pkb.addParent(2, 5);
-  pkb.addParent(3, 4);
-
-  pkb.addParentT(1, 2);
-  pkb.addParentT(1, 5);
-  pkb.addParentT(2, 5);
-  pkb.addParentT(3, 4);
-
-  Table table = pkb.getChildT(1);
-  REQUIRE(table.getData().count({ "2" }));
-  REQUIRE(table.getData().count({ "5" }));
-}
-
-TEST_CASE("[TestPkb] getUses") {
-  Pkb pkb;
+  pkb.addAssign(1);
+  pkb.addAssign(2);
   pkb.addUsesS(1, "x");
   pkb.addUsesS(2, "y");
-  Table table = pkb.getUses("x");
-  REQUIRE(table.getData().count({ "1" }));
+  pkb.addUsesS(3, "x");
+  std::unordered_set<int> stmtNumbers = pkb.getAssignUses("x");
+  REQUIRE(stmtNumbers.count(1) == 1);
+  REQUIRE(stmtNumbers.size() == 1);
   pkb.addUsesS(2, "x");
-  table = pkb.getUses("x");
-  REQUIRE(table.getData().count({ "2" }));
-}
-
-TEST_CASE("[TestPkb] getUsedBy") {
-  Pkb pkb;
-  pkb.addUsesS(1, "x");
-  pkb.addUsesS(2, "y");
-  pkb.addUsesS(2, "x");
-
-  SECTION("used by statement") {
-    Table table = pkb.getUsedBy(1);
-    REQUIRE(table.getData().count({ "x" }));
-    table = pkb.getUsedBy(2);
-    REQUIRE(table.getData().count({ "x" }));
-    REQUIRE(table.getData().count({ "y" }));
-  }
-}
-
-TEST_CASE("[TestPkb] getModifies") {
-  Pkb pkb;
-  pkb.addModifiesS(1, "x");
-  pkb.addModifiesS(2, "y");
-  Table table = pkb.getModifies("x");
-  REQUIRE(table.getData().count({ "1" }));
-  pkb.addModifiesS(2, "x");
-  table = pkb.getModifies("x");
-  REQUIRE(table.getData().count({ "2" }));
+  stmtNumbers = pkb.getAssignUses("x");
+  REQUIRE(stmtNumbers.count(1) == 1);
+  REQUIRE(stmtNumbers.count(2) == 1);
+  REQUIRE(stmtNumbers.size() == 2);
 }
 
 TEST_CASE("[TestPkb] getModifiedBy") {
@@ -491,10 +372,12 @@ TEST_CASE("[TestPkb] getModifiedBy") {
   pkb.addModifiesS(2, "x");
 
   SECTION("modified by statement") {
-    Table table = pkb.getModifiedBy(1);
-    REQUIRE(table.getData().count({ "x" }));
-    table = pkb.getModifiedBy(2);
-    REQUIRE(table.getData().count({ "x" }));
-    REQUIRE(table.getData().count({ "y" }));
+    std::unordered_set<std::string> variables = pkb.getModifiedBy(1);
+    REQUIRE(variables.count("x") == 1);
+    REQUIRE(variables.size() == 1);
+    variables = pkb.getModifiedBy(2);
+    REQUIRE(variables.count("x") == 1);
+    REQUIRE(variables.count("y") == 1);
+    REQUIRE(variables.size() == 2);
   }
 }

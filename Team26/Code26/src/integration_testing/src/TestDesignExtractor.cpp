@@ -181,3 +181,99 @@ TEST_CASE("[TestDesignExtractor] Indirect ModifiesP extractor") {
   REQUIRE(usesPTable.contains({ "p3", "modifiedByP3" }));
   REQUIRE(usesPTable.size() == 5);
 }
+
+TEST_CASE("[TestDesignExtractor] Affects extractor") {
+  Pkb pkb;
+  DesignExtractor designExtractor(pkb);
+
+  // Example Code 5 in Advanced SPA requirements
+  pkb.addProc("second");
+  pkb.addProc("third");
+
+  // adding statements
+  pkb.addAssign(1);
+  pkb.addAssign(2);
+  pkb.addWhile(3);
+  pkb.addAssign(4);
+  pkb.addCall(5);
+  pkb.addAssign(6);
+  pkb.addIf(7);
+  pkb.addAssign(8);
+  pkb.addAssign(9);
+  pkb.addAssign(10);
+  pkb.addAssign(11);
+  pkb.addAssign(12);
+  pkb.addAssign(13);
+  pkb.addAssign(14);
+
+  // adding to cfg
+  pkb.addCfgLink(1, 2);
+  pkb.addCfgLink(2, 3);
+  pkb.addCfgLink(3, 4);
+  pkb.addCfgLink(4, 5);
+  pkb.addCfgLink(5, 6);
+  pkb.addCfgLink(6, 3);
+  pkb.addCfgLink(3, 7);
+  pkb.addCfgLink(7, 8);
+  pkb.addCfgLink(7, 9);
+  pkb.addCfgLink(8, 10);
+  pkb.addCfgLink(9, 10);
+  pkb.addCfgLink(10, 11);
+  pkb.addCfgLink(11, 12);
+  pkb.addCfgLink(13, 14);
+
+  // adding usesS and modifiesS
+  pkb.addUsesS(4, "x");
+  pkb.addUsesS(4, "y");
+  pkb.addUsesS(6, "i");
+  pkb.addUsesS(8, "x");
+  pkb.addUsesS(10, "i");
+  pkb.addUsesS(10, "x");
+  pkb.addUsesS(10, "z");
+  pkb.addUsesS(11, "z");
+  pkb.addUsesS(12, "x");
+  pkb.addUsesS(12, "y");
+  pkb.addUsesS(12, "z");
+  pkb.addUsesS(14, "z");
+  pkb.addModifiesS(1, "x");
+  pkb.addModifiesS(2, "i");
+  pkb.addModifiesS(4, "x");
+  pkb.addModifiesS(6, "i");
+  pkb.addModifiesS(8, "x");
+  pkb.addModifiesS(9, "z");
+  pkb.addModifiesS(10, "z");
+  pkb.addModifiesS(11, "y");
+  pkb.addModifiesS(12, "x");
+  pkb.addModifiesS(13, "z");
+  pkb.addModifiesS(14, "v");
+
+  pkb.addCallProc(5, "third");
+
+  pkb.addProcStmtRange(1, 12, "second");
+  pkb.addProcStmtRange(13, 14, "third");
+
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsTable = pkb.getAffectsTable();
+
+  REQUIRE(affectsTable.contains({ "1", "4" }));
+  REQUIRE(affectsTable.contains({ "1", "8" }));
+  REQUIRE(affectsTable.contains({ "1", "10" }));
+  REQUIRE(affectsTable.contains({ "1", "12" }));
+  REQUIRE(affectsTable.contains({ "2", "10" }));
+  REQUIRE(affectsTable.contains({ "2", "6" }));
+  REQUIRE(affectsTable.contains({ "4", "4" }));
+  REQUIRE(affectsTable.contains({ "4", "8" }));
+  REQUIRE(affectsTable.contains({ "4", "10" }));
+  REQUIRE(affectsTable.contains({ "4", "12" }));
+  REQUIRE(affectsTable.contains({ "6", "6" }));
+  REQUIRE(affectsTable.contains({ "6", "10" }));
+  REQUIRE(affectsTable.contains({ "8", "10" }));
+  REQUIRE(affectsTable.contains({ "8", "12" }));
+  REQUIRE(affectsTable.contains({ "9", "10" }));
+  REQUIRE(affectsTable.contains({ "10", "11" }));
+  REQUIRE(affectsTable.contains({ "10", "12" }));
+  REQUIRE(affectsTable.contains({ "11", "12" }));
+  REQUIRE(affectsTable.contains({ "13", "14" }));
+  REQUIRE(affectsTable.size() == 19);
+}

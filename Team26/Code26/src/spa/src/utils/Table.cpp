@@ -247,7 +247,7 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
       std::vector<Row> rows = hashmap.at(key);
       for (const Row& row : rows) { // do cross product on relevant rows
         Row newRow = row;
-        for (int i = 0; i < otherHeader.size(); i++) {
+        for (size_t i = 0; i < otherHeader.size(); i++) {
           bool isInToDrop = std::find(droppedSecondIndexes.begin(), droppedSecondIndexes.end(), i) != droppedSecondIndexes.end();
           if (!isInToDrop) {
             newRow.emplace_back(otherRow[i]);

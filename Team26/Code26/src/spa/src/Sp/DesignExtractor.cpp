@@ -4,13 +4,16 @@
 
 #include <string>
 #include <vector>
+#include <stack>
 #include <stdexcept>
 #include <map>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "Table.h"
 #include "Pkb.h"
 #include "AdjList.h"
+#include "Cfg.h"
 
 namespace {
   static const std::string GENERATE_TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG =
@@ -18,6 +21,90 @@ namespace {
 
   static const std::string FILL_INDIRECT_RELATION_HEADER_SIZE_NEQ_2_ERROR_MSG =
     "[DesignExtractor::fillIndirectRelation]: Both tables must have two columns.";
+
+  /**
+   * Fills in the Affects relation based on the CFG.
+   *
+   * Pre-conditions:
+   *   1) Requires that all Modifies relations are filled in.
+   *   2) Requires that all Uses relations are filled in.
+   *   3) Requires that all assign stmts are filled in.
+   *   4) Requires that the CFG is built.
+   *
+   * @param pkb The PKB to refer to.
+   */
+  void fillAffectsTable(Pkb& pkb) {
+    Table assignTable = pkb.getAssignTable();
+    Table ifTable = pkb.getIfTable();
+    Table whileTable = pkb.getWhileTable();
+    Table callTable = pkb.getCallTable();
+    Table modifiesPTable = pkb.getModifiesPTable();
+
+    // Fill up the affects table for each assign statement
+    for (Row assignRow : assignTable.getData()) {
+      int affecterAssignStmt = std::stoi(assignRow[0]);
+      
+      // Extract the varModifed by affecterAssignStmt
+      std::string varModified;
+      for (const std::string& variable : pkb.getModifiedBy(affecterAssignStmt)) {
+        varModified = variable;
+      }
+
+      std::unordered_set<int> potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
+      std::unordered_set<int> visited; // keep track of visited nodes
+      std::stack<int> stack; // stack for dfs
+
+      // =============== //
+      //  DFS algorithm  //
+      // =============== //
+
+      // Get the next stmts in the CFG from the starting affecterAssignStmt stmt and push to the stack
+      for (const int nextStmt : pkb.getNextStmtFromCfg(affecterAssignStmt)) {
+        stack.push(nextStmt);
+      }
+
+      while (!stack.empty()) {
+        int currentStmt = stack.top();
+        stack.pop();
+
+        // Check if currentStmt has been visited
+        // Skip this currentStmt if already visited
+        if (visited.count(currentStmt) == 1) {
+          continue;
+        }
+        visited.emplace(currentStmt); // Set currentStmt as visited
+
+        // Check if currentStmt satisfy the Affects(affecterAssignStmt, currentStmt) relation
+        if (potentiallyAffectedAssigns.count(currentStmt) == 1) {
+          pkb.addAffects(affecterAssignStmt, currentStmt); // add Affects relation to pkb
+        }
+
+        // TODO: Remove once modifiesSTable and ssesSTable is correct.
+        const bool isCalls = callTable.contains({ std::to_string(currentStmt) });
+        if (isCalls) {
+          // Check if the called proc modifies var
+          // Stop searching if the currentStmt (a call stmt) modifies the varModified
+          std::string calledProc = pkb.getProcNameFromCallStmt(currentStmt);
+          if (modifiesPTable.contains({ calledProc, varModified })) {
+            continue;
+          }
+        }
+
+        // Check if currentStmt modifies the varModified
+        // Stop searching this path if the currentStmt is not a container stmt and it modifies the varModified
+        const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
+        const bool isContainerStmt = ifTable.contains({ std::to_string(currentStmt) }) || whileTable.contains({ std::to_string(currentStmt) });
+        if (isModified && !isContainerStmt) {
+          continue;
+        }
+
+        // Push all next stmts into the stack
+        for (const int nextStmt : pkb.getNextStmtFromCfg(currentStmt)) {
+          stack.push(nextStmt);
+        }
+      }
+    }
+  }
 
   static const std::string CYCLE_EXISTS_ERROR_MSG =
     "[DesignExtractor::verifyNoCyclicCalls]: Cycle detected.";
@@ -35,10 +122,10 @@ namespace {
    *     for all x, y, z, if R(x, y) and R(y, z)
    *     then R(x, z)
    *
-   * @param table The table to use when generating
-   *     the transitive closure. 
-   * @param listOfEntities The list of all entities in the table. 
-   * @returns A Table with entries as detailed above. 
+   * @param table The table to use when generating 
+   *     the transitive closure.
+   * @param listOfEntities The list of all entities in the table.
+   * @returns A Table with entries as detailed above.
    */
   Table generateTransitiveClosure(const Table& table, const std::list<std::string>& listOfEntities) {
     int numEntities = listOfEntities.size();
@@ -476,17 +563,20 @@ namespace {
 
 // TODO: Should the verification calls be extracted and called somewhere else?
 void DesignExtractor::extractDesignAbstractions() {
+  // Verification
+  verifyNoCallsToNonExistentProcedures(pkb);
+  verifyNoCyclicCalls(pkb);
+
+  // Filling of Tables
   fillParentTTable(pkb);
   fillFollowsTTable(pkb);
   fillUsesSTable(pkb);
   fillModifiesSTable(pkb);
 
-  verifyNoCyclicCalls(pkb);
-  verifyNoCallsToNonExistentProcedures(pkb);
-
-  // Calls that require as a pre-condition
-  // that no cyclic calls exist.
+  // Calls that require that no cyclic calls exist.
   fillCallsTTable(pkb);
   fillUsesPTable(pkb);
   fillModifiesPTable(pkb);
+
+  fillAffectsTable(pkb);
 }

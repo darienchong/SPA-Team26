@@ -8,7 +8,20 @@
 
 #include "Table.h"
 
-Pkb::Pkb() = default;
+Pkb::Pkb()
+  : cfg(Cfg()) {
+}
+
+void Pkb::addProcStmtRange(int start, int end, std::string procName) {
+  for (int i = start; i <= end; i++) {
+    stmtProcMapper[i] = procName;
+  }
+}
+
+void Pkb::addCfgLink(int parent, int child) {
+  cfg.addNext(parent, child);
+  addNext(parent, child);
+}
 
 void Pkb::addModifiesP(std::string proc, std::string var) {
   std::vector<std::string> vect{ proc, std::move(var) };
@@ -50,6 +63,7 @@ void Pkb::addNext(int prev, int next) {
   std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
   nextTable.insertRow(vect);
 }
+
 void Pkb::addNextT(int prev, int next) {
   std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
   nextTTable.insertRow(vect);
@@ -211,113 +225,74 @@ Table Pkb::getPrintVarTable() const { return printVarTable; }
 Table Pkb::getPatternIfTable() const { return patternIfTable; }
 Table Pkb::getPatternWhileTable() const { return patternWhileTable; }
 
-Table Pkb::getFollower(int stmtNo) const {
-  Table filterTable = followsTable;
-  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(0);
-  return filterTable;
-}
-
-Table Pkb::getFollowedBy(int stmtNo) const {
-  Table filterTable = followsTable;
-  filterTable.filterColumn(1, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(1);
-  return filterTable;
-}
-
-Table Pkb::getFollowerT(int stmtNo) const {
-  Table filterTable = followsTTable;
-  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(0);
-  return filterTable;
-}
-
-Table Pkb::getFollowedByT(int stmtNo) const {
-  Table filterTable = followsTTable;
-  filterTable.filterColumn(1, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(1);
-  return filterTable;
-}
-
-Table Pkb::getParent(int stmtNo) const {
-  Table filterTable = parentTable;
-  filterTable.filterColumn(1, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(1);
-  return filterTable;
-}
-
-Table Pkb::getChild(int stmtNo) const {
-  Table filterTable = parentTable;
-  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(0);
-  return filterTable;
-}
-
-Table Pkb::getParentT(int stmtNo) const {
-  Table filterTable = parentTTable;
-  filterTable.filterColumn(1, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(1);
-  return filterTable;
-}
-
-Table Pkb::getChildT(int stmtNo) const {
-  Table filterTable = parentTTable;
-  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(0);
-  return filterTable;
-}
-
-Table Pkb::getUses(std::string varName) const {
+std::unordered_set<int> Pkb::getAssignUses(const std::string& varName) const {
   Table filterTable = usesSTable;
-  filterTable.filterColumn(1, std::unordered_set<std::string> {std::move(varName)});
-  filterTable.dropColumn(1);
-  return filterTable;
+  filterTable.filterColumn(1, { varName });
+  filterTable.innerJoin(assignTable, 0, 0);
+  std::unordered_set<int> stmtNumbers;
+  for (Row row : filterTable.getData()) {
+    stmtNumbers.insert(std::stoi(row[0]));
+  }
+  return stmtNumbers;
 }
 
-Table Pkb::getUsedBy(int stmtNo) const {
-  Table filterTable = usesSTable;
-  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(0);
-  return filterTable;
-}
-
-Table Pkb::getModifies(std::string varName) const {
+std::unordered_set<std::string> Pkb::getModifiedBy(const int stmtNo) const {
   Table filterTable = modifiesSTable;
-  filterTable.filterColumn(1, std::unordered_set<std::string> {std::move(varName)});
-  filterTable.dropColumn(1);
-  return filterTable;
+  filterTable.filterColumn(0, { std::to_string(stmtNo) });
+  std::unordered_set<std::string> variablesModified;
+  for (Row row : filterTable.getData()) {
+    variablesModified.insert(row[1]);
+  }
+  return variablesModified;
 }
 
-Table Pkb::getModifiedBy(int stmtNo) const {
-  Table filterTable = modifiesSTable;
-  filterTable.filterColumn(0, std::unordered_set<std::string> {std::to_string(stmtNo)});
-  filterTable.dropColumn(0);
-  return filterTable;
-}
-
-std::string Pkb::getProcNameFromCallStmt(int stmtNo) {
-  bool isValidCallStmt = callTable.contains({std::to_string(stmtNo)});
-  if(isValidCallStmt) {
+std::string Pkb::getProcNameFromCallStmt(const int stmtNo) const {
+  const bool isValidCallStmt = callTable.contains({ std::to_string(stmtNo) });
+  if (isValidCallStmt) {
     return callProcMapper.at(stmtNo);
   } else {
     return "";
   }
 }
 
-std::string Pkb::getVarNameFromReadStmt(int stmtNo) {
-  bool isValidReadStmt = readTable.contains({std::to_string(stmtNo)});
-  if(isValidReadStmt) {
+std::string Pkb::getVarNameFromReadStmt(const int stmtNo) const {
+  const bool isValidReadStmt = readTable.contains({ std::to_string(stmtNo) });
+  if (isValidReadStmt) {
     return readVarMapper.at(stmtNo);
   } else {
     return "";
   }
 }
 
-std::string Pkb::getVarNameFromPrintStmt(int stmtNo) {
-  bool isValidPrintStmt = printTable.contains({std::to_string(stmtNo)});
-  if(isValidPrintStmt) {
+std::string Pkb::getVarNameFromPrintStmt(const int stmtNo) const {
+  const bool isValidPrintStmt = printTable.contains({ std::to_string(stmtNo) });
+  if (isValidPrintStmt) {
     return printVarMapper.at(stmtNo);
   } else {
     return "";
   }
+}
+
+std::unordered_set<int> Pkb::getNextStmtFromCfg(const int node) const {
+  return cfg.getNext(node);
+}
+
+bool Pkb::isSameProc(const int stmt1, const int stmt2) const {
+  if (stmt2 == stmt1) {
+    return true;
+  }
+
+  if (stmtProcMapper.count(stmt1) == 0) {
+    throw std::invalid_argument("Statement number stmt1 does not exist in the program");
+  }
+
+  if (stmtProcMapper.count(stmt2) == 0) {
+    throw std::invalid_argument("Statement number stmt2 does not exist in the program");
+  }
+
+  if (stmtProcMapper.at(stmt1) == stmtProcMapper.at(stmt2)) {
+    return true;
+  }
+
+  return false;
 }
