@@ -22,9 +22,9 @@ namespace Pql {
     Table executeQuery() const;
 
     /**
-     * Check if any clause in the query can be short-circuited. 
-     * Short-circuit means that the result will be empty. 
-     * 
+     * Check if any clause in the query can be short-circuited.
+     * Short-circuit means that the result will be empty.
+     *
      * @return True if the query can be short-circuited. Otherwise, false.
      */
     bool canShortCircuit();
@@ -54,6 +54,23 @@ namespace Pql {
     void constructPatternAssignTableFromClause(Table& clauseResultTable, const Clause& clause) const;
 
     /**
+     * Constructs a clause result table given a clause of type PATTERN_IF or PATTERN_WHILE.
+     *
+     * @param clauseResultTable Table to be constructed.
+     * @param clause Pattern_If clause object or PATTERN_WHILE clause object.
+     */
+    void constructPatternCondTableFromClause(Table& clauseResultTable, const Clause& clause) const;
+
+
+    /**
+     * Constructs a clause result table given a clause of type with
+     *
+     * @param clauseResultTable Table to be constructed.
+     * @param clause with clause object.
+     */
+    void PqlEvaluator::constructWithTableFromClause(Table& clauseResultTable, const Clause& clause) const;
+
+    /**
      * Helper function to get the corresponding Table from the PKB when given an entity.
      * E.g. Entity with EntityType of STMT will return the stmtTable from PKB.
      *
@@ -63,11 +80,30 @@ namespace Pql {
     Table getTableFromEntity(const Entity& entity) const;
 
     /**
-     * @brief Extracts the result from the given Table and populates the results list of the PqlEvaluator.
+     * Helper function to get the corresponding attribute reference mapping Table from the PKB when given an entity.
+     * E.g. Entity with EntityType of STMT will return the stmtTable from PKB.
+     *
+     * @param entity Given entity to retrieve the corresponding attribute reference mapping table from PKB.
+     * @return Table of attribute reference mapping.
+     */
+    Table PqlEvaluator::getAttrRefMappingTableFromEntity(const Entity& entity) const;
+
+    /**
+     * Extracts the result from the given Table and populates the results list of the PqlEvaluator.
      *
      * @param resultTable Final result table from execution of all clauses.
      */
     void extractResults(const Table& resultTable) const;
+
+    /**
+     * Helper function to that maps the given entity's stmtNumber to it's attribute reference value by
+     * consulting the PKB.
+     *
+     * @param entity Given entity to be mapped.
+     * @param stmtNumber Statement number to be mapped.
+     * @return Attribute reference value.
+    */
+    std::string mapEntityToAttrRef(const Pql::Entity& entity, const int stmtNumber) const;
 
   public:
     /**

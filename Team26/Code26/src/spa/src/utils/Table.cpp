@@ -11,7 +11,7 @@ TableException::TableException(const std::string& msg)
   : std::exception(msg.c_str()) {}
 
 Table::Table() {
-  header.emplace_back("0");
+  header.emplace_back("");
 }
 
 Table::Table(int n) {
@@ -60,10 +60,13 @@ RowSet Table::getData() const {
 }
 
 std::unordered_set<std::string> Table::getColumn(const std::string& headerTitle) const {
-  int index = getColumnIndex(headerTitle);
+  const int columnIndex = getColumnIndex(headerTitle);
+  if (columnIndex == -1) {
+	throw std::invalid_argument("Non-existing header title: \"" + headerTitle + "\"");
+  }
   std::unordered_set<std::string> column;
   for (Row row : data) {
-    column.emplace(row[index]);
+	column.emplace(row[columnIndex]);
   }
   return column;
 }
@@ -72,7 +75,11 @@ RowSet Table::getColumns(const Row& headerTitles) const {
   std::vector<int> indexList;
   indexList.reserve(headerTitles.size()); // Optimization to avoid resizing
   for (const std::string& headerTitle : headerTitles) {
-    indexList.push_back(getColumnIndex(headerTitle));
+	const int columnIndex = getColumnIndex(headerTitle);
+	if (columnIndex == -1) {
+	  throw std::invalid_argument("Non-existing header title: \"" + headerTitle + "\"");
+	}
+	indexList.push_back(columnIndex);
   }
 
   RowSet result;
@@ -93,10 +100,13 @@ int Table::getColumnIndex(const std::string& headerTitle) const {
       return i;
     }
   }
-  throw TableException("Column with name:" + headerTitle + " not found");
+  return -1;
 }
 
-void Table::dropColumn(int index) {
+bool Table::dropColumn(int index) {
+  if (index < 0 || index >= header.size()) {
+	return false;
+  }
   // Clear data if there is only one column, otherwise erase column
   if (header.size() == 1) {
     data.clear();
@@ -110,11 +120,16 @@ void Table::dropColumn(int index) {
     }
     data = std::move(newData);
   }
+  return true;
 }
 
-void Table::dropColumn(const std::string& headerTitle) {
+bool Table::dropColumn(const std::string& headerTitle) {
   const int index = getColumnIndex(headerTitle);
+  if (index == -1) {
+    return false;
+  }
   dropColumn(index);
+  return true;
 }
 
 void Table::filterColumn(int index, const std::unordered_set<std::string>& values) {
@@ -205,13 +220,13 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
   std::vector<int> droppedSecondIndexes;
   std::vector<int> droppedFirstIndexes;
 
-  for (std::pair<int, int> pair : indexPairs) {
+  for (const std::pair<int, int> pair : indexPairs) {
     droppedFirstIndexes.emplace_back(pair.first);
     droppedSecondIndexes.emplace_back(pair.second);
   }
 
   for (size_t i = 0; i < otherHeader.size(); i++) {
-    bool isInToDrop = std::find(droppedSecondIndexes.begin(), droppedSecondIndexes.end(), i) != droppedSecondIndexes.end();
+    const bool isInToDrop = std::find(droppedSecondIndexes.begin(), droppedSecondIndexes.end(), i) != droppedSecondIndexes.end();
     if (!isInToDrop) {
       header.emplace_back(otherHeader[i]);
     }
@@ -221,12 +236,12 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
   std::unordered_map<int, std::vector<Row>> hashmap;
   for (const Row& row : data) {
     std::string concatStr;
-    for (int i : droppedFirstIndexes) {
+    for (const int i : droppedFirstIndexes) {
       concatStr.append(row[i] + " ");
     }
-    int key = std::hash<std::string>{}(concatStr);
+    const int key = std::hash<std::string>{}(concatStr);
 
-    bool isInMap = hashmap.find(key) != hashmap.end();
+    const bool isInMap = hashmap.find(key) != hashmap.end();
     if (!isInMap) {
       std::vector<Row> vect{ row };
       hashmap[key] = vect;
@@ -242,11 +257,11 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
     for (int i : droppedSecondIndexes) {
       concatStr.append(otherRow[i] + " ");
     }
-    int key = std::hash<std::string>{}(concatStr);
+    const int key = std::hash<std::string>{}(concatStr);
 
-    bool isInMap = hashmap.find(key) != hashmap.end();
+    const bool isInMap = hashmap.find(key) != hashmap.end();
     if (isInMap) {
-      std::vector<Row> rows = hashmap.at(key);
+      const std::vector<Row> rows = hashmap.at(key);
       for (const Row& row : rows) { // do cross product on relevant rows
         Row newRow = row;
         for (size_t i = 0; i < otherHeader.size(); i++) {
@@ -263,7 +278,7 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
 }
 
 void Table::innerJoin(const Table& otherTable, int thisTableIndex, int otherTableIndex) {
-  std::vector<std::pair<int, int>> indexPairs{ {thisTableIndex, otherTableIndex} };
+  const std::vector<std::pair<int, int>> indexPairs{ {thisTableIndex, otherTableIndex} };
   innerJoin(otherTable, indexPairs);
 }
 
@@ -274,6 +289,6 @@ void Table::innerJoin(const Table& otherTable, const std::string& commonHeader) 
 }
 
 bool Table::deleteRow(const Row& row) {
-  int numRowErased = data.erase(row);
+  const int numRowErased = data.erase(row);
   return numRowErased == 1;
 }

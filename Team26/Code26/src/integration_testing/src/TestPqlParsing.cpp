@@ -21,7 +21,7 @@ namespace {
   }
 }
 
-TEST_CASE("[TestPqlParser] Valid Query", "[PqlParser][Valid]") {
+TEST_CASE("[TestPqlParsing] Valid Query", "[PqlParser][Valid]") {
   SECTION("Declarations", "[declaration]") {
     SECTION("Single declaration") {
       // PQL query to test
@@ -1579,7 +1579,7 @@ TEST_CASE("[TestPqlParser] Valid Query", "[PqlParser][Valid]") {
   }
 }
 
-TEST_CASE("[TestPqlParser] Query with Syntax Error", "[PqlParser][SyntaxError]") {
+TEST_CASE("[TestPqlParsing] Query with Syntax Error", "[PqlParser][SyntaxError]") {
   SECTION("Empty query string") {
     std::list<Token> emptyList;
     Pql::PqlParser pqlParser(emptyList);
@@ -1746,7 +1746,7 @@ TEST_CASE("[TestPqlParser] Query with Syntax Error", "[PqlParser][SyntaxError]")
   }
 }
 
-TEST_CASE("[TestPqlParser] Query with Semantic Error", "[PqlParser][Semantic Error]") {
+TEST_CASE("[TestPqlParsing] Query with Semantic Error", "[PqlParser][Semantic Error]") {
   SECTION("Repeated declarations of same name - same types") {
     // PQL query to test
     std::string queryString(R"(

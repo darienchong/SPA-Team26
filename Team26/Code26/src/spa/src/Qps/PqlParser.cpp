@@ -1,6 +1,7 @@
 #include "PqlParser.h"
 
 #include <assert.h>
+
 #include <list>
 #include <string>
 
@@ -154,10 +155,9 @@ namespace Pql {
     return pqlQuery;
   }
 
-  // Iteration 1
   // declaration: design-entity synonym (',' synonym)* ';'
   // design-entity: 'stmt' | 'read' | 'print' | 'while' | 'if' | 'assign' | 
-  // 'variable' | 'constant' | 'procedure'
+  // 'variable' | 'constant' | 'procedure' | 'call' | 'prog_line'
   // Parses the declarations of the PQL query
   void PqlParser::parseDeclarations() {
     while (!tokens.empty() && tokens.front() != SELECT) {

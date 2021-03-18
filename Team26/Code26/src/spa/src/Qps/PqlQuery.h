@@ -168,14 +168,14 @@ namespace Pql {
     /**
      * Checks if the entity is a 'stmt' synonym type.
      *
-     * @return True if the entity is a container synonym type. Otherwise, false.
+     * @return True if the entity is a stmt synonym type. Otherwise, false.
      */
     bool isStmtSynonym() const;
 
     /**
      * Checks if the entity is a 'read' synonym type.
      *
-     * @return True if the entity is a print synonym type. Otherwise, false.
+     * @return True if the entity is a read synonym type. Otherwise, false.
      */
     bool isReadSynonym() const;
 
@@ -189,16 +189,23 @@ namespace Pql {
     /**
      * Checks if the entity is a 'while' synonym type.
      *
-     * @return True if the entity is a container synonym type. Otherwise, false.
+     * @return True if the entity is a while synonym type. Otherwise, false.
      */
     bool isWhileSynonym() const;
 
     /**
      * Checks if the entity is a 'if' synonym type.
      *
-     * @return True if the entity is a container synonym type. Otherwise, false.
+     * @return True if the entity is a if synonym type. Otherwise, false.
      */
     bool isIfSynonym() const;
+
+    /**
+     * Checks if the entity is a 'prog_line' synonym type.
+     *
+     * @return True if the entity is a prog_line synonym type. Otherwise, false.
+     */
+    bool isProgLineSynonym() const;
 
 
     // Operator overloading

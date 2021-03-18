@@ -1,6 +1,7 @@
 #include "SimpleParser.h"
 
 #include <assert.h>
+
 #include <list>
 #include <string>
 #include <vector>

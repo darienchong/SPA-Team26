@@ -86,6 +86,10 @@ namespace Pql {
     return type == EntityType::IF;
   }
 
+  bool Entity::isProgLineSynonym() const {
+    return type == EntityType::PROG_LINE;
+  }
+
   // Clause methods
   Clause::Clause()
     : type(ClauseType::UNDEFINED) {

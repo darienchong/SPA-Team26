@@ -9,11 +9,11 @@
 typedef std::vector<std::string> Row;
 struct StringVectorHash {
   size_t operator()(Row const& strings) const {
-    std::string concatenatedString;
-    for (const std::string& string : strings) {
-      concatenatedString.append(string);
-    }
-    return std::hash<std::string>{}(concatenatedString);
+	std::string concatenatedString;
+	for (const std::string& string : strings) {
+	  concatenatedString.append(string);
+	}
+	return std::hash<std::string>{}(concatenatedString);
   }
 };
 typedef std::unordered_set<Row, StringVectorHash> RowSet;
@@ -90,9 +90,10 @@ public:
 
   /**
    * Returns the column index of the Table under the specified header.
+   * Returns -1 if header is not found.
    *
    * @param headerTitle The specified header.
-   * @return The index of the column under the header.
+   * @return The index of the column under the header if found. Otherwise, return -1.
    */
   int getColumnIndex(const std::string& headerTitle) const;
 
@@ -107,21 +108,23 @@ public:
   std::vector<std::pair<int, int>> getColumnIndexPairs(const Table& otherTable) const;
 
   /**
-   * Deletes a column from the Table at the specified index.
+   * Deletes a column from the Table at the specified index if the index is not out of bound.
    * This method also deletes the header, reducing the number of columns of Table by 1.
    *
    * @param index The column index of the Table.
+   * @return boolean Whether column has been dropped.
    */
-  void dropColumn(int index);
+  bool dropColumn(int index);
 
   /**
    * Deletes a column from the Table at the index corresponding to the specified
-   * header title.
+   * header title if the title is found.
    * This method also deletes the header, reducing the number of columns of Table by 1.
    *
    * @param headerTitle The specified column header.
+   * @return boolean Whether column has been dropped.
    */
-  void dropColumn(const std::string& headerTitle);
+  bool dropColumn(const std::string& headerTitle);
 
   /**
    * Filter the table rows based on the values for a particular column.

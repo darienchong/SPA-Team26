@@ -24,7 +24,7 @@ namespace {
 //  CondExprParser  //
 //==================//
 
-TEST_CASE("Valid conditional expressions", "[ExprParser][CondExprParser]") {
+TEST_CASE("[TestExprParsing] Valid conditional expressions", "[ExprParser][CondExprParser]") {
   SECTION("Basic conditional expression") {
     std::string string(R"( x == y )");
     std::list<Token> condExprTokens = expressionStringToTokens(string);
@@ -117,7 +117,7 @@ TEST_CASE("Valid conditional expressions", "[ExprParser][CondExprParser]") {
   }
 }
 
-TEST_CASE("Invalid conditional expressions", "[ExprParser][CondExprParser]") {
+TEST_CASE("[TestExprParsing] Invalid conditional expressions", "[ExprParser][CondExprParser]") {
   SECTION("Empty conditional expression") {
     std::string string("");
     std::list<Token> condExprTokens = expressionStringToTokens(string);
@@ -267,7 +267,7 @@ TEST_CASE("Invalid conditional expressions", "[ExprParser][CondExprParser]") {
 //==================//
 
 // Invalid variable names eg. "x3)3_5!$" would never occur since the tokens would be split by tokeniser
-TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprParser]") {
+TEST_CASE("[TestExprParsing] Assignment expressions - single variable", "[ExprParser][AssignExprParser]") {
   SECTION("Valid single length variable") {
     std::string string("x");
     std::list<Token> assignExprTokens = expressionStringToTokens(string);
@@ -366,7 +366,7 @@ TEST_CASE("Assignment expressions - single variable", "[ExprParser][AssignExprPa
 }
 
 // Invalid consts, eg "0314" would be handled by tokeniser and will not reach AssignExprParser
-TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprParser]") {
+TEST_CASE("[TestExprParsing] Assignment expressions - single constant", "[ExprParser][AssignExprParser]") {
   SECTION("Valid single length non-zero constant") {
     std::string string("1");
     std::list<Token> assignExprTokens = expressionStringToTokens(string);
@@ -432,7 +432,7 @@ TEST_CASE("Assignment expressions - single constant", "[ExprParser][AssignExprPa
   }
 }
 
-TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprParser]") {
+TEST_CASE("[TestExprParsing] Assignment expressions - double variables", "[ExprParser][AssignExprParser]") {
   SECTION("Invalid double variables (no operators between)") {
     std::string string("x y");
     std::list<Token> assignExprTokens = expressionStringToTokens(string);
@@ -624,7 +624,7 @@ TEST_CASE("Assignment expressions - double variables", "[ExprParser][AssignExprP
   }
 }
 
-TEST_CASE("Assignment expressions - double constants", "[ExprParser][AssignExprParser]") {
+TEST_CASE("[TestExprParsing] Assignment expressions - double constants", "[ExprParser][AssignExprParser]") {
   SECTION("Invalid double constants (no operators between)") {
     std::string string("1 2");
     std::list<Token> assignExprTokens = expressionStringToTokens(string);
@@ -816,7 +816,7 @@ TEST_CASE("Assignment expressions - double constants", "[ExprParser][AssignExprP
   }
 }
 
-TEST_CASE("Assignment expressions - single variable single constant", "[ExprParser][AssignExprParser]") {
+TEST_CASE("[TestExprParsing] Assignment expressions - single variable single constant", "[ExprParser][AssignExprParser]") {
   SECTION("Invalid single variable single constant (no operators between)") {
     std::string string("x 1");
     std::list<Token> assignExprTokens = expressionStringToTokens(string);
@@ -985,7 +985,7 @@ TEST_CASE("Assignment expressions - single variable single constant", "[ExprPars
   }
 }
 
-TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][AssignExprParser]") {
+TEST_CASE("[TestExprParsing] Assignment expressions - variables/constants with ()", "[ExprParser][AssignExprParser]") {
   SECTION("Mismatched ()") {
     SECTION("Extra (") {
       SECTION("Single (") {
@@ -1314,7 +1314,7 @@ TEST_CASE("Assignment expressions - variables/constants with ()", "[ExprParser][
 }
 
 // Fill in other examples for assign expr parsing
-TEST_CASE("Assignment expressions - others", "[ExprParser][AssignExprParser]") {
+TEST_CASE("[TestExprParsing] Assignment expressions - others", "[ExprParser][AssignExprParser]") {
   SECTION("Empty assignment") {
     std::string string("");
     std::list<Token> assignExprTokens = expressionStringToTokens(string);
