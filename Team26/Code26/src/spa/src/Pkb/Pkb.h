@@ -16,15 +16,6 @@ public:
   Pkb();
 
   /**
-   * Adds the start and end statement (both inclusive) number range for each procedure.
-   *
-   * @param start Statement number of the first statement in the procedure.
-   * @param end Statement number of the last statement in the procedure.
-   * @param procName Procedure name for which the statements belongs to. 
-   */
-  void addProcStmtRange(int start, int end, std::string procName);
-
-  /**
    * Adds the statement numbers to CFG and populates Next relation.
    *
    * @param parent Statement number of the statement executed first.
@@ -417,17 +408,17 @@ public:
 
   /**
    * Finds and returns the assign statement numbers that are uses the given variable. If no
-   * assign statement uses the variable, returns an empty result. This function must be 
+   * assign statement uses the variable, returns an empty result. This function must be
    * called after the Design Extractor extracts all the design abstractions.
    *
    * @param varName Variable name to check.
    * @return Set of assign statement numbers that uses the variable.
    */
-   std::unordered_set<int> getAssignUses(const std::string& varName) const;
+  std::unordered_set<int> getAssignUses(const std::string& varName) const;
 
   /**
-   * Finds and returns the variables that are modified by the given statement number. If no 
-   * variable is modified, returns an empty result. This function must be called after the 
+   * Finds and returns the variables that are modified by the given statement number. If no
+   * variable is modified, returns an empty result. This function must be called after the
    * Design Extractor extracts all the design abstractions.
    *
    * @param stmtNo Statement number to check.
@@ -471,18 +462,9 @@ public:
  */
   std::unordered_set<int> getNextStmtFromCfg(const int node) const;
 
-  /**
-   * Returns true if both statements are from the same procedure, false otherwise.
-   *
-   * @param stmt1 First statement number to compare.
-   * @param stmt2 Second statement number to compare.
-   * @return bool true/false depending on whether the statements are from the same procedure.
-   */
-  bool isSameProc(const int stmt1, const int stmt2) const;
-
 private:
   Cfg cfg;
-  
+
   Table varTable{ 1 };
   Table stmtTable{ 1 };
   Table procTable{ 1 };
@@ -521,5 +503,4 @@ private:
   std::unordered_map<int, std::string> callProcMapper;
   std::unordered_map<int, std::string> readVarMapper;
   std::unordered_map<int, std::string> printVarMapper;
-  std::unordered_map<int, std::string> stmtProcMapper;
 };

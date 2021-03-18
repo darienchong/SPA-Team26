@@ -6,19 +6,16 @@
 Cfg::Cfg() = default;
 
 void Cfg::addNext(const int parent, const int child) {
-  auto search = adjLst.find(parent);
-  if (search == adjLst.end()) {
-    adjLst.emplace(parent, std::unordered_set<int>{child});
-  }
-  else {
-    search->second.insert(child);
+  if (adjLst.count(parent) == 0) {
+    adjLst.emplace(parent, std::unordered_set<int>{ child });
+  } else {
+    adjLst.at(parent).insert(child);
   }
 }
 
 std::unordered_set<int> Cfg::getNext(const int node) const {
-  auto search = adjLst.find(node);
-  if (search == adjLst.end()) {
-    return std::unordered_set<int>();
+  if (adjLst.count(node) == 0) {
+    return {};
   }
-  return search->second;
+  return adjLst.at(node);
 }

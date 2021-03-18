@@ -14,14 +14,9 @@
 #include "Pkb.h"
 #include "AdjList.h"
 #include "Cfg.h"
+#include "SpaException.h"
 
 namespace {
-  static const std::string GENERATE_TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG =
-    "[DesignExtractor::generateTransitiveClosure]: Table must have two columns.";
-
-  static const std::string FILL_INDIRECT_RELATION_HEADER_SIZE_NEQ_2_ERROR_MSG =
-    "[DesignExtractor::fillIndirectRelation]: Both tables must have two columns.";
-
   /**
    * Fills in the Affects relation based on the CFG.
    *
@@ -43,7 +38,7 @@ namespace {
     // Fill up the affects table for each assign statement
     for (Row assignRow : assignTable.getData()) {
       int affecterAssignStmt = std::stoi(assignRow[0]);
-      
+
       // Extract the varModifed by affecterAssignStmt
       std::string varModified;
       for (const std::string& variable : pkb.getModifiedBy(affecterAssignStmt)) {
@@ -51,12 +46,12 @@ namespace {
       }
 
       std::unordered_set<int> potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
-      std::unordered_set<int> visited; // keep track of visited nodes
-      std::stack<int> stack; // stack for dfs
 
       // =============== //
       //  DFS algorithm  //
       // =============== //
+      std::unordered_set<int> visited; // keep track of visited nodes
+      std::stack<int> stack; // stack for dfs
 
       // Get the next stmts in the CFG from the starting affecterAssignStmt stmt and push to the stack
       for (const int nextStmt : pkb.getNextStmtFromCfg(affecterAssignStmt)) {
@@ -79,17 +74,6 @@ namespace {
           pkb.addAffects(affecterAssignStmt, currentStmt); // add Affects relation to pkb
         }
 
-        // TODO: Remove once modifiesSTable and ssesSTable is correct.
-        const bool isCalls = callTable.contains({ std::to_string(currentStmt) });
-        if (isCalls) {
-          // Check if the called proc modifies var
-          // Stop searching if the currentStmt (a call stmt) modifies the varModified
-          std::string calledProc = pkb.getProcNameFromCallStmt(currentStmt);
-          if (modifiesPTable.contains({ calledProc, varModified })) {
-            continue;
-          }
-        }
-
         // Check if currentStmt modifies the varModified
         // Stop searching this path if the currentStmt is not a container stmt and it modifies the varModified
         const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
@@ -106,33 +90,29 @@ namespace {
     }
   }
 
-  static const std::string CYCLE_EXISTS_ERROR_MSG =
-    "[DesignExtractor::verifyNoCyclicCalls]: Cycle detected.";
-
   /**
-   * Given a table, generates the transitive closure 
-   * of the table. We assume that the table tabulates 
+   * Given a table, generates the transitive closure
+   * of the table. We assume that the table tabulates
    * a binary relation (call it R) where
    *
    *     <x, y> in table <=> R(x, y) holds.
    *
-   * This method generates a table that forms the 
-   * transitive closure of the table i.e. 
+   * This method generates a table that forms the
+   * transitive closure of the table i.e.
    *
    *     for all x, y, z, if R(x, y) and R(y, z)
    *     then R(x, z)
    *
-   * @param table The table to use when generating 
+   * @param table The table to use when generating
    *     the transitive closure.
    * @param listOfEntities The list of all entities in the table.
    * @returns A Table with entries as detailed above.
    */
   Table generateTransitiveClosure(const Table& table, const std::list<std::string>& listOfEntities) {
+    assert(table.getHeader().size() == 2); // Guaranteed to receive a table with 2 columns
+
     int numEntities = listOfEntities.size();
     Table newTable = table;
-    if (table.getHeader().size() != 2) {
-      throw std::invalid_argument(GENERATE_TRANSITIVE_CLOSURE_HEADER_SIZE_NEQ_2_ERROR_MSG);
-    }
 
     // Tables may sometimes have non-numerical entries.
     // We use this to perform conversion to and from.
@@ -170,8 +150,8 @@ namespace {
   }
 
   /**
-   * Populates a given table with indirect relations. 
-   * We have a table with a number of direct relations. 
+   * Populates a given table with indirect relations.
+   * We have a table with a number of direct relations.
    * We wish to implement a new indirect relation, defined so: where
    *
    *   R(x, y) indicates an existing relation in the first table,
@@ -190,12 +170,9 @@ namespace {
    * @returns The table with new indirect relation entries.
    */
   Table fillIndirectRelation(Table table, const Table& parentTTable) {
-    bool isTableColumnCountNotTwo = (table.getHeader().size() != 2) ||
-      (parentTTable.getHeader().size() != 2);
-
-    if (isTableColumnCountNotTwo) {
-      throw std::invalid_argument(FILL_INDIRECT_RELATION_HEADER_SIZE_NEQ_2_ERROR_MSG);
-    }
+    const bool areTableColumnCountTwo = (table.getHeader().size() == 2) &&
+      (parentTTable.getHeader().size() == 2);
+    assert(areTableColumnCountTwo); // Guaranteed to receive tables with 2 columns
 
     Table newParentTTable = parentTTable;
     newParentTTable.innerJoin(table, 1, 0);
@@ -262,15 +239,15 @@ namespace {
   }
 
   /**
-   * Given the Calls() relations between procedures, writes in all the 
+   * Given the Calls() relations between procedures, writes in all the
    * transitive Calls*() relations.
-   * 
+   *
    * Pre-conditions:
-   *   1) Requires that all the Calls() relations be populated 
+   *   1) Requires that all the Calls() relations be populated
    *      in the PKB first.
    *   2) Requires that pkb.getProcTable() returns a table
    *      containing all the procedures in the program.
-   * 
+   *
    * @param pkb The PKB to refer to.
    * @returns
    */
@@ -288,16 +265,69 @@ namespace {
   }
 
   /**
-   * Populates the PKB's UsesS table with all Uses(s, v) relations between
-   * container statements s and variables v.
-   * 
-   * Requires that the Uses() relations between assignments/print statements and 
-   * variables, as well as the ParentTTable be populated first.
+   * Given the Next() relations between statements, writes in all the
+   * transitive Next*() relations.
+   *
+   * Pre-conditions:
+   *   1) Requires that all the Next() relations be populated
+   *      in the PKB first.
+   *   2) Requires that pkb.getStmtTable() returns a table
+   *      containing all the statements in the program.
+   *
+   * @param pkb The PKB to refer to.
+   * @returns
+   */
+  void fillNextTTable(Pkb& pkb) {
+    std::list<std::string> stmtList;
+    for (const Row row : pkb.getStmtTable().getData()) {
+      stmtList.push_back(row[0]);
+    }
+
+    Table nextTTable = generateTransitiveClosure(pkb.getNextTable(),
+      stmtList);
+    for (const Row row : nextTTable.getData()) {
+      pkb.addNextT(std::stoi(row[0]), std::stoi(row[1]));
+    }
+  }
+
+  /**
+   * Given the Affects() relations between statements, writes in all the
+   * transitive Affects*() relations.
+   *
+   * Pre-conditions:
+   *   1) Requires that all the Affects() relations be populated
+   *      in the PKB first.
+   *   2) Requires that pkb.getAssignTable() returns a table
+   *      containing all the assign statements in the program.
+   *
+   * @param pkb The PKB to refer to.
+   * @returns
+   */
+  void fillAffectsTTable(Pkb& pkb) {
+    std::list<std::string> assignStmtList;
+    for (const Row row : pkb.getAssignTable().getData()) {
+      assignStmtList.push_back(row[0]);
+    }
+
+    Table affectsTTable = generateTransitiveClosure(pkb.getAffectsTable(),
+      assignStmtList);
+    for (const Row row : affectsTTable.getData()) {
+      pkb.addAffectsT(std::stoi(row[0]), std::stoi(row[1]));
+    }
+  }
+
+  /**
+   * Populates the given PKB's UsesS table with all Uses(ifs/w, v) relations where
+   * the relation holds due to some Uses(s, v) for some s in the container, if the
+   * Uses(s, v) relation is recorded in the UsesS table.
+   *
+   * Requires that the following be populated first:
+   * 1) ParentTTable
    *
    * @param pkb The PKB to use/modify.
    * @returns
    */
-  void fillUsesSTable(Pkb& pkb) {
+  void fillUsesSTableNonCallStmts(Pkb& pkb) {
     Table newUsesSTable = fillIndirectRelation(pkb.getUsesSTable(), pkb.getParentTTable());
     for (const Row row : newUsesSTable.getData()) {
       int stmtNum = std::stoi(row[0]);
@@ -307,16 +337,75 @@ namespace {
   }
 
   /**
-   * Populates the PKB's ModifiesS table with all Modifies(s, v) relations between
-   * container statements s and variables v.
+   * Populates the given PKB's UsesS table with all Uses(c, v) relations,
+   * where c is a call stmt that calls a procedure such that Uses(p, v) holds.
    *
-   * Requires that the Modifies() relations between assignments/read statements and
-   * variables, as well as the ParentTTable be populated first.
+   * Requires that the following be populated first:
+   * 1) callProcTable in PKB
+   * 2) usesPTable in PKB
    *
    * @param pkb The PKB to use/modify.
    * @returns
    */
-  void fillModifiesSTable(Pkb& pkb) {
+  void fillUsesSTableCallStmts(Pkb& pkb) {
+    Table callProcTable = pkb.getCallProcTable();
+    Table usesPTable = pkb.getUsesPTable();
+
+    // Inner join the callProcTable{"stmtNum","procName"}
+    // and usesPTable{"proc","var"}, so we only retain the 
+    // rows where call statements are made to procedures
+    // that have some Uses(p, v) relation in the table.
+    // We then drop the middle column to obtain a table of 
+    // {"stmtNum", "var"} of Uses(c, v) relations.
+    callProcTable.innerJoin(usesPTable, 1, 0);
+    callProcTable.dropColumn(1);
+
+    for (const Row row : callProcTable.getData()) {
+      pkb.addUsesS(std::stoi(row[0]), row[1]);
+    }
+  }
+
+  /**
+   * Populates the given PKB's ModifiesS table with all Modifies(c, v) relations,
+   * where c is a call stmt that calls a procedure such that Modifies(p, v) holds.
+   *
+   * Requires that the following be populated first:
+   * 1) callProcTable in PKB
+   * 2) modifiesPTable in PKB
+   *
+   * @param pkb The PKB to use/modify.
+   * @returns
+   */
+  void fillModifiesSTableCallStmts(Pkb& pkb) {
+    Table callProcTable = pkb.getCallProcTable();
+    Table modifiesPTable = pkb.getModifiesPTable();
+
+    // Inner join the callProcTable{"stmtNum","procName"}
+    // and usesPTable{"proc","var"}, so we only retain the 
+    // rows where call statements are made to procedures
+    // that have some Uses(p, v) relation in the table.
+    // We then drop the middle column to obtain a table of 
+    // {"stmtNum", "var"} of Uses(c, v) relations.
+    callProcTable.innerJoin(modifiesPTable, 1, 0);
+    callProcTable.dropColumn(1);
+
+    for (const Row row : callProcTable.getData()) {
+      pkb.addModifiesS(std::stoi(row[0]), row[1]);
+    }
+  }
+
+  /**
+   * Populates the given PKB's ModifiesS table with all Modifies(ifs/w, v) relations where
+   * the relation holds due to some Modifies(s, v) for some s in the container, if the
+   * Modifies(s, v) relation is recorded in the ModifiesS table.
+   *
+   * Requires that the following be populated first:
+   * 1) ParentTTable
+   *
+   * @param pkb The PKB to use/modify.
+   * @returns
+   */
+  void fillModifiesSTableNonCallStmts(Pkb& pkb) {
     Table newModifiesSTable = fillIndirectRelation(pkb.getModifiesSTable(), pkb.getParentTTable());
     for (const Row row : newModifiesSTable.getData()) {
       int stmtNum = std::stoi(row[0]);
@@ -326,13 +415,13 @@ namespace {
   }
 
   /**
-   * Helper method to get all the procedures directly called by procName. 
+   * Helper method to get all the procedures directly called by procName.
    * Requires that the callsTable be populated.
-   * 
+   *
    * @param pkb The PKB to refer to.
    * @param procName The procedure to check against.
    */
-  std::unordered_set<std::string> getProceduresCalledBy(Pkb &pkb, std::string procName) {
+  std::unordered_set<std::string> getProceduresCalledBy(Pkb& pkb, std::string procName) {
     Table callsTable = pkb.getCallsTable();
     std::unordered_set<std::string> toReturn;
 
@@ -350,11 +439,11 @@ namespace {
    * Populates the UsesP table with all indirect Uses(p, v) relations between
    * procedures p and variables v. Direct relations are when Uses(p, v) holds because
    * there exists some statement s in p such that Uses(s, v) holds.
-   * 
+   *
    * Requires that the following be computed first:
    * 1) All other types of Uses() relations
    * 2) callsTable
-   * 
+   *
    * @param pkb The PKB to use/modify.
    * @returns
    */
@@ -378,7 +467,7 @@ namespace {
     // node numbers and procedure names since our 
     // adjacency list only allows numeric identifiers
     // for the graph vertices.
- 
+
     // Maps procedure names to a vertex number.
     std::map<std::string, int> procNameToNum;
     // Maps vertex numbers back to a procedure name.
@@ -494,10 +583,10 @@ namespace {
    * Verifies that no cyclic calls are made.
    * e.g. where A -> B indicates that A calls B, we verify
    * that no situation of the form A -> B -> C -> ... -> A exists.
-   * If any cyclic calls are found, a std::logic_error exception is thrown.
-   * 
+   * If any cyclic calls are found, an exception is thrown.
+   *
    * Requires that the callsTable be populated first.
-   * 
+   *
    * @param pkb The PKB to reference.
    * @returns none
    */
@@ -529,18 +618,18 @@ namespace {
     bool isCycleExists = (topoOrder.size() != pkb.getProcTable().size());
 
     if (isCycleExists) {
-      throw std::logic_error(CYCLE_EXISTS_ERROR_MSG + 
-        " (expected topological order of length " + 
-        std::to_string(pkb.getProcTable().size()) + 
-        ", but got " + std::to_string(topoOrder.size()) + 
-        ".)");
+      throw SourceProcessor::SemanticError(
+        SourceProcessor::ErrorMessage::SEMANTIC_ERROR_RECURSIVE_OR_CYCLIC_PROCEDURE_CALL +
+        "\nExpected topological order of length " + std::to_string(pkb.getProcTable().size()) +
+        " but got " + std::to_string(topoOrder.size()) + "."
+      );
     }
   }
 
   /**
    * Verifies that no calls to non-existent procedures exist.
-   * If any are found, a std::logic_error exception is thrown.
-   * 
+   * If any are found, an exception is thrown.
+   *
    * @returns none
    */
   void verifyNoCallsToNonExistentProcedures(Pkb& pkb) {
@@ -553,30 +642,61 @@ namespace {
     for (const Row row : callProcTable.getData()) {
       bool isCallToExistentProcedure = procTable.getData().count({ row[1] }) > 0;
       if (!isCallToExistentProcedure) {
-        throw std::logic_error("[DesignExtractor::verifyNoCallsToNonExistent"
-          "Procedures] Call to non-existent procedure (" + row[1] + ") found"
-          "at line " + row[0] + ".");
+        throw SourceProcessor::SemanticError(
+          SourceProcessor::ErrorMessage::SEMANTIC_ERROR_CALL_TO_NON_EXISTENT_PROCEDURE +
+          SourceProcessor::ErrorMessage::APPEND_STMT_NUMBER + row[0] +
+          SourceProcessor::ErrorMessage::APPEND_PROC_NAME + row[1]
+        );
       }
     }
   }
 }
 
-// TODO: Should the verification calls be extracted and called somewhere else?
-void DesignExtractor::extractDesignAbstractions() {
-  // Verification
-  verifyNoCallsToNonExistentProcedures(pkb);
-  verifyNoCyclicCalls(pkb);
+namespace SourceProcessor {
+  // TODO: Should the verification calls be extracted and called somewhere else?
+  void DesignExtractor::extractDesignAbstractions() {
+    // Verification
+    verifyNoCallsToNonExistentProcedures(pkb);
+    verifyNoCyclicCalls(pkb);
 
-  // Filling of Tables
-  fillParentTTable(pkb);
-  fillFollowsTTable(pkb);
-  fillUsesSTable(pkb);
-  fillModifiesSTable(pkb);
+    // Transitive relations
+    fillParentTTable(pkb);
+    fillFollowsTTable(pkb);
+    fillCallsTTable(pkb);
+    fillNextTTable(pkb);
 
-  // Calls that require that no cyclic calls exist.
-  fillCallsTTable(pkb);
-  fillUsesPTable(pkb);
-  fillModifiesPTable(pkb);
+    // Note the specific order of method calls here;
+    // We require that `fillUsesSTableNonCallStmts` be called
+    // again at the end to extract Uses(ifs/w, v) relations due to
+    // call statements inside the container.
+    // The order of UsesS/P design abstraction extraction by DE is as follows:
+    // 
+    // 1) All Uses(ifs/w, v) due to Uses(s != c, v)
+    // 2) All Uses(p, v) due to Calls(p, p') && Uses(p', v)
+    // 3) All Uses(c, v) due to call stmt c calling p && Uses(p, v)
+    // 4) All Uses(ifs/w, v) due to Uses(c, v)
+    // 
+    // We assume that other (sub-)components (Parser, etc.) have already
+    // extracted the following:
+    // 1) All Uses(ifs/w, v) due to conditional using v
+    // 2) All Uses(p, v) due to some s != c in p satisfying Uses(s, v)
+    // 3) All Uses(a, v), Uses(pn, v)
+    fillUsesSTableNonCallStmts(pkb);
+    fillUsesPTable(pkb);
+    fillUsesSTableCallStmts(pkb);
+    fillUsesSTableNonCallStmts(pkb);
 
-  fillAffectsTable(pkb);
+    // Same strategy as for UsesS/P.
+    // We assume that other (sub-)components (Parser, etc.) have already
+    // extracted the following:
+    // 1) All Modifies(p, v) due to some s != c in p satisfying Uses(s, v)
+    // 2) All Modifies(a, v), Modifies(r, v)
+    fillModifiesSTableNonCallStmts(pkb);
+    fillModifiesPTable(pkb);
+    fillModifiesSTableCallStmts(pkb);
+    fillModifiesSTableNonCallStmts(pkb);
+
+    fillAffectsTable(pkb);
+    fillAffectsTTable(pkb);
+  }
 }

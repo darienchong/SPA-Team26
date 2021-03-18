@@ -33,7 +33,7 @@ namespace {
     if (isNextCharDelimiter) {
       value.push_back(stream.get());
     } else {
-      throw std::invalid_argument("[Tokeniser::constructDelimiter]: Expected one of {}();_\", but got " + stream.peek());
+      throw TokeniserException("Expected one of {}();_\", but got " + stream.peek());
     }
 
     return { type, value };
@@ -57,7 +57,7 @@ namespace {
 
       // Identifiers cannot have digits as the first character.
       if (isFirstCharDigit) {
-        throw std::invalid_argument("[Tokeniser::constructName]: Encountered a digit as the first character of a name.");
+        throw TokeniserException("Encountered a digit as the first character of a name.");
       } else {
         isFirstChar = false;
       }
@@ -85,7 +85,7 @@ namespace {
       // we are at least on the second digit, hence an invalid construction.
       if (value == "0") {
         if (!isAllowLeadingZeroes) {
-          throw std::invalid_argument("[Tokeniser::constructNumber]: Encountered 0 as the first digit of a number.");
+          throw TokeniserException("Encountered 0 as the first digit of a number.");
         }
       }
 
@@ -93,7 +93,7 @@ namespace {
     }
 
     if (std::isalpha(stream.peek())) {
-      throw std::invalid_argument("[Tokeniser::constructNumber]: Encountered an alphabetical letter while constructing a number.");
+      throw TokeniserException("Encountered an alphabetical letter while constructing a number.");
     }
 
     return { type, value };
@@ -208,7 +208,7 @@ namespace {
     // operators are valid e.g. we allow <= but not !<
 
     if (!isOperator(stream.peek())) {
-      throw std::invalid_argument("[Tokeniser::constructOperator]: Expected one of +-*/%>=<!&| but got " + stream.peek());
+      throw TokeniserException("Expected one of +-*/%>=<!&| but got " + stream.peek());
     }
 
     if (isSingleOperator(stream.peek())) {
@@ -238,7 +238,7 @@ namespace {
       if (isNextCharEquals) {
         value.push_back(stream.get());
       } else {
-        throw std::invalid_argument("[Tokeniser::constructOperator]: Expected = but got " + stream.peek());
+        throw TokeniserException("Expected = but got " + stream.peek());
       }
 
       return { type, value };
@@ -251,7 +251,7 @@ namespace {
       if (isNextCharAmpersand) {
         value.push_back(stream.get());
       } else {
-        throw std::invalid_argument("[Tokeniser::constructOperator]: Expected & but got " + stream.peek());
+        throw TokeniserException("Expected & but got " + stream.peek());
       }
 
       return { type, value };
@@ -264,13 +264,13 @@ namespace {
       if (isNextCharShefferStroke) {
         value.push_back(stream.get());
       } else {
-        throw std::invalid_argument("[Tokeniser::constructOperator]: Expected | but got " + stream.peek());
+        throw TokeniserException("Expected | but got " + stream.peek());
       }
 
       return { type, value };
     }
 
-    throw std::logic_error("[Tokeniser::constructOperator]: Failed to construct operator, got " + stream.peek());
+    throw TokeniserException("Failed to construct operator, got " + stream.peek());
   }
 
   /**
@@ -284,7 +284,7 @@ namespace {
     std::string value;
 
     if (!std::isspace(stream.peek())) {
-      throw std::invalid_argument("[Tokeniser::constructWhitespace]: Expected whitespace character but got " + stream.peek());
+      throw TokeniserException("Expected whitespace character but got " + stream.peek());
     }
     value.push_back(stream.get());
     return { type, value };
@@ -302,6 +302,9 @@ namespace {
     }
   }
 }
+
+TokeniserException::TokeniserException(const std::string& msg)
+  : std::exception(("[Tokeniser Parsing Error] " + msg).c_str()) {}
 
 std::list<Token> Tokeniser::tokenise(std::istream& stream) {
   std::list<Token> tokens;
@@ -326,7 +329,7 @@ std::list<Token> Tokeniser::tokenise(std::istream& stream) {
         consumeWhitespace(stream);
       }
     } else {
-      throw std::logic_error("[Tokeniser::tokenise]: Failed to recognise character " + stream.peek());
+      throw TokeniserException("Failed to recognise character " + stream.peek());
     }
   }
 

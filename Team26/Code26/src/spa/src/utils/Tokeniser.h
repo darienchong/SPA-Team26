@@ -6,6 +6,11 @@
 #include <list>
 #include <fstream>
 
+class TokeniserException : public std::exception {
+public:
+  TokeniserException(const std::string& msg);
+};
+
 /**
  * Concrete API for the Tokeniser.
  * Handles conversion of a file (given as an input file stream)

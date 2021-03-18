@@ -87,10 +87,6 @@ TEST_CASE("[TestPkb] addFollows") {
     auto dataCopy = pkb.getFollowsTable().getData();
     REQUIRE(dataCopy.count({ "5", "6" }) == 1);
   }
-
-  SECTION("Check invalid insertion") {
-    REQUIRE_THROWS(pkb.addFollows(5, 4));
-  }
 }
 
 TEST_CASE("[TestPkb] addFollowsT(int, int)") {
@@ -100,10 +96,6 @@ TEST_CASE("[TestPkb] addFollowsT(int, int)") {
     pkb.addFollowsT(5, 6);
     auto dataCopy = pkb.getFollowsTTable().getData();
     REQUIRE(dataCopy.count({ "5", "6" }) == 1);
-  }
-
-  SECTION("Check invalid insertion") {
-    REQUIRE_THROWS(pkb.addFollowsT(5, 4));
   }
 }
 
@@ -115,10 +107,6 @@ TEST_CASE("[TestPkb] addParent") {
     auto dataCopy = pkb.getParentTable().getData();
     REQUIRE(dataCopy.count({ "5", "6" }) == 1);
   }
-
-  SECTION("Check invalid insertion") {
-    REQUIRE_THROWS(pkb.addParent(5, 4));
-  }
 }
 
 TEST_CASE("[TestPkb] addParentT(int, int)") {
@@ -128,10 +116,6 @@ TEST_CASE("[TestPkb] addParentT(int, int)") {
     pkb.addParentT(5, 6);
     auto dataCopy = pkb.getParentTTable().getData();
     REQUIRE(dataCopy.count({ "5", "6" }) == 1);
-  }
-
-  SECTION("Check invalid insertion") {
-    REQUIRE_THROWS(pkb.addParentT(5, 4));
   }
 }
 

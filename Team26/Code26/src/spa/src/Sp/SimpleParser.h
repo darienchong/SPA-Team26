@@ -3,6 +3,7 @@
 #include <list>
 #include <string>
 #include <vector>
+#include <unordered_set>
 
 #include "ExprParser.h"
 #include "Pkb.h"
@@ -12,6 +13,7 @@ namespace SourceProcessor {
   class SimpleParser {
   private:
     // Class variables
+    std::unordered_set<std::string> parsedProcs;
     std::string currentProc;
     std::list<Token> tokens;
     int stmtNum = 1;

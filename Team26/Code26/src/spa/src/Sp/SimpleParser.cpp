@@ -423,11 +423,9 @@ namespace SourceProcessor {
         stmt = parseRead();
       } else if (keyword == PRINT) {
         stmt = parsePrint();
-      }
-      else if (keyword == CALL) {
+      } else if (keyword == CALL) {
         stmt = parseCall();
-      }
-      else {
+      } else {
         throw SyntaxError(
           ErrorMessage::SYNTAX_ERROR_UNKNOWN_STMT_TYPE +
           ErrorMessage::APPEND_STMT_NUMBER +
@@ -470,19 +468,23 @@ namespace SourceProcessor {
 
   void SimpleParser::parseProcedure() {
     prevStmts.clear();
-    int start = getStmtNum();
 
     // grammar: 'procedure' proc_name '{' '}'
     validate(PROCEDURE);
     std::string procName = validate(NAME);
     setCurrentProc(procName);
+    if (parsedProcs.count(procName) == 1) {
+      throw SemanticError(
+        ErrorMessage::SEMANTIC_ERROR_DUPLICATED_PROCEDURE_NAME +
+        ErrorMessage::APPEND_STMT_NUMBER +
+        procName
+      );
+    }
+    parsedProcs.insert(procName);
     pkb.addProc(procName); // add procedures
     validate(LEFT_BRACE);
     parseStmtLst(0, getStmtNum());
     validate(RIGHT_BRACE);
-
-    int end = getStmtNum() - 1;
-    pkb.addProcStmtRange(start, end, procName); // add stmt num range to pkb
   }
 
   void SimpleParser::parseProgram() {

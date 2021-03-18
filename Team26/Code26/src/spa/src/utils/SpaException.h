@@ -57,7 +57,10 @@ namespace SourceProcessor {
     const static std::string SYNTAX_ERROR_EMPTY_STMT_LIST = "Encountered an empty stmtLst.";
     const static std::string SYNTAX_ERROR_UNKNOWN_STMT_TYPE = "Encountered an unknowned statement type.";
 
-    // Semantic Errors - Non for Iteration 1
+    // Semantic Errors
+    const static std::string SEMANTIC_ERROR_DUPLICATED_PROCEDURE_NAME = "Encountered a duplicated procedure name.";
+    const static std::string SEMANTIC_ERROR_CALL_TO_NON_EXISTENT_PROCEDURE = "Encountered a call to non-existent procedure.";
+    const static std::string SEMANTIC_ERROR_RECURSIVE_OR_CYCLIC_PROCEDURE_CALL = "Encountered a recursive or cyclic procedure call.";
 
     // =================
     // Appended Message
@@ -65,6 +68,7 @@ namespace SourceProcessor {
     const static std::string APPEND_TOKEN_EXPECTED = "\nToken expected: ";
     const static std::string APPEND_TOKEN_RECEIVED = "\nToken received: ";
     const static std::string APPEND_STMT_NUMBER = "\nStatement number: ";
+    const static std::string APPEND_PROC_NAME = "\nProcedure name: ";
   }
 
   /**

@@ -1,5 +1,7 @@
 #include "Pkb.h"
 
+#include <assert.h>
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -10,12 +12,6 @@
 
 Pkb::Pkb()
   : cfg(Cfg()) {
-}
-
-void Pkb::addProcStmtRange(int start, int end, std::string procName) {
-  for (int i = start; i <= end; i++) {
-    stmtProcMapper[i] = procName;
-  }
 }
 
 void Pkb::addCfgLink(int parent, int child) {
@@ -146,33 +142,25 @@ void Pkb::addAssign(int stmtNo) {
 }
 
 void Pkb::addFollows(int followed, int follower) {
-  if (followed >= follower) {
-    throw std::invalid_argument("Follower should come after followed");
-  }
+  assert(followed < follower);
   std::vector<std::string> vect{ std::to_string(followed), std::to_string(follower) };
   followsTable.insertRow(vect);
 }
 
 void Pkb::addFollowsT(int followed, int follower) {
-  if (followed >= follower) {
-    throw std::invalid_argument("Follower should come after followed");
-  }
+  assert(followed < follower);
   std::vector<std::string> vect{ std::to_string(followed), std::to_string(follower) };
   followsTTable.insertRow(vect);
 }
 
 void Pkb::addParent(int parent, int child) {
-  if (parent >= child) {
-    throw std::invalid_argument("Parent should come before child");
-  }
+  assert(parent < child);
   std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
   parentTable.insertRow(vect);
 }
 
 void Pkb::addParentT(int parent, int child) {
-  if (parent >= child) {
-    throw std::invalid_argument("Parent should come before child");
-  }
+  assert(parent < child);
   std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
   parentTTable.insertRow(vect);
 }
@@ -275,24 +263,4 @@ std::string Pkb::getVarNameFromPrintStmt(const int stmtNo) const {
 
 std::unordered_set<int> Pkb::getNextStmtFromCfg(const int node) const {
   return cfg.getNext(node);
-}
-
-bool Pkb::isSameProc(const int stmt1, const int stmt2) const {
-  if (stmt2 == stmt1) {
-    return true;
-  }
-
-  if (stmtProcMapper.count(stmt1) == 0) {
-    throw std::invalid_argument("Statement number stmt1 does not exist in the program");
-  }
-
-  if (stmtProcMapper.count(stmt2) == 0) {
-    throw std::invalid_argument("Statement number stmt2 does not exist in the program");
-  }
-
-  if (stmtProcMapper.at(stmt1) == stmtProcMapper.at(stmt2)) {
-    return true;
-  }
-
-  return false;
 }

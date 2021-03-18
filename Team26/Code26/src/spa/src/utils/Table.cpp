@@ -5,8 +5,10 @@
 #include <unordered_set>
 #include <stdexcept>
 #include <unordered_map>
-#include <stdexcept>
 #include <utility>
+
+TableException::TableException(const std::string& msg)
+  : std::exception(msg.c_str()) {}
 
 Table::Table() {
   header.emplace_back("0");
@@ -25,14 +27,14 @@ Table::Table(const Row& newHeader)
 
 void Table::setHeader(const Row& newHeader) {
   if (newHeader.size() != header.size()) {
-    throw std::invalid_argument("Header size does not match");
+    throw TableException("Header size does not match");
   }
 
   std::unordered_set<std::string> prevNames;
   for (std::string name : newHeader) {
     bool isDuplicate = (name != "") && prevNames.count(name);
     if (isDuplicate) {
-      throw std::invalid_argument("Non-empty column name could not be duplicated");
+      throw TableException("Non-empty column name could not be duplicated");
     } else {
       prevNames.emplace(name);
     }
@@ -44,7 +46,7 @@ void Table::setHeader(const Row& newHeader) {
 
 void Table::insertRow(Row row) {
   if (row.size() != header.size()) {
-    throw std::invalid_argument("Row should be of length " + std::to_string(header.size()));
+    throw TableException("Row should be of length " + std::to_string(header.size()));
   }
   data.emplace(row);
 }
@@ -91,7 +93,7 @@ int Table::getColumnIndex(const std::string& headerTitle) const {
       return i;
     }
   }
-  throw std::invalid_argument("Column with name:" + headerTitle + " not found");
+  throw TableException("Column with name:" + headerTitle + " not found");
 }
 
 void Table::dropColumn(int index) {
@@ -132,7 +134,7 @@ void Table::filterColumn(const std::string& columnName, const std::unordered_set
 
 void Table::concatenate(Table& otherTable) {
   if (header.size() != otherTable.getHeader().size()) {
-    throw std::invalid_argument("Concatenation requires table with the same number of columns");
+    throw TableException("Concatenation requires table with the same number of columns");
   }
   for (const Row& row : otherTable.getData()) {
     data.emplace(row);

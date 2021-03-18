@@ -2,12 +2,14 @@
 
 #include "Pkb.h"
 
-class DesignExtractor {
-private:
-  Pkb& pkb;
-public:
-  DesignExtractor(Pkb& pkb) : pkb(pkb) {}
-  ~DesignExtractor() {}
+namespace SourceProcessor {
+  class DesignExtractor {
+  private:
+    Pkb& pkb;
+  public:
+    DesignExtractor(Pkb& pkb) : pkb(pkb) {}
+    ~DesignExtractor() {}
 
-  void extractDesignAbstractions();
-};
+    void extractDesignAbstractions();
+  };
+}

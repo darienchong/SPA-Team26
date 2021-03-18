@@ -27,6 +27,43 @@ namespace {
   }
 }
 
+TEST_CASE("Semantic Error", "[SimpleParser][Semantic Error]") {
+  SECTION("Duplicated procedure name") {
+    std::string string("procedure proc1 {x=1;} procedure proc1 {x=2;}");
+    std::list<Token> simpleProg = expressionStringToTokens(string);
+    Pkb pkb;
+    SourceProcessor::SimpleParser parser(pkb, simpleProg);
+    REQUIRE_THROWS(parser.parse());
+  }
+
+  SECTION("Call to non-existing procedure") {
+    std::string string("procedure proc1 {call proc2;}");
+    std::list<Token> simpleProg = expressionStringToTokens(string);
+    Pkb pkb;
+    SourceProcessor::SimpleParser parser(pkb, simpleProg);
+    parser.parse();
+    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractDesignAbstractions());
+  }
+
+  SECTION("Recursive call of procedure") {
+    std::string string("procedure proc1 {call proc1;}");
+    std::list<Token> simpleProg = expressionStringToTokens(string);
+    Pkb pkb;
+    SourceProcessor::SimpleParser parser(pkb, simpleProg);
+    parser.parse();
+    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractDesignAbstractions());
+  }
+
+  SECTION("Cyclic call of procedure") {
+    std::string string("procedure proc1 {call proc2;} procedure proc2 {call proc1;}");
+    std::list<Token> simpleProg = expressionStringToTokens(string);
+    Pkb pkb;
+    SourceProcessor::SimpleParser parser(pkb, simpleProg);
+    parser.parse();
+    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractDesignAbstractions());
+  }
+}
+
 // Procedure
 TEST_CASE("Invalid parsing procedure", "[SimpleParser][Procedure]") {
   SECTION("Missing procedure keyword") {
@@ -627,7 +664,7 @@ TEST_CASE("Valid if statement - Basic", "[SimpleParser][If]") {
   REQUIRE(patternAssignTable.size() == 1);
 
   SECTION("With DE relations") {
-    DesignExtractor designExtractor(pkb);
+    SourceProcessor::DesignExtractor designExtractor(pkb);
     designExtractor.extractDesignAbstractions();
 
     Table parentTTable = pkb.getParentTTable();
@@ -717,7 +754,7 @@ TEST_CASE("Valid if statement - Advanced", "[SimpleParser][If]") {
     REQUIRE(patternAssignTable.size() == 2);
 
     SECTION("With DE relations") {
-      DesignExtractor designExtractor(pkb);
+      SourceProcessor::DesignExtractor designExtractor(pkb);
       designExtractor.extractDesignAbstractions();
 
       Table parentTTable = pkb.getParentTTable();
@@ -841,7 +878,7 @@ TEST_CASE("Valid if statement - Advanced", "[SimpleParser][If]") {
     REQUIRE(patternAssignTable.size() == 4);
 
     SECTION("With DE relations") {
-      DesignExtractor designExtractor(pkb);
+      SourceProcessor::DesignExtractor designExtractor(pkb);
       designExtractor.extractDesignAbstractions();
 
       Table parentTTable = pkb.getParentTTable();
@@ -1019,7 +1056,7 @@ TEST_CASE("Valid while statement - Basic", "[SimpleParser][While]") {
   REQUIRE(patternAssignTable.size() == 0);
 
   SECTION("With DE relations") {
-    DesignExtractor designExtractor(pkb);
+    SourceProcessor::DesignExtractor designExtractor(pkb);
     designExtractor.extractDesignAbstractions();
 
     Table parentTTable = pkb.getParentTTable();
@@ -1095,7 +1132,7 @@ TEST_CASE("Valid while statement - Advanced", "[SimpleParser][While]") {
     REQUIRE(patternAssignTable.size() == 1);
 
     SECTION("With DE relations") {
-      DesignExtractor designExtractor(pkb);
+      SourceProcessor::DesignExtractor designExtractor(pkb);
       designExtractor.extractDesignAbstractions();
 
       Table parentTTable = pkb.getParentTTable();
@@ -1206,7 +1243,7 @@ TEST_CASE("Valid while statement - Advanced", "[SimpleParser][While]") {
     REQUIRE(patternAssignTable.size() == 5);
 
     SECTION("With DE relations") {
-      DesignExtractor designExtractor(pkb);
+      SourceProcessor::DesignExtractor designExtractor(pkb);
       designExtractor.extractDesignAbstractions();
 
       Table parentTTable = pkb.getParentTTable();
@@ -1332,7 +1369,7 @@ TEST_CASE("Loops", "[SimpleParser][Assign][If][Print][Read][While]") {
     REQUIRE(patternAssignTable.size() == 3);
 
     SECTION("With DE relations") {
-      DesignExtractor designExtractor(pkb);
+      SourceProcessor::DesignExtractor designExtractor(pkb);
       designExtractor.extractDesignAbstractions();
 
       Table parentTTable = pkb.getParentTTable();
@@ -1439,7 +1476,7 @@ TEST_CASE("Loops", "[SimpleParser][Assign][If][Print][Read][While]") {
     REQUIRE(patternAssignTable.size() == 1);
 
     SECTION("With DE relations") {
-      DesignExtractor designExtractor(pkb);
+      SourceProcessor::DesignExtractor designExtractor(pkb);
       designExtractor.extractDesignAbstractions();
 
       Table parentTTable = pkb.getParentTTable();
@@ -1676,7 +1713,7 @@ TEST_CASE("Affects relations - Basic", "[SimpleParser][Affects]") {
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
 
-    DesignExtractor designExtractor(pkb);
+    SourceProcessor::DesignExtractor designExtractor(pkb);
     designExtractor.extractDesignAbstractions();
 
     Table affectsTable = pkb.getAffectsTable();
@@ -1711,7 +1748,7 @@ TEST_CASE("Affects relations - Basic", "[SimpleParser][Affects]") {
       SourceProcessor::SimpleParser parser(pkb, simpleProg);
       parser.parse();
 
-      DesignExtractor designExtractor(pkb);
+      SourceProcessor::DesignExtractor designExtractor(pkb);
       designExtractor.extractDesignAbstractions();
 
       Table affectsTable = pkb.getAffectsTable();
@@ -1726,7 +1763,7 @@ TEST_CASE("Affects relations - Basic", "[SimpleParser][Affects]") {
       SourceProcessor::SimpleParser parser(pkb, simpleProg);
       parser.parse();
 
-      DesignExtractor designExtractor(pkb);
+      SourceProcessor::DesignExtractor designExtractor(pkb);
       designExtractor.extractDesignAbstractions();
 
       Table affectsTable = pkb.getAffectsTable();
@@ -1742,7 +1779,7 @@ TEST_CASE("Affects relations - Basic", "[SimpleParser][Affects]") {
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
 
-    DesignExtractor designExtractor(pkb);
+    SourceProcessor::DesignExtractor designExtractor(pkb);
     designExtractor.extractDesignAbstractions();
 
     Table affectsTable = pkb.getAffectsTable();
@@ -1759,7 +1796,7 @@ TEST_CASE("Affects relations - Basic", "[SimpleParser][Affects]") {
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
 
-    DesignExtractor designExtractor(pkb);
+    SourceProcessor::DesignExtractor designExtractor(pkb);
     designExtractor.extractDesignAbstractions();
 
     Table affectsTable = pkb.getAffectsTable();
@@ -1776,7 +1813,7 @@ TEST_CASE("Affects relations - Advanced", "[SimpleParser][Affects]") {
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
 
-    DesignExtractor designExtractor(pkb);
+    SourceProcessor::DesignExtractor designExtractor(pkb);
     designExtractor.extractDesignAbstractions();
 
     Table affectsTable = pkb.getAffectsTable();
@@ -1804,7 +1841,7 @@ TEST_CASE("Affects relations - Advanced", "[SimpleParser][Affects]") {
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
 
-    DesignExtractor designExtractor(pkb);
+    SourceProcessor::DesignExtractor designExtractor(pkb);
     designExtractor.extractDesignAbstractions();
 
     Table affectsTable = pkb.getAffectsTable();

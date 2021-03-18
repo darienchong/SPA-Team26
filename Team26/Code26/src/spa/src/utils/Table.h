@@ -4,6 +4,7 @@
 #include <unordered_set>
 #include <vector>
 #include <functional>
+#include <exception>
 
 typedef std::vector<std::string> Row;
 struct StringVectorHash {
@@ -16,6 +17,11 @@ struct StringVectorHash {
   }
 };
 typedef std::unordered_set<Row, StringVectorHash> RowSet;
+
+class TableException : public std::exception {
+public:
+  TableException(const std::string& msg);
+};
 
 class Table {
 private:
