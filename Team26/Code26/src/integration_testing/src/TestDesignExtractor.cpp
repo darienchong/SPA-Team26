@@ -353,20 +353,20 @@ TEST_CASE("[TestDesignExtractor] Affects extraction") {
   pkb.addAssign(14);
 
   // adding to cfg
-  pkb.addCfgLink(1, 2);
-  pkb.addCfgLink(2, 3);
-  pkb.addCfgLink(3, 4);
-  pkb.addCfgLink(4, 5);
-  pkb.addCfgLink(5, 6);
-  pkb.addCfgLink(6, 3);
-  pkb.addCfgLink(3, 7);
-  pkb.addCfgLink(7, 8);
-  pkb.addCfgLink(7, 9);
-  pkb.addCfgLink(8, 10);
-  pkb.addCfgLink(9, 10);
-  pkb.addCfgLink(10, 11);
-  pkb.addCfgLink(11, 12);
-  pkb.addCfgLink(13, 14);
+  pkb.addCfgEdge(1, 2);
+  pkb.addCfgEdge(2, 3);
+  pkb.addCfgEdge(3, 4);
+  pkb.addCfgEdge(4, 5);
+  pkb.addCfgEdge(5, 6);
+  pkb.addCfgEdge(6, 3);
+  pkb.addCfgEdge(3, 7);
+  pkb.addCfgEdge(7, 8);
+  pkb.addCfgEdge(7, 9);
+  pkb.addCfgEdge(8, 10);
+  pkb.addCfgEdge(9, 10);
+  pkb.addCfgEdge(10, 11);
+  pkb.addCfgEdge(11, 12);
+  pkb.addCfgEdge(13, 14);
 
   // adding usesS and modifiesS
   pkb.addUsesS(4, "x");
@@ -446,20 +446,20 @@ TEST_CASE("[TestDesignExtractor] AffectsT extraction") {
   pkb.addAssign(14);
 
   // adding to cfg
-  pkb.addCfgLink(1, 2);
-  pkb.addCfgLink(2, 3);
-  pkb.addCfgLink(3, 4);
-  pkb.addCfgLink(4, 5);
-  pkb.addCfgLink(5, 6);
-  pkb.addCfgLink(6, 3);
-  pkb.addCfgLink(3, 7);
-  pkb.addCfgLink(7, 8);
-  pkb.addCfgLink(7, 9);
-  pkb.addCfgLink(8, 10);
-  pkb.addCfgLink(9, 10);
-  pkb.addCfgLink(10, 11);
-  pkb.addCfgLink(11, 12);
-  pkb.addCfgLink(13, 14);
+  pkb.addCfgEdge(1, 2);
+  pkb.addCfgEdge(2, 3);
+  pkb.addCfgEdge(3, 4);
+  pkb.addCfgEdge(4, 5);
+  pkb.addCfgEdge(5, 6);
+  pkb.addCfgEdge(6, 3);
+  pkb.addCfgEdge(3, 7);
+  pkb.addCfgEdge(7, 8);
+  pkb.addCfgEdge(7, 9);
+  pkb.addCfgEdge(8, 10);
+  pkb.addCfgEdge(9, 10);
+  pkb.addCfgEdge(10, 11);
+  pkb.addCfgEdge(11, 12);
+  pkb.addCfgEdge(13, 14);
 
   // adding usesS and modifiesS
   pkb.addUsesS(4, "x");

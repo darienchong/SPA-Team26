@@ -8,7 +8,7 @@ class AdjList {
 private:
   // The internal representation of the adjacency list.
   std::map<int, std::unordered_set<int>> internalRepresentation;
-  
+
   // Number of nodes in the graph.
   int size;
 
@@ -31,7 +31,7 @@ public:
   /**
    * Records a directed edge into the adjacency list i.e.
    * adds E(i,j) into the adjacency list.
-   * 
+   *
    * @param i
    * @param j
    * @returns none
@@ -40,7 +40,7 @@ public:
 
   /**
    * Retrives the value of a given entry.
-   * 
+   *
    * @param i
    * @param j
    * @returns `true` if E(i, j) holds, `false` otherwise.
@@ -51,14 +51,14 @@ public:
    * Applies Warshall's algorithm
    * (see https://www.dartmouth.edu/~matc/DiscreteMath/V.6.pdf) to the
    * current adjacency list.
-   * 
+   *
    * @returns
    */
   void applyWarshallAlgorithm();
 
   /**
    * Returns an ordered list of nodes in topological order.
-   * 
+   *
    * @returns Nodes in topological order.
    */
   std::list<int> topologicalOrder();
@@ -66,7 +66,7 @@ public:
   /**
    * Returns a string representation of the graph
    * as adjacency matrix.
-   * 
+   *
    * @returns String representation of graph as adjacency list.
    */
   std::string toString();

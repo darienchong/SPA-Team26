@@ -23,7 +23,7 @@ void Spa::parseSourceFile(const std::string& filename) {
   std::ifstream sourceFile(filename);
   if (!sourceFile.is_open()) {
     std::cout << "Unable to open source file" << std::endl;
-    exit(EXIT_SUCCESS);
+    exit(EXIT_FAILURE);
   }
 
   try {
@@ -40,9 +40,11 @@ void Spa::parseSourceFile(const std::string& filename) {
   } catch (const std::exception& e) {
     pkb = Pkb();
     std::cout << e.what() << std::endl;
+    exit(EXIT_FAILURE);
   } catch (...) {
     pkb = Pkb();
     std::cout << "OOPS! An unexpected error occured!";
+    exit(EXIT_FAILURE);
   }
 }
 

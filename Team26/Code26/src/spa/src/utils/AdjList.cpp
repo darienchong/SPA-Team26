@@ -10,7 +10,7 @@
 
 void AdjList::insert(const int i, const int j) {
   if (i > size || j > size) {
-    throw std::invalid_argument("[AdjList::insert] " 
+    throw std::invalid_argument("[AdjList::insert] "
       + INDEX_GREATER_THAN_SIZE_ERROR_MSG);
   }
 

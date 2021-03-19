@@ -54,7 +54,7 @@ namespace {
       std::stack<int> stack; // stack for dfs
 
       // Get the next stmts in the CFG from the starting affecterAssignStmt stmt and push to the stack
-      for (const int nextStmt : pkb.getNextStmtFromCfg(affecterAssignStmt)) {
+      for (const int nextStmt : pkb.getNextStmtsFromCfg(affecterAssignStmt)) {
         stack.push(nextStmt);
       }
 
@@ -83,7 +83,7 @@ namespace {
         }
 
         // Push all next stmts into the stack
-        for (const int nextStmt : pkb.getNextStmtFromCfg(currentStmt)) {
+        for (const int nextStmt : pkb.getNextStmtsFromCfg(currentStmt)) {
           stack.push(nextStmt);
         }
       }

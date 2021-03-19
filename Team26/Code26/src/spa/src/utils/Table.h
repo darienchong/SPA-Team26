@@ -9,11 +9,11 @@
 typedef std::vector<std::string> Row;
 struct StringVectorHash {
   size_t operator()(Row const& strings) const {
-	std::string concatenatedString;
-	for (const std::string& string : strings) {
-	  concatenatedString.append(string);
-	}
-	return std::hash<std::string>{}(concatenatedString);
+    std::string concatenatedString;
+    for (const std::string& string : strings) {
+      concatenatedString.append(string);
+    }
+    return std::hash<std::string>{}(concatenatedString);
   }
 };
 typedef std::unordered_set<Row, StringVectorHash> RowSet;

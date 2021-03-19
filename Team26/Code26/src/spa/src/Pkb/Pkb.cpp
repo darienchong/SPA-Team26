@@ -14,9 +14,9 @@ Pkb::Pkb()
   : cfg(Cfg()) {
 }
 
-void Pkb::addCfgLink(int parent, int child) {
-  cfg.addNext(parent, child);
-  addNext(parent, child);
+void Pkb::addCfgEdge(int from, int to) {
+  cfg.addEdge(from, to);
+  addNext(from, to);
 }
 
 void Pkb::addModifiesP(std::string proc, std::string var) {
@@ -261,6 +261,6 @@ std::string Pkb::getVarNameFromPrintStmt(const int stmtNo) const {
   }
 }
 
-std::unordered_set<int> Pkb::getNextStmtFromCfg(const int node) const {
-  return cfg.getNext(node);
+std::unordered_set<int> Pkb::getNextStmtsFromCfg(const int stmtNo) const {
+  return cfg.getNeighbours(stmtNo);
 }

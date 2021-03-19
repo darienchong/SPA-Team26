@@ -16,12 +16,12 @@ public:
   Pkb();
 
   /**
-   * Adds the statement numbers to CFG and populates Next relation.
+   * Adds a directed edge into the CFG and populates Next relation.
    *
-   * @param parent Statement number of the statement executed first.
-   * @param child Statement number of the statement which can be executed immediately after parent in some execution sequence.
+   * @param from Statement number of the statement executed first.
+   * @param to Statement number of the statement which can be executed immediately after.
    */
-  void addCfgLink(int parent, int child);
+  void addCfgEdge(int from, int to);
 
   /**
    * Adds a variable name into varTable.
@@ -454,13 +454,13 @@ public:
   std::string getVarNameFromPrintStmt(const int stmtNo) const;
 
   /**
- * Finds the set of nodes directly following the node of interest in the CFG.
- * If there are no nodes following, will return an empty set.
- *
- * @param node Node of interest.
- * @return Unordered set of nodes.
- */
-  std::unordered_set<int> getNextStmtFromCfg(const int node) const;
+   * Finds the set of stmts that can be directly executed after the given stmt number.
+   * If there are no nodes following, an empty set is returned.
+   *
+   * @param stmtNo Statement number of interest.
+   * @return Set of nodes.
+   */
+  std::unordered_set<int> getNextStmtsFromCfg(const int stmtNo) const;
 
 private:
   Cfg cfg;

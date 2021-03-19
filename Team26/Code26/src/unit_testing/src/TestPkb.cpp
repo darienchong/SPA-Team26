@@ -199,7 +199,7 @@ TEST_CASE("[TestPkb] addCallsT") {
   }
 }
 
-TEST_CASE("[TestPkb] addNext") {
+TEST_CASE("[TestPkb] addEdge") {
   Pkb pkb;
 
   SECTION("Check valid insertion") {

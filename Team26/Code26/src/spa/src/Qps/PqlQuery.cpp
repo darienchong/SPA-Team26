@@ -97,7 +97,7 @@ namespace Pql {
 
   Clause::Clause(const ClauseType& type, const std::vector<Entity>& params)
     : type(type), params(params) {
-      this->params.reserve(3); // Max number of params is 3
+    this->params.reserve(3); // Max number of params is 3
   }
 
   ClauseType Clause::getType() const {

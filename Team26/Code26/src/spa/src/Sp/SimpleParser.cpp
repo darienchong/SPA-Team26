@@ -210,7 +210,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (int i : prevStmts) {
-      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+      pkb.addCfgEdge(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
     }
     pkb.addIf(stmtNum); // add if stmts
     for (const std::string& variable : variablesUsed) {
@@ -262,7 +262,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (int i : prevStmts) {
-      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+      pkb.addCfgEdge(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
     }
     pkb.addWhile(stmtNum); // add while stmts
     for (const std::string& variable : variablesUsed) {
@@ -280,7 +280,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (int i : prevStmts) {
-      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+      pkb.addCfgEdge(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
     }
 
     // update prevStmts
@@ -300,7 +300,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (int i : prevStmts) {
-      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+      pkb.addCfgEdge(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
     }
     pkb.addCall(stmtNum); // add call stmts
     pkb.addCalls(getCurrentProc(), procName); // add proc-proc calls relation
@@ -324,7 +324,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (int i : prevStmts) {
-      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+      pkb.addCfgEdge(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
     }
     pkb.addVar(varName); // add variable
     pkb.addRead(stmtNum); // add read stmts
@@ -350,7 +350,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (int i : prevStmts) {
-      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+      pkb.addCfgEdge(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
     }
     pkb.addVar(varName); // add variable
     pkb.addPrint(stmtNum); // add print stmts
@@ -378,7 +378,7 @@ namespace SourceProcessor {
 
     // adding information to pkb
     for (int i : prevStmts) {
-      pkb.addCfgLink(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
+      pkb.addCfgEdge(i, stmtNum); // adding Next relation for stmt-stmt and Cfg nodes
     }
     pkb.addVar(varName); // add variable
     pkb.addAssign(stmtNum); /// add assign stmts

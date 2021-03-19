@@ -3,17 +3,15 @@
 #include <unordered_set>
 #include <unordered_map>
 
-Cfg::Cfg() = default;
-
-void Cfg::addNext(const int parent, const int child) {
-  if (adjLst.count(parent) == 0) {
-    adjLst.emplace(parent, std::unordered_set<int>{ child });
+void Cfg::addEdge(const int from, const int to) {
+  if (adjLst.count(from) == 0) {
+    adjLst.emplace(from, std::unordered_set<int>{ to });
   } else {
-    adjLst.at(parent).insert(child);
+    adjLst.at(from).insert(to);
   }
 }
 
-std::unordered_set<int> Cfg::getNext(const int node) const {
+std::unordered_set<int> Cfg::getNeighbours(const int node) const {
   if (adjLst.count(node) == 0) {
     return {};
   }

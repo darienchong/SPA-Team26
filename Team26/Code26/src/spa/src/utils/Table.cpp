@@ -62,11 +62,11 @@ RowSet Table::getData() const {
 std::unordered_set<std::string> Table::getColumn(const std::string& headerTitle) const {
   const int columnIndex = getColumnIndex(headerTitle);
   if (columnIndex == -1) {
-	throw std::invalid_argument("Non-existing header title: \"" + headerTitle + "\"");
+    throw std::invalid_argument("Non-existing header title: \"" + headerTitle + "\"");
   }
   std::unordered_set<std::string> column;
   for (Row row : data) {
-	column.emplace(row[columnIndex]);
+    column.emplace(row[columnIndex]);
   }
   return column;
 }
@@ -75,11 +75,11 @@ RowSet Table::getColumns(const Row& headerTitles) const {
   std::vector<int> indexList;
   indexList.reserve(headerTitles.size()); // Optimization to avoid resizing
   for (const std::string& headerTitle : headerTitles) {
-	const int columnIndex = getColumnIndex(headerTitle);
-	if (columnIndex == -1) {
-	  throw std::invalid_argument("Non-existing header title: \"" + headerTitle + "\"");
-	}
-	indexList.push_back(columnIndex);
+    const int columnIndex = getColumnIndex(headerTitle);
+    if (columnIndex == -1) {
+      throw std::invalid_argument("Non-existing header title: \"" + headerTitle + "\"");
+    }
+    indexList.push_back(columnIndex);
   }
 
   RowSet result;
@@ -105,7 +105,7 @@ int Table::getColumnIndex(const std::string& headerTitle) const {
 
 bool Table::dropColumn(int index) {
   if (index < 0 || index >= header.size()) {
-	return false;
+    return false;
   }
   // Clear data if there is only one column, otherwise erase column
   if (header.size() == 1) {
@@ -245,8 +245,7 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
     if (!isInMap) {
       std::vector<Row> vect{ row };
       hashmap[key] = vect;
-    }
-    else {
+    } else {
       hashmap.at(key).emplace_back(row);
     }
   }

@@ -8,23 +8,20 @@ private:
   std::unordered_map<int, std::unordered_set<int>> adjLst;
 
 public:
-
   /**
-   * Adds a parent and child node into the CFG.
+   * Adds a directed edge into the CFG.
    *
-   * @param parent Parent node to be inserted
-   * @param child Child node to be inserted
+   * @param from From node to be inserted.
+   * @param to To node to be inserted.
    */
-  void addNext(const int parent, const int child);
+  void addEdge(const int from, const int to);
 
   /**
-   * Finds the set of nodes directly following the node of interest in the CFG.
-   * If there are no nodes following, will return an empty set.
+   * Finds the set of neighbouring nodes of the given node.
+   * If there are no neighbouring nodes, an empty set is returned.
    *
    * @param node Node of interest.
-   * @return Unordered set of nodes
+   * @return Set of neighbouring nodes.
    */
-  std::unordered_set<int> getNext(const int node) const;
-
-  Cfg();
+  std::unordered_set<int> getNeighbours(const int node) const;
 };

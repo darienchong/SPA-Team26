@@ -1664,18 +1664,18 @@ TEST_CASE("CFG", "[SimpleParser][Cfg]") {
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
 
-    std::unordered_set<int> stmt1 = pkb.getNextStmtFromCfg(1);
-    std::unordered_set<int> stmt2 = pkb.getNextStmtFromCfg(2);
-    std::unordered_set<int> stmt3 = pkb.getNextStmtFromCfg(3);
-    std::unordered_set<int> stmt4 = pkb.getNextStmtFromCfg(4);
-    std::unordered_set<int> stmt5 = pkb.getNextStmtFromCfg(5);
-    std::unordered_set<int> stmt6 = pkb.getNextStmtFromCfg(6);
-    std::unordered_set<int> stmt7 = pkb.getNextStmtFromCfg(7);
-    std::unordered_set<int> stmt8 = pkb.getNextStmtFromCfg(8);
-    std::unordered_set<int> stmt9 = pkb.getNextStmtFromCfg(9);
-    std::unordered_set<int> stmt10 = pkb.getNextStmtFromCfg(10);
-    std::unordered_set<int> stmt11 = pkb.getNextStmtFromCfg(11);
-    std::unordered_set<int> stmt12 = pkb.getNextStmtFromCfg(12);
+    std::unordered_set<int> stmt1 = pkb.getNextStmtsFromCfg(1);
+    std::unordered_set<int> stmt2 = pkb.getNextStmtsFromCfg(2);
+    std::unordered_set<int> stmt3 = pkb.getNextStmtsFromCfg(3);
+    std::unordered_set<int> stmt4 = pkb.getNextStmtsFromCfg(4);
+    std::unordered_set<int> stmt5 = pkb.getNextStmtsFromCfg(5);
+    std::unordered_set<int> stmt6 = pkb.getNextStmtsFromCfg(6);
+    std::unordered_set<int> stmt7 = pkb.getNextStmtsFromCfg(7);
+    std::unordered_set<int> stmt8 = pkb.getNextStmtsFromCfg(8);
+    std::unordered_set<int> stmt9 = pkb.getNextStmtsFromCfg(9);
+    std::unordered_set<int> stmt10 = pkb.getNextStmtsFromCfg(10);
+    std::unordered_set<int> stmt11 = pkb.getNextStmtsFromCfg(11);
+    std::unordered_set<int> stmt12 = pkb.getNextStmtsFromCfg(12);
 
     REQUIRE(stmt1.find(2) != stmt1.end());
     REQUIRE(stmt1.size() == 1);
