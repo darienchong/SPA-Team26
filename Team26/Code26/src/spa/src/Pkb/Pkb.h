@@ -207,7 +207,7 @@ public:
 
 
   /**
-   * Adds the Row {stmtNo, lhs, rhs} into patterTable.
+   * Adds the Row {stmtNo, lhs, rhs} into patternAssignTable.
    *
    * @param stmtNo Statement number of the assign statement
    * @param lhs String of the left hand side of the assign statement
