@@ -33,29 +33,28 @@ TEST_CASE("[TestTable] New Table") {
 TEST_CASE("[TestTable] Set Header") {
   SECTION("valid header") {
     Table table(2);
-    std::vector<std::string> h{ "0", "1" };
-    table.setHeader(h);
-    REQUIRE(table.getHeader() == h);
+    table.setHeader({ "0", "1" });
+    std::vector<std::string> expectedHeader{ "0", "1" };
+    REQUIRE(table.getHeader() == expectedHeader);
   }
 
   SECTION("valid header with empty string") {
     Table table(2);
-    std::vector<std::string> h{ "", "a" };
-    table.setHeader(h);
-    REQUIRE(table.getHeader() == h);
+    table.setHeader({ "", "a" });
+    std::vector<std::string> expectedHeader{ "", "a" };
+    REQUIRE(table.getHeader() == expectedHeader);
   }
 
   SECTION("valid header with duplicated empty string") {
     Table table(2);
-    std::vector<std::string> h{ "", "" };
-    table.setHeader(h);
-    REQUIRE(table.getHeader() == h);
+    table.setHeader({ "", "" });
+    std::vector<std::string> expectedHeader{ "", "" };
+    REQUIRE(table.getHeader() == expectedHeader);
   }
 
   SECTION("invalid header") {
     Table table(2);
-    std::vector<std::string> h{ "a", "a" };
-    REQUIRE_THROWS(table.setHeader(h));
+    REQUIRE_THROWS(table.setHeader({ "a", "a" }));
   }
 
 }

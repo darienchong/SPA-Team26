@@ -199,7 +199,7 @@ TEST_CASE("[TestPkb] addCallsT") {
   }
 }
 
-TEST_CASE("[TestPkb] addEdge") {
+TEST_CASE("[TestPkb] addNext") {
   Pkb pkb;
 
   SECTION("Check valid insertion") {
@@ -363,5 +363,37 @@ TEST_CASE("[TestPkb] getModifiedBy") {
     REQUIRE(variables.count("x") == 1);
     REQUIRE(variables.count("y") == 1);
     REQUIRE(variables.size() == 2);
+  }
+}
+
+TEST_CASE("[TestPkb] CFG edges/Next") {
+  Pkb pkb;
+  pkb.addCfgEdge(1, 2);
+  pkb.addCfgEdge(1, 3);
+  pkb.addCfgEdge(1, 4);
+  pkb.addCfgEdge(4, 5);
+
+  SECTION("Next relations") {
+    Table nextTable = pkb.getNextTable();
+    REQUIRE(nextTable.contains({ "1", "2" }));
+    REQUIRE(nextTable.contains({ "1", "3" }));
+    REQUIRE(nextTable.contains({ "1", "4" }));
+    REQUIRE(nextTable.contains({ "4", "5" }));
+    REQUIRE(nextTable.size() == 4);
+  }
+
+  SECTION("getNextStmtsFromCfg") {
+    std::unordered_set<int> neighbours1 = pkb.getNextStmtsFromCfg(1);
+    std::unordered_set<int> neighbours4 = pkb.getNextStmtsFromCfg(4);
+    REQUIRE(neighbours1.count(2) == 1);
+    REQUIRE(neighbours1.count(3) == 1);
+    REQUIRE(neighbours1.count(4) == 1);
+    REQUIRE(neighbours1.size() == 3);
+    REQUIRE(pkb.getNextStmtsFromCfg(2).size() == 0);
+    REQUIRE(pkb.getNextStmtsFromCfg(3).size() == 0);
+    REQUIRE(neighbours4.count(5) == 1);
+    REQUIRE(neighbours4.size() == 1);
+    REQUIRE(pkb.getNextStmtsFromCfg(5).size() == 0);
+    REQUIRE(pkb.getNextStmtsFromCfg(6).size() == 0);
   }
 }
