@@ -31,16 +31,21 @@ namespace {
     case Pql::ClauseType::USES_S:
     case Pql::ClauseType::NEXT:
     case Pql::ClauseType::NEXT_T:
+      return entity.getType() == Pql::EntityType::STMT ||
+        entity.getType() == Pql::EntityType::PROG_LINE; // stmtRef
     case Pql::ClauseType::AFFECTS:
     case Pql::ClauseType::AFFECTS_T:
       return entity.getType() == Pql::EntityType::STMT ||
-        entity.getType() == Pql::EntityType::PROG_LINE; // stmtRef
+        entity.getType() == Pql::EntityType::PROG_LINE ||
+        entity.getType() == Pql::EntityType::ASSIGN; // stmtRef + assignStmts
 
     case Pql::ClauseType::MODIFIES_P:
     case Pql::ClauseType::USES_P:
     case Pql::ClauseType::CALLS:
     case Pql::ClauseType::CALLS_T:
       return entity.getType() == Pql::EntityType::PROCEDURE; // procRef
+    default:
+      return false;
     }
   }
 
@@ -60,10 +65,13 @@ namespace {
     case Pql::ClauseType::PARENT_T:
     case Pql::ClauseType::NEXT:
     case Pql::ClauseType::NEXT_T:
+      return entity.getType() == Pql::EntityType::STMT ||
+        entity.getType() == Pql::EntityType::PROG_LINE; // stmtRef
     case Pql::ClauseType::AFFECTS:
     case Pql::ClauseType::AFFECTS_T:
       return entity.getType() == Pql::EntityType::STMT ||
-        entity.getType() == Pql::EntityType::PROG_LINE; // stmtRef
+        entity.getType() == Pql::EntityType::PROG_LINE ||
+        entity.getType() == Pql::EntityType::ASSIGN; // stmtRef + assignStmts
 
     case Pql::ClauseType::MODIFIES_S:
     case Pql::ClauseType::USES_S:
@@ -74,6 +82,8 @@ namespace {
     case Pql::ClauseType::CALLS:
     case Pql::ClauseType::CALLS_T:
       return entity.getType() == Pql::EntityType::PROCEDURE; // procRef
+    default:
+      return false;
     }
   }
 
@@ -122,14 +132,14 @@ namespace Pql {
       {
         const Entity& lhsEntity = params[0];
         const Entity& rhsEntity = params[1];
-        if (lhsEntity == rhsEntity) {
+        if (!lhsEntity.isWildcard() && lhsEntity == rhsEntity) {
           return true;
         }
 
         const bool isRhsSmallerThanLhs =
           lhsEntity.isNumber() &&
           rhsEntity.isNumber() &&
-          rhsEntity.getValue() < lhsEntity.getValue();
+          stoi(rhsEntity.getValue()) < stoi(lhsEntity.getValue());
         if (isRhsSmallerThanLhs) {
           return true;
         }
@@ -140,13 +150,13 @@ namespace Pql {
       {
         const Entity& lhsEntity = params[0];
         const Entity& rhsEntity = params[1];
-        if (lhsEntity == rhsEntity) {
+        if (!lhsEntity.isWildcard() && lhsEntity == rhsEntity) {
           return true;
         }
         const bool isRhsSmallerThanLhs =
           lhsEntity.isNumber() &&
           rhsEntity.isNumber() &&
-          rhsEntity.getValue() < lhsEntity.getValue();
+          stoi(rhsEntity.getValue()) < stoi(lhsEntity.getValue());
         if (isRhsSmallerThanLhs) {
           return true;
         }
@@ -155,7 +165,8 @@ namespace Pql {
           lhsEntity.isSynonym() &&
           !lhsEntity.isStmtSynonym() &&
           !lhsEntity.isWhileSynonym() &&
-          !lhsEntity.isIfSynonym();
+          !lhsEntity.isIfSynonym() &&
+          !lhsEntity.isProgLineSynonym();
         if (isLhsNotContainerStmt) {
           return true;
         }
@@ -192,8 +203,6 @@ namespace Pql {
       clauseResultTables.emplace_back(clauseResult);
     }
 
-    const std::vector<Entity>& queryTargets = query.getTargets();
-
     Table finalResultTable = Table({ "" });
     finalResultTable.insertRow({ "" });
 
@@ -220,6 +229,7 @@ namespace Pql {
     }
 
     // Join remaining query targets that is not found in the finalResultTable
+    const std::vector<Entity>& queryTargets = query.getTargets();
     for (Entity target : queryTargets) {
       const bool doesTargetExist = finalResultTable.getColumnIndex(target.getValue()) != -1;
       if (!doesTargetExist) {
@@ -337,6 +347,18 @@ namespace Pql {
       }
     }
 
+    // If LHS synonym == RHS synonym, need to make sure table value LHS = RHS
+    if (lhsEntity.isSynonym() && lhsEntity == rhsEntity) {
+      for (const Row& row : clauseResultTable.getData()) {
+        const bool isLhsEqualRhs = row[0] == row[1];
+        if (!isLhsEqualRhs) {
+          clauseResultTable.deleteRow(row);
+        }
+      }
+      clauseResultTable.setHeader({ header1, "" });
+      return;
+    }
+
     // Do nothing if param is wildcard
     if (!rhsEntity.isWildcard()) {
       if (rhsEntity.isSynonym()) {
@@ -348,6 +370,7 @@ namespace Pql {
         clauseResultTable.innerJoin(getTableFromEntity(rhsEntity), 1, 0); // inner join on second column
       }
     }
+
 
     clauseResultTable.setHeader({ header1, header2 });
   }
@@ -377,9 +400,9 @@ namespace Pql {
       rhsTable.insertRow({ postfixExpr });
       clauseResultTable.innerJoin(rhsTable, 2, 0); // inner join on third column of table
     } else if (rhsEntity.isSubExpression()) {
-      for (std::vector<std::string> row : clauseResultTable.getData()) {
-        int hey = row[2].find(postfixExpr);
-        if (row[2].find(postfixExpr) == std::string::npos) {
+      for (const Row& row : clauseResultTable.getData()) {
+        const bool doesNotMatch = row[2].find(postfixExpr) == std::string::npos;
+        if (doesNotMatch) {
           clauseResultTable.deleteRow(row);
         }
       }
@@ -585,7 +608,7 @@ namespace Pql {
     set.reserve(resultTable.size()); // optimization to avoid rehashing
     for (const Row& row : resultTable.getData()) {
       std::string outputLine;
-      for (int i = 0; i < columns.size(); i++) {
+      for (size_t i = 0; i < columns.size(); i++) {
         const int rowColumnIdx = columns[i];
         std::string element;
 

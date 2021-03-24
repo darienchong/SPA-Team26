@@ -112,6 +112,8 @@ namespace Pql {
     const static std::string SEMANTIC_ERROR_ZERO_STMT_NUMBER = "Encountered 0 as a statement number.";
     const static std::string SEMANTIC_ERROR_INVALID_WILDCARD = "Encountered _ but is ambiguous.";
     const static std::string SEMANTIC_ERROR_INVALID_ATTRIBUTE_NAME = "Encountered an invalid attribute name for a specific synonym.";
+    const static std::string SEMANTIC_ERROR_INVALID_WITH_CLAUSE = "Encountered a with clause where the LHS and RHS are of different types.";
+    const static std::string SEMANTIC_ERROR_INVALID_DECLARATION_NAME_BOOLEAN = "Encountered an illegal declaration of a synonym named BOOLEAN.";
 
     // =================
     // Appended Message

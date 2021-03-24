@@ -1,24 +1,17 @@
-procedure NoNestingNoProblem {
-  print = call;
-  print print;
-  read = 2;
-  read if;
-  while = procedure;
-  read while;
-  exampleReport =a +b *(c* d -e)* (f + g * h)
-- i;
-  read read;
-  print call;
-  read print;
-  if = while;
-  read call;
-  print errors;
-  call = C47Lm370n1gHt;
-  print read;
-  applepen= pen/ apple;
-  print 
+procedure
+general{while	(x !=
+0)
+	
 
- if;
-  print             while;
-  Pineapplepen = pen % pineapple;Applepen=pinepineappleapplepen-pineapplepen;
+{x=x-		
+	 x + 0
+;}
+if (x == 0)then {
+  call next; 	
+} 	
+else { print x; }}
+
+procedure next {
+  	
+read x;
 }

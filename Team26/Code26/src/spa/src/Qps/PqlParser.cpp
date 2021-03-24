@@ -116,6 +116,62 @@ namespace {
   }
 
   /**
+   * Checks whether the given with clause parameter entity is a number.
+   *
+   * @param entity Entity to verify.
+   * @return True if the entity is a number type param. Otherwise, false.
+   */
+  bool isWithClauseParamNumber(const Pql::Entity& entity) {
+    const Pql::EntityType entityType = entity.getType();
+    switch (entityType) {
+      // Alway true
+    case Pql::EntityType::PROG_LINE:
+    case Pql::EntityType::NUMBER:
+      return true;
+    case Pql::EntityType::CONSTANT:
+      assert(entity.getAttributeRefType() == Pql::AttributeRefType::VALUE);
+      return true;
+    case Pql::EntityType::ASSIGN:
+    case Pql::EntityType::IF:
+    case Pql::EntityType::WHILE:
+    case Pql::EntityType::STMT:
+      assert(entity.getAttributeRefType() == Pql::AttributeRefType::STMT_NUMBER);
+      return true;
+
+      // May be true
+    case Pql::EntityType::READ:
+    case Pql::EntityType::PRINT:
+    case Pql::EntityType::CALL:
+      return entity.getAttributeRefType() == Pql::AttributeRefType::STMT_NUMBER;
+
+      // Always false
+    case Pql::EntityType::NAME:
+    case Pql::EntityType::PROCEDURE:
+    case Pql::EntityType::VARIABLE:
+      return false;
+    default:
+      assert(false); // no other cases
+      return false;
+    }
+  }
+
+  /**
+   * Checks whether the given with-clause params are of the same type (both numbers
+   * or both names).
+   *
+   * @param lhs Left-hand-side parameter entity.
+   * @param rhs Right-hand-side parameter entity.
+   * @return True if both lhs and rhs are of the same type. Otherwise, false.
+  */
+  bool areWithClauseParamsSameType(const Pql::Entity& lhs, const Pql::Entity& rhs) {
+    const bool isLhsNumber = isWithClauseParamNumber(lhs);
+    const bool isRhsNumber = isWithClauseParamNumber(rhs);
+    return isLhsNumber && isRhsNumber || // both are numbers 
+      !isLhsNumber && !isRhsNumber;      // both are names (guaranteed)
+  }
+
+
+  /**
    * Converts infix expression tokens into postfix expression as a whitespace delimited string.
    *
    * @param infixExpressionTokens List of infix expression tokens.
@@ -155,9 +211,6 @@ namespace Pql {
     return pqlQuery;
   }
 
-  // declaration: design-entity synonym (',' synonym)* ';'
-  // design-entity: 'stmt' | 'read' | 'print' | 'while' | 'if' | 'assign' | 
-  // 'variable' | 'constant' | 'procedure' | 'call' | 'prog_line'
   // Parses the declarations of the PQL query
   void PqlParser::parseDeclarations() {
     while (!tokens.empty() && tokens.front() != SELECT) {
@@ -205,6 +258,11 @@ namespace Pql {
   void PqlParser::parseDeclarationSynonym(const EntityType& designEntityType) {
     const Token& synonymToken = validateAndGet(IDENTIFIER);
 
+    // Disallow synonym to be named 'BOOLEAN' to avoid confusion
+    if (synonymToken == BOOLEAN) {
+      throw SemanticError(ErrorMessage::SEMANTIC_ERROR_INVALID_DECLARATION_NAME_BOOLEAN);
+    }
+
     // Check if synonym has been declared
     if (isSynonymDeclared(synonymToken.value)) {
       throw SemanticError(
@@ -218,7 +276,6 @@ namespace Pql {
     declaredSynonyms[synonymToken.value] = designEntityType;
   }
 
-  // query-body: 'Select' synonym [ suchthat-cl ] [ pattern-cl ]
   // Parses the PQL query body
   void PqlParser::parseBody(Query& queryUnderConstruction) {
     validateAndGet(SELECT);
@@ -236,9 +293,9 @@ namespace Pql {
     }
 
     const Token frontToken = tokens.front();
-    if (frontToken == BOOLEAN) { // BOOLEAN query
+    if (frontToken == BOOLEAN) {                             // BOOLEAN query
       validateAndGet(BOOLEAN);
-    } else if (frontToken == LEFT_ANGLE_BRACKET) { // Tuple select
+    } else if (frontToken == LEFT_ANGLE_BRACKET) {           // Tuple select
       validateAndGet(LEFT_ANGLE_BRACKET);
 
       // Parse first select target in tuple
@@ -251,7 +308,7 @@ namespace Pql {
       }
 
       validateAndGet(RIGHT_ANGLE_BRACKET);
-    } else { // Single select
+    } else {                                                 // Single select
       parseSelectTarget(queryUnderConstruction);
     }
   }
@@ -464,6 +521,13 @@ namespace Pql {
     parseRef(clauseUnderConstruction);
     validateAndGet(EQUAL);
     parseRef(clauseUnderConstruction);
+    // Verify LHS and RHS are the same type
+    const std::vector<Entity>& params = clauseUnderConstruction.getParams();
+    const Entity& lhsEntity = params[0];
+    const Entity& rhsEntity = params[1];
+    if (!areWithClauseParamsSameType(lhsEntity, rhsEntity)) {
+      throw SemanticError(ErrorMessage::SEMANTIC_ERROR_INVALID_WITH_CLAUSE);
+    }
     queryUnderConstruction.addClause(clauseUnderConstruction);
   }
 

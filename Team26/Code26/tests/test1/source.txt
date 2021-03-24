@@ -1,5 +1,37 @@
-procedure
-general{read
-x;while	(x !=0)
+procedure procedure {
+  print = call;
+  print print;
+  read = ((2));
+  read if;
+  while = procedure;
+  read while;
+  exampleReport = a + b * (((c)) * d - e) * (f + g * h) - i;
+  read read;
+  print call;
+  read print;
+  if = while;
+  print errors;
+  call = C47Lm370n1gHt;
+  print read;
+  applepen = pen / apple;
+  print if;
+  print while;
+  Pineapplepen = pen % pineapple;
+  Applepen = pinepineappleapplepen - pineapplepen;
+}
 
-{x=x- 1;}}
+procedure C47Lm370n1gHt {
+  C47Lm370n1gHt = (((procedure)));
+  if ((if) >= while + C47Lm370n1gHt) then {
+    print print;
+  } else {
+    call call;
+  }
+  while ((!((call != print) && (read == procedure))) || (0 <= 346)) {
+    call call;
+  }
+}
+
+procedure call {
+  read call;
+}

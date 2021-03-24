@@ -103,9 +103,9 @@ TEST_CASE("[TestPqlParsing] Valid Query", "[PqlParser][Valid]") {
     SECTION("Declaration of synonym using keywords") {
       // PQL query to test
       std::string queryString(R"(
-        stmt Select, BOOLEAN, such, that, pattern, with, Follows, Parent, Uses, 
-        Modifies, Next, Calls, Affects, stmt, read, print, while, if, assign, 
-        variable, constant, procedure, call, prog, line, and;
+        stmt Select, such, that, pattern, with, Follows, Parent, Uses, Modifies, 
+        Next, Calls, Affects, stmt, read, print, while, if, assign, variable, 
+        constant, procedure, call, prog, line, and, procName, varName, value;
         Select Select
       )");
       std::list<Token> queryTokens = queryStringToTokens(queryString);
@@ -1747,6 +1747,18 @@ TEST_CASE("[TestPqlParsing] Query with Syntax Error", "[PqlParser][SyntaxError]"
 }
 
 TEST_CASE("[TestPqlParsing] Query with Semantic Error", "[PqlParser][Semantic Error]") {
+  SECTION("Declaration using synonym named BOOLEAN") {
+    // PQL query to test
+    std::string queryString(R"(
+      stmt BOOLEAN; 
+      Select BOOLEAN
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    REQUIRE_THROWS(pqlParser.parseQuery());
+  }
+
   SECTION("Repeated declarations of same name - same types") {
     // PQL query to test
     std::string queryString(R"(
@@ -1940,6 +1952,55 @@ TEST_CASE("[TestPqlParsing] Query with Semantic Error", "[PqlParser][Semantic Er
       // PQL query to test
       std::string queryString(R"(
         Select BOOLEAN such that Modifies(_, _)
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+  }
+
+  SECTION("With clause params of different types") {
+    SECTION("number = name") {
+      // PQL query to test
+      std::string queryString(R"(
+        Select BOOLEAN with 10 = "x"
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("number = name (attrRef)") {
+      // PQL query to test
+      std::string queryString(R"(
+        procedure pr;
+        Select BOOLEAN with 10 = pr.procName
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("number (attrRef) = name") {
+      // PQL query to test
+      std::string queryString(R"(
+        constant c;
+        Select BOOLEAN with c.value = "x"
+      )");
+      std::list<Token> queryTokens = queryStringToTokens(queryString);
+      Pql::PqlParser pqlParser(queryTokens);
+
+      REQUIRE_THROWS(pqlParser.parseQuery());
+    }
+
+    SECTION("number (attrRef) = name (attrRef)") {
+      // PQL query to test
+      std::string queryString(R"(
+        constant c; variable v;
+        Select BOOLEAN with c.value = v.varName
       )");
       std::list<Token> queryTokens = queryStringToTokens(queryString);
       Pql::PqlParser pqlParser(queryTokens);
