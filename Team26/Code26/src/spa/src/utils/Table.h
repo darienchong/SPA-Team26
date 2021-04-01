@@ -12,6 +12,7 @@ struct StringVectorHash {
     std::string concatenatedString;
     for (const std::string& string : strings) {
       concatenatedString.append(string);
+      concatenatedString.append(" ");
     }
     return std::hash<std::string>{}(concatenatedString);
   }

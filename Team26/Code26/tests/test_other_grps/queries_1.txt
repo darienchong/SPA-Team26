@@ -1,0 +1,240 @@
+1 - Calls - single clause
+procedure p;
+Select p such that Calls(p, "UmS1ee")
+gPmmoDn2P2R
+5000
+2 - Calls - single clause
+procedure p, q;
+Select p such that Calls(p, q)
+gPmmoDn2P2R, UmS1ee
+5000
+3 - Calls - single clause
+procedure p;
+Select p such that Calls("gPmmoDn2P2R", p)
+UmS1ee
+5000
+4 - Calls - single clause
+procedure p;
+Select p such that Calls("CMafLVFWEGxkT8", "gPmmoDn2P2R")
+none
+5000
+5 - Calls* - single clause
+procedure p;
+Select p such that Calls*(p, "CMafLVFWEGxkT8")
+gPmmoDn2P2R, UmS1ee
+5000
+6 - Calls* - single clause
+procedure p, q;
+Select q such that Calls*(p, q)
+UmS1ee, CMafLVFWEGxkT8
+5000
+7 - Calls* - single clause
+procedure p;
+Select p such that Calls*("gPmmoDn2P2R", p)
+UmS1ee, CMafLVFWEGxkT8
+5000
+8 - Calls* - single clause
+procedure p;
+Select p such that Calls*("gPmmoDn2P2R", "UmS1ee")
+UmS1ee, gPmmoDn2P2R, CMafLVFWEGxkT8
+5000
+9 - Next - single clause
+stmt s;
+Select s such that Next(s, 2)
+1
+5000
+10 - Next - single clause
+assign a;
+Select a such that Next(a, 2)
+none
+5000
+11 - Next - single clause
+read r;
+Select r such that Next(r, 2)
+1
+5000
+12 - Next - single clause
+stmt s;
+Select s such that Next(3, s)
+4
+5000
+13 - Next - single clause
+print pr;
+Select pr such that Next(3, pr)
+none
+5000
+14 - Next - single clause
+while w;
+Select w such that Next(3, w)
+4
+5000
+15 - Next - single clause
+stmt s;
+Select s such that Next(3, s)
+4
+5000
+16 - Next - single clause
+stmt s1, s2;
+Select s1 such that Next(s1, s2)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+5000
+17 - Next - single clause
+stmt s1, s2;
+Select s2 such that Next(s1, s2)
+2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+5000
+18 - Next - single clause
+procedure p;
+Select p such that Next(_, _)
+UmS1ee, gPmmoDn2P2R, CMafLVFWEGxkT8
+5000
+19 - Next - single clause
+stmt s;
+Select s such that Next(22, s)
+23, 25
+5000
+20 - Next - single clause
+if ifs;
+Select ifs such that Next(ifs, _)
+18, 22, 28
+5000
+21 - Next - single clause
+assign a; while w;
+Select a such that Next(_, w)
+9, 15, 17, 23, 24, 26, 29
+5000
+22 - Next* - single clause
+stmt s;
+Select s such that Next*(11, s)
+none
+5000
+23 - Next* - single clause
+stmt s;
+Select s such that Next*(4, s)
+4, 5, 6, 7, 8, 9, 10
+5000
+24 - Next* - single clause
+stmt s;
+Select s such that Next*(s, 4)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+5000
+25 - Next* - single clause
+read r; while w;
+Select r such that Next*(r, w)
+1, 2, 3, 8, 10, 25 
+5000
+26 - Next* - single clause
+read r; while w;
+Select w such that Next*(r, w)
+4, 6, 7, 12, 14, 16, 19, 21 
+5000
+27 - Calls - single clause
+procedure p;
+Select p such that Calls(p, _)
+gPmmoDn2P2R, UmS1ee
+5000
+28 - Calls* - single clause
+procedure p;
+Select p such that Calls*(p, _)
+gPmmoDn2P2R, UmS1ee
+5000
+29 - Pattern if - single clause
+if ifs;
+Select ifs pattern ifs(_, _, _)
+18, 22, 28
+5000
+30 - Pattern if - single clause
+if ifs;
+Select ifs pattern ifs("f", _, _)
+18, 22
+5000
+31 - Pattern if - single clause
+if ifs; variable v;
+Select ifs pattern ifs(v, _, _)
+18, 22, 28
+5000
+32 - Pattern if - single clause
+if ifs; variable v;
+Select ifs pattern ifs("abc", _, _)
+none
+5000
+33 - Pattern if - single clause
+if ifs; variable v;
+Select v pattern ifs(v, _, _)
+f, pHDrAty, osA, JgYUYU, r
+5000
+34 - Pattern while - single clause
+while w;
+Select w pattern w(_, _)
+4, 6, 7, 12, 14, 16, 19
+5000
+35 - Pattern while - single clause
+while w; variable v;
+Select v pattern w(v, _)
+JgYUYU, r, f, osA, pHDrAty
+5000
+36 - Calls - non-proc synonym - semantic error
+print pr;
+Select pr such that Calls(pr, _)
+none
+5000
+37 - Pattern while - single clause
+while w; variable v;
+Select w pattern w(v, _)
+4, 6, 7, 12, 14, 16, 19
+5000
+38 - Pattern while - single clause
+while w1, w2;
+Select w1 pattern w2(_, _)
+4, 6, 7, 12, 14, 16, 19, 21
+5000
+39 - Pattern while - single clause
+while w;
+Select w pattern w("abc", _)
+none
+5000
+40 - multiple clauses - and between clauses - syntactic error
+stmt s; while w;
+Select s such that Next(_, _) and pattern w(_, _)
+none
+5000
+41 - multiple clauses
+stmt s; while w;
+Select s such that Next(_, _) pattern w(_, _)
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30
+5000
+42 - valid and usage
+stmt s;
+Select s such that Next(2, s) and Modifies(s, "JgYUYU")
+3
+5000
+43 - valid and usage
+stmt s;
+Select s such that Next(2, s) and Modifies(s, "JgYUYU") and Uses(s, _)   
+none
+5000
+44 - valid and usage
+while w; if ifs;
+Select ifs pattern w(_, _) and ifs(_, _, _)
+18, 22, 28
+5000
+45 - valid and usage
+while w; if ifs;
+Select ifs pattern w(_, _) and ifs(_, _, _)
+18, 22, 28
+5000
+46 - multiple clauses
+while w; if ifs;
+Select BOOLEAN pattern w(_, _) and ifs(_, _, _)
+TRUE
+5000
+47 - multiple clauses
+while w; if ifs;
+Select <ifs, w> pattern w(_, _) and ifs(_, _, _)
+18 4, 18 6, 18 7, 18 12, 18 14, 18 16, 18 19, 22 4, 22 6, 22 7, 22 12, 22 14, 22 16, 22 19, 28 4, 28 6, 28 7, 28 12, 28 14, 28 16, 28 19
+5000
+48 - multiple clauses
+while w; if ifs; assign a;
+Select a pattern w(_, _) and ifs(_, _, _) and a(_, _"(f - pHDrAty) % osA"_)
+26
+5000

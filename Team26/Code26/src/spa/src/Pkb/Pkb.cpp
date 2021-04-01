@@ -9,14 +9,45 @@
 #include <stdexcept>
 
 #include "Table.h"
+#include "Cfg.h"
+#include "CfgBip.h"
 
-Pkb::Pkb()
-  : cfg(Cfg()) {
+Pkb::Pkb() {}
+
+void Pkb::addProcRange(const std::string proc, const int first, const int last) {
+  for (int stmt = first; stmt <= last; ++stmt) {
+    stmtProcMapper.emplace(stmt, proc);
+  }
 }
 
-void Pkb::addCfgEdge(int from, int to) {
-  cfg.addEdge(from, to);
-  addNext(from, to);
+void Pkb::addProcStartEnd(const std::string proc, const int start, const std::vector<int> end) {
+  procStartMapper.emplace(proc, start);
+  procEndMapper.emplace(proc, end);
+}
+
+void Pkb::addCfgBipEdge(const int from, const int to, const int label, const Cfg::NodeType type) {
+  cfgBip.addBipEdge(from, to, label, type);
+  if (type != Cfg::NodeType::DUMMY && type != Cfg::NodeType::BRANCH_BACK) {
+    addNextBip(from, to);
+  }
+}
+
+void Pkb::addCfgEdge(const int from, const int to) {
+  if (to < 0) {
+    assert(from > 0);
+    cfg.addEdge(from, to);
+    if (getCallTable().getData().count({ std::to_string(from) }) == 0) {
+      cfgBip.addBipEdge(from, to, 0, Cfg::NodeType::DUMMY);
+    }
+  }
+  else {
+    cfg.addEdge(from, to);
+    addNext(from, to);
+    if (getCallTable().getData().count({ std::to_string(from) }) == 0) {
+      cfgBip.addBipEdge(from, to, 0, Cfg::NodeType::NORMAL);
+      addNextBip(from, to);
+    }
+  }
 }
 
 void Pkb::addModifiesP(std::string proc, std::string var) {
@@ -71,6 +102,24 @@ void Pkb::addAffects(int affecter, int affected) {
 void Pkb::addAffectsT(int affecter, int affected) {
   std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
   affectsTTable.insertRow(vect);
+}
+
+void Pkb::addNextBip(int prev, int next) {
+  std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
+  nextBipTable.insertRow(vect);
+}
+
+void Pkb::addNextBipT(int prev, int next) {
+  std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
+  nextBipTTable.insertRow(vect);
+}
+void Pkb::addAffectsBip(int affecter, int affected) {
+  std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
+  affectsBipTable.insertRow(vect);
+}
+void Pkb::addAffectsBipT(int affecter, int affected) {
+  std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
+  affectsBipTTable.insertRow(vect);
 }
 
 void Pkb::addCallProc(int stmtNo, std::string proc) {
@@ -205,6 +254,10 @@ Table Pkb::getNextTable() const { return nextTable; }
 Table Pkb::getNextTTable() const { return nextTTable; }
 Table Pkb::getAffectsTable() const { return affectsTable; }
 Table Pkb::getAffectsTTable() const { return affectsTTable; }
+Table Pkb::getNextBipTable() const { return nextBipTable; }
+Table Pkb::getNextBipTTable() const { return nextBipTTable; }
+Table Pkb::getAffectsBipTable() const { return affectsBipTable; }
+Table Pkb::getAffectsBipTTable() const { return affectsBipTTable; }
 Table Pkb::getUsesPTable() const { return usesPTable; }
 Table Pkb::getModifiesPTable() const { return modifiesPTable; }
 Table Pkb::getCallProcTable() const { return callProcTable; }
@@ -261,6 +314,25 @@ std::string Pkb::getVarNameFromPrintStmt(const int stmtNo) const {
   }
 }
 
-std::unordered_set<int> Pkb::getNextStmtsFromCfg(const int stmtNo) const {
+std::vector<int> Pkb::getNextStmtsFromCfg(const int stmtNo) const {
   return cfg.getNeighbours(stmtNo);
+}
+
+std::vector<Cfg::BipNode> Pkb::getNextStmtsFromCfgBip(const int stmtNo) const {
+  return cfgBip.getNeighbours(stmtNo);
+}
+
+int Pkb::getStartStmtFromProc(const std::string proc) const {
+  return procStartMapper.at(proc);
+}
+
+std::vector<int> Pkb::getEndStmtsFromProc(const std::string proc) const {
+  return procEndMapper.at(proc);
+}
+
+std::string Pkb::getProcFromStmt(const int stmt) const {
+  if (stmtProcMapper.count(stmt) == 1) {
+    return stmtProcMapper.at(stmt);
+  }
+  return "";
 }

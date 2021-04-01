@@ -4,6 +4,9 @@
 # Visual Studio Code cache
 .vscode/
 
+# PyCharm cache
+.idea/
+
 # CMake build folder
 Team26/Code26/build*
 

@@ -3,12 +3,13 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 #include "Table.h"
 #include "Cfg.h"
+#include "CfgBip.h"
 
 class Pkb {
-
 public:
   /*
    * Constructor of Pkb.
@@ -16,12 +17,40 @@ public:
   Pkb();
 
   /**
-   * Adds a directed edge into the CFG and populates Next relation.
+   * Adds the range of statement numbers that belong to a procedure.
+   *
+   * @param proc Procedure in question.
+   * @param first Statement number of the first statement in the procedure.
+   * @param last Last statement number in the procedure. Different from end statement of a procedure.
+   */
+  void addProcRange(const std::string proc, const int first, const int last);
+
+  /**
+   * Adds a procedure's first and last statement numbers in the control flow path.
+   *
+   * @param proc Procedure in question.
+   * @param start Statement number of the first statement in the procedure's control flow path.
+   * @param end List of statement numbers of the last statements in the procedure's control flow path.
+   */
+  void addProcStartEnd(const std::string proc, const int start, const std::vector<int> end);
+
+  /**
+  * Adds a directed edge into the CFGBip and populates the NextBip relation.
+  *
+  * @param from Statement number of the statement executed first.
+  * @param to Statement number of the statement which can be executed immediately after.
+  * @param label Label of the edge.
+  * @param type Type of the edge.
+  */
+  void addCfgBipEdge(const int from, const int to, const int label, const Cfg::NodeType type);
+
+  /**
+   * Adds a directed edge into the CFG and CFGBip. Also populates Next and NextBip relation.
    *
    * @param from Statement number of the statement executed first.
    * @param to Statement number of the statement which can be executed immediately after.
    */
-  void addCfgEdge(int from, int to);
+  void addCfgEdge(const int from, const int to);
 
   /**
    * Adds a variable name into varTable.
@@ -205,6 +234,37 @@ public:
    */
   void addAffectsT(int affecter, int affected);
 
+  /**
+   * Adds the Row {prev, next} into nextBipTable.
+   *
+   * @param prev Statement number of the statement executed first
+   * @param next Statement number of the statement which can be executed immediately after prev in some execution sequence
+   */
+  void addNextBip(int prev, int next);
+
+  /**
+   * Adds the Row {prev, next} into nextBipTTable.
+   *
+   * @param prev Statement number of the statement executed first
+   * @param next Statement number of the statement which can be executed after prev in some execution sequence
+   */
+  void addNextBipT(int prev, int next);
+
+  /**
+   * Adds the Row {affecter, affected} into affectsBipTable.
+   *
+   * @param prev Statement number of the statement which modifies a variable used in affected
+   * @param next Statement number of the statement uses a variable modified by prev
+   */
+  void addAffectsBip(int affecter, int affected);
+
+  /**
+   * Adds the Row {affecter, affected} into affectsBipTTable.
+   *
+   * @param prev Statement number of the statement which modifies a variable used in affected
+   * @param next Statement number of the statement uses a variable modified by prev
+   */
+  void addAffectsBipT(int affecter, int affected);
 
   /**
    * Adds the Row {stmtNo, lhs, rhs} into patternAssignTable.
@@ -367,9 +427,29 @@ public:
   Table getAffectsTable() const;
 
   /**
-   * @return affectTTable
+   * @return affectsTTable
    */
   Table getAffectsTTable() const;
+
+  /**
+ * @return nextBipTable
+ */
+  Table getNextBipTable() const;
+
+  /**
+   * @return nextBipTTable
+   */
+  Table getNextBipTTable() const;
+
+  /**
+   * @return affectsBipTable
+   */
+  Table getAffectsBipTable() const;
+
+  /**
+   * @return affectsBipTTable
+   */
+  Table getAffectsBipTTable() const;
 
   /**
    * @return usesPTable
@@ -454,16 +534,50 @@ public:
   std::string getVarNameFromPrintStmt(const int stmtNo) const;
 
   /**
-   * Finds the set of stmts that can be directly executed after the given stmt number.
+   * Finds the set of stmts that can be directly executed after the given stmt number in the CFG.
    * If there are no nodes following, an empty set is returned.
    *
    * @param stmtNo Statement number of interest.
-   * @return Set of nodes.
+   * @return std::vector<int> List of nodes.
    */
-  std::unordered_set<int> getNextStmtsFromCfg(const int stmtNo) const;
+  std::vector<int> getNextStmtsFromCfg(const int stmtNo) const;
+
+  /**
+   * Finds the list of stmts that can be directly executed after the given stmt number in the CFGBip.
+   * If there are no nodes following, an empty list is returned.
+   *
+   * @param stmtNo Statement number of interest.
+   * @return std::vector<BipNode> List of nodes.
+   */
+  std::vector<Cfg::BipNode> getNextStmtsFromCfgBip(const int stmtNo) const;
+
+  /**
+   * Finds the first statement of a given procedure.
+   *
+   * @param proc Procedure in question.
+   * @return int Statement number of the first statement in the procedure.
+   */
+  int getStartStmtFromProc(const std::string proc) const;
+
+  /**
+   * Finds the list of last statements of a given procedure.
+   *
+   * @param proc Procedure in question.
+   * @return std::vector<int> List of statement number of the last statements in the procedure.
+   */
+  std::vector<int> getEndStmtsFromProc(const std::string proc) const;
+
+  /**
+   * Finds the procedure corresponding to the target statement number.
+   *
+   * @param stmt Statement in question.
+   * @return std::string Procedure that the statement belongs to.
+   */
+  std::string getProcFromStmt(const int stmt) const;
 
 private:
-  Cfg cfg;
+  Cfg::Cfg cfg;
+  Cfg::CfgBip cfgBip;
 
   Table varTable{ 1 };
   Table stmtTable{ 1 };
@@ -492,6 +606,11 @@ private:
   Table affectsTable{ 2 };
   Table affectsTTable{ 2 };
 
+  Table nextBipTable{ 2 };
+  Table nextBipTTable{ 2 };
+  Table affectsBipTable{ 2 };
+  Table affectsBipTTable{ 2 };
+
   Table callProcTable{ 2 };
   Table readVarTable{ 2 };
   Table printVarTable{ 2 };
@@ -503,4 +622,7 @@ private:
   std::unordered_map<int, std::string> callProcMapper;
   std::unordered_map<int, std::string> readVarMapper;
   std::unordered_map<int, std::string> printVarMapper;
+  std::unordered_map<std::string, int> procStartMapper;
+  std::unordered_map<std::string, std::vector<int>> procEndMapper;
+  std::unordered_map<int, std::string> stmtProcMapper;
 };

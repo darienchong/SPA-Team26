@@ -14,9 +14,256 @@
 #include "Pkb.h"
 #include "AdjList.h"
 #include "Cfg.h"
+#include "CfgBip.h"
 #include "SpaException.h"
 
 namespace {
+  /**
+   * Preprocesses the CFGBip to add in directed edges from call stmt to the first statement of called procedure.
+   * Also adds directed edges from last statements of the called procedure to the next statement after the call stmt.
+   *
+   * @param pkb The PKB to refer to.
+   */
+  void preprocessCfgBip(Pkb& pkb) {
+    const Table callTable = pkb.getCallTable();
+    const Table procTable = pkb.getProcTable();
+
+    // Create dummy nodes and adding edge from end statements of each proc to their respective dummy nodes
+    for (const Row procRow : procTable.getData()) {
+      const std::string proc = procRow[0];
+      const int dummyNode = -1 * pkb.getStartStmtFromProc(proc);
+
+      for (const int end : pkb.getEndStmtsFromProc(proc)) {
+        pkb.addCfgEdge(end, dummyNode);
+      }
+    }
+
+    // Add the branch in and branch back links
+    for (const Row stmtRow : callTable.getData()) {
+      const int callStmt = std::stoi(stmtRow[0]); // call stmt of interest
+      const std::string calledProc = pkb.getProcNameFromCallStmt(callStmt); // get the called proc from the call stmt
+      const int calledProcStartStmt = pkb.getStartStmtFromProc(calledProc); // get the starting stmt num of the called proc
+      const int dummyNode = -1 * calledProcStartStmt;
+      const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(callStmt); // get next stmts from call stmt. Note: fromCfg not fromCfgBip
+      assert(nextStmts.size() == 1);
+
+      int nextStmt;
+      for (int next : nextStmts) {
+        nextStmt = next;
+      }
+
+      // Add NextBip from end stmt of called proc to stmt directly after call stmt if the latter is not a dummy node
+      for (int end : pkb.getEndStmtsFromProc(calledProc)) {
+        if (nextStmt > 0) { // if nextStmt is not a dummy node
+          pkb.addNextBip(end, nextStmt);
+        }
+      }
+
+      // Add CFGBip branch in edge from call stmt to first statement of called proc
+      pkb.addCfgBipEdge(callStmt, calledProcStartStmt, callStmt, Cfg::NodeType::BRANCH_IN);
+
+      // Add CFGBip branch back edge from dummy node to the stmt directly after the call stmt
+      pkb.addCfgBipEdge(dummyNode, nextStmt, callStmt, Cfg::NodeType::BRANCH_BACK);
+    }
+  }
+
+  void fillNextBipTTable(Pkb& pkb) {
+    const Table stmtTable = pkb.getStmtTable();
+    const int largest = stmtTable.size();
+
+    for (int row = 1; row <= largest; ++row) {
+      // =============== //
+      //  DFS algorithm  //
+      // =============== //
+      std::unordered_set<int> visited; // keep track of visited nodes
+      std::stack<Cfg::BipNode> dfsStack; // stack for dfs
+      std::stack<int> branchStack; // to branchback
+      const std::string rowProc = pkb.getProcFromStmt(row); // procedure that statement belongs to
+
+      // Get the next stmts in the CFGBip from the starting stmt and push to the stack
+      for (const Cfg::BipNode& nextNode : pkb.getNextStmtsFromCfgBip(row)) {
+        dfsStack.push(nextNode);
+      }
+
+      while (!dfsStack.empty()) {
+        const Cfg::BipNode currentNode = dfsStack.top();
+        dfsStack.pop();
+        const int currentStmt = currentNode.node;
+
+        // Check and pop branch stack if current node is a branch back node
+        if (currentNode.type == Cfg::NodeType::BRANCH_BACK) {
+          if (!branchStack.empty()) {
+            assert(currentNode.label == branchStack.top());
+            branchStack.pop();
+          }
+        }
+
+        // Check if currentStmt has been visited
+        if (visited.count(currentStmt) == 1) {
+          // Clear any branchStack top element
+          if (currentNode.type == Cfg::NodeType::DUMMY) {
+            for (const Cfg::BipNode& branchBackNode : pkb.getNextStmtsFromCfgBip(currentStmt)) {
+              if (!branchStack.empty() && branchBackNode.label == branchStack.top()) {
+                dfsStack.push(branchBackNode);
+              }
+            }
+          }
+          continue; // Skip this currentStmt if already visited
+        }
+        visited.emplace(currentStmt); // Set currentStmt as visited
+
+        // Add to NextBipT relation if current node is not a dummy node/ branch back is not to a dummy node
+        if (currentNode.node > 0) {
+          pkb.addNextBipT(row, currentStmt);
+        }
+
+        // Add to branch stack if current node is a branching in node - for keeping track of which branch back node to take
+        const bool isBranchInToSameProc = rowProc == pkb.getProcFromStmt(currentNode.node);
+        if (currentNode.type == Cfg::NodeType::BRANCH_IN && !isBranchInToSameProc) {
+          branchStack.push(currentNode.label);
+        }
+
+        // Push all next stmts into the stack under certain conditions
+        for (const Cfg::BipNode& nextNode : pkb.getNextStmtsFromCfgBip(currentStmt)) {
+          // If the next node is of type branch in and has already been visited, push the node directly after current node instead
+          if (nextNode.type == Cfg::NodeType::BRANCH_IN && visited.count(nextNode.node) == 1) {
+            const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(currentStmt);
+            for (const int next : nextStmts) { // Note: get from CFG, not from CFGBip
+              dfsStack.push(Cfg::BipNode{ next, 0, Cfg::NodeType::NORMAL });
+            }
+          }
+          // If next node is of type branch back, check that the edge label corresponds to branch stack's top
+          else if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
+            if (branchStack.empty() || nextNode.label == branchStack.top()) {
+              dfsStack.push(nextNode);
+            }
+          }
+          // Else next node is of type normal or dummy or (is a branch in node and is not in visited)
+          else {
+            dfsStack.push(nextNode);
+          }
+        }
+      }
+    }
+  }
+
+  void pseudocodeFillBipT() {
+    // for each proc, get the nextT table and store into a map of proc -> nextT
+    // for each proc's next table duplicate it and find the corresponding call stmts, then
+    //  1) Duplicate called proc's nextT table and add to to this proc's duplicated table
+    //  2) Add a row correseponding to call stmt to first stmt of the called proc
+    //  3) Add rows corresponding to call proc's last stmts to next stmt after call stmt
+    //  4) Repeat steps 1 - 3 for each new proc added on to the target proc
+    //  5) Do transitive closure
+    // Profit
+  }
+
+  void fillAffectsBipTable(Pkb& pkb) {
+    const Table assignTable = pkb.getAssignTable();
+    const Table callTable = pkb.getCallTable();
+    const Table modifiesPTable = pkb.getModifiesPTable();
+    const Table readTable = pkb.getReadTable();
+
+    // Fill up the affects table for each assign statement
+    for (const Row assignRow : assignTable.getData()) {
+      const int affecterAssignStmt = std::stoi(assignRow[0]);
+
+      // Extract the varModifed by affecterAssignStmt
+      std::string varModified;
+      for (const std::string& variable : pkb.getModifiedBy(affecterAssignStmt)) {
+        varModified = variable;
+      }
+
+      const std::unordered_set<int> potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
+      if (potentiallyAffectedAssigns.empty()) {
+        continue;  // shortcircuit if no assign uses the varModified
+      }
+
+      // =============== //
+      //  DFS algorithm  //
+      // =============== //
+      std::unordered_set<int> visited; // keep track of visited nodes
+      std::stack<Cfg::BipNode> dfsStack; // stack for dfs
+      std::stack<int> branchStack; // to branch back
+      const std::string assignProc = pkb.getProcFromStmt(affecterAssignStmt); // procedure that statement belongs to
+
+      // Get the next stmts in the CFG from the starting affecterAssignStmt stmt and push to the stack
+      for (const Cfg::BipNode& nextEdge : pkb.getNextStmtsFromCfgBip(affecterAssignStmt)) {
+        dfsStack.push(nextEdge);
+      }
+
+      while (!dfsStack.empty()) {
+        const Cfg::BipNode currentNode = dfsStack.top();
+        dfsStack.pop();
+        const int currentStmt = currentNode.node;
+
+        // Check and pop branch stack if current node is a branch back node
+        if (currentNode.type == Cfg::NodeType::BRANCH_BACK) {
+          if (!branchStack.empty()) {
+            assert(currentNode.label == branchStack.top());
+            branchStack.pop();
+          }
+        }
+
+        // Check if currentStmt has been visited
+        if (visited.count(currentStmt) == 1) {
+          // Clear any branchStack top element
+          if (currentNode.type == Cfg::NodeType::DUMMY) {
+            for (const Cfg::BipNode& branchBackNode : pkb.getNextStmtsFromCfgBip(currentStmt)) {
+              if (!branchStack.empty() && branchBackNode.label == branchStack.top()) {
+                dfsStack.push(branchBackNode);
+              }
+            }
+          }
+          continue; // Skip this currentStmt if already visited
+        }
+        visited.emplace(currentStmt); // Set currentStmt as visited
+
+        // Check if currentStmt satisfy the AffectsBip(affecterAssignStmt, currentStmt) relation
+        if (potentiallyAffectedAssigns.count(currentStmt) == 1) {
+          pkb.addAffectsBip(affecterAssignStmt, currentStmt); // add AffectsBip relation to pkb
+          pkb.addAffectsBipT(affecterAssignStmt, currentStmt); // add AffectsBipT relation to pkb
+        }
+
+        // Check if currentStmt modifies the varModified
+        // Stop searching this path if the currentStmt is an assign stmt or read stmt
+        const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
+        const bool isReadOrAssignStmt = readTable.contains({ std::to_string(currentStmt) }) || assignTable.contains({ std::to_string(currentStmt) });
+        if (isModified && isReadOrAssignStmt) {
+          continue;
+        }
+
+        // Add to branch stack if current node is a branching in node - for keeping track of which branch back node to take
+        const bool isBranchInToSameProc = assignProc == pkb.getProcFromStmt(currentNode.node);
+        if (currentNode.type == Cfg::NodeType::BRANCH_IN && !isBranchInToSameProc) {
+          branchStack.push(currentNode.label);
+        }
+
+        // Push all next stmts into the stack under certain conditions
+        for (const Cfg::BipNode& nextNode : pkb.getNextStmtsFromCfgBip(currentStmt)) {
+          // If the next node is of type branch in and has already been visited, push the node directly after current node instead
+          if (nextNode.type == Cfg::NodeType::BRANCH_IN && visited.count(nextNode.node) == 1) {
+            const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(currentStmt);
+            for (const int next : nextStmts) { // Note: get from CFG, not from CFGBip
+              dfsStack.push(Cfg::BipNode{ next, 0, Cfg::NodeType::NORMAL });
+            }
+          }
+          // If next node is of type branch back, check that the edge label corresponds to branch stack's top
+          else if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
+            if (branchStack.empty() || nextNode.label == branchStack.top()) {
+              dfsStack.push(nextNode);
+            }
+          }
+          // Else next node is of type normal or dummy or (is a branch in node and is not in visited)
+          else {
+            dfsStack.push(nextNode);
+          }
+        }
+
+      }
+    }
+  }
+
   /**
    * Fills in the Affects relation based on the CFG.
    *
@@ -46,6 +293,9 @@ namespace {
       }
 
       std::unordered_set<int> potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
+      if (potentiallyAffectedAssigns.empty()) {
+        continue;  // shortcircuit if no assign uses the varModified
+      }
 
       // =============== //
       //  DFS algorithm  //
@@ -698,5 +948,11 @@ namespace SourceProcessor {
 
     fillAffectsTable(pkb);
     fillAffectsTTable(pkb);
+
+    // Iteration 3 extensions
+    preprocessCfgBip(pkb);
+    fillNextBipTTable(pkb);
+    fillAffectsBipTable(pkb);
+    // missing AffectsBipT
   }
 }

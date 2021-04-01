@@ -11,6 +11,8 @@
 #include "Table.h"
 #include "Tokeniser.h"
 #include "Token.h"
+#include "CfgBip.h"
+
 
 /*
 * Integration testing of SimpleParser with Tokeniser, ExprParser, Pkb and De
@@ -31,7 +33,7 @@ namespace {
 // Procedure //
 ///////////////
 
-TEST_CASE("Procedures with semantic errors", "[SimpleParser][Procedure][Semantic Error]") {
+TEST_CASE("[TestSimpleParser] Procedures with semantic errors", "[SimpleParser][Procedure][Semantic Error]") {
   SECTION("Duplicated procedure name") {
     std::string string("procedure proc1 {x=1;} procedure proc1 {x=2;}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -68,7 +70,7 @@ TEST_CASE("Procedures with semantic errors", "[SimpleParser][Procedure][Semantic
   }
 }
 
-TEST_CASE("Invalid parsing procedure", "[SimpleParser][Procedure][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid parsing procedure", "[SimpleParser][Procedure][Syntax Error]") {
   SECTION("Missing procedure keyword") {
     std::string string("computeAverage {}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -110,7 +112,7 @@ TEST_CASE("Invalid parsing procedure", "[SimpleParser][Procedure][Syntax Error]"
   }
 }
 
-TEST_CASE("Multiple procedures - independent", "[SimpleParser][Procedures]") {
+TEST_CASE("[TestSimpleParser] Multiple procedures - independent", "[SimpleParser][Procedures]") {
   std::string string("procedure computeAverage {x=1;} procedure b{x=2;}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -155,7 +157,7 @@ TEST_CASE("Multiple procedures - independent", "[SimpleParser][Procedures]") {
   }
 }
 
-TEST_CASE("Multiple procedures - Direct calls", "[SimpleParser][Procedures]") {
+TEST_CASE("[TestSimpleParser] Multiple procedures - Direct calls", "[SimpleParser][Procedures]") {
   std::string string("procedure a{x=1;call b;call c;} procedure b{y=2;} procedure c{print z;}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -213,7 +215,7 @@ TEST_CASE("Multiple procedures - Direct calls", "[SimpleParser][Procedures]") {
   }
 }
 
-TEST_CASE("Multiple procedures - Indirect calls", "[SimpleParser][Procedures]") {
+TEST_CASE("[TestSimpleParser] Multiple procedures - Indirect calls", "[SimpleParser][Procedures]") {
   std::string string("procedure a{x=1;call b;} procedure b{y=v;call c;} procedure c{w=z;}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -288,7 +290,7 @@ TEST_CASE("Multiple procedures - Indirect calls", "[SimpleParser][Procedures]") 
 // Read statement //
 ////////////////////
 
-TEST_CASE("Invalid read statement", "[SimpleParser][Read][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid read statement", "[SimpleParser][Read][Syntax Error]") {
   SECTION("Missing read keyword") {
     std::string string("procedure computeAverage {x;}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -322,7 +324,7 @@ TEST_CASE("Invalid read statement", "[SimpleParser][Read][Syntax Error]") {
   }
 }
 
-TEST_CASE("Valid read statement", "[SimpleParser][Read]") {
+TEST_CASE("[TestSimpleParser] Valid read statement", "[SimpleParser][Read]") {
   std::string string("procedure computeAverage {read s3s1kd03kd42d;}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -350,7 +352,7 @@ TEST_CASE("Valid read statement", "[SimpleParser][Read]") {
 // Print statement //
 /////////////////////
 
-TEST_CASE("Invalid print statement", "[SimpleParser][Print][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid print statement", "[SimpleParser][Print][Syntax Error]") {
   SECTION("Missing print keyword") {
     std::string string("procedure computeAverage {x;}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -384,7 +386,7 @@ TEST_CASE("Invalid print statement", "[SimpleParser][Print][Syntax Error]") {
   }
 }
 
-TEST_CASE("Valid print statement", "[SimpleParser][Print]") {
+TEST_CASE("[TestSimpleParser] Valid print statement", "[SimpleParser][Print]") {
   std::string string("procedure computeAverage {print s3s1kd03kd42d;}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -412,7 +414,7 @@ TEST_CASE("Valid print statement", "[SimpleParser][Print]") {
 // Assign statement //
 //////////////////////
 
-TEST_CASE("Invalid assign statement - LHS constant", "[SimpleParser][Assign][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid assign statement - LHS constant", "[SimpleParser][Assign][Syntax Error]") {
   SECTION("Single constant - no =, no rhs") {
     std::string string("procedure computeAverage {3;}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -454,7 +456,7 @@ TEST_CASE("Invalid assign statement - LHS constant", "[SimpleParser][Assign][Syn
   }
 }
 
-TEST_CASE("Invalid assign statement - LHS variable", "[SimpleParser][Assign][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid assign statement - LHS variable", "[SimpleParser][Assign][Syntax Error]") {
   SECTION("Single variable - no =, no rhs") {
     std::string string("procedure computeAverage {varX;}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -496,7 +498,7 @@ TEST_CASE("Invalid assign statement - LHS variable", "[SimpleParser][Assign][Syn
   }
 }
 
-TEST_CASE("Valid assign statement - Basic", "[SimpleParser][Assign]") {
+TEST_CASE("[TestSimpleParser] Valid assign statement - Basic", "[SimpleParser][Assign]") {
   SECTION("Single variable") {
     std::string string("procedure computeAverage {x= y;}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -607,7 +609,7 @@ TEST_CASE("Valid assign statement - Basic", "[SimpleParser][Assign]") {
   }
 }
 
-TEST_CASE("Valid assign statement - Advanced", "[SimpleParser][Assign]") {
+TEST_CASE("[TestSimpleParser] Valid assign statement - Advanced", "[SimpleParser][Assign]") {
   SECTION("Geekforgeeks example") {
     std::string string("procedure geeks{z=a + b * (c * d - e) * (f + g * h) - i;}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -716,7 +718,7 @@ TEST_CASE("Valid assign statement - Advanced", "[SimpleParser][Assign]") {
 // If statement //
 //////////////////
 
-TEST_CASE("Invalid if statement - Parenthesis", "[SimpleParser][If][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid if statement - Parenthesis", "[SimpleParser][If][Syntax Error]") {
   SECTION("No parenthesis with cond expr") {
     std::string string("procedure if{if while==3 then{x=1;}else{y=2;}}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -742,7 +744,7 @@ TEST_CASE("Invalid if statement - Parenthesis", "[SimpleParser][If][Syntax Error
   }
 }
 
-TEST_CASE("Invalid if statement - Others", "[SimpleParser][If][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid if statement - Missing from grammar/semantic", "[SimpleParser][If][Syntax Error]") {
   SECTION("No conditional expression") {
     std::string string("procedure if{if()then{x=1;}else{y=2;}}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -782,7 +784,9 @@ TEST_CASE("Invalid if statement - Others", "[SimpleParser][If][Syntax Error]") {
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     REQUIRE_THROWS(parser.parse());
   }
+}
 
+TEST_CASE("[TestSimpleParser] Invalid if statement - Conditional expr", "[SimpleParser][If][Syntax Error]") {
   SECTION("Variable as conditional expr") {
     std::string string("procedure then{if(true)then{x=1;}else{y=2;}}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -808,7 +812,7 @@ TEST_CASE("Invalid if statement - Others", "[SimpleParser][If][Syntax Error]") {
   }
 }
 
-TEST_CASE("Valid if statement - Basic", "[SimpleParser][If]") {
+TEST_CASE("[TestSimpleParser] Valid if statement - Basic", "[SimpleParser][If]") {
   std::string string("procedure then{if(then==else)then{x=1;}else{read y;}}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -911,7 +915,7 @@ TEST_CASE("Valid if statement - Basic", "[SimpleParser][If]") {
   }
 }
 
-TEST_CASE("Valid if statement - Singly nested if", "[SimpleParser][If]") {
+TEST_CASE("[TestSimpleParser] Valid if statement - Singly nested if", "[SimpleParser][If]") {
   std::string string("procedure then{if(then==else)then{if(else==while)then{print x;}else{read x;}}else{if(if==read)then{y=x;}else{x=y;}}}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -1066,7 +1070,7 @@ TEST_CASE("Valid if statement - Singly nested if", "[SimpleParser][If]") {
   }
 }
 
-TEST_CASE("Valid if statement - Doubly nested if", "[SimpleParser][If]") {
+TEST_CASE("[TestSimpleParser] Valid if statement - Doubly nested if", "[SimpleParser][If]") {
   std::string string("procedure a{if(2==3)then{x1=y1;}else{if(while==3)then{read x;print x;}else{z=3;if(b!=2)then{z=6;}else{c=f+g/5;read d;}}}}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -1275,7 +1279,7 @@ TEST_CASE("Valid if statement - Doubly nested if", "[SimpleParser][If]") {
 // While statement //
 /////////////////////
 
-TEST_CASE("Invalid while statement - Parenthesis", "[SimpleParser][While][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid while statement - Parenthesis", "[SimpleParser][While][Syntax Error]") {
   SECTION("No parenthesis with cond expr") {
     std::string string("procedure while{while x==2 {x=1;}}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -1301,7 +1305,7 @@ TEST_CASE("Invalid while statement - Parenthesis", "[SimpleParser][While][Syntax
   }
 }
 
-TEST_CASE("Invalid while statement - Others", "[SimpleParser][While][Syntax Error]") {
+TEST_CASE("[TestSimpleParser] Invalid while statement - Others", "[SimpleParser][While][Syntax Error]") {
   SECTION("No conditional expression") {
     std::string string("procedure while{while(){x=1;}}");
     std::list<Token> simpleProg = expressionStringToTokens(string);
@@ -1351,7 +1355,7 @@ TEST_CASE("Invalid while statement - Others", "[SimpleParser][While][Syntax Erro
   }
 }
 
-TEST_CASE("Valid while statement - Basic", "[SimpleParser][While]") {
+TEST_CASE("[TestSimpleParser] Valid while statement - Basic", "[SimpleParser][While]") {
   std::string string("procedure procedure{while(!((if==else)&&(43-3<while))){read read;}print print;}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -1457,7 +1461,7 @@ TEST_CASE("Valid while statement - Basic", "[SimpleParser][While]") {
   }
 }
 
-TEST_CASE("Valid while statement - Singly nested while", "[SimpleParser][While]") {
+TEST_CASE("[TestSimpleParser] Valid while statement - Singly nested while", "[SimpleParser][While]") {
   std::string string("procedure i{read while;while(while<=2){while(!(i>while)){i=i+1;}print i;}print while;}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -1595,7 +1599,7 @@ TEST_CASE("Valid while statement - Singly nested while", "[SimpleParser][While]"
   }
 }
 
-TEST_CASE("Valid while statement - Doubly nested while", "[SimpleParser][While]") {
+TEST_CASE("[TestSimpleParser] Valid while statement - Doubly nested while", "[SimpleParser][While]") {
   std::string string("procedure i{while(a==b){print=print+1;while(c>d){while(e%f==4){read=read/3;}if=if*2;}while=while%0;}call=call-call;}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -1836,7 +1840,7 @@ TEST_CASE("Valid while statement - Doubly nested while", "[SimpleParser][While]"
 // Combination of if and while //
 /////////////////////////////////
 
-TEST_CASE("Loops - Nested/follows if/while loops", "[SimpleParser][Assign][If][Print][Read][While]") {
+TEST_CASE("[TestSimpleParser] Loops - Nested/follows if/while loops", "[SimpleParser][Assign][If][Print][Read][While]") {
   std::string string("procedure proc{read D33z;while(D33z>6){life=42;if(life==bad)then{print = read;}else{while(D33z!=life){D33z=life-1;}}while(bad==2){print nu7z;}}}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
@@ -2064,8 +2068,10 @@ TEST_CASE("Loops - Nested/follows if/while loops", "[SimpleParser][Assign][If][P
   }
 }
 
-TEST_CASE("Loops - Random example", "[SimpleParser][Assign][If][Print][Read][While]") {
-  std::string string("procedure main {while (((while + (print)) != read) || ((if) <= else)) {if (!((if > then) && (print < while))) then {read read;} else {while (print >= (((call) + ((read))) % else)) {print = call + procedure;}}}}");
+TEST_CASE("[TestSimpleParser] Loops - Random example", "[SimpleParser][Assign][If][Print][Read][While]") {
+  std::string string(R"(
+    procedure main {while (((while + (print)) != read) || ((if) <= else)) {if (!((if > then) && (print < while))) then {
+    read read;} else {while (print >= (((call) + ((read))) % else)) {print = call + procedure;}}}})");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
@@ -2241,55 +2247,57 @@ TEST_CASE("Loops - Random example", "[SimpleParser][Assign][If][Print][Read][Whi
   }
 }
 
-TEST_CASE("Loops - Random example, but with extra parenthesis around cond expr", "[SimpleParser][Assign][If][Print][Read][While]") {
-  std::string string("procedure main {while ((((while + (print)) != read) || ((if) <= else))) {if (!((if > then) && (print < while))) then {read read;} else {while (print >= (((call) + ((read))) % else)) {print = call + procedure;}}}}");
+TEST_CASE("[TestSimpleParser] Loops - Random example, but with extra parenthesis around cond expr", "[SimpleParser][Assign][If][Print][Read][While]") {
+  std::string string(R"(
+    procedure main {while ((((while + (print)) != read) || ((if) <= else))) {if (!((if > then) && (print < while))) then {
+    read read;} else {while (print >= (((call) + ((read))) % else)) {print = call + procedure;}}}})");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   REQUIRE_THROWS(parser.parse());
 }
 
-///////////////////
-// Next relation //
-///////////////////
+/////////////////////////////
+// Next and NextT relation //
+/////////////////////////////
 
-TEST_CASE("Next relation - No loops", "[SimpleParser][Next]") {
+TEST_CASE("[TestSimpleParser] Next relation - No loops", "[SimpleParser][Next]") {
+  std::string string("procedure a{x=0;read y;print z;call b;}procedure b{a=1;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
   SECTION("Next") {
-    std::string string("procedure a{x=0;read y;print z;call b;}procedure b{a=1;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
-
     Table nextTable = pkb.getNextTable();
 
     REQUIRE(nextTable.contains({ "1", "2" }));
     REQUIRE(nextTable.contains({ "2", "3" }));
     REQUIRE(nextTable.contains({ "3", "4" }));
     REQUIRE(nextTable.size() == 3);
+  }
 
-    SECTION("NextT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
 
-      Table nextTTable = pkb.getNextTTable();
+  SECTION("NextT") {
+    Table nextTTable = pkb.getNextTTable();
 
-      REQUIRE(nextTTable.contains({ "1", "3" }));
-      REQUIRE(nextTTable.contains({ "1", "4" }));
-      REQUIRE(nextTTable.contains({ "2", "4" }));
-      REQUIRE(nextTTable.size() == 6);
-    }
+    REQUIRE(nextTTable.contains({ "1", "3" }));
+    REQUIRE(nextTTable.contains({ "1", "4" }));
+    REQUIRE(nextTTable.contains({ "2", "4" }));
+    REQUIRE(nextTTable.size() == 6);
   }
 }
 
-TEST_CASE("Next relation - Example CFG (Figure 5) - Advanced SPA requirements", "[SimpleParser][Next]") {
-  SECTION("Next") {
-    std::string string("procedure Second{x=0;i=5;while(i!=0){x=x+2*y;print Third;i=i-1;}if(x==1)then{x=x+1;}else{z=1;}z=z+x+i;y=z+2;x=x*y+z;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
+TEST_CASE("[TestSimpleParser] Next relation - Example CFG (Figure 5) - Advanced SPA requirements", "[SimpleParser][Next]") {
+  std::string string("procedure Second{x=0;i=5;while(i!=0){x=x+2*y;print Third;i=i-1;}if(x==1)then{x=x+1;}else{z=1;}z=z+x+i;y=z+2;x=x*y+z;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
 
+  SECTION("Next") {
     Table nextTable = pkb.getNextTable();
 
     REQUIRE(nextTable.contains({ "1", "2" }));
@@ -2306,88 +2314,88 @@ TEST_CASE("Next relation - Example CFG (Figure 5) - Advanced SPA requirements", 
     REQUIRE(nextTable.contains({ "10", "11" }));
     REQUIRE(nextTable.contains({ "11", "12" }));
     REQUIRE(nextTable.size() == 13);
+  }
 
-    SECTION("NextT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
 
-      Table nextTTable = pkb.getNextTTable();
+  SECTION("NextT") {
+    Table nextTTable = pkb.getNextTTable();
 
-      REQUIRE(nextTTable.contains({ "1", "3" }));
-      REQUIRE(nextTTable.contains({ "1", "4" }));
-      REQUIRE(nextTTable.contains({ "1", "5" }));
-      REQUIRE(nextTTable.contains({ "1", "6" }));
-      REQUIRE(nextTTable.contains({ "1", "7" }));
-      REQUIRE(nextTTable.contains({ "1", "8" }));
-      REQUIRE(nextTTable.contains({ "1", "9" }));
-      REQUIRE(nextTTable.contains({ "1", "10" }));
-      REQUIRE(nextTTable.contains({ "1", "11" }));
-      REQUIRE(nextTTable.contains({ "1", "12" }));
-      REQUIRE(nextTTable.contains({ "2", "4" }));
-      REQUIRE(nextTTable.contains({ "2", "5" }));
-      REQUIRE(nextTTable.contains({ "2", "6" }));
-      REQUIRE(nextTTable.contains({ "2", "7" }));
-      REQUIRE(nextTTable.contains({ "2", "8" }));
-      REQUIRE(nextTTable.contains({ "2", "9" }));
-      REQUIRE(nextTTable.contains({ "2", "10" }));
-      REQUIRE(nextTTable.contains({ "2", "11" }));
-      REQUIRE(nextTTable.contains({ "2", "12" }));
-      REQUIRE(nextTTable.contains({ "3", "3" }));
-      REQUIRE(nextTTable.contains({ "3", "5" }));
-      REQUIRE(nextTTable.contains({ "3", "6" }));
-      REQUIRE(nextTTable.contains({ "3", "8" }));
-      REQUIRE(nextTTable.contains({ "3", "9" }));
-      REQUIRE(nextTTable.contains({ "3", "10" }));
-      REQUIRE(nextTTable.contains({ "3", "11" }));
-      REQUIRE(nextTTable.contains({ "3", "12" }));
-      REQUIRE(nextTTable.contains({ "4", "3" }));
-      REQUIRE(nextTTable.contains({ "4", "4" }));
-      REQUIRE(nextTTable.contains({ "4", "6" }));
-      REQUIRE(nextTTable.contains({ "4", "7" }));
-      REQUIRE(nextTTable.contains({ "4", "8" }));
-      REQUIRE(nextTTable.contains({ "4", "9" }));
-      REQUIRE(nextTTable.contains({ "4", "10" }));
-      REQUIRE(nextTTable.contains({ "4", "11" }));
-      REQUIRE(nextTTable.contains({ "4", "12" }));
-      REQUIRE(nextTTable.contains({ "5", "3" }));
-      REQUIRE(nextTTable.contains({ "5", "4" }));
-      REQUIRE(nextTTable.contains({ "5", "5" }));
-      REQUIRE(nextTTable.contains({ "5", "7" }));
-      REQUIRE(nextTTable.contains({ "5", "8" }));
-      REQUIRE(nextTTable.contains({ "5", "9" }));
-      REQUIRE(nextTTable.contains({ "5", "10" }));
-      REQUIRE(nextTTable.contains({ "5", "11" }));
-      REQUIRE(nextTTable.contains({ "5", "12" }));
-      REQUIRE(nextTTable.contains({ "6", "4" }));
-      REQUIRE(nextTTable.contains({ "6", "5" }));
-      REQUIRE(nextTTable.contains({ "6", "6" }));
-      REQUIRE(nextTTable.contains({ "6", "7" }));
-      REQUIRE(nextTTable.contains({ "6", "8" }));
-      REQUIRE(nextTTable.contains({ "6", "9" }));
-      REQUIRE(nextTTable.contains({ "6", "10" }));
-      REQUIRE(nextTTable.contains({ "6", "11" }));
-      REQUIRE(nextTTable.contains({ "6", "12" }));
-      REQUIRE(nextTTable.contains({ "7", "10" }));
-      REQUIRE(nextTTable.contains({ "7", "11" }));
-      REQUIRE(nextTTable.contains({ "7", "12" }));
-      REQUIRE(nextTTable.contains({ "8", "11" }));
-      REQUIRE(nextTTable.contains({ "8", "12" }));
-      REQUIRE(nextTTable.contains({ "9", "11" }));
-      REQUIRE(nextTTable.contains({ "9", "12" }));
-      REQUIRE(nextTTable.contains({ "10", "12" }));
-      REQUIRE(nextTTable.size() == 75);
-    }
+    REQUIRE(nextTTable.contains({ "1", "3" }));
+    REQUIRE(nextTTable.contains({ "1", "4" }));
+    REQUIRE(nextTTable.contains({ "1", "5" }));
+    REQUIRE(nextTTable.contains({ "1", "6" }));
+    REQUIRE(nextTTable.contains({ "1", "7" }));
+    REQUIRE(nextTTable.contains({ "1", "8" }));
+    REQUIRE(nextTTable.contains({ "1", "9" }));
+    REQUIRE(nextTTable.contains({ "1", "10" }));
+    REQUIRE(nextTTable.contains({ "1", "11" }));
+    REQUIRE(nextTTable.contains({ "1", "12" }));
+    REQUIRE(nextTTable.contains({ "2", "4" }));
+    REQUIRE(nextTTable.contains({ "2", "5" }));
+    REQUIRE(nextTTable.contains({ "2", "6" }));
+    REQUIRE(nextTTable.contains({ "2", "7" }));
+    REQUIRE(nextTTable.contains({ "2", "8" }));
+    REQUIRE(nextTTable.contains({ "2", "9" }));
+    REQUIRE(nextTTable.contains({ "2", "10" }));
+    REQUIRE(nextTTable.contains({ "2", "11" }));
+    REQUIRE(nextTTable.contains({ "2", "12" }));
+    REQUIRE(nextTTable.contains({ "3", "3" }));
+    REQUIRE(nextTTable.contains({ "3", "5" }));
+    REQUIRE(nextTTable.contains({ "3", "6" }));
+    REQUIRE(nextTTable.contains({ "3", "8" }));
+    REQUIRE(nextTTable.contains({ "3", "9" }));
+    REQUIRE(nextTTable.contains({ "3", "10" }));
+    REQUIRE(nextTTable.contains({ "3", "11" }));
+    REQUIRE(nextTTable.contains({ "3", "12" }));
+    REQUIRE(nextTTable.contains({ "4", "3" }));
+    REQUIRE(nextTTable.contains({ "4", "4" }));
+    REQUIRE(nextTTable.contains({ "4", "6" }));
+    REQUIRE(nextTTable.contains({ "4", "7" }));
+    REQUIRE(nextTTable.contains({ "4", "8" }));
+    REQUIRE(nextTTable.contains({ "4", "9" }));
+    REQUIRE(nextTTable.contains({ "4", "10" }));
+    REQUIRE(nextTTable.contains({ "4", "11" }));
+    REQUIRE(nextTTable.contains({ "4", "12" }));
+    REQUIRE(nextTTable.contains({ "5", "3" }));
+    REQUIRE(nextTTable.contains({ "5", "4" }));
+    REQUIRE(nextTTable.contains({ "5", "5" }));
+    REQUIRE(nextTTable.contains({ "5", "7" }));
+    REQUIRE(nextTTable.contains({ "5", "8" }));
+    REQUIRE(nextTTable.contains({ "5", "9" }));
+    REQUIRE(nextTTable.contains({ "5", "10" }));
+    REQUIRE(nextTTable.contains({ "5", "11" }));
+    REQUIRE(nextTTable.contains({ "5", "12" }));
+    REQUIRE(nextTTable.contains({ "6", "4" }));
+    REQUIRE(nextTTable.contains({ "6", "5" }));
+    REQUIRE(nextTTable.contains({ "6", "6" }));
+    REQUIRE(nextTTable.contains({ "6", "7" }));
+    REQUIRE(nextTTable.contains({ "6", "8" }));
+    REQUIRE(nextTTable.contains({ "6", "9" }));
+    REQUIRE(nextTTable.contains({ "6", "10" }));
+    REQUIRE(nextTTable.contains({ "6", "11" }));
+    REQUIRE(nextTTable.contains({ "6", "12" }));
+    REQUIRE(nextTTable.contains({ "7", "10" }));
+    REQUIRE(nextTTable.contains({ "7", "11" }));
+    REQUIRE(nextTTable.contains({ "7", "12" }));
+    REQUIRE(nextTTable.contains({ "8", "11" }));
+    REQUIRE(nextTTable.contains({ "8", "12" }));
+    REQUIRE(nextTTable.contains({ "9", "11" }));
+    REQUIRE(nextTTable.contains({ "9", "12" }));
+    REQUIRE(nextTTable.contains({ "10", "12" }));
+    REQUIRE(nextTTable.size() == 75);
   }
 }
 
-TEST_CASE("Next relation - If within while", "[SimpleParser][Next]") {
-  SECTION("Next") {
-    std::string string("procedure a{x=0;while(c<d){print z;if(3==3)then{call=assign;}else{while=read;}}read f;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
+TEST_CASE("[TestSimpleParser] Next relation - If within while", "[SimpleParser][Next]") {
+  std::string string("procedure a{x=0;while(c<d){print z;if(3==3)then{call=assign;}else{while=read;}}read f;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
 
+  SECTION("Next") {
     Table nextTable = pkb.getNextTable();
 
     REQUIRE(nextTable.contains({ "1", "2" }));
@@ -2399,54 +2407,54 @@ TEST_CASE("Next relation - If within while", "[SimpleParser][Next]") {
     REQUIRE(nextTable.contains({ "5", "2" }));
     REQUIRE(nextTable.contains({ "6", "2" }));
     REQUIRE(nextTable.size() == 8);
+  }
 
-    SECTION("NextT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
 
-      Table nextTTable = pkb.getNextTTable();
+  SECTION("NextT") {
+    Table nextTTable = pkb.getNextTTable();
 
-      REQUIRE(nextTTable.contains({ "1", "3" }));
-      REQUIRE(nextTTable.contains({ "1", "4" }));
-      REQUIRE(nextTTable.contains({ "1", "5" }));
-      REQUIRE(nextTTable.contains({ "1", "6" }));
-      REQUIRE(nextTTable.contains({ "1", "7" }));
-      REQUIRE(nextTTable.contains({ "2", "2" }));
-      REQUIRE(nextTTable.contains({ "2", "4" }));
-      REQUIRE(nextTTable.contains({ "2", "5" }));
-      REQUIRE(nextTTable.contains({ "2", "6" }));
-      REQUIRE(nextTTable.contains({ "3", "2" }));
-      REQUIRE(nextTTable.contains({ "3", "3" }));
-      REQUIRE(nextTTable.contains({ "3", "5" }));
-      REQUIRE(nextTTable.contains({ "3", "6" }));
-      REQUIRE(nextTTable.contains({ "3", "7" }));
-      REQUIRE(nextTTable.contains({ "4", "2" }));
-      REQUIRE(nextTTable.contains({ "4", "3" }));
-      REQUIRE(nextTTable.contains({ "4", "4" }));
-      REQUIRE(nextTTable.contains({ "4", "7" }));
-      REQUIRE(nextTTable.contains({ "5", "3" }));
-      REQUIRE(nextTTable.contains({ "5", "4" }));
-      REQUIRE(nextTTable.contains({ "5", "5" }));
-      REQUIRE(nextTTable.contains({ "5", "6" }));
-      REQUIRE(nextTTable.contains({ "5", "7" }));
-      REQUIRE(nextTTable.contains({ "6", "3" }));
-      REQUIRE(nextTTable.contains({ "6", "4" }));
-      REQUIRE(nextTTable.contains({ "6", "5" }));
-      REQUIRE(nextTTable.contains({ "6", "6" }));
-      REQUIRE(nextTTable.contains({ "6", "7" }));
-      REQUIRE(nextTTable.size() == 36);
-    }
+    REQUIRE(nextTTable.contains({ "1", "3" }));
+    REQUIRE(nextTTable.contains({ "1", "4" }));
+    REQUIRE(nextTTable.contains({ "1", "5" }));
+    REQUIRE(nextTTable.contains({ "1", "6" }));
+    REQUIRE(nextTTable.contains({ "1", "7" }));
+    REQUIRE(nextTTable.contains({ "2", "2" }));
+    REQUIRE(nextTTable.contains({ "2", "4" }));
+    REQUIRE(nextTTable.contains({ "2", "5" }));
+    REQUIRE(nextTTable.contains({ "2", "6" }));
+    REQUIRE(nextTTable.contains({ "3", "2" }));
+    REQUIRE(nextTTable.contains({ "3", "3" }));
+    REQUIRE(nextTTable.contains({ "3", "5" }));
+    REQUIRE(nextTTable.contains({ "3", "6" }));
+    REQUIRE(nextTTable.contains({ "3", "7" }));
+    REQUIRE(nextTTable.contains({ "4", "2" }));
+    REQUIRE(nextTTable.contains({ "4", "3" }));
+    REQUIRE(nextTTable.contains({ "4", "4" }));
+    REQUIRE(nextTTable.contains({ "4", "7" }));
+    REQUIRE(nextTTable.contains({ "5", "3" }));
+    REQUIRE(nextTTable.contains({ "5", "4" }));
+    REQUIRE(nextTTable.contains({ "5", "5" }));
+    REQUIRE(nextTTable.contains({ "5", "6" }));
+    REQUIRE(nextTTable.contains({ "5", "7" }));
+    REQUIRE(nextTTable.contains({ "6", "3" }));
+    REQUIRE(nextTTable.contains({ "6", "4" }));
+    REQUIRE(nextTTable.contains({ "6", "5" }));
+    REQUIRE(nextTTable.contains({ "6", "6" }));
+    REQUIRE(nextTTable.contains({ "6", "7" }));
+    REQUIRE(nextTTable.size() == 36);
   }
 }
 
-TEST_CASE("Next relation - While within while", "[SimpleParser][Next]") {
-  SECTION("Next") {
-    std::string string("procedure a{while(b<b){while(c<d){read while;print read;}}e=1;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
+TEST_CASE("[TestSimpleParser] Next relation - While within while", "[SimpleParser][Next]") {
+  std::string string("procedure a{while(b<b){while(c<d){read while;print read;}}e=1;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
 
+  SECTION("Next") {
     Table nextTable = pkb.getNextTable();
 
     REQUIRE(nextTable.contains({ "1", "2" }));
@@ -2456,40 +2464,40 @@ TEST_CASE("Next relation - While within while", "[SimpleParser][Next]") {
     REQUIRE(nextTable.contains({ "3", "4" }));
     REQUIRE(nextTable.contains({ "4", "2" }));
     REQUIRE(nextTable.size() == 6);
+  }
 
-    SECTION("NextT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
 
-      Table nextTTable = pkb.getNextTTable();
+  SECTION("NextT") {
+    Table nextTTable = pkb.getNextTTable();
 
-      REQUIRE(nextTTable.contains({ "1", "1" }));
-      REQUIRE(nextTTable.contains({ "1", "3" }));
-      REQUIRE(nextTTable.contains({ "1", "4" }));
-      REQUIRE(nextTTable.contains({ "2", "2" }));
-      REQUIRE(nextTTable.contains({ "2", "4" }));
-      REQUIRE(nextTTable.contains({ "2", "5" }));
-      REQUIRE(nextTTable.contains({ "3", "1" }));
-      REQUIRE(nextTTable.contains({ "3", "2" }));
-      REQUIRE(nextTTable.contains({ "3", "3" }));
-      REQUIRE(nextTTable.contains({ "3", "5" }));
-      REQUIRE(nextTTable.contains({ "4", "1" }));
-      REQUIRE(nextTTable.contains({ "4", "3" }));
-      REQUIRE(nextTTable.contains({ "4", "4" }));
-      REQUIRE(nextTTable.contains({ "4", "5" }));
-      REQUIRE(nextTTable.size() == 20);
-    }
+    REQUIRE(nextTTable.contains({ "1", "1" }));
+    REQUIRE(nextTTable.contains({ "1", "3" }));
+    REQUIRE(nextTTable.contains({ "1", "4" }));
+    REQUIRE(nextTTable.contains({ "2", "2" }));
+    REQUIRE(nextTTable.contains({ "2", "4" }));
+    REQUIRE(nextTTable.contains({ "2", "5" }));
+    REQUIRE(nextTTable.contains({ "3", "1" }));
+    REQUIRE(nextTTable.contains({ "3", "2" }));
+    REQUIRE(nextTTable.contains({ "3", "3" }));
+    REQUIRE(nextTTable.contains({ "3", "5" }));
+    REQUIRE(nextTTable.contains({ "4", "1" }));
+    REQUIRE(nextTTable.contains({ "4", "3" }));
+    REQUIRE(nextTTable.contains({ "4", "4" }));
+    REQUIRE(nextTTable.contains({ "4", "5" }));
+    REQUIRE(nextTTable.size() == 20);
   }
 }
 
-TEST_CASE("Next relation - If within if", "[SimpleParser][Next]") {
-  SECTION("Next") {
-    std::string string("procedure a{if(b>c)then{if(d==e)then{read f;}else{print g;}}else{if(h!=i)then{j=3;}else{k=l+m;}}a=1;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
+TEST_CASE("[TestSimpleParser] Next relation - If within if", "[SimpleParser][Next]") {
+  std::string string("procedure a{if(b>c)then{if(d==e)then{read f;}else{print g;}}else{if(h!=i)then{j=3;}else{k=l+m;}}a=1;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
 
+  SECTION("Next") {
     Table nextTable = pkb.getNextTable();
 
     REQUIRE(nextTable.contains({ "1", "2" }));
@@ -2503,33 +2511,33 @@ TEST_CASE("Next relation - If within if", "[SimpleParser][Next]") {
     REQUIRE(nextTable.contains({ "6", "8" }));
     REQUIRE(nextTable.contains({ "7", "8" }));
     REQUIRE(nextTable.size() == 10);
+  }
 
-    SECTION("NextT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SECTION("NextT") {
+    SourceProcessor::DesignExtractor designExtractor(pkb);
+    designExtractor.extractDesignAbstractions();
 
-      Table nextTTable = pkb.getNextTTable();
+    Table nextTTable = pkb.getNextTTable();
 
-      REQUIRE(nextTTable.contains({ "1", "3" }));
-      REQUIRE(nextTTable.contains({ "1", "4" }));
-      REQUIRE(nextTTable.contains({ "1", "6" }));
-      REQUIRE(nextTTable.contains({ "1", "7" }));
-      REQUIRE(nextTTable.contains({ "1", "8" }));
-      REQUIRE(nextTTable.contains({ "2", "8" }));
-      REQUIRE(nextTTable.contains({ "5", "8" }));
-      REQUIRE(nextTTable.size() == 17);
-    }
+    REQUIRE(nextTTable.contains({ "1", "3" }));
+    REQUIRE(nextTTable.contains({ "1", "4" }));
+    REQUIRE(nextTTable.contains({ "1", "6" }));
+    REQUIRE(nextTTable.contains({ "1", "7" }));
+    REQUIRE(nextTTable.contains({ "1", "8" }));
+    REQUIRE(nextTTable.contains({ "2", "8" }));
+    REQUIRE(nextTTable.contains({ "5", "8" }));
+    REQUIRE(nextTTable.size() == 17);
   }
 }
 
-TEST_CASE("Next relation - While within if", "[SimpleParser][Next]") {
-  SECTION("Next") {
-    std::string string("procedure a{if(2>e)then{while(c>=3){z=1;}}else{while(f>=3){k=1;}}a=1;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
+TEST_CASE("[TestSimpleParser] Next relation - While within if", "[SimpleParser][Next]") {
+  std::string string("procedure a{if(2>e)then{while(c>=3){z=1;}}else{while(f>=3){k=1;}}a=1;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
 
+  SECTION("Next") {
     Table nextTable = pkb.getNextTable();
 
     REQUIRE(nextTable.contains({ "1", "2" }));
@@ -2541,97 +2549,189 @@ TEST_CASE("Next relation - While within if", "[SimpleParser][Next]") {
     REQUIRE(nextTable.contains({ "4", "6" }));
     REQUIRE(nextTable.contains({ "5", "4" }));
     REQUIRE(nextTable.size() == 8);
+  }
 
-    SECTION("NextT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
 
-      Table nextTTable = pkb.getNextTTable();
+  SECTION("NextT") {
+    Table nextTTable = pkb.getNextTTable();
 
-      REQUIRE(nextTTable.contains({ "1", "3" }));
-      REQUIRE(nextTTable.contains({ "1", "4" }));
-      REQUIRE(nextTTable.contains({ "1", "5" }));
-      REQUIRE(nextTTable.contains({ "1", "6" }));
-      REQUIRE(nextTTable.contains({ "2", "2" }));
-      REQUIRE(nextTTable.contains({ "3", "6" }));
-      REQUIRE(nextTTable.contains({ "4", "4" }));
-      REQUIRE(nextTTable.contains({ "5", "5" }));
-      REQUIRE(nextTTable.contains({ "5", "6" }));
-      REQUIRE(nextTTable.size() == 17);
-    }
+    REQUIRE(nextTTable.contains({ "1", "3" }));
+    REQUIRE(nextTTable.contains({ "1", "4" }));
+    REQUIRE(nextTTable.contains({ "1", "5" }));
+    REQUIRE(nextTTable.contains({ "1", "6" }));
+    REQUIRE(nextTTable.contains({ "2", "2" }));
+    REQUIRE(nextTTable.contains({ "3", "6" }));
+    REQUIRE(nextTTable.contains({ "4", "4" }));
+    REQUIRE(nextTTable.contains({ "5", "5" }));
+    REQUIRE(nextTTable.contains({ "5", "6" }));
+    REQUIRE(nextTTable.size() == 17);
   }
 }
 
-// add next for week 7 lecture quiz
+////////////////////
+// CFG and CFGBip //
+////////////////////
 
-/////////
-// CFG //
-/////////
+TEST_CASE("[TestSimpleParser] CFG - Example CFG (Figure 5) - Advanced SPA requirements", "[SimpleParser][Cfg][CfgBip]") {
+  std::string string("procedure Second{x=0;i=5;while(i!=0){x=x+2*y;call Third;i=i-1;}if(x==1)then{x=x+1;}else{z=1;}z=z+x+i;y=z+2;x=x*y+z;}procedure Third{z=5;v=z;print v;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
 
-TEST_CASE("CFG", "[SimpleParser][Cfg]") {
-  SECTION("Basic example - from example CFG (Figure 5) in Advanced SPA requirements") {
-    std::string string("procedure Second{x=0;i=5;while(i!=0){x=x+2*y;call Third;i=i-1;}if(x==1)then{x=x+1;}else{z=1;}z=z+x+i;y=z+2;x=x*y+z;}procedure Third{z=5;v=z;print v;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
+  SECTION("CFG") {
+    std::vector<int> stmt1 = pkb.getNextStmtsFromCfg(1);
+    std::vector<int> stmt2 = pkb.getNextStmtsFromCfg(2);
+    std::vector<int> stmt3 = pkb.getNextStmtsFromCfg(3);
+    std::vector<int> stmt4 = pkb.getNextStmtsFromCfg(4);
+    std::vector<int> stmt5 = pkb.getNextStmtsFromCfg(5);
+    std::vector<int> stmt6 = pkb.getNextStmtsFromCfg(6);
+    std::vector<int> stmt7 = pkb.getNextStmtsFromCfg(7);
+    std::vector<int> stmt8 = pkb.getNextStmtsFromCfg(8);
+    std::vector<int> stmt9 = pkb.getNextStmtsFromCfg(9);
+    std::vector<int> stmt10 = pkb.getNextStmtsFromCfg(10);
+    std::vector<int> stmt11 = pkb.getNextStmtsFromCfg(11);
+    std::vector<int> stmt12 = pkb.getNextStmtsFromCfg(12);
 
-    std::unordered_set<int> stmt1 = pkb.getNextStmtsFromCfg(1);
-    std::unordered_set<int> stmt2 = pkb.getNextStmtsFromCfg(2);
-    std::unordered_set<int> stmt3 = pkb.getNextStmtsFromCfg(3);
-    std::unordered_set<int> stmt4 = pkb.getNextStmtsFromCfg(4);
-    std::unordered_set<int> stmt5 = pkb.getNextStmtsFromCfg(5);
-    std::unordered_set<int> stmt6 = pkb.getNextStmtsFromCfg(6);
-    std::unordered_set<int> stmt7 = pkb.getNextStmtsFromCfg(7);
-    std::unordered_set<int> stmt8 = pkb.getNextStmtsFromCfg(8);
-    std::unordered_set<int> stmt9 = pkb.getNextStmtsFromCfg(9);
-    std::unordered_set<int> stmt10 = pkb.getNextStmtsFromCfg(10);
-    std::unordered_set<int> stmt11 = pkb.getNextStmtsFromCfg(11);
-    std::unordered_set<int> stmt12 = pkb.getNextStmtsFromCfg(12);
-
-    REQUIRE(stmt1.find(2) != stmt1.end());
+    REQUIRE(std::find(stmt1.begin(), stmt1.end(), 2) != stmt1.end());
     REQUIRE(stmt1.size() == 1);
-    REQUIRE(stmt2.find(3) != stmt2.end());
+    REQUIRE(std::find(stmt2.begin(), stmt2.end(), 3) != stmt2.end());
     REQUIRE(stmt2.size() == 1);
-    REQUIRE(stmt3.find(4) != stmt3.end());
-    REQUIRE(stmt3.find(7) != stmt3.end());
+    REQUIRE(std::find(stmt3.begin(), stmt3.end(), 4) != stmt3.end());
+    REQUIRE(std::find(stmt3.begin(), stmt3.end(), 7) != stmt3.end());
     REQUIRE(stmt3.size() == 2);
-    REQUIRE(stmt4.find(5) != stmt4.end());
+    REQUIRE(std::find(stmt4.begin(), stmt4.end(), 5) != stmt4.end());
     REQUIRE(stmt4.size() == 1);
-    REQUIRE(stmt5.find(6) != stmt5.end());
+    REQUIRE(std::find(stmt5.begin(), stmt5.end(), 6) != stmt5.end());
     REQUIRE(stmt5.size() == 1);
-    REQUIRE(stmt6.find(3) != stmt6.end());
+    REQUIRE(std::find(stmt6.begin(), stmt6.end(), 3) != stmt6.end());
     REQUIRE(stmt6.size() == 1);
-    REQUIRE(stmt7.find(8) != stmt7.end());
-    REQUIRE(stmt7.find(9) != stmt7.end());
+    REQUIRE(std::find(stmt7.begin(), stmt7.end(), 8) != stmt7.end());
+    REQUIRE(std::find(stmt7.begin(), stmt7.end(), 9) != stmt7.end());
     REQUIRE(stmt7.size() == 2);
-    REQUIRE(stmt8.find(10) != stmt8.end());
+    REQUIRE(std::find(stmt8.begin(), stmt8.end(), 10) != stmt8.end());
     REQUIRE(stmt8.size() == 1);
-    REQUIRE(stmt9.find(10) != stmt9.end());
+    REQUIRE(std::find(stmt9.begin(), stmt9.end(), 10) != stmt9.end());
     REQUIRE(stmt9.size() == 1);
-    REQUIRE(stmt10.find(11) != stmt10.end());
+    REQUIRE(std::find(stmt10.begin(), stmt10.end(), 11) != stmt10.end());
     REQUIRE(stmt10.size() == 1);
-    REQUIRE(stmt11.find(12) != stmt11.end());
+    REQUIRE(std::find(stmt11.begin(), stmt11.end(), 12) != stmt11.end());
     REQUIRE(stmt11.size() == 1);
     REQUIRE(stmt12.size() == 0);
   }
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  SECTION("CFGBip") {
+    std::vector<Cfg::BipNode> bipStmt1 = pkb.getNextStmtsFromCfgBip(1);
+    std::vector<Cfg::BipNode> bipStmt2 = pkb.getNextStmtsFromCfgBip(2);
+    std::vector<Cfg::BipNode> bipStmt3 = pkb.getNextStmtsFromCfgBip(3);
+    std::vector<Cfg::BipNode> bipStmt4 = pkb.getNextStmtsFromCfgBip(4);
+    std::vector<Cfg::BipNode> bipStmt5 = pkb.getNextStmtsFromCfgBip(5);
+    std::vector<Cfg::BipNode> bipStmt6 = pkb.getNextStmtsFromCfgBip(6);
+    std::vector<Cfg::BipNode> bipStmt7 = pkb.getNextStmtsFromCfgBip(7);
+    std::vector<Cfg::BipNode> bipStmt8 = pkb.getNextStmtsFromCfgBip(8);
+    std::vector<Cfg::BipNode> bipStmt9 = pkb.getNextStmtsFromCfgBip(9);
+    std::vector<Cfg::BipNode> bipStmt10 = pkb.getNextStmtsFromCfgBip(10);
+    std::vector<Cfg::BipNode> bipStmt11 = pkb.getNextStmtsFromCfgBip(11);
+    std::vector<Cfg::BipNode> bipStmt12 = pkb.getNextStmtsFromCfgBip(12);
+    std::vector<Cfg::BipNode> bipStmt13 = pkb.getNextStmtsFromCfgBip(13);
+    std::vector<Cfg::BipNode> bipStmt14 = pkb.getNextStmtsFromCfgBip(14);
+    std::vector<Cfg::BipNode> bipStmt15 = pkb.getNextStmtsFromCfgBip(15);
+    std::vector<Cfg::BipNode> dummy1 = pkb.getNextStmtsFromCfgBip(-1);
+    std::vector<Cfg::BipNode> dummy13 = pkb.getNextStmtsFromCfgBip(-13);
+
+    REQUIRE(bipStmt1[0].node == 2);
+    REQUIRE(bipStmt1[0].label == 0);
+    REQUIRE(bipStmt1[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt1.size() == 1);
+    REQUIRE(bipStmt2[0].node == 3);
+    REQUIRE(bipStmt2[0].label == 0);
+    REQUIRE(bipStmt2[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt2.size() == 1);
+    REQUIRE(bipStmt3[0].node == 4);
+    REQUIRE(bipStmt3[0].label == 0);
+    REQUIRE(bipStmt3[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt3[1].node == 7);
+    REQUIRE(bipStmt3[1].label == 0);
+    REQUIRE(bipStmt3[1].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt3.size() == 2);
+    REQUIRE(bipStmt4[0].node == 5);
+    REQUIRE(bipStmt4[0].label == 0);
+    REQUIRE(bipStmt4[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt4.size() == 1);
+    REQUIRE(bipStmt5[0].node == 13);
+    REQUIRE(bipStmt5[0].label == 5);
+    REQUIRE(bipStmt5[0].type == Cfg::NodeType::BRANCH_IN);
+    REQUIRE(bipStmt5.size() == 1);
+    REQUIRE(bipStmt6[0].node == 3);
+    REQUIRE(bipStmt6[0].label == 0);
+    REQUIRE(bipStmt6[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt6.size() == 1);
+    REQUIRE(bipStmt7[0].node == 8);
+    REQUIRE(bipStmt7[0].label == 0);
+    REQUIRE(bipStmt7[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt7[1].node == 9);
+    REQUIRE(bipStmt7[1].label == 0);
+    REQUIRE(bipStmt7[1].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt7.size() == 2);
+    REQUIRE(bipStmt8[0].node == 10);
+    REQUIRE(bipStmt8[0].label == 0);
+    REQUIRE(bipStmt8[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt8.size() == 1);
+    REQUIRE(bipStmt9[0].node == 10);
+    REQUIRE(bipStmt9[0].label == 0);
+    REQUIRE(bipStmt9[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt9.size() == 1);
+    REQUIRE(bipStmt10[0].node == 11);
+    REQUIRE(bipStmt10[0].label == 0);
+    REQUIRE(bipStmt10[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt10.size() == 1);
+    REQUIRE(bipStmt11[0].node == 12);
+    REQUIRE(bipStmt11[0].label == 0);
+    REQUIRE(bipStmt11[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt11.size() == 1);
+    REQUIRE(bipStmt12[0].node == -1);
+    REQUIRE(bipStmt12[0].label == 0);
+    REQUIRE(bipStmt12[0].type == Cfg::NodeType::DUMMY);
+    REQUIRE(bipStmt12.size() == 1);
+    REQUIRE(bipStmt13[0].node == 14);
+    REQUIRE(bipStmt13[0].label == 0);
+    REQUIRE(bipStmt13[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt13.size() == 1);
+    REQUIRE(bipStmt14[0].node == 15);
+    REQUIRE(bipStmt14[0].label == 0);
+    REQUIRE(bipStmt14[0].type == Cfg::NodeType::NORMAL);
+    REQUIRE(bipStmt14.size() == 1);
+    REQUIRE(bipStmt15[0].node == -13);
+    REQUIRE(bipStmt15[0].label == 0);
+    REQUIRE(bipStmt15[0].type == Cfg::NodeType::DUMMY);
+    REQUIRE(bipStmt15.size() == 1);
+    REQUIRE(dummy1.size() == 0);
+    REQUIRE(dummy13[0].node == 6);
+    REQUIRE(dummy13[0].label == 5);
+    REQUIRE(dummy13[0].type == Cfg::NodeType::BRANCH_BACK);
+    REQUIRE(dummy13.size() == 1);
+  }
 }
 
-//////////////////////
-// Affects relation //
-//////////////////////
+///////////////////////////////////
+// Affects and AffectsT relation //
+///////////////////////////////////
 
-TEST_CASE("Affects relation - Example CFG (Figure 5) - Advanced SPA requirements", "[SimpleParser][Affects]") {
+TEST_CASE("[TestSimpleParser] Affects relation - Example CFG (Figure 5) - Advanced SPA requirements", "[SimpleParser][Affects]") {
+  std::string string("procedure Second{x=0;i=5;while(i!=0){x=x+2*y;call Third;i=i-1;}if(x==1)then{x=x+1;}else{z=1;}z=z+x+i;y=z+2;x=x*y+z;}procedure Third{z=5;v=z;print v;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
   SECTION("Affects") {
-    std::string string("procedure Second{x=0;i=5;while(i!=0){x=x+2*y;call Third;i=i-1;}if(x==1)then{x=x+1;}else{z=1;}z=z+x+i;y=z+2;x=x*y+z;}procedure Third{z=5;v=z;print v;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
-
-    SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
-
     Table affectsTable = pkb.getAffectsTable();
 
     REQUIRE(affectsTable.contains({ "1", "4" }));
@@ -2654,144 +2754,132 @@ TEST_CASE("Affects relation - Example CFG (Figure 5) - Advanced SPA requirements
     REQUIRE(affectsTable.contains({ "11", "12" }));
     REQUIRE(affectsTable.contains({ "13", "14" }));
     REQUIRE(affectsTable.size() == 19);
-
-    SECTION("AffectsT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
-
-      Table affectsTTable = pkb.getAffectsTTable();
-
-      REQUIRE(affectsTTable.contains({ "1", "11" }));
-      REQUIRE(affectsTTable.contains({ "2", "11" }));
-      REQUIRE(affectsTTable.contains({ "2", "12" }));
-      REQUIRE(affectsTTable.contains({ "4", "11" }));
-      REQUIRE(affectsTTable.contains({ "6", "11" }));
-      REQUIRE(affectsTTable.contains({ "6", "12" }));
-      REQUIRE(affectsTTable.contains({ "8", "11" }));
-      REQUIRE(affectsTTable.contains({ "9", "11" }));
-      REQUIRE(affectsTTable.contains({ "9", "12" }));
-      REQUIRE(affectsTTable.size() == 28);
-    }
   }
-}
 
-TEST_CASE("Affects relation - Call proc directly modifies target var", "[SimpleParser][Affects]") {
-  SECTION("Affects", "[SimpleParser][Affects]") {
-    std::string string("procedure first{x=0;call second;i=x-1;}procedure second{read x;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
-
+  SECTION("AffectsT") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
     designExtractor.extractDesignAbstractions();
 
-    Table affectsTable = pkb.getAffectsTable();
+    Table affectsTTable = pkb.getAffectsTTable();
 
-    REQUIRE(affectsTable.size() == 0);
-
-    SECTION("AffectsT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
-
-      Table affectsTTable = pkb.getAffectsTTable();
-
-      REQUIRE(affectsTTable.size() == 0);
-    }
+    REQUIRE(affectsTTable.contains({ "1", "11" }));
+    REQUIRE(affectsTTable.contains({ "2", "11" }));
+    REQUIRE(affectsTTable.contains({ "2", "12" }));
+    REQUIRE(affectsTTable.contains({ "4", "11" }));
+    REQUIRE(affectsTTable.contains({ "6", "11" }));
+    REQUIRE(affectsTTable.contains({ "6", "12" }));
+    REQUIRE(affectsTTable.contains({ "8", "11" }));
+    REQUIRE(affectsTTable.contains({ "9", "11" }));
+    REQUIRE(affectsTTable.contains({ "9", "12" }));
+    REQUIRE(affectsTTable.size() == 28);
   }
 }
 
-TEST_CASE("Affects relation - Call proc indirectly modifies target var", "[SimpleParser][Affects]") {
+TEST_CASE("[TestSimpleParser] Affects relation - Call proc directly modifies target var", "[SimpleParser][Affects]") {
+  std::string string("procedure first{x=0;call second;i=x-1;}procedure second{read x;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
   SECTION("Affects", "[SimpleParser][Affects]") {
-    std::string string("procedure first{x=0;call second;i=x-1;}procedure second{print y;call third;}procedure third{x=3;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
-
-    SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
-
     Table affectsTable = pkb.getAffectsTable();
 
     REQUIRE(affectsTable.size() == 0);
+  }
 
-    SECTION("AffectsT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SECTION("AffectsT") {
+    Table affectsTTable = pkb.getAffectsTTable();
 
-      Table affectsTTable = pkb.getAffectsTTable();
-
-      REQUIRE(affectsTTable.size() == 0);
-    }
+    REQUIRE(affectsTTable.size() == 0);
   }
 }
 
-TEST_CASE("Affects relation - Container statement - Advanced SPA requirements", "[SimpleParser][Affects]") {
+TEST_CASE("[TestSimpleParser] Affects relation - Call proc indirectly modifies target var", "[SimpleParser][Affects]") {
+  std::string string("procedure first{x=0;call second;i=x-1;}procedure second{print y;call third;}procedure third{x=3;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  SECTION("Affects", "[SimpleParser][Affects]") {
+    Table affectsTable = pkb.getAffectsTable();
+
+    REQUIRE(affectsTable.size() == 0);
+  }
+
+  SECTION("AffectsT") {
+    Table affectsTTable = pkb.getAffectsTTable();
+
+    REQUIRE(affectsTTable.size() == 0);
+  }
+}
+
+TEST_CASE("[TestSimpleParser] Affects relation - Container statement - Advanced SPA requirements", "[SimpleParser][Affects]") {
+  std::string string("procedure alpha{x=1;if(i!=2)then{x=a+1;}else{a=b;}a=x;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
   SECTION("Affects") {
-    std::string string("procedure alpha{x=1;if(i!=2)then{x=a+1;}else{a=b;}a=x;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
-
-    SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
-
     Table affectsTable = pkb.getAffectsTable();
 
     REQUIRE(affectsTable.contains({ "1", "5" }));
     REQUIRE(affectsTable.contains({ "3", "5" }));
     REQUIRE(affectsTable.size() == 2);
+  }
 
-    SECTION("AffectsT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SECTION("AffectsT") {
+    Table affectsTTable = pkb.getAffectsTTable();
 
-      Table affectsTTable = pkb.getAffectsTTable();
-
-      REQUIRE(affectsTTable.size() == 2);
-    }
+    REQUIRE(affectsTTable.size() == 2);
   }
 }
 
-TEST_CASE("Affects relation - Procedure call - Advanced SPA requirements", "[SimpleParser][Affects]") {
+TEST_CASE("[TestSimpleParser] Affects relation - Procedure call - Advanced SPA requirements", "[SimpleParser][Affects]") {
+  std::string string("procedure alpha{x=1;call beta;a=x;}procedure beta{if(i!=2)then{x=a+1;}else{a=b;}}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
   SECTION("Affects") {
-    std::string string("procedure alpha{x=1;call beta;a=x;}procedure beta{if(i!=2)then{x=a+1;}else{a=b;}}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
-
-    SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
-
     Table affectsTable = pkb.getAffectsTable();
 
     REQUIRE(affectsTable.size() == 0);
+  }
 
-    SECTION("AffectsT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SECTION("AffectsT") {
+    Table affectsTTable = pkb.getAffectsTTable();
 
-      Table affectsTTable = pkb.getAffectsTTable();
-
-      REQUIRE(affectsTTable.size() == 0);
-    }
+    REQUIRE(affectsTTable.size() == 0);
   }
 }
 
-TEST_CASE("Affects relation - Advanced SPA in class quiz", "[SimpleParser][Affects]") {
+TEST_CASE("[TestSimpleParser] Affects relation - Advanced SPA in class quiz", "[SimpleParser][Affects]") {
+  std::string string(R"(
+      procedure Bumblebee{read x;y=2*z;call Megatron;z=p-y;
+      if(q!=1)then{z=x+24;call Ironhide;}else{while(z>0){y=x*q-5;z=z-1;}y=x+y*z+p*q;call Ironhide;}i=x+j+z;call Barricade;}
+      procedure Megatron{p=x*10;q=y+y*10;while(t==0){a=5*p-5;print y;}q=p*5;}
+      procedure Ironhide{i=x*10;j=x+y*10;if(i>j)then{read x;call Barricade;}else{y=i+x+y*z;}}
+      procedure Barricade{q=i*x*j+y+p*q;print q;})"); 
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
   SECTION("Affects") {
-    std::string string("procedure Bumblebee{read x;y=2*z;call Megatron;z=p-y;if(q!=1)then{z=x+24;call Ironhide;}else{while(z>0){y=x*q-5;z=z-1;}y=x+y*z+p*q;call Ironhide;}i=x+j+z;call Barricade;}procedure Megatron{p=x*10;q=y+y*10;while(t==0){a=5*p-5;print y;}q=p*5;}procedure Ironhide{i=x*10;j=x+y*10;if(i>j)then{read x;call Barricade;}else{y=i+x+y*z;}}procedure Barricade{q=i*x*j+y+p*q;print q;}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
-
-    SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
-
     Table affectsTable = pkb.getAffectsTable();
 
     REQUIRE(affectsTable.contains({ "2", "4" }));
@@ -2808,31 +2896,31 @@ TEST_CASE("Affects relation - Advanced SPA in class quiz", "[SimpleParser][Affec
     REQUIRE(affectsTable.contains({ "15", "20" }));
     REQUIRE(affectsTable.contains({ "21", "26" }));
     REQUIRE(affectsTable.size() == 13);
+  }
 
-    SECTION("AffectsT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
+  SECTION("AffectsT") {
+    Table affectsTTable = pkb.getAffectsTTable();
 
-      Table affectsTTable = pkb.getAffectsTTable();
-
-      REQUIRE(affectsTTable.contains({ "2", "10" }));
-      REQUIRE(affectsTTable.contains({ "2", "13" }));
-      REQUIRE(affectsTTable.size() == 15);
-    }
+    REQUIRE(affectsTTable.contains({ "2", "10" }));
+    REQUIRE(affectsTTable.contains({ "2", "13" }));
+    REQUIRE(affectsTTable.size() == 15);
   }
 }
 
-TEST_CASE("Affects relation - Week 7 lecture quiz", "[SimpleParser][Affects]") {
+TEST_CASE("[TestSimpleParser] Affects relation - Week 7 lecture quiz", "[SimpleParser][Affects]") {
+  std::string string(R"(
+      procedure Gandalf{read shine;ring=shine*2;f=ring+3;read lost;call Frodo;
+      if(lost==shine)then{call Aragon;d=(shine+12)*(lost+13);}else{while(f>10){read g;f=ring+4+g*a*2*1+shine;call Frodo;}d=2;}print d;}
+      procedure Frodo{a=f+shine;if(a<2)then{call Aragon;}else{f=f+19;}}
+      procedure Aragon{while(shine<3){a=1*2+lost-f;while(lost==a){lost=lost-1;w=a+lost;shine=1+ring;}if(a!=shine)then{a=lost+1;w=shine*2;}else {w=1;}}})");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
   SECTION("Affects") {
-    std::string string("procedure Gandalf{read shine;ring=shine*2;f=ring+3;read lost;call Frodo;if(lost==shine)then{call Aragon;d=(shine+12)*(lost+13);}else{while(f>10){read g;f=ring+4+g*a*2*1+shine;call Frodo;}d=2;}print d;}procedure Frodo{a=f+shine;if(a<2)then{call Aragon;}else{f=f+19;}}procedure Aragon{while(shine<3){a=1*2+lost-f;while(lost==a){lost=lost-1;w=a+lost;shine=1+ring;}if(a!=shine)then{a=lost+1;w=shine*2;}else {w=1;}}}");
-    std::list<Token> simpleProg = expressionStringToTokens(string);
-    Pkb pkb;
-    SourceProcessor::SimpleParser parser(pkb, simpleProg);
-    parser.parse();
-
-    SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
-
     Table affectsTable = pkb.getAffectsTable();
 
     REQUIRE(affectsTable.contains({ "2", "3" }));
@@ -2844,14 +2932,423 @@ TEST_CASE("Affects relation - Week 7 lecture quiz", "[SimpleParser][Affects]") {
     REQUIRE(affectsTable.contains({ "22", "26" }));
     REQUIRE(affectsTable.contains({ "24", "27" }));
     REQUIRE(affectsTable.size() == 8);
-
-    SECTION("AffectsT") {
-      SourceProcessor::DesignExtractor designExtractor(pkb);
-      designExtractor.extractDesignAbstractions();
-
-      Table affectsTTable = pkb.getAffectsTTable();
-
-      REQUIRE(affectsTTable.size() == 8);
-    }
   }
+
+  SECTION("AffectsT") {
+    Table affectsTTable = pkb.getAffectsTTable();
+
+    REQUIRE(affectsTTable.size() == 8);
+  }
+}
+
+///////////////////////////////////
+// NextBip and NextBipT relation //
+///////////////////////////////////
+
+TEST_CASE("[TestSimpleParser] NextBip relation - Example 1 - Project iteration 2 and 3", "[SimpleParser][NextBip]") {
+  std::string string("procedure Bill{x=5;call Mary;y=x+6;x=5;z=x*y+2;}procedure Mary{y=x*3;call John;z=x+y;}procedure John{if(i>0)then{x=x+z;}else{y=x*y;}}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SECTION("NextBip - Before Extraction") {
+    Table nextBipTable = pkb.getNextBipTable();
+
+    REQUIRE(nextBipTable.contains({ "1", "2" }));
+    REQUIRE(nextBipTable.contains({ "3", "4" }));
+    REQUIRE(nextBipTable.contains({ "4", "5" }));
+    REQUIRE(nextBipTable.contains({ "6", "7" }));
+    REQUIRE(nextBipTable.contains({ "9", "10" }));
+    REQUIRE(nextBipTable.contains({ "9", "11" }));
+    REQUIRE(nextBipTable.size() == 6);
+  }
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  SECTION("NextBip - After Extraction") {
+    Table nextBipTable = pkb.getNextBipTable();
+
+    REQUIRE(nextBipTable.contains({ "2", "6" }));
+    REQUIRE(nextBipTable.contains({ "7", "9" }));
+    REQUIRE(nextBipTable.contains({ "8", "3" }));
+    REQUIRE(nextBipTable.contains({ "10", "8" }));
+    REQUIRE(nextBipTable.contains({ "11", "8" }));
+    REQUIRE(nextBipTable.size() == 11);
+  }
+
+  SECTION("NextBipT") {
+    Table nextBipTTable = pkb.getNextBipTTable();
+
+    REQUIRE(nextBipTTable.contains({ "1", "2" }));
+    REQUIRE(nextBipTTable.contains({ "1", "6" }));
+    REQUIRE(nextBipTTable.contains({ "1", "7" }));
+    REQUIRE(nextBipTTable.contains({ "1", "9" }));
+    REQUIRE(nextBipTTable.contains({ "1", "10" }));
+    REQUIRE(nextBipTTable.contains({ "1", "11" }));
+    REQUIRE(nextBipTTable.contains({ "1", "8" }));
+    REQUIRE(nextBipTTable.contains({ "1", "3" }));
+    REQUIRE(nextBipTTable.contains({ "1", "4" }));
+    REQUIRE(nextBipTTable.contains({ "1", "5" }));
+    REQUIRE(nextBipTTable.contains({ "2", "6" }));
+    REQUIRE(nextBipTTable.contains({ "2", "7" }));
+    REQUIRE(nextBipTTable.contains({ "2", "9" }));
+    REQUIRE(nextBipTTable.contains({ "2", "10" }));
+    REQUIRE(nextBipTTable.contains({ "2", "11" }));
+    REQUIRE(nextBipTTable.contains({ "2", "8" }));
+    REQUIRE(nextBipTTable.contains({ "2", "3" }));
+    REQUIRE(nextBipTTable.contains({ "2", "4" }));
+    REQUIRE(nextBipTTable.contains({ "2", "5" }));
+    REQUIRE(nextBipTTable.contains({ "3", "4" }));
+    REQUIRE(nextBipTTable.contains({ "3", "5" }));
+    REQUIRE(nextBipTTable.contains({ "4", "5" }));
+    REQUIRE(nextBipTTable.contains({ "6", "7" }));
+    REQUIRE(nextBipTTable.contains({ "6", "9" }));
+    REQUIRE(nextBipTTable.contains({ "6", "10" }));
+    REQUIRE(nextBipTTable.contains({ "6", "11" }));
+    REQUIRE(nextBipTTable.contains({ "6", "8" }));
+    REQUIRE(nextBipTTable.contains({ "6", "3" }));
+    REQUIRE(nextBipTTable.contains({ "6", "4" }));
+    REQUIRE(nextBipTTable.contains({ "6", "5" }));
+    REQUIRE(nextBipTTable.contains({ "7", "9" }));
+    REQUIRE(nextBipTTable.contains({ "7", "10" }));
+    REQUIRE(nextBipTTable.contains({ "7", "11" }));
+    REQUIRE(nextBipTTable.contains({ "7", "8" }));
+    REQUIRE(nextBipTTable.contains({ "7", "3" }));
+    REQUIRE(nextBipTTable.contains({ "7", "4" }));
+    REQUIRE(nextBipTTable.contains({ "7", "5" }));
+    REQUIRE(nextBipTTable.contains({ "8", "3" }));
+    REQUIRE(nextBipTTable.contains({ "8", "4" }));
+    REQUIRE(nextBipTTable.contains({ "8", "5" }));
+    REQUIRE(nextBipTTable.contains({ "9", "10" }));
+    REQUIRE(nextBipTTable.contains({ "9", "11" }));
+    REQUIRE(nextBipTTable.contains({ "9", "8" }));
+    REQUIRE(nextBipTTable.contains({ "9", "3" }));
+    REQUIRE(nextBipTTable.contains({ "9", "4" }));
+    REQUIRE(nextBipTTable.contains({ "9", "5" }));
+    REQUIRE(nextBipTTable.contains({ "10", "8" }));
+    REQUIRE(nextBipTTable.contains({ "10", "3" }));
+    REQUIRE(nextBipTTable.contains({ "10", "4" }));
+    REQUIRE(nextBipTTable.contains({ "10", "5" }));
+    REQUIRE(nextBipTTable.contains({ "11", "8" }));
+    REQUIRE(nextBipTTable.contains({ "11", "3" }));
+    REQUIRE(nextBipTTable.contains({ "11", "4" }));
+    REQUIRE(nextBipTTable.contains({ "11", "5" }));
+    REQUIRE(nextBipTTable.size() == 54);
+  }
+}
+
+TEST_CASE("[TestSimpleParser] NextBip relation - Example 2 - Project iteration 2 and 3", "[SimpleParser][NextBip]") {
+  std::string string("procedure Bill{x=5;call Mary;y=x+6;call John;z=x*y+2;}procedure Mary{y=x*3;call John;z=x+y;}procedure John{if(i>0)then{x=x+z;}else{y=x*y;}}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SECTION("NextBip - Before Extraction") {
+    Table nextBipTable = pkb.getNextBipTable();
+
+    REQUIRE(nextBipTable.contains({ "1", "2" }));
+    REQUIRE(nextBipTable.contains({ "3", "4" }));
+    REQUIRE(nextBipTable.contains({ "6", "7" }));
+    REQUIRE(nextBipTable.contains({ "9", "10" }));
+    REQUIRE(nextBipTable.contains({ "9", "11" }));
+    REQUIRE(nextBipTable.size() == 5);
+  }
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  SECTION("NextBip - After Extraction") {
+    Table nextBipTable = pkb.getNextBipTable();
+
+    REQUIRE(nextBipTable.contains({ "2", "6" }));
+    REQUIRE(nextBipTable.contains({ "4", "9" }));
+    REQUIRE(nextBipTable.contains({ "7", "9" }));
+    REQUIRE(nextBipTable.contains({ "8", "3" }));
+    REQUIRE(nextBipTable.contains({ "10", "5" }));
+    REQUIRE(nextBipTable.contains({ "11", "5" }));
+    REQUIRE(nextBipTable.contains({ "10", "8" }));
+    REQUIRE(nextBipTable.contains({ "11", "8" }));
+    REQUIRE(nextBipTable.size() == 13);
+  }
+
+  SECTION("NextBipT") {
+    Table nextBipTTable = pkb.getNextBipTTable();
+
+    REQUIRE(nextBipTTable.contains({ "1", "2" }));
+    REQUIRE(nextBipTTable.contains({ "1", "6" }));
+    REQUIRE(nextBipTTable.contains({ "1", "7" }));
+    REQUIRE(nextBipTTable.contains({ "1", "9" }));
+    REQUIRE(nextBipTTable.contains({ "1", "10" }));
+    REQUIRE(nextBipTTable.contains({ "1", "11" }));
+    REQUIRE(nextBipTTable.contains({ "1", "8" }));
+    REQUIRE(nextBipTTable.contains({ "1", "3" }));
+    REQUIRE(nextBipTTable.contains({ "1", "4" }));
+    REQUIRE(nextBipTTable.contains({ "1", "5" }));
+    REQUIRE(nextBipTTable.contains({ "2", "6" }));
+    REQUIRE(nextBipTTable.contains({ "2", "7" }));
+    REQUIRE(nextBipTTable.contains({ "2", "9" }));
+    REQUIRE(nextBipTTable.contains({ "2", "10" }));
+    REQUIRE(nextBipTTable.contains({ "2", "11" }));
+    REQUIRE(nextBipTTable.contains({ "2", "8" }));
+    REQUIRE(nextBipTTable.contains({ "2", "3" }));
+    REQUIRE(nextBipTTable.contains({ "2", "4" }));
+    REQUIRE(nextBipTTable.contains({ "2", "5" }));
+    REQUIRE(nextBipTTable.contains({ "3", "4" }));
+    REQUIRE(nextBipTTable.contains({ "3", "9" }));
+    REQUIRE(nextBipTTable.contains({ "3", "10" }));
+    REQUIRE(nextBipTTable.contains({ "3", "11" }));
+    REQUIRE(nextBipTTable.contains({ "3", "5" }));
+    REQUIRE(nextBipTTable.contains({ "4", "9" }));
+    REQUIRE(nextBipTTable.contains({ "4", "10" }));
+    REQUIRE(nextBipTTable.contains({ "4", "11" }));
+    REQUIRE(nextBipTTable.contains({ "4", "5" }));
+    REQUIRE(nextBipTTable.contains({ "6", "7" }));
+    REQUIRE(nextBipTTable.contains({ "6", "9" }));
+    REQUIRE(nextBipTTable.contains({ "6", "10" }));
+    REQUIRE(nextBipTTable.contains({ "6", "11" }));
+    REQUIRE(nextBipTTable.contains({ "6", "8" }));
+    REQUIRE(nextBipTTable.contains({ "6", "3" }));
+    REQUIRE(nextBipTTable.contains({ "6", "4" }));
+    REQUIRE(nextBipTTable.contains({ "6", "5" }));
+    REQUIRE(nextBipTTable.contains({ "7", "9" }));
+    REQUIRE(nextBipTTable.contains({ "7", "10" }));
+    REQUIRE(nextBipTTable.contains({ "7", "11" }));
+    REQUIRE(nextBipTTable.contains({ "7", "8" }));
+    REQUIRE(nextBipTTable.contains({ "7", "3" }));
+    REQUIRE(nextBipTTable.contains({ "7", "4" }));
+    REQUIRE(nextBipTTable.contains({ "7", "5" }));
+    REQUIRE(nextBipTTable.contains({ "8", "3" }));
+    REQUIRE(nextBipTTable.contains({ "8", "4" }));
+    REQUIRE(nextBipTTable.contains({ "8", "9" }));
+    REQUIRE(nextBipTTable.contains({ "8", "10" }));
+    REQUIRE(nextBipTTable.contains({ "8", "11" }));
+    REQUIRE(nextBipTTable.contains({ "8", "5" }));
+    REQUIRE(nextBipTTable.contains({ "9", "10" }));
+    REQUIRE(nextBipTTable.contains({ "9", "11" }));
+    REQUIRE(nextBipTTable.contains({ "9", "8" }));
+    REQUIRE(nextBipTTable.contains({ "9", "3" }));
+    REQUIRE(nextBipTTable.contains({ "9", "4" }));
+    REQUIRE(nextBipTTable.contains({ "9", "9" }));
+    REQUIRE(nextBipTTable.contains({ "9", "5" }));
+    REQUIRE(nextBipTTable.contains({ "10", "8" }));
+    REQUIRE(nextBipTTable.contains({ "10", "3" }));
+    REQUIRE(nextBipTTable.contains({ "10", "4" }));
+    REQUIRE(nextBipTTable.contains({ "10", "9" }));
+    REQUIRE(nextBipTTable.contains({ "10", "10" }));
+    REQUIRE(nextBipTTable.contains({ "10", "11" }));
+    REQUIRE(nextBipTTable.contains({ "10", "5" }));
+    REQUIRE(nextBipTTable.contains({ "11", "8" }));
+    REQUIRE(nextBipTTable.contains({ "11", "3" }));
+    REQUIRE(nextBipTTable.contains({ "11", "4" }));
+    REQUIRE(nextBipTTable.contains({ "11", "9" }));
+    REQUIRE(nextBipTTable.contains({ "11", "10" }));
+    REQUIRE(nextBipTTable.contains({ "11", "11" }));
+    REQUIRE(nextBipTTable.contains({ "11", "5" }));
+    REQUIRE(nextBipTTable.size() == 70);
+  }
+}
+
+/////////////////////////
+// AffectsBip relation //
+/////////////////////////
+
+TEST_CASE("[TestSimpleParser] AffectsBip relation - Call proc directly modifies target var", "[SimpleParser][AffectsBip]") {
+  std::string string("procedure first{x=0;call second;i=x-1;}procedure second{read x;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTable = pkb.getAffectsBipTable();
+
+  REQUIRE(affectsBipTable.size() == 0);
+}
+
+TEST_CASE("[TestSimpleParser] AffectsBip relation - Call proc indirectly modifies target var", "[SimpleParser][AffectsBip]") {
+  std::string string("procedure first{x=0;call second;i=x-1;}procedure second{print y;call third;}procedure third{x=3;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTable = pkb.getAffectsBipTable();
+
+  REQUIRE(affectsBipTable.contains({ "6", "3" }));
+  REQUIRE(affectsBipTable.size() == 1);
+}
+
+TEST_CASE("[TestSimpleParser] AffectsBip relation - Container statement - Advanced SPA requirements", "[SimpleParser][AffectsBip]") {
+  std::string string("procedure alpha{x=1;if(i!=2)then{x=a+1;}else{a=b;}a=x;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTable = pkb.getAffectsBipTable();
+
+  REQUIRE(affectsBipTable.contains({ "1", "5" }));
+  REQUIRE(affectsBipTable.contains({ "3", "5" }));
+  REQUIRE(affectsBipTable.size() == 2);
+}
+
+TEST_CASE("[TestSimpleParser] AffectsBip relation - Procedure call - Advanced SPA requirements", "[SimpleParser][AffectsBip]") {
+  std::string string("procedure alpha{x=1;call beta;a=x+a;}procedure beta{if(i!=2)then{x=a+1;}else{a=b;}}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTable = pkb.getAffectsBipTable();
+
+  REQUIRE(affectsBipTable.contains({ "1", "3" }));
+  REQUIRE(affectsBipTable.contains({ "5", "3" }));
+  REQUIRE(affectsBipTable.contains({ "6", "3" }));
+  REQUIRE(affectsBipTable.size() == 3);
+}
+
+TEST_CASE("[TestSimpleParser] AffectsBip relation - Example CFG (Figure 5) - Advanced SPA requirements", "[SimpleParser][AffectsBip]") {
+  std::string string("procedure Second{x=0;i=5;while(i!=0){x=x+2*y;call Third;i=i-1;}if(x==1)then{x=x+1;}else{z=1;}z=z+x+i;y=z+2;x=x*y+z;}procedure Third{z=5;v=z;print v;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTable = pkb.getAffectsBipTable();
+
+  REQUIRE(affectsBipTable.contains({ "1", "4" }));
+  REQUIRE(affectsBipTable.contains({ "1", "8" }));
+  REQUIRE(affectsBipTable.contains({ "1", "10" }));
+  REQUIRE(affectsBipTable.contains({ "1", "12" }));
+  REQUIRE(affectsBipTable.contains({ "2", "6" }));
+  REQUIRE(affectsBipTable.contains({ "2", "10" }));
+  REQUIRE(affectsBipTable.contains({ "4", "4" }));
+  REQUIRE(affectsBipTable.contains({ "4", "8" }));
+  REQUIRE(affectsBipTable.contains({ "4", "10" }));
+  REQUIRE(affectsBipTable.contains({ "4", "12" }));
+  REQUIRE(affectsBipTable.contains({ "6", "6" }));
+  REQUIRE(affectsBipTable.contains({ "6", "10" }));
+  REQUIRE(affectsBipTable.contains({ "8", "10" }));
+  REQUIRE(affectsBipTable.contains({ "8", "12" }));
+  REQUIRE(affectsBipTable.contains({ "9", "10" }));
+  REQUIRE(affectsBipTable.contains({ "10", "11" }));
+  REQUIRE(affectsBipTable.contains({ "10", "12" }));
+  REQUIRE(affectsBipTable.contains({ "11", "12" }));
+  REQUIRE(affectsBipTable.contains({ "13", "10" }));
+  REQUIRE(affectsBipTable.contains({ "13", "14" }));
+  REQUIRE(affectsBipTable.size() == 20);
+}
+
+TEST_CASE("[TestSimpleParser] AffectsBip relation - Advanced SPA in class quiz", "[SimpleParser][AffectsBip]") {
+  std::string string(R"(
+    procedure Bumblebee{read x;y=2*z;call Megatron;z=p-y;
+    if(q!=1)then{z=x+24;call Ironhide;}else{while(z>0){y=x*q-5;z=z-1;}y=x+y*z+p*q;call Ironhide;}i=x+j+z;call Barricade;}
+    procedure Megatron{p=x*10;q=y+y*10;while(t==0){a=5*p-5;print y;}q=p*5;}
+    procedure Ironhide{i=x*10;j=x+y*10;if(i>j)then{read x;call Barricade;}else{y=i+x+y*z;}}
+    procedure Barricade{q=i*x*j+y+p*q;print q;})");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTable = pkb.getAffectsBipTable();
+
+  REQUIRE(affectsBipTable.contains({ "2", "4" }));
+  REQUIRE(affectsBipTable.contains({ "2", "11" }));
+  REQUIRE(affectsBipTable.contains({ "2", "16" }));
+  REQUIRE(affectsBipTable.contains({ "2", "22" }));
+  REQUIRE(affectsBipTable.contains({ "2", "26" }));
+  REQUIRE(affectsBipTable.contains({ "2", "27" }));
+  REQUIRE(affectsBipTable.contains({ "4", "10" }));
+  REQUIRE(affectsBipTable.contains({ "4", "11" }));
+  REQUIRE(affectsBipTable.contains({ "4", "13" }));
+  REQUIRE(affectsBipTable.contains({ "4", "26" }));
+  REQUIRE(affectsBipTable.contains({ "6", "13" }));
+  REQUIRE(affectsBipTable.contains({ "6", "26" }));
+  REQUIRE(affectsBipTable.contains({ "9", "11" }));
+  REQUIRE(affectsBipTable.contains({ "10", "10" }));
+  REQUIRE(affectsBipTable.contains({ "10", "11" }));
+  REQUIRE(affectsBipTable.contains({ "10", "13" }));
+  REQUIRE(affectsBipTable.contains({ "10", "26" }));
+  REQUIRE(affectsBipTable.contains({ "11", "22" }));
+  REQUIRE(affectsBipTable.contains({ "11", "26" }));
+  REQUIRE(affectsBipTable.contains({ "11", "27" }));
+  REQUIRE(affectsBipTable.contains({ "13", "27" }));
+  REQUIRE(affectsBipTable.contains({ "15", "18" }));
+  REQUIRE(affectsBipTable.contains({ "15", "20" }));
+  REQUIRE(affectsBipTable.contains({ "15", "4" }));
+  REQUIRE(affectsBipTable.contains({ "15", "11" }));
+  REQUIRE(affectsBipTable.contains({ "15", "27" }));
+  REQUIRE(affectsBipTable.contains({ "20", "9" }));
+  REQUIRE(affectsBipTable.contains({ "20", "11" }));
+  REQUIRE(affectsBipTable.contains({ "20", "27" }));
+  REQUIRE(affectsBipTable.contains({ "21", "26" }));
+  REQUIRE(affectsBipTable.contains({ "21", "27" }));
+  REQUIRE(affectsBipTable.contains({ "22", "13" }));
+  REQUIRE(affectsBipTable.contains({ "22", "27" }));
+  REQUIRE(affectsBipTable.contains({ "26", "27" }));
+  REQUIRE(affectsBipTable.contains({ "27", "27" }));
+  REQUIRE(affectsBipTable.size() == 35);
+}
+
+TEST_CASE("[TestSimpleParser] AffectsBip relation - Week 7 lecture quiz", "[SimpleParser][AffectsBip]") {
+  std::string string(R"(
+    procedure Gandalf{read shine;ring=shine*2;f=ring+3;read lost;call Frodo;
+    if(lost==shine)then{call Aragon;d=(shine+12)*(lost+13);}else{while(f>10){read g;f=ring+4+g*a*2*1+shine;call Frodo;}d=2;}print d;}
+    procedure Frodo{a=f+shine;if(a<2)then{call Aragon;}else{f=f+19;}}
+    procedure Aragon{while(shine<3){a=1*2+lost-f;while(lost==a){lost=lost-1;w=a+lost;shine=1+ring;}if(a!=shine)then{a=lost+1;w=shine*2;}else {w=1;}}})");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTable = pkb.getAffectsBipTable();
+
+  REQUIRE(affectsBipTable.contains({ "2", "3" }));
+  REQUIRE(affectsBipTable.contains({ "2", "11" }));
+  REQUIRE(affectsBipTable.contains({ "2", "24" }));
+  REQUIRE(affectsBipTable.contains({ "3", "15" }));
+  REQUIRE(affectsBipTable.contains({ "3", "18" }));
+  REQUIRE(affectsBipTable.contains({ "3", "20" }));
+  REQUIRE(affectsBipTable.contains({ "11", "15" }));
+  REQUIRE(affectsBipTable.contains({ "11", "18" }));
+  REQUIRE(affectsBipTable.contains({ "11", "20" }));
+  REQUIRE(affectsBipTable.contains({ "15", "11" }));
+  REQUIRE(affectsBipTable.contains({ "18", "20" }));
+  REQUIRE(affectsBipTable.contains({ "20", "11" }));
+  REQUIRE(affectsBipTable.contains({ "20", "23" }));
+  REQUIRE(affectsBipTable.contains({ "22", "8" }));
+  REQUIRE(affectsBipTable.contains({ "22", "20" }));
+  REQUIRE(affectsBipTable.contains({ "22", "22" }));
+  REQUIRE(affectsBipTable.contains({ "22", "23" }));
+  REQUIRE(affectsBipTable.contains({ "22", "26" }));
+  REQUIRE(affectsBipTable.contains({ "24", "8" }));
+  REQUIRE(affectsBipTable.contains({ "24", "11" }));
+  REQUIRE(affectsBipTable.contains({ "24", "15" }));
+  REQUIRE(affectsBipTable.contains({ "24", "27" }));
+  REQUIRE(affectsBipTable.contains({ "26", "11" }));
+  REQUIRE(affectsBipTable.size() == 23);
 }

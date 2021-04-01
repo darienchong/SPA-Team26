@@ -470,6 +470,8 @@ namespace SourceProcessor {
   void SimpleParser::parseProcedure() {
     prevStmts.clear();
 
+    int start = getStmtNum();
+
     // grammar: 'procedure' proc_name '{' '}'
     validate(PROCEDURE);
     std::string procName = validate(NAME);
@@ -482,10 +484,19 @@ namespace SourceProcessor {
       );
     }
     parsedProcs.insert(procName);
-    pkb.addProc(procName); // add procedures
     validate(LEFT_BRACE);
     parseStmtLst(0, getStmtNum());
     validate(RIGHT_BRACE);
+
+    std::vector<int> end;
+    for (int stmt : prevStmts) {
+      end.push_back(stmt);
+    }
+
+    // adding to pkb
+    pkb.addProc(procName); // add procedures
+    pkb.addProcStartEnd(procName, start, end);
+    pkb.addProcRange(procName, start, getStmtNum() - 1);
   }
 
   void SimpleParser::parseProgram() {

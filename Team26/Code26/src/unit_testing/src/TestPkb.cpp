@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 #include "Pkb.h"
 
@@ -383,15 +384,15 @@ TEST_CASE("[TestPkb] CFG edges/Next") {
   }
 
   SECTION("getNextStmtsFromCfg") {
-    std::unordered_set<int> neighbours1 = pkb.getNextStmtsFromCfg(1);
-    std::unordered_set<int> neighbours4 = pkb.getNextStmtsFromCfg(4);
-    REQUIRE(neighbours1.count(2) == 1);
-    REQUIRE(neighbours1.count(3) == 1);
-    REQUIRE(neighbours1.count(4) == 1);
+    std::vector<int> neighbours1 = pkb.getNextStmtsFromCfg(1);
+    std::vector<int> neighbours4 = pkb.getNextStmtsFromCfg(4);
+    REQUIRE(std::find(neighbours1.begin(), neighbours1.end(), 2) != neighbours1.end());
+    REQUIRE(std::find(neighbours1.begin(), neighbours1.end(), 3) != neighbours1.end());
+    REQUIRE(std::find(neighbours1.begin(), neighbours1.end(), 4) != neighbours1.end());
     REQUIRE(neighbours1.size() == 3);
     REQUIRE(pkb.getNextStmtsFromCfg(2).size() == 0);
     REQUIRE(pkb.getNextStmtsFromCfg(3).size() == 0);
-    REQUIRE(neighbours4.count(5) == 1);
+    REQUIRE(std::find(neighbours4.begin(), neighbours4.end(), 5) != neighbours4.end());
     REQUIRE(neighbours4.size() == 1);
     REQUIRE(pkb.getNextStmtsFromCfg(5).size() == 0);
     REQUIRE(pkb.getNextStmtsFromCfg(6).size() == 0);
