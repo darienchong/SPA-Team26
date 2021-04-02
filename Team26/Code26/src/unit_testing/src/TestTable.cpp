@@ -9,22 +9,23 @@ TEST_CASE("[TestTable] New Table") {
 
   SECTION("new empty table") {
     Table table;
-    REQUIRE(table.getHeader() == std::vector<std::string>{""});
+    REQUIRE(table.getHeader() == std::vector<std::string>{ "" });
     REQUIRE(table.empty());
   }
 
-  SECTION("new table with header") {
-    std::vector<std::string> header = { "0", "1" };
-    Table tableWithHeader(header);
-    REQUIRE(tableWithHeader.getHeader() == header);
-    REQUIRE(tableWithHeader.getColumnIndex("1") == 1);
-    REQUIRE(tableWithHeader.getColumnIndex("a") == -1);
+  SECTION("new table with empty header") {
+    Table tableWithEmptyHeader(2);
+    REQUIRE(tableWithEmptyHeader.getHeader().size() == 2);
+    REQUIRE(tableWithEmptyHeader.getHeader() == std::vector<std::string>{ "", "" });
+    REQUIRE(tableWithEmptyHeader.getColumnIndex("1") == -1);
+    REQUIRE(tableWithEmptyHeader.getColumnIndex("a") == -1);
   }
 
-  SECTION("new table with given header length") {
-    Table tableWithHeader(2);
+  SECTION("new table with given header") {
+    Table tableWithHeader({ "0", "1" });
     REQUIRE(tableWithHeader.getHeader().size() == 2);
-    REQUIRE(tableWithHeader.getHeader() == std::vector<std::string> {"0", "1"});
+    REQUIRE(tableWithHeader.getHeader() == std::vector<std::string>{ "0", "1" });
+    REQUIRE(tableWithHeader.getColumnIndex("0") == 0);
     REQUIRE(tableWithHeader.getColumnIndex("1") == 1);
   }
 
@@ -90,7 +91,7 @@ TEST_CASE("[TestTable] Get Data") {
   }
 
   SECTION("two columns") {
-    Table table{ 2 };
+    Table table({ "0", "1" });
     table.insertRow({ "1", "11" });
     table.insertRow({ "2", "22" });
     table.insertRow({ "3", "33" });
