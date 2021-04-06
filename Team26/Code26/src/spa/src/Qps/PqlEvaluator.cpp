@@ -11,6 +11,7 @@
 #include "PqlQuery.h"
 #include "Pkb.h"
 #include "Table.h"
+#include "PqlOptimizer.h"
 
 namespace {
   /**
@@ -139,7 +140,7 @@ namespace Pql {
         const bool isRhsSmallerThanLhs =
           lhsEntity.isNumber() &&
           rhsEntity.isNumber() &&
-          stoi(rhsEntity.getValue()) < stoi(lhsEntity.getValue());
+          stoll(rhsEntity.getValue()) < stoll(lhsEntity.getValue());
         if (isRhsSmallerThanLhs) {
           return true;
         }
@@ -156,7 +157,7 @@ namespace Pql {
         const bool isRhsSmallerThanLhs =
           lhsEntity.isNumber() &&
           rhsEntity.isNumber() &&
-          stoi(rhsEntity.getValue()) < stoi(lhsEntity.getValue());
+          stoll(rhsEntity.getValue()) < stoll(lhsEntity.getValue());
         if (isRhsSmallerThanLhs) {
           return true;
         }
@@ -200,29 +201,37 @@ namespace Pql {
     clauseResultTables.reserve(clauses.size()); // Optimization to avoid resizing of vector
     for (const Clause& clause : clauses) {
       Table clauseResult = executeClause(clause);
+      if (clauseResult.empty()) {
+        // short circuit
+        return Table();
+      }
       clauseResultTables.emplace_back(clauseResult);
     }
 
     Table finalResultTable = Table({ "" });
-    finalResultTable.insertRow({ "" });
+    finalResultTable.insertRow({ 0 }); // dummy row
 
-    // Join each clause result table to finalResultTable
-    for (Table& table : clauseResultTables) {
-      if (table.empty()) {
-        // short circuit
-        return Table();
-      } else {
+
+    if (!clauses.empty()) {
+      // Initialise optimizer to get order of joining tables
+      Optimizer optimizer(clauseResultTables);
+      std::vector<int> order = optimizer.getOptimizedOrder();
+
+       // Join each clause result table to finalResultTable
+      for (size_t i = 0; i < clauseResultTables.size(); i++) {
+        const int tableIndex = order[i];
+
         // natural join on finalResultTable
         bool areAllHeadersEmptyStrings = true;
-        for (const std::string& header : table.getHeader()) {
+        for (const std::string& header : clauseResultTables[tableIndex].getHeader()) {
           if (!header.empty()) {
             areAllHeadersEmptyStrings = false;
           }
         }
 
         if (!areAllHeadersEmptyStrings) {
-          table.dropColumn(""); // drop empty column - Guaranteed to be only 1 column max
-          finalResultTable.naturalJoin(table);
+          clauseResultTables[tableIndex].dropColumn(""); // drop empty column - Guaranteed to be only 1 column max
+          finalResultTable.naturalJoin(clauseResultTables[tableIndex]);
         }
         // Don't need to join if all headers empty strings
       }
@@ -340,10 +349,17 @@ namespace Pql {
       if (lhsEntity.isSynonym()) {
         // Update header name to reflect name of synonym
         header1 = lhsEntity.getValue();
-      }
-      // Short circuit
-      if (!canOmitJoinSuchThatLhs(clause.getType(), lhsEntity)) {
-        clauseResultTable.innerJoin(getTableFromEntity(lhsEntity), 0, 0); // inner join on first column
+
+        // Short circuit
+        if (!canOmitJoinSuchThatLhs(clause.getType(), lhsEntity)) {
+          clauseResultTable.innerJoin(getTableFromEntity(lhsEntity), 0, 0); // inner join on first column
+        }
+      } else if (lhsEntity.isName()) {
+        clauseResultTable.filterColumn(0, { pkb.getIntRefFromEntity(lhsEntity.getValue()) });
+      } else if (lhsEntity.isNumber()) {
+        clauseResultTable.filterColumn(0, { std::stoi(lhsEntity.getValue()) });
+      } else {
+        assert(false);
       }
     }
 
@@ -364,13 +380,19 @@ namespace Pql {
       if (rhsEntity.isSynonym()) {
         // Update header name to reflect name of synonym
         header2 = rhsEntity.getValue();
-      }
-      // Short circuit
-      if (!canOmitJoinSuchThatRhs(clause.getType(), rhsEntity)) {
-        clauseResultTable.innerJoin(getTableFromEntity(rhsEntity), 1, 0); // inner join on second column
+
+        // Short circuit
+        if (!canOmitJoinSuchThatRhs(clause.getType(), rhsEntity)) {
+          clauseResultTable.innerJoin(getTableFromEntity(rhsEntity), 1, 0); // inner join on second column
+        }
+      } else if (rhsEntity.isName()) {
+        clauseResultTable.filterColumn(1, { pkb.getIntRefFromEntity(rhsEntity.getValue()) });
+      } else if (rhsEntity.isNumber()) {
+        clauseResultTable.filterColumn(1, { std::stoi(rhsEntity.getValue()) });
+      } else {
+        assert(false);
       }
     }
-
 
     clauseResultTable.setHeader({ header1, header2 });
   }
@@ -388,20 +410,16 @@ namespace Pql {
     if (lhsEntity.isSynonym()) { // Guaranteed to be of type VARIABLE
       header2 = lhsEntity.getValue();
     } else if (lhsEntity.isName()) {
-      Table lhsTable({ "" });
-      lhsTable.insertRow({ lhsEntity.getValue() });
-      clauseResultTable.innerJoin(lhsTable, 1, 0); // inner join on second column of table
+      clauseResultTable.filterColumn(1, { pkb.getIntRefFromEntity(lhsEntity.getValue()) }); // filter second column 
     }
     // else wildcard. do not join with any tables. 
 
-    std::string postfixExpr = rhsEntity.getValue(); // to evaluate infix to post fix expression
+    std::string postfixExpr = rhsEntity.getValue();
     if (rhsEntity.isExpression()) {
-      Table rhsTable({ "" });
-      rhsTable.insertRow({ postfixExpr });
-      clauseResultTable.innerJoin(rhsTable, 2, 0); // inner join on third column of table
+      clauseResultTable.filterColumn(2, { pkb.getIntRefFromEntity(postfixExpr) }); // filter third column
     } else if (rhsEntity.isSubExpression()) {
       for (const Row& row : clauseResultTable.getData()) {
-        const bool doesNotMatch = row[2].find(postfixExpr) == std::string::npos;
+        const bool doesNotMatch = pkb.getEntityFromIntRef(row[2]).find(postfixExpr) == std::string::npos;
         if (doesNotMatch) {
           clauseResultTable.deleteRow(row);
         }
@@ -423,9 +441,7 @@ namespace Pql {
     if (condEntity.isSynonym()) { // Guaranteed to be of type VARIABLE
       header2 = condEntity.getValue();
     } else if (condEntity.isName()) {
-      Table condTable({ "" });
-      condTable.insertRow({ condEntity.getValue() });
-      clauseResultTable.innerJoin(condTable, 1, 0); // inner join on second column of table
+      clauseResultTable.filterColumn(1, { pkb.getIntRefFromEntity(condEntity.getValue()) }); // filter second column
     }
     // else wildcard. do not join with any tables. 
 
@@ -442,46 +458,43 @@ namespace Pql {
       lhsEntity.isNumber() && rhsEntity.isNumber()) {
       clauseResultTable.setHeader({ "" });
       if (lhsEntity.getValue() == rhsEntity.getValue()) {
-        clauseResultTable.insertRow({ "" }); // Dummy row to signify True
+        clauseResultTable.insertRow({ 0 }); // Dummy row to signify True
       }
       return;
     }
 
-    // LHS is number or name
-    if (lhsEntity.isName() || lhsEntity.isNumber()) {
-      Table lhsTable({ "" });
-      lhsTable.insertRow({ lhsEntity.getValue() });
-
-      if (needsAttrRefMapping(rhsEntity)) {
-        clauseResultTable = std::move(getAttrRefMappingTableFromEntity(rhsEntity));
-        clauseResultTable.innerJoin(lhsTable, 1, 0); // Two column
-        clauseResultTable.setHeader({ rhsEntity.getValue(), "" });
-      } else {
-        clauseResultTable = std::move(getTableFromEntity(rhsEntity));
-        clauseResultTable.innerJoin(lhsTable, 0, 0); // One column
-        clauseResultTable.setHeader({ rhsEntity.getValue() });
+    // LHS and RHS both not constants - Special case: stmt.stmt#/prog_line = constant.value
+    if ((lhsEntity.isProgLineSynonym() || 
+      lhsEntity.getAttributeRefType() == AttributeRefType::STMT_NUMBER) && 
+      rhsEntity.getAttributeRefType() == AttributeRefType::VALUE) {
+      Table& lhsTable = getTableFromEntity(lhsEntity);
+      Table finalTable(2);
+      for (Row row : lhsTable.getData()) {
+        const int intRef = pkb.getIntRefFromEntity(std::to_string(row[0]));
+        if (intRef != -1) {
+          finalTable.insertRow({ row[0], intRef });
+        }
       }
+      finalTable.setHeader({ lhsEntity.getValue(), rhsEntity.getValue() });
+      clauseResultTable = std::move(finalTable);
+      return;
+    } else if ((rhsEntity.isProgLineSynonym() || 
+      rhsEntity.getAttributeRefType() == AttributeRefType::STMT_NUMBER) && 
+      lhsEntity.getAttributeRefType() == AttributeRefType::VALUE) {
+      Table& rhsTable = getTableFromEntity(rhsEntity);
+      Table finalTable(2);
+      for (Row row : rhsTable.getData()) {
+        const int intRef = pkb.getIntRefFromEntity(std::to_string(row[0]));
+        if (intRef != -1) {
+          finalTable.insertRow({ row[0], intRef });
+        }
+      }
+      finalTable.setHeader({ rhsEntity.getValue(), lhsEntity.getValue() });
+      clauseResultTable = std::move(finalTable);
       return;
     }
 
-    // RHS is number or name
-    if (rhsEntity.isName() || rhsEntity.isNumber()) {
-      Table rhsTable({ "" });
-      rhsTable.insertRow({ rhsEntity.getValue() });
-
-      if (needsAttrRefMapping(lhsEntity)) {
-        clauseResultTable = std::move(getAttrRefMappingTableFromEntity(lhsEntity));
-        clauseResultTable.innerJoin(rhsTable, 1, 0); // Two column
-        clauseResultTable.setHeader({ lhsEntity.getValue(), "" });
-      } else {
-        clauseResultTable = std::move(getTableFromEntity(lhsEntity));
-        clauseResultTable.innerJoin(rhsTable, 0, 0); // One column
-        clauseResultTable.setHeader({ lhsEntity.getValue() });
-      }
-      return;
-    }
-
-    // LHS and RHS not constants
+    // LHS and RHS both not constants - Other case
     int lhsColumnIdxToJoin = -1;
     if ((lhsEntity.isProgLineSynonym() || lhsEntity.isAttributeRef()) &&
       (rhsEntity.isProgLineSynonym() || rhsEntity.isAttributeRef())) {
@@ -516,7 +529,26 @@ namespace Pql {
       return;
     }
 
-    assert(false); // Guaranteed to be the above cases by the PqlParser
+    // LHS is number or name - Guaranteed by the PqlParser
+    const bool isLhsNameOrNum = lhsEntity.isName() || lhsEntity.isNumber();
+    const Entity& synonymEntity = isLhsNameOrNum ? rhsEntity : lhsEntity;
+    const Entity& constantEntity = isLhsNameOrNum ? lhsEntity : rhsEntity;
+
+    const bool isReferenceToStmtNumber = synonymEntity.getAttributeRefType() == AttributeRefType::STMT_NUMBER ||
+      synonymEntity.getType() == EntityType::PROG_LINE;
+    const int filterValue = isReferenceToStmtNumber
+      ? std::stoi(constantEntity.getValue())
+      : pkb.getIntRefFromEntity(constantEntity.getValue());
+
+    if (needsAttrRefMapping(synonymEntity)) {
+      clauseResultTable = std::move(getAttrRefMappingTableFromEntity(synonymEntity)); // Two column table
+      clauseResultTable.filterColumn(1, { filterValue });
+      clauseResultTable.setHeader({ synonymEntity.getValue(), "" });
+    } else {
+      clauseResultTable = std::move(getTableFromEntity(synonymEntity)); // One column table
+      clauseResultTable.filterColumn(0, { filterValue });
+      clauseResultTable.setHeader({ synonymEntity.getValue() });
+    }
   }
 
   // Get table from given entity 
@@ -546,11 +578,6 @@ namespace Pql {
       return pkb.getProcTable();
     case EntityType::NUMBER:
     case EntityType::NAME:
-    {
-      Table table({ "" });
-      table.insertRow({ entity.getValue() });
-      return table;
-    }
     default:
       assert(false);
       return Table();
@@ -558,9 +585,7 @@ namespace Pql {
   }
 
   Table PqlEvaluator::getAttrRefMappingTableFromEntity(const Entity& entity) const {
-    if (!needsAttrRefMapping(entity)) {
-      assert(false);
-    }
+    assert(needsAttrRefMapping(entity));
     switch (entity.getType()) {
     case EntityType::CALL:
       return pkb.getCallProcTable();
@@ -610,15 +635,9 @@ namespace Pql {
       std::string outputLine;
       for (size_t i = 0; i < columns.size(); i++) {
         const int rowColumnIdx = columns[i];
-        std::string element;
-
-        if (needsAttrRefMapping(queryTargets[i])) {
-          element = mapEntityToAttrRef(queryTargets[i], std::stoi(row[rowColumnIdx]));
-        } else {
-          element = row[rowColumnIdx];
-        }
-
-        outputLine.append(element).append(" ");
+        outputLine
+          .append(mapIntRefToResultValue(queryTargets[i], row[rowColumnIdx]))
+          .append(" ");
       }
       outputLine.pop_back();
 
@@ -629,14 +648,37 @@ namespace Pql {
     }
   }
 
-  std::string PqlEvaluator::mapEntityToAttrRef(const Pql::Entity& entity, const int stmtNumber) const {
+  std::string PqlEvaluator::mapIntRefToResultValue(const Pql::Entity& entity, const int intRef) const {
+    if (needsAttrRefMapping(entity)) {
+      switch (entity.getType()) {
+      case Pql::EntityType::CALL:
+        return pkb.getProcNameFromCallStmt(intRef);
+      case Pql::EntityType::READ:
+        return pkb.getVarNameFromReadStmt(intRef);
+      case Pql::EntityType::PRINT:
+        return pkb.getVarNameFromPrintStmt(intRef);
+      default:
+        assert(false);
+        return "";
+      }
+    }
+
     switch (entity.getType()) {
-    case Pql::EntityType::CALL:
-      return pkb.getProcNameFromCallStmt(stmtNumber);
-    case Pql::EntityType::READ:
-      return pkb.getVarNameFromReadStmt(stmtNumber);
-    case Pql::EntityType::PRINT:
-      return pkb.getVarNameFromPrintStmt(stmtNumber);
+    case EntityType::PROG_LINE:
+    case EntityType::STMT:
+    case EntityType::READ:
+    case EntityType::PRINT:
+    case EntityType::CALL:
+    case EntityType::WHILE:
+    case EntityType::IF:
+    case EntityType::ASSIGN:
+      return std::to_string(intRef);
+
+    case EntityType::VARIABLE:
+    case EntityType::CONSTANT:
+    case EntityType::PROCEDURE:
+      return pkb.getEntityFromIntRef(intRef);
+
     default:
       assert(false);
       return "";

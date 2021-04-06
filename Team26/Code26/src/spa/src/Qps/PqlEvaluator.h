@@ -96,14 +96,13 @@ namespace Pql {
     void extractResults(const Table& resultTable) const;
 
     /**
-     * Helper function to that maps the given entity's stmtNumber to it's attribute reference value by
-     * consulting the PKB.
+     * Helper function to that maps the given entity's table number to it's actual value by consulting the PKB.
      *
      * @param entity Given entity to be mapped.
-     * @param stmtNumber Statement number to be mapped.
-     * @return Attribute reference value.
+     * @param tableNumber Table number to be mapped.
+     * @return Actual value.
     */
-    std::string mapEntityToAttrRef(const Pql::Entity& entity, const int stmtNumber) const;
+    std::string mapIntRefToResultValue(const Pql::Entity& entity, const int tableNumber) const;
 
   public:
     /**

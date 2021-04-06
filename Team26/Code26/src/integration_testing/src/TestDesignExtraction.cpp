@@ -19,14 +19,14 @@ TEST_CASE("[TestDesignExtractor] ParentT extraction") {
   designExtractor.extractDesignAbstractions();
   Table parentTTable = pkb.getParentTTable();
 
-  REQUIRE(parentTTable.contains({ "1", "2" }));
-  REQUIRE(parentTTable.contains({ "1", "3" }));
-  REQUIRE(parentTTable.contains({ "1", "4" }));
+  REQUIRE(parentTTable.contains({ 1, 2 }));
+  REQUIRE(parentTTable.contains({ 1, 3 }));
+  REQUIRE(parentTTable.contains({ 1, 4 }));
 
-  REQUIRE(parentTTable.contains({ "2", "3" }));
-  REQUIRE(parentTTable.contains({ "2", "4" }));
+  REQUIRE(parentTTable.contains({ 2, 3 }));
+  REQUIRE(parentTTable.contains({ 2, 4 }));
 
-  REQUIRE(parentTTable.contains({ "3", "4" }));
+  REQUIRE(parentTTable.contains({ 3, 4 }));
   REQUIRE(parentTTable.size() == 6);
 }
 
@@ -46,14 +46,14 @@ TEST_CASE("[TestDesignExtractor] FollowsT extraction") {
   designExtractor.extractDesignAbstractions();
   Table followsTTable = pkb.getFollowsTTable();
 
-  REQUIRE(followsTTable.contains({ "1", "2" }));
-  REQUIRE(followsTTable.contains({ "1", "3" }));
-  REQUIRE(followsTTable.contains({ "1", "4" }));
+  REQUIRE(followsTTable.contains({ 1, 2 }));
+  REQUIRE(followsTTable.contains({ 1, 3 }));
+  REQUIRE(followsTTable.contains({ 1, 4 }));
 
-  REQUIRE(followsTTable.contains({ "2", "3" }));
-  REQUIRE(followsTTable.contains({ "2", "4" }));
+  REQUIRE(followsTTable.contains({ 2, 3 }));
+  REQUIRE(followsTTable.contains({ 2, 4 }));
 
-  REQUIRE(followsTTable.contains({ "3", "4" }));
+  REQUIRE(followsTTable.contains({ 3, 4 }));
   REQUIRE(followsTTable.size() == 6);
 }
 
@@ -78,12 +78,12 @@ TEST_CASE("[TestDesignExtractor] CallsT extraction") {
   designExtractor.extractDesignAbstractions();
   Table callsTTable = pkb.getCallsTTable();
 
-  REQUIRE(callsTTable.contains({ "p1", "p2" }));
-  REQUIRE(callsTTable.contains({ "p1", "p3" }));
-  REQUIRE(callsTTable.contains({ "p1", "p4" }));
-  REQUIRE(callsTTable.contains({ "p2", "p3" }));
-  REQUIRE(callsTTable.contains({ "p2", "p4" }));
-  REQUIRE(callsTTable.contains({ "p3", "p4" }));
+  REQUIRE(callsTTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("p2") }));
+  REQUIRE(callsTTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("p3") }));
+  REQUIRE(callsTTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("p4") }));
+  REQUIRE(callsTTable.contains({ pkb.getIntRefFromEntity("p2"), pkb.getIntRefFromEntity("p3") }));
+  REQUIRE(callsTTable.contains({ pkb.getIntRefFromEntity("p2"), pkb.getIntRefFromEntity("p4") }));
+  REQUIRE(callsTTable.contains({ pkb.getIntRefFromEntity("p3"), pkb.getIntRefFromEntity("p4") }));
   REQUIRE(callsTTable.size() == 6);
 }
 
@@ -148,15 +148,15 @@ TEST_CASE("[TestDesignExtractor] NextT extraction") {
 
   Table nextTTable = pkb.getNextTTable();
 
-  REQUIRE(nextTTable.contains({ "1", "2" }));
-  REQUIRE(nextTTable.contains({ "1", "3" }));
-  REQUIRE(nextTTable.contains({ "2", "5" }));
-  REQUIRE(nextTTable.contains({ "4", "3" }));
-  REQUIRE(!(nextTTable.contains({ "5", "2" })));
-  REQUIRE(nextTTable.contains({ "5", "5" }));
-  REQUIRE(nextTTable.contains({ "5", "8" }));
-  REQUIRE(nextTTable.contains({ "5", "12" }));
-  REQUIRE(!(nextTTable.contains({ "8", "9" })));
+  REQUIRE(nextTTable.contains({ 1, 2 }));
+  REQUIRE(nextTTable.contains({ 1, 3 }));
+  REQUIRE(nextTTable.contains({ 2, 5 }));
+  REQUIRE(nextTTable.contains({ 4, 3 }));
+  REQUIRE(!(nextTTable.contains({ 5, 2 })));
+  REQUIRE(nextTTable.contains({ 5, 5 }));
+  REQUIRE(nextTTable.contains({ 5, 8 }));
+  REQUIRE(nextTTable.contains({ 5, 12 }));
+  REQUIRE(!(nextTTable.contains({ 8, 9 })));
 }
 
 TEST_CASE("[TestDesignExtractor] Uses(s != c, v) in container => Uses(ifs/w, v)") {
@@ -175,7 +175,7 @@ TEST_CASE("[TestDesignExtractor] Uses(s != c, v) in container => Uses(ifs/w, v)"
   designExtractor.extractDesignAbstractions();
   Table usesSTable = pkb.getUsesSTable();
 
-  REQUIRE(usesSTable.contains({ "1", "z" }));
+  REQUIRE(usesSTable.contains({ 1, pkb.getIntRefFromEntity("z") }));
   REQUIRE(usesSTable.size() == 3);
 }
 
@@ -203,13 +203,13 @@ TEST_CASE("[TestDesignExtractor] Indirect UsesP extraction") {
   designExtractor.extractDesignAbstractions();
   Table usesPTable = pkb.getUsesPTable();
 
-  REQUIRE(usesPTable.contains({ "p1", "usedByP2" }));
-  REQUIRE(usesPTable.contains({ "p1", "usedByP3" }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("usedByP2") }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("usedByP3") }));
 
-  REQUIRE(usesPTable.contains({ "p2", "usedByP2" }));
-  REQUIRE(usesPTable.contains({ "p2", "usedByP3" }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p2"), pkb.getIntRefFromEntity("usedByP2") }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p2"), pkb.getIntRefFromEntity("usedByP3") }));
 
-  REQUIRE(usesPTable.contains({ "p3", "usedByP3" }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p3"), pkb.getIntRefFromEntity("usedByP3") }));
   REQUIRE(usesPTable.size() == 5);
 }
 
@@ -249,11 +249,11 @@ TEST_CASE("[TestDesignExtractor] Uses(c, v) in container => Uses(ifs/w, v)") {
 
   Table usesSTable = pkb.getUsesSTable();
   Table usesPTable = pkb.getUsesPTable();
-  REQUIRE(usesSTable.contains({ "1", "x" }));
-  REQUIRE(usesSTable.contains({ "2", "x" }));
-  REQUIRE(usesSTable.contains({ "4", "x" }));
-  REQUIRE(usesPTable.contains({ "p1", "x" }));
-  REQUIRE(usesPTable.contains({ "p2", "x" }));
+  REQUIRE(usesSTable.contains({ 1, pkb.getIntRefFromEntity("x") }));
+  REQUIRE(usesSTable.contains({ 2, pkb.getIntRefFromEntity("x") }));
+  REQUIRE(usesSTable.contains({ 4, pkb.getIntRefFromEntity("x") }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("x") }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p2"), pkb.getIntRefFromEntity("x") }));
 }
 
 TEST_CASE("[TestDesignExtractor] Modifies(s != c, v) in container => Modifies(ifs/w, v)") {
@@ -272,7 +272,7 @@ TEST_CASE("[TestDesignExtractor] Modifies(s != c, v) in container => Modifies(if
   designExtractor.extractDesignAbstractions();
   Table modifiesSTable = pkb.getModifiesSTable();
 
-  REQUIRE(modifiesSTable.contains({ "1", "z" }));
+  REQUIRE(modifiesSTable.contains({ 1, pkb.getIntRefFromEntity("z") }));
   REQUIRE(modifiesSTable.size() == 3);
 }
 
@@ -300,13 +300,13 @@ TEST_CASE("[TestDesignExtractor] Indirect ModifiesP extraction") {
   designExtractor.extractDesignAbstractions();
   Table usesPTable = pkb.getModifiesPTable();
 
-  REQUIRE(usesPTable.contains({ "p1", "modifiedByP2" }));
-  REQUIRE(usesPTable.contains({ "p1", "modifiedByP3" }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("modifiedByP2") }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("modifiedByP3") }));
 
-  REQUIRE(usesPTable.contains({ "p2", "modifiedByP2" }));
-  REQUIRE(usesPTable.contains({ "p2", "modifiedByP3" }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p2"), pkb.getIntRefFromEntity("modifiedByP2") }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p2"), pkb.getIntRefFromEntity("modifiedByP3") }));
 
-  REQUIRE(usesPTable.contains({ "p3", "modifiedByP3" }));
+  REQUIRE(usesPTable.contains({ pkb.getIntRefFromEntity("p3"), pkb.getIntRefFromEntity("modifiedByP3") }));
   REQUIRE(usesPTable.size() == 5);
 }
 
@@ -344,11 +344,11 @@ TEST_CASE("[TestDesignExtractor] Modifies(c, v) in container => Modifies(ifs/w, 
   Table modifiesSTable = pkb.getModifiesSTable();
   Table modifiesPTable = pkb.getModifiesPTable();
 
-  REQUIRE(modifiesSTable.contains({ "1", "x" }));
-  REQUIRE(modifiesSTable.contains({ "2", "x" }));
-  REQUIRE(modifiesSTable.contains({ "3", "x" }));
-  REQUIRE(modifiesPTable.contains({ "p1", "x" }));
-  REQUIRE(modifiesPTable.contains({ "p2", "x" }));
+  REQUIRE(modifiesSTable.contains({ 1, pkb.getIntRefFromEntity("x") }));
+  REQUIRE(modifiesSTable.contains({ 2, pkb.getIntRefFromEntity("x") }));
+  REQUIRE(modifiesSTable.contains({ 3, pkb.getIntRefFromEntity("x") }));
+  REQUIRE(modifiesPTable.contains({ pkb.getIntRefFromEntity("p1"), pkb.getIntRefFromEntity("x") }));
+  REQUIRE(modifiesPTable.contains({ pkb.getIntRefFromEntity("p2"), pkb.getIntRefFromEntity("x") }));
 }
 
 TEST_CASE("[TestDesignExtractor] Affects extraction") {
@@ -425,25 +425,25 @@ TEST_CASE("[TestDesignExtractor] Affects extraction") {
 
   Table affectsTable = pkb.getAffectsTable();
 
-  REQUIRE(affectsTable.contains({ "1", "4" }));
-  REQUIRE(affectsTable.contains({ "1", "8" }));
-  REQUIRE(affectsTable.contains({ "1", "10" }));
-  REQUIRE(affectsTable.contains({ "1", "12" }));
-  REQUIRE(affectsTable.contains({ "2", "10" }));
-  REQUIRE(affectsTable.contains({ "2", "6" }));
-  REQUIRE(affectsTable.contains({ "4", "4" }));
-  REQUIRE(affectsTable.contains({ "4", "8" }));
-  REQUIRE(affectsTable.contains({ "4", "10" }));
-  REQUIRE(affectsTable.contains({ "4", "12" }));
-  REQUIRE(affectsTable.contains({ "6", "6" }));
-  REQUIRE(affectsTable.contains({ "6", "10" }));
-  REQUIRE(affectsTable.contains({ "8", "10" }));
-  REQUIRE(affectsTable.contains({ "8", "12" }));
-  REQUIRE(affectsTable.contains({ "9", "10" }));
-  REQUIRE(affectsTable.contains({ "10", "11" }));
-  REQUIRE(affectsTable.contains({ "10", "12" }));
-  REQUIRE(affectsTable.contains({ "11", "12" }));
-  REQUIRE(affectsTable.contains({ "13", "14" }));
+  REQUIRE(affectsTable.contains({ 1, 4 }));
+  REQUIRE(affectsTable.contains({ 1, 8 }));
+  REQUIRE(affectsTable.contains({ 1, 10 }));
+  REQUIRE(affectsTable.contains({ 1, 12 }));
+  REQUIRE(affectsTable.contains({ 2, 10 }));
+  REQUIRE(affectsTable.contains({ 2, 6 }));
+  REQUIRE(affectsTable.contains({ 4, 4 }));
+  REQUIRE(affectsTable.contains({ 4, 8 }));
+  REQUIRE(affectsTable.contains({ 4, 10 }));
+  REQUIRE(affectsTable.contains({ 4, 12 }));
+  REQUIRE(affectsTable.contains({ 6, 6 }));
+  REQUIRE(affectsTable.contains({ 6, 10 }));
+  REQUIRE(affectsTable.contains({ 8, 10 }));
+  REQUIRE(affectsTable.contains({ 8, 12 }));
+  REQUIRE(affectsTable.contains({ 9, 10 }));
+  REQUIRE(affectsTable.contains({ 10, 11 }));
+  REQUIRE(affectsTable.contains({ 10, 12 }));
+  REQUIRE(affectsTable.contains({ 11, 12 }));
+  REQUIRE(affectsTable.contains({ 13, 14 }));
   REQUIRE(affectsTable.size() == 19);
 }
 
@@ -521,8 +521,8 @@ TEST_CASE("[TestDesignExtractor] AffectsT extraction") {
 
   Table affectsTTable = pkb.getAffectsTTable();
 
-  REQUIRE(affectsTTable.contains({ "1", "4" }));
-  REQUIRE(affectsTTable.contains({ "1", "10" }));
-  REQUIRE(affectsTTable.contains({ "1", "11" }));
-  REQUIRE(affectsTTable.contains({ "9", "12" }));
+  REQUIRE(affectsTTable.contains({ 1, 4 }));
+  REQUIRE(affectsTTable.contains({ 1, 10 }));
+  REQUIRE(affectsTTable.contains({ 1, 11 }));
+  REQUIRE(affectsTTable.contains({ 9, 12 }));
 }

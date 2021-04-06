@@ -129,6 +129,41 @@ std::list<int> AdjList::topologicalOrder() {
   return toReturn;
 }
 
+std::list<std::list<int>> AdjList::getAllConnectedComponents() {
+  // Algorithm taken from http://math.hws.edu/eck/cs327_s04/chapter9.pdf
+  std::list<std::list<int>> connectedComponents;
+  std::vector<bool> isVisited(size + 1);
+  for (int i = 1; i <= size; i++) {
+    isVisited[i] = false;
+  }
+
+  for (int j = 1; j <= size; j++) {
+    std::list<int> connectedComponent;
+    if (!isVisited[j]) {
+      std::deque<int> queue;
+      queue.push_back(j);
+      isVisited[j] = true;
+      while (!(queue.size() == 0)) {
+        int nodeInConnectedComponent = queue.front();
+        queue.pop_front();
+
+        connectedComponent.emplace_back(nodeInConnectedComponent);
+        std::unordered_set<int> neighboursOfNode = internalRepresentation.at(nodeInConnectedComponent);
+        for (int neighbouringNode : neighboursOfNode) {
+          if (!isVisited[neighbouringNode]) {
+            isVisited[neighbouringNode] = true;
+            queue.push_back(neighbouringNode);
+          }
+        }
+      }
+    }
+
+    connectedComponents.push_back(connectedComponent);
+  }
+
+  return connectedComponents;
+}
+
 std::string AdjList::toString() {
   std::string toReturn = "";
   for (int i = 1; i <= size; i++) {

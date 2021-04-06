@@ -31,6 +31,7 @@ public:
   /**
    * Records a directed edge into the adjacency list i.e.
    * adds E(i,j) into the adjacency list.
+   * Guarantees worst case O(size) performance.
    *
    * @param i
    * @param j
@@ -40,6 +41,7 @@ public:
 
   /**
    * Retrives the value of a given entry.
+   * Guarantees worst-case O(size) performance.
    *
    * @param i
    * @param j
@@ -50,8 +52,8 @@ public:
   /**
    * Applies Warshall's algorithm
    * (see https://www.dartmouth.edu/~matc/DiscreteMath/V.6.pdf) to the
-   * current adjacency list.
-   *
+   * current adjacency list. Complexity: O(size * size)
+   * 
    * @returns
    */
   void applyWarshallAlgorithm();
@@ -62,6 +64,13 @@ public:
    * @returns Nodes in topological order.
    */
   std::list<int> topologicalOrder();
+
+  /**
+   * Returns a list of connected components.
+   * 
+   * @returns
+   */
+  std::list<std::list<int>> getAllConnectedComponents();
 
   /**
    * Returns a string representation of the graph

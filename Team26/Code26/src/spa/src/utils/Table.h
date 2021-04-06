@@ -6,18 +6,22 @@
 #include <functional>
 #include <exception>
 
-typedef std::vector<std::string> Row;
-struct StringVectorHash {
-  size_t operator()(Row const& strings) const {
-    std::string concatenatedString;
-    for (const std::string& string : strings) {
-      concatenatedString.append(string);
-      concatenatedString.append(" ");
+typedef std::vector<std::string> Header;
+typedef std::vector<int> Row;
+
+// Hash function from boost::hash_combine
+// Source: https://www.boost.org/doc/libs/1_55_0/doc/html/hash/reference.html#boost.hash_combine
+struct IntVectorHash {
+  std::uint32_t operator()(Row const& elements) const {
+    std::uint32_t seed = elements.size();
+    for (const uint32_t& i : elements) {
+      seed ^= i + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
-    return std::hash<std::string>{}(concatenatedString);
+    return seed;
   }
 };
-typedef std::unordered_set<Row, StringVectorHash> RowSet;
+
+typedef std::unordered_set<Row, IntVectorHash> RowSet;
 
 class TableException : public std::exception {
 public:
@@ -26,7 +30,7 @@ public:
 
 class Table {
 private:
-  Row header;
+  Header header;
   RowSet data;
 
 public:
@@ -47,14 +51,14 @@ public:
    *
    * @param newHeader A vector of strings corresponding to the header titles.
    */
-  explicit Table(const Row& header);
+  explicit Table(const Header& header);
 
   /**
    * Replaces the current headers with new headers.
    *
    * @param newHeader A vector of strings corresponding to the header titles.
    */
-  void setHeader(const Row& newHeader);
+  void setHeader(const Header& newHeader);
 
   /**
    * Inserts a new row into Table.
@@ -66,28 +70,12 @@ public:
   /**
    * @return The headers of the Table.
    */
-  Row getHeader() const;
+  Header getHeader() const;
 
   /**
    * @return The data of the table.
    */
   RowSet getData() const;
-
-  /**
-   * Returns a column of the Table under the specified header.
-   *
-   * @param headerTitle The specified header.
-   * @return The column data under the header.
-   */
-  std::unordered_set<std::string> getColumn(const std::string& headerTitle) const;
-
-  /**
-   * Returns a column of the Table under the specified header.
-   *
-   * @param headerTitle The specified header.
-   * @return The column data under the header.
-   */
-  RowSet getColumns(const Row& headerTitles) const;
 
   /**
    * Returns the column index of the Table under the specified header.
@@ -99,23 +87,13 @@ public:
   int getColumnIndex(const std::string& headerTitle) const;
 
   /**
-   * Returns a list of pairs which have the same header titles.
-   * The pair contains two integers. The first integer refers to the column index
-   * of the first table. The second integer refers to that of the second table.
-   *
-   * @param otherTable The second table to be compared with the first table.
-   * @return A list of integer pairs corresponding to the column index of the tables.
-   */
-  std::vector<std::pair<int, int>> getColumnIndexPairs(const Table& otherTable) const;
-
-  /**
    * Deletes a column from the Table at the specified index if the index is not out of bound.
    * This method also deletes the header, reducing the number of columns of Table by 1.
    *
    * @param index The column index of the Table.
    * @return boolean Whether column has been dropped.
    */
-  bool dropColumn(int index);
+  bool dropColumn(const int index);
 
   /**
    * Deletes a column from the Table at the index corresponding to the specified
@@ -136,18 +114,7 @@ public:
    * @param index The column index to be based on for filtering the Table.
    * @param values A set of values to be checked upon when filtering the Table.
    */
-  void filterColumn(int index, const std::unordered_set<std::string>& values);
-
-  /**
-   * Filter the table rows based on the values for a particular column.
-   * If the values from the column at the specified header in the table matches any of the
-   * specified values, that particular row would be preserved.
-   * Otherwise, if there is no match, that row would be deleted.
-   *
-   * @param columnName The header to be based on for filtering the Table.
-   * @param values A set of values to be checked upon when filtering the Table.
-   */
-  void filterColumn(const std::string& columnName, const std::unordered_set<std::string>& values);
+  void filterColumn(const int index, const std::unordered_set<int>& values);
 
   /**
    * Concatenates two tables with the same header size.
@@ -237,4 +204,15 @@ public:
    * @return Returns true if the Table data is empty. Otherwise, returns false.
    */
   bool empty() const;
+
+private:
+  /**
+   * Returns a list of pairs which have the same header titles.
+   * The pair contains two integers. The first integer refers to the column index
+   * of the first table. The second integer refers to that of the second table.
+   *
+   * @param otherTable The second table to be compared with the first table.
+   * @return A list of integer pairs corresponding to the column index of the tables.
+   */
+  std::vector<std::pair<int, int>> getColumnIndexPairs(const Table& otherTable) const;
 };

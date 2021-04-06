@@ -57,70 +57,70 @@ public:
    *
    * @param var Variable name to be inserted
    */
-  void addVar(std::string var);
+  void addVar(const std::string& var);
 
   /**
    * Adds a statement number into stmtTable.
    *
-   * @param stmtNo Statement number to be inserted
+   * @param stmtNum Statement number to be inserted
    */
-  void addStmt(int stmtNo);
+  void addStmt(const int stmtNum);
 
   /**
    * Adds a procedure name into procTable.
    *
    * @param proc Procedure name to be inserted
    */
-  void addProc(std::string proc);
+  void addProc(const std::string& proc);
 
   /**
    * Adds a constant into constTable.
    *
    * @param constant Constant String to be inserted
    */
-  void addConst(std::string constant);
+  void addConst(const std::string& constant);
 
   /**
-   * Adds stmtNo into ifTable and stmtTable.
+   * Adds stmtNum into ifTable and stmtTable.
    *
-   * @param stmtNo Statement number to be inserted
+   * @param stmtNum Statement number to be inserted
    */
-  void addIf(int stmtNo);
+  void addIf(const int stmtNum);
 
   /**
-   * Adds stmtNo into whileTable and stmtTable.
+   * Adds stmtNum into whileTable and stmtTable.
    *
-   * @param stmtNo Statement number to be inserted
+   * @param stmtNum Statement number to be inserted
    */
-  void addWhile(int stmtNo);
+  void addWhile(const int stmtNum);
 
   /**
-   * Adds stmtNo into readTable and stmtTable.
+   * Adds stmtNum into readTable and stmtTable.
    *
-   * @param stmtNo Statement number to be inserted
+   * @param stmtNum Statement number to be inserted
    */
-  void addRead(int stmtNo);
+  void addRead(const int stmtNum);
 
   /**
-   * Adds stmtNo into printTable and stmtTable.
+   * Adds stmtNum into printTable and stmtTable.
    *
-   * @param stmtNo Statement number to be inserted
+   * @param stmtNum Statement number to be inserted
    */
-  void addPrint(int stmtNo);
+  void addPrint(const int stmtNum);
 
   /**
-   * Adds stmtNo into assignTable and stmtTable.
+   * Adds stmtNum into assignTable and stmtTable.
    *
-   * @param stmtNo Statement number to be inserted
+   * @param stmtNum Statement number to be inserted
    */
-  void addAssign(int stmtNo);
+  void addAssign(const int stmtNum);
 
   /**
-   * Adds stmtNo into callTable and stmtTable.
+   * Adds stmtNum into callTable and stmtTable.
    *
-   * @param stmtNo Statement number to be inserted
+   * @param stmtNum Statement number to be inserted
    */
-  void addCall(int stmtNo);
+  void addCall(const int stmtNum);
 
   /**
    * Adds the Row {followed, follower} into followsTable.
@@ -128,7 +128,7 @@ public:
    * @param followed Statement number of the preceding statement
    * @param follower Statement number of the following statement
    */
-  void addFollows(int followed, int follower);
+  void addFollows(const int followed, const int follower);
 
   /**
    * Adds the Row {followed, follower} into followsTTable.
@@ -136,7 +136,7 @@ public:
    * @param followed Statement number of the preceding statement
    * @param follower Statement number of the following statement
    */
-  void addFollowsT(int followed, int follower);
+  void addFollowsT(const int followed, const int follower);
 
   /**
    * Adds the Row {parent, child} into parentTable.
@@ -144,7 +144,7 @@ public:
    * @param parent Statement number of the container statement
    * @param child Statement number of the child statement
    */
-  void addParent(int parent, int child);
+  void addParent(const int parent, const int child);
 
   /**
    * Adds the Row {parent, child} into parentTTable.
@@ -152,15 +152,15 @@ public:
    * @param parent Statement number of the container statement
    * @param child Statement number of the child statement
    */
-  void addParentT(int parent, int child);
+  void addParentT(const int parent, const int child);
 
   /**
-   * Adds the Row {stmtNo, var} into usesSTable.
+   * Adds the Row {stmtNum, var} into usesSTable.
    *
-   * @param stmtNo Statement number of the statement which uses var
+   * @param stmtNum Statement number of the statement which uses var
    * @param var Variable or constant name which is used by the statement
    */
-  void addUsesS(int stmtNo, std::string var);
+  void addUsesS(const int stmtNum, const std::string& var);
 
   /**
    * Adds the Row {proc, var} into usesPTable.
@@ -168,15 +168,15 @@ public:
    * @param proc Name of procedure which uses var
    * @param var Variable or constant name which is used by the procedure
    */
-  void addUsesP(std::string proc, std::string var);
+  void addUsesP(const std::string& proc, const std::string& var);
 
   /**
-   * Adds the Row {stmtNo, var} into modifiesSTable.
+   * Adds the Row {stmtNum, var} into modifiesSTable.
    *
-   * @param stmtNo Statement number of the statement which modifies var
+   * @param stmtNum Statement number of the statement which modifies var
    * @param var Variable or constant name which is modified by the statement
    */
-  void addModifiesS(int stmtNo, std::string var);
+  void addModifiesS(const int stmtNum, const std::string& var);
 
   /**
    * Adds the Row {proc, var} into modifiesPTable.
@@ -184,7 +184,7 @@ public:
    * @param proc Name of procedure which modifies var
    * @param var Variable or constant name which is modified by the procedure
    */
-  void addModifiesP(std::string proc, std::string var);
+  void addModifiesP(const std::string& proc, const std::string& var);
 
   /**
    * Adds the Row {caller, called} into callsTable.
@@ -192,7 +192,7 @@ public:
    * @param followed Name of the caller Procedure
    * @param follower Name of the Procedure being called
    */
-  void addCalls(std::string caller, std::string called);
+  void addCalls(const std::string& caller, const std::string& called);
 
   /**
    * Adds the Row {caller, called} into callsTTable.
@@ -200,7 +200,7 @@ public:
    * @param followed Name of the transitive caller Procedure
    * @param follower Name of the Procedure being transitively called
    */
-  void addCallsT(std::string caller, std::string called);
+  void addCallsT(const std::string& caller, const std::string& called);
 
   /**
    * Adds the Row {prev, next} into nextTable.
@@ -208,7 +208,7 @@ public:
    * @param prev Statement number of the statement executed first
    * @param next Statement number of the statement which can be executed immediately after prev in some execution sequence
    */
-  void addNext(int prev, int next);
+  void addNext(const int prev, const int next);
 
   /**
    * Adds the Row {prev, next} into nextTTable.
@@ -216,7 +216,7 @@ public:
    * @param prev Statement number of the statement executed first
    * @param next Statement number of the statement which can be executed after prev in some execution sequence
    */
-  void addNextT(int prev, int next);
+  void addNextT(const int prev, const int next);
 
   /**
    * Adds the Row {affecter, affected} into affectsTable.
@@ -224,7 +224,7 @@ public:
    * @param prev Statement number of the statement which modifies a variable used in affected
    * @param next Statement number of the statement uses a variable modified by prev
    */
-  void addAffects(int affecter, int affected);
+  void addAffects(const int affecter, const int affected);
 
   /**
    * Adds the Row {affecter, affected} into affectsTTable.
@@ -232,7 +232,7 @@ public:
    * @param prev Statement number of the statement which modifies a variable used in affected
    * @param next Statement number of the statement uses a variable modified by prev
    */
-  void addAffectsT(int affecter, int affected);
+  void addAffectsT(const int affecter, const int affected);
 
   /**
    * Adds the Row {prev, next} into nextBipTable.
@@ -240,7 +240,7 @@ public:
    * @param prev Statement number of the statement executed first
    * @param next Statement number of the statement which can be executed immediately after prev in some execution sequence
    */
-  void addNextBip(int prev, int next);
+  void addNextBip(const int prev, const int next);
 
   /**
    * Adds the Row {prev, next} into nextBipTTable.
@@ -248,7 +248,7 @@ public:
    * @param prev Statement number of the statement executed first
    * @param next Statement number of the statement which can be executed after prev in some execution sequence
    */
-  void addNextBipT(int prev, int next);
+  void addNextBipT(const int prev, const int next);
 
   /**
    * Adds the Row {affecter, affected} into affectsBipTable.
@@ -256,7 +256,7 @@ public:
    * @param prev Statement number of the statement which modifies a variable used in affected
    * @param next Statement number of the statement uses a variable modified by prev
    */
-  void addAffectsBip(int affecter, int affected);
+  void addAffectsBip(const int affecter, const int affected);
 
   /**
    * Adds the Row {affecter, affected} into affectsBipTTable.
@@ -264,57 +264,57 @@ public:
    * @param prev Statement number of the statement which modifies a variable used in affected
    * @param next Statement number of the statement uses a variable modified by prev
    */
-  void addAffectsBipT(int affecter, int affected);
+  void addAffectsBipT(const int affecter, const int affected);
 
   /**
-   * Adds the Row {stmtNo, lhs, rhs} into patternAssignTable.
+   * Adds the Row {stmtNum, lhs, rhs} into patternAssignTable.
    *
-   * @param stmtNo Statement number of the assign statement
+   * @param stmtNum Statement number of the assign statement
    * @param lhs String of the left hand side of the assign statement
    * @param rhs String of the postfix form of the right hand side of the
    * assign statement
    */
-  void addPatternAssign(int stmtNo, std::string lhs, std::string rhs);
+  void addPatternAssign(const int stmtNum, const std::string& lhs, const std::string& rhs);
 
   /**
-   * Adds the Row {stmtNo, var} int patternIfTable.
+   * Adds the Row {stmtNum, var} int patternIfTable.
    *
-   * @param stmtNo Statement number of the if statement
+   * @param stmtNum Statement number of the if statement
    * @param var Name of variable within the condition of the if statement
    */
-  void addPatternIf(int stmtNum, std::string var);
+  void addPatternIf(const int stmtNum, const std::string& var);
 
   /**
-   * Adds the Row {stmtNo, var} into patternWhileTable.
+   * Adds the Row {stmtNum, var} into patternWhileTable.
    *
-   * @param stmtNo Statement number of the while statement
+   * @param stmtNum Statement number of the while statement
    * @param var Name of variable within the condition of the while statement
    */
-  void addPatternWhile(int stmtNum, std::string var);
+  void addPatternWhile(const int stmtNum, const std::string& var);
 
   /**
-  * Adds the Row {stmtNo, proc} into callProcTable.
+  * Adds the Row {stmtNum, proc} into callProcTable.
   *
-  * @param stmtNo Statement number of the call statement
-  * @param var Name of procedure being called by stmtNo
+  * @param stmtNum Statement number of the call statement
+  * @param var Name of procedure being called by stmtNum
   */
-  void addCallProc(int stmtNo, std::string proc);
+  void addCallProc(const int stmtNum, const std::string& proc);
 
   /**
-  * Adds the Row {stmtNo, var} into readVarTable.
+  * Adds the Row {stmtNum, var} into readVarTable.
   *
-  * @param stmtNo Statement number of the read statement
+  * @param stmtNum Statement number of the read statement
   * @param var Name of variable being read
   */
-  void addReadVar(int stmtNo, std::string var);
+  void addReadVar(const int stmtNum, const std::string& var);
 
   /**
-  * Adds the Row {stmtNo, var} into printVarTable.
+  * Adds the Row {stmtNum, var} into printVarTable.
   *
-  * @param stmtNo Statement number of the print statement
+  * @param stmtNum Statement number of the print statement
   * @param var Name of variable being printed
   */
-  void addPrintVar(int stmtNo, std::string var);
+  void addPrintVar(const int stmtNum, const std::string& var);
 
   /**
    * @return varTable
@@ -487,6 +487,23 @@ public:
   Table getPatternWhileTable() const;
 
   /**
+   * Returns the integer reference of a given entity. 
+   * Returns -1 if entity does not exist.
+   * 
+   * @param entity Entity.
+   * @return Integer reference of the entity.
+   */
+  int getIntRefFromEntity(const std::string& entity) const;
+
+  /**
+   * Returns the entity of the given existing integer reference.
+   *
+   * @param intRef Entity integer reference.
+   * @return Entity of the integer reference.
+   */
+  std::string getEntityFromIntRef(const int intRef) const;
+
+  /**
    * Finds and returns the assign statement numbers that are uses the given variable. If no
    * assign statement uses the variable, returns an empty result. This function must be
    * called after the Design Extractor extracts all the design abstractions.
@@ -501,55 +518,55 @@ public:
    * variable is modified, returns an empty result. This function must be called after the
    * Design Extractor extracts all the design abstractions.
    *
-   * @param stmtNo Statement number to check.
+   * @param stmtNum Statement number to check.
    * @return Set of variables modified.
    */
-  std::unordered_set<std::string> getModifiedBy(const int stmtNo) const;
+  std::unordered_set<std::string> getModifiedBy(const int stmtNum) const;
 
   /**
-   * If the stmtNo is of a call statement, will return the name of the procedure
-   * being called by stmtNo. Otherwise, returns empty String.
+   * If the stmtNum is of a call statement, will return the name of the procedure
+   * being called by stmtNum. Otherwise, returns empty String.
    *
-   * @param stmtNo Statement number of a call statement
-   * @return Name of procedure being called by stmtNo
+   * @param stmtNum Statement number of a call statement
+   * @return Name of procedure being called by stmtNum
    */
-  std::string getProcNameFromCallStmt(const int stmtNo) const;
+  std::string getProcNameFromCallStmt(const int stmtNum) const;
 
   /**
-   * If the stmtNo is of a read statement, will return the name of the variable
-   * being read by stmtNo. Otherwise, returns empty String.
+   * If the stmtNum is of a read statement, will return the name of the variable
+   * being read by stmtNum. Otherwise, returns empty String.
    *
-   * @param stmtNo Statement number of a read statement
-   * @return Name of var being read by stmtNo
+   * @param stmtNum Statement number of a read statement
+   * @return Name of var being read by stmtNum
    */
-  std::string getVarNameFromReadStmt(const int stmtNo) const;
+  std::string getVarNameFromReadStmt(const int stmtNum) const;
 
   /**
-   * If the stmtNo is of a print statement, will return the name of the variable
-   * being printed by stmtNo. Otherwise, returns empty String.
+   * If the stmtNum is of a print statement, will return the name of the variable
+   * being printed by stmtNum. Otherwise, returns empty String.
    *
-   * @param stmtNo Statement number of a print statement
-   * @return Name of var being printed by stmtNo
+   * @param stmtNum Statement number of a print statement
+   * @return Name of var being printed by stmtNum
    */
-  std::string getVarNameFromPrintStmt(const int stmtNo) const;
+  std::string getVarNameFromPrintStmt(const int stmtNum) const;
 
   /**
    * Finds the set of stmts that can be directly executed after the given stmt number in the CFG.
    * If there are no nodes following, an empty set is returned.
    *
-   * @param stmtNo Statement number of interest.
+   * @param stmtNum Statement number of interest.
    * @return std::vector<int> List of nodes.
    */
-  std::vector<int> getNextStmtsFromCfg(const int stmtNo) const;
+  std::vector<int> getNextStmtsFromCfg(const int stmtNum) const;
 
   /**
    * Finds the list of stmts that can be directly executed after the given stmt number in the CFGBip.
    * If there are no nodes following, an empty list is returned.
    *
-   * @param stmtNo Statement number of interest.
+   * @param stmtNum Statement number of interest.
    * @return std::vector<BipNode> List of nodes.
    */
-  std::vector<Cfg::BipNode> getNextStmtsFromCfgBip(const int stmtNo) const;
+  std::vector<Cfg::BipNode> getNextStmtsFromCfgBip(const int stmtNum) const;
 
   /**
    * Finds the first statement of a given procedure.
@@ -557,7 +574,7 @@ public:
    * @param proc Procedure in question.
    * @return int Statement number of the first statement in the procedure.
    */
-  int getStartStmtFromProc(const std::string proc) const;
+  int getStartStmtFromProc(const std::string& proc) const;
 
   /**
    * Finds the list of last statements of a given procedure.
@@ -565,7 +582,7 @@ public:
    * @param proc Procedure in question.
    * @return std::vector<int> List of statement number of the last statements in the procedure.
    */
-  std::vector<int> getEndStmtsFromProc(const std::string proc) const;
+  std::vector<int> getEndStmtsFromProc(const std::string& proc) const;
 
   /**
    * Finds the procedure corresponding to the target statement number.
@@ -619,9 +636,14 @@ private:
   Table patternIfTable{ 2 };
   Table patternWhileTable{ 2 };
 
+  std::unordered_set<std::string> entitySet;
+  std::unordered_map<int, std::string> intToEntityMapper;
+  std::unordered_map<std::string, int> entityToIntMapper;
+
   std::unordered_map<int, std::string> callProcMapper;
   std::unordered_map<int, std::string> readVarMapper;
   std::unordered_map<int, std::string> printVarMapper;
+
   std::unordered_map<std::string, int> procStartMapper;
   std::unordered_map<std::string, std::vector<int>> procEndMapper;
   std::unordered_map<int, std::string> stmtProcMapper;

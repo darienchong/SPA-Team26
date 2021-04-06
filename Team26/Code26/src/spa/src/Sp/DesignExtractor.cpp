@@ -30,7 +30,7 @@ namespace {
 
     // Create dummy nodes and adding edge from end statements of each proc to their respective dummy nodes
     for (const Row procRow : procTable.getData()) {
-      const std::string proc = procRow[0];
+      const std::string proc = pkb.getEntityFromIntRef(procRow[0]);
       const int dummyNode = -1 * pkb.getStartStmtFromProc(proc);
 
       for (const int end : pkb.getEndStmtsFromProc(proc)) {
@@ -40,7 +40,7 @@ namespace {
 
     // Add the branch in and branch back links
     for (const Row stmtRow : callTable.getData()) {
-      const int callStmt = std::stoi(stmtRow[0]); // call stmt of interest
+      const int callStmt = stmtRow[0]; // call stmt of interest
       const std::string calledProc = pkb.getProcNameFromCallStmt(callStmt); // get the called proc from the call stmt
       const int calledProcStartStmt = pkb.getStartStmtFromProc(calledProc); // get the starting stmt num of the called proc
       const int dummyNode = -1 * calledProcStartStmt;
@@ -166,7 +166,7 @@ namespace {
 
     // Fill up the affects table for each assign statement
     for (const Row assignRow : assignTable.getData()) {
-      const int affecterAssignStmt = std::stoi(assignRow[0]);
+      const int affecterAssignStmt = assignRow[0];
 
       // Extract the varModifed by affecterAssignStmt
       std::string varModified;
@@ -228,7 +228,7 @@ namespace {
         // Check if currentStmt modifies the varModified
         // Stop searching this path if the currentStmt is an assign stmt or read stmt
         const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
-        const bool isReadOrAssignStmt = readTable.contains({ std::to_string(currentStmt) }) || assignTable.contains({ std::to_string(currentStmt) });
+        const bool isReadOrAssignStmt = readTable.contains({ currentStmt }) || assignTable.contains({ currentStmt });
         if (isModified && isReadOrAssignStmt) {
           continue;
         }
@@ -284,7 +284,7 @@ namespace {
 
     // Fill up the affects table for each assign statement
     for (Row assignRow : assignTable.getData()) {
-      int affecterAssignStmt = std::stoi(assignRow[0]);
+      int affecterAssignStmt = assignRow[0];
 
       // Extract the varModifed by affecterAssignStmt
       std::string varModified;
@@ -327,7 +327,7 @@ namespace {
         // Check if currentStmt modifies the varModified
         // Stop searching this path if the currentStmt is not a container stmt and it modifies the varModified
         const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
-        const bool isContainerStmt = ifTable.contains({ std::to_string(currentStmt) }) || whileTable.contains({ std::to_string(currentStmt) });
+        const bool isContainerStmt = ifTable.contains({ currentStmt }) || whileTable.contains({ currentStmt });
         if (isModified && !isContainerStmt) {
           continue;
         }
@@ -358,18 +358,18 @@ namespace {
    * @param listOfEntities The list of all entities in the table.
    * @returns A Table with entries as detailed above.
    */
-  Table generateTransitiveClosure(const Table& table, const std::list<std::string>& listOfEntities) {
+  Table generateTransitiveClosure(const Table& table, const std::list<int>& listOfEntities) {
     assert(table.getHeader().size() == 2); // Guaranteed to receive a table with 2 columns
 
     int numEntities = listOfEntities.size();
     Table newTable = table;
 
-    // Tables may sometimes have non-numerical entries.
+    // Tables may sometimes have non-consecutive entries.
     // We use this to perform conversion to and from.
-    std::map<std::string, int> nameToNum;
-    std::map<int, std::string> numToName;
+    std::map<int, int> nameToNum;
+    std::map<int, int> numToName;
     int counter = 1;
-    for (const std::string name : listOfEntities) {
+    for (const int name : listOfEntities) {
       nameToNum.emplace(name, counter);
       numToName.emplace(counter, name);
       counter++;
@@ -443,20 +443,16 @@ namespace {
    *      number of statements in the PKB.
    *
    * @param pkb The PKB to refer to.
-   * @returns
    */
   void fillParentTTable(Pkb& pkb) {
-    std::list<std::string> procList;
+    std::list<int> stmtList;
     for (const Row row : pkb.getStmtTable().getData()) {
-      procList.push_back(row[0]);
+      stmtList.push_back(row[0]);
     }
 
-    Table parentTTable = generateTransitiveClosure(pkb.getParentTable(),
-      procList);
-    for (const Row row : parentTTable.getData()) {
-      int parent = std::stoi(row[0]);
-      int child = std::stoi(row[1]);
-      pkb.addParentT(parent, child);
+    Table parentTTable = generateTransitiveClosure(pkb.getParentTable(), stmtList);
+    for (const Row& row : parentTTable.getData()) {
+      pkb.addParentT(row[0], row[1]);
     }
   }
 
@@ -471,10 +467,9 @@ namespace {
    *      number of statements in the PKB.
    *
    * @param pkb The PKB to refer to.
-   * @returns
    */
   void fillFollowsTTable(Pkb& pkb) {
-    std::list<std::string> stmtList;
+    std::list<int> stmtList;
     for (const Row row : pkb.getStmtTable().getData()) {
       stmtList.push_back(row[0]);
     }
@@ -482,9 +477,7 @@ namespace {
     Table followsTTable = generateTransitiveClosure(pkb.getFollowsTable(),
       stmtList);
     for (const Row row : followsTTable.getData()) {
-      int followed = std::stoi(row[0]);
-      int follower = std::stoi(row[1]);
-      pkb.addFollowsT(followed, follower);
+      pkb.addFollowsT(row[0], row[1]);
     }
   }
 
@@ -502,7 +495,7 @@ namespace {
    * @returns
    */
   void fillCallsTTable(Pkb& pkb) {
-    std::list<std::string> procList;
+    std::list<int> procList;
     for (const Row row : pkb.getProcTable().getData()) {
       procList.push_back(row[0]);
     }
@@ -510,7 +503,7 @@ namespace {
     Table callsTTable = generateTransitiveClosure(pkb.getCallsTable(),
       procList);
     for (const Row row : callsTTable.getData()) {
-      pkb.addCallsT(row[0], row[1]);
+      pkb.addCallsT(pkb.getEntityFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
 
@@ -528,7 +521,7 @@ namespace {
    * @returns
    */
   void fillNextTTable(Pkb& pkb) {
-    std::list<std::string> stmtList;
+    std::list<int> stmtList;
     for (const Row row : pkb.getStmtTable().getData()) {
       stmtList.push_back(row[0]);
     }
@@ -536,7 +529,7 @@ namespace {
     Table nextTTable = generateTransitiveClosure(pkb.getNextTable(),
       stmtList);
     for (const Row row : nextTTable.getData()) {
-      pkb.addNextT(std::stoi(row[0]), std::stoi(row[1]));
+      pkb.addNextT(row[0], row[1]);
     }
   }
 
@@ -554,7 +547,7 @@ namespace {
    * @returns
    */
   void fillAffectsTTable(Pkb& pkb) {
-    std::list<std::string> assignStmtList;
+    std::list<int> assignStmtList;
     for (const Row row : pkb.getAssignTable().getData()) {
       assignStmtList.push_back(row[0]);
     }
@@ -562,7 +555,7 @@ namespace {
     Table affectsTTable = generateTransitiveClosure(pkb.getAffectsTable(),
       assignStmtList);
     for (const Row row : affectsTTable.getData()) {
-      pkb.addAffectsT(std::stoi(row[0]), std::stoi(row[1]));
+      pkb.addAffectsT(row[0], row[1]);
     }
   }
 
@@ -580,9 +573,7 @@ namespace {
   void fillUsesSTableNonCallStmts(Pkb& pkb) {
     Table newUsesSTable = fillIndirectRelation(pkb.getUsesSTable(), pkb.getParentTTable());
     for (const Row row : newUsesSTable.getData()) {
-      int stmtNum = std::stoi(row[0]);
-      std::string var = row[1];
-      pkb.addUsesS(stmtNum, var);
+      pkb.addUsesS(row[0], pkb.getEntityFromIntRef(row[1]));
     }
   }
 
@@ -611,7 +602,7 @@ namespace {
     callProcTable.dropColumn(1);
 
     for (const Row row : callProcTable.getData()) {
-      pkb.addUsesS(std::stoi(row[0]), row[1]);
+      pkb.addUsesS(row[0], pkb.getEntityFromIntRef(row[1]));
     }
   }
 
@@ -640,7 +631,7 @@ namespace {
     callProcTable.dropColumn(1);
 
     for (const Row row : callProcTable.getData()) {
-      pkb.addModifiesS(std::stoi(row[0]), row[1]);
+      pkb.addModifiesS(row[0], pkb.getEntityFromIntRef(row[1]));
     }
   }
 
@@ -658,9 +649,7 @@ namespace {
   void fillModifiesSTableNonCallStmts(Pkb& pkb) {
     Table newModifiesSTable = fillIndirectRelation(pkb.getModifiesSTable(), pkb.getParentTTable());
     for (const Row row : newModifiesSTable.getData()) {
-      int stmtNum = std::stoi(row[0]);
-      std::string var = row[1];
-      pkb.addModifiesS(stmtNum, var);
+      pkb.addModifiesS(row[0], pkb.getEntityFromIntRef(row[1]));
     }
   }
 
@@ -676,9 +665,9 @@ namespace {
     std::unordered_set<std::string> toReturn;
 
     for (const Row row : callsTable.getData()) {
-      bool isProcNameCaller = (row[0] == procName);
+      bool isProcNameCaller = (pkb.getEntityFromIntRef(row[0]) == procName);
       if (isProcNameCaller) {
-        toReturn.insert(row[1]);
+        toReturn.insert(pkb.getEntityFromIntRef(row[1]));
       }
     }
 
@@ -725,7 +714,7 @@ namespace {
 
     int counter = 1;
     for (const Row row : pkb.getProcTable().getData()) {
-      std::string procName = row[0];
+      std::string procName = pkb.getEntityFromIntRef(row[0]);
       procNameToNum.emplace(procName, counter);
       numToProcName.emplace(counter, procName);
       counter++;
@@ -735,8 +724,8 @@ namespace {
 
     // Populate the graph
     for (const Row row : callsTable.getData()) {
-      std::string caller = row[0];
-      std::string callee = row[1];
+      std::string caller = pkb.getEntityFromIntRef(row[0]);
+      std::string callee = pkb.getEntityFromIntRef(row[1]);
       invertedProcGraph.insert(procNameToNum.at(callee), procNameToNum.at(caller));
     }
 
@@ -753,8 +742,8 @@ namespace {
 
       std::unordered_set<std::string> proceduresCalledByProcName = getProceduresCalledBy(pkb, procName);
       for (const Row row : pkb.getUsesPTable().getData()) {
-        bool isFirstArgCalledByProcName = (proceduresCalledByProcName.count(row[0]) > 0);
-        std::string var = row[1];
+        bool isFirstArgCalledByProcName = (proceduresCalledByProcName.count(pkb.getEntityFromIntRef(row[0])) > 0);
+        std::string var = pkb.getEntityFromIntRef(row[1]);
         if (isFirstArgCalledByProcName) {
           pkb.addUsesP(procName, var);
         }
@@ -789,7 +778,7 @@ namespace {
 
     int counter = 1;
     for (const Row row : pkb.getProcTable().getData()) {
-      std::string procName = row[0];
+      std::string procName = pkb.getEntityFromIntRef(row[0]);
       procNameToNum.emplace(procName, counter);
       numToProcName.emplace(counter, procName);
       counter++;
@@ -802,8 +791,8 @@ namespace {
 
     // Populate the graph
     for (const Row row : callsTable.getData()) {
-      std::string caller = row[0];
-      std::string callee = row[1];
+      std::string caller = pkb.getEntityFromIntRef(row[0]);
+      std::string callee = pkb.getEntityFromIntRef(row[1]);
       invertedProcGraph.insert(procNameToNum.at(callee), procNameToNum.at(caller));
     }
 
@@ -820,8 +809,8 @@ namespace {
 
       std::unordered_set<std::string> proceduresCalledByProcName = getProceduresCalledBy(pkb, procName);
       for (const Row row : pkb.getModifiesPTable().getData()) {
-        bool isFirstArgCalledByProcName = (proceduresCalledByProcName.count(row[0]) > 0);
-        std::string var = row[1];
+        bool isFirstArgCalledByProcName = (proceduresCalledByProcName.count(pkb.getEntityFromIntRef(row[0])) > 0);
+        std::string var = pkb.getEntityFromIntRef(row[1]);
         if (isFirstArgCalledByProcName) {
           pkb.addModifiesP(procName, var);
         }
@@ -852,15 +841,15 @@ namespace {
 
     int counter = 1;
     for (const Row row : pkb.getProcTable().getData()) {
-      std::string procName = row[0];
+      std::string procName = pkb.getEntityFromIntRef(row[0]);
       procNameToNum.emplace(procName, counter);
       numToProcName.emplace(counter, procName);
       counter++;
     }
 
     for (const Row row : pkb.getCallsTable().getData()) {
-      std::string caller = row[0];
-      std::string callee = row[1];
+      std::string caller = pkb.getEntityFromIntRef(row[0]);
+      std::string callee = pkb.getEntityFromIntRef(row[1]);
       procGraph.insert(procNameToNum.at(caller), procNameToNum.at(callee));
     }
 
@@ -894,8 +883,8 @@ namespace {
       if (!isCallToExistentProcedure) {
         throw SourceProcessor::SemanticError(
           SourceProcessor::ErrorMessage::SEMANTIC_ERROR_CALL_TO_NON_EXISTENT_PROCEDURE +
-          SourceProcessor::ErrorMessage::APPEND_STMT_NUMBER + row[0] +
-          SourceProcessor::ErrorMessage::APPEND_PROC_NAME + row[1]
+          SourceProcessor::ErrorMessage::APPEND_STMT_NUMBER + pkb.getEntityFromIntRef(row[0]) +
+          SourceProcessor::ErrorMessage::APPEND_PROC_NAME + pkb.getEntityFromIntRef(row[1])
         );
       }
     }

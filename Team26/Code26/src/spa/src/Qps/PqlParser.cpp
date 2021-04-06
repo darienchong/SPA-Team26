@@ -796,7 +796,7 @@ namespace Pql {
       clauseUnderConstruction.addParam(Entity(EntityType::NAME, nameToken.value));
     } else if (frontToken.type == TokenType::NUMBER) { // INTEGER
       const Token& numberToken = validateAndGet(NUMBER);
-      std::string removedLeadingZerosNumber = std::to_string(std::stoi(numberToken.value));
+      std::string removedLeadingZerosNumber = std::to_string(std::stoll(numberToken.value));
       clauseUnderConstruction.addParam(Entity(EntityType::NUMBER, removedLeadingZerosNumber));
     } else if (frontToken.type == TokenType::IDENTIFIER) { // prog_line synoynm OR attrRef
       const Token& synonymToken = validateAndGet(IDENTIFIER);
@@ -887,7 +887,7 @@ namespace Pql {
     } else if (frontToken.type == TokenType::NUMBER) {
       validateAndGet(NUMBER);
 
-      std::string removedLeadingZerosNumber = std::to_string(std::stoi(frontToken.value));
+      std::string removedLeadingZerosNumber = std::to_string(std::stoll(frontToken.value));
       const bool isStmtNumberZero = removedLeadingZerosNumber == "0";
       if (isStmtNumberZero) {
         throw SemanticError(ErrorMessage::SEMANTIC_ERROR_ZERO_STMT_NUMBER);
@@ -1038,7 +1038,7 @@ namespace Pql {
       const Token currentToken = tokens.front();
       if (currentToken.type == TokenType::NUMBER) {
         // Remove leading zero for const by casting to int and back to string
-        const Token& noLeadingZeroConstToken = { currentToken.type, std::to_string(std::stoi(currentToken.value)) };
+        const Token& noLeadingZeroConstToken = { currentToken.type, std::to_string(std::stoll(currentToken.value)) };
         infixExpressionTokens.emplace_back(noLeadingZeroConstToken);
       } else {
         infixExpressionTokens.emplace_back(tokens.front());

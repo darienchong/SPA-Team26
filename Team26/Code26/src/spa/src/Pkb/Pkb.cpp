@@ -36,197 +36,282 @@ void Pkb::addCfgEdge(const int from, const int to) {
   if (to < 0) {
     assert(from > 0);
     cfg.addEdge(from, to);
-    if (getCallTable().getData().count({ std::to_string(from) }) == 0) {
+    if (getCallTable().getData().count({ from }) == 0) {
       cfgBip.addBipEdge(from, to, 0, Cfg::NodeType::DUMMY);
     }
-  }
-  else {
+  } else {
     cfg.addEdge(from, to);
     addNext(from, to);
-    if (getCallTable().getData().count({ std::to_string(from) }) == 0) {
+    if (getCallTable().getData().count({ from }) == 0) {
       cfgBip.addBipEdge(from, to, 0, Cfg::NodeType::NORMAL);
       addNextBip(from, to);
     }
   }
 }
 
-void Pkb::addModifiesP(std::string proc, std::string var) {
-  std::vector<std::string> vect{ proc, std::move(var) };
-  modifiesPTable.insertRow(vect);
+void Pkb::addPatternIf(const int stmtNum, const std::string& var) {
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  patternIfTable.insertRow({ stmtNum, entityToIntMapper.at(var) });
 }
 
-void Pkb::addUsesP(std::string proc, std::string var) {
-  std::vector<std::string> vect{ proc, std::move(var) };
-  usesPTable.insertRow(vect);
+void Pkb::addPatternWhile(const int stmtNum, const std::string& var) {
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  patternWhileTable.insertRow({ stmtNum, entityToIntMapper.at(var) });
 }
 
-void Pkb::addPatternIf(int stmtNum, std::string var) {
-  std::vector<std::string> vect{ std::to_string(stmtNum), std::move(var) };
-  patternIfTable.insertRow(vect);
+void Pkb::addCall(const int stmtNum) {
+  callTable.insertRow({ stmtNum });
+  stmtTable.insertRow({ stmtNum });
 }
 
-void Pkb::addPatternWhile(int stmtNum, std::string var) {
-  std::vector<std::string> vect{ std::to_string(stmtNum), std::move(var) };
-  patternWhileTable.insertRow(vect);
+void Pkb::addCalls(const std::string& caller, const std::string& called) {
+  if (entitySet.count(caller) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(caller);
+    intToEntityMapper.emplace(intRef, caller);
+    entityToIntMapper.emplace(caller, intRef);
+  }
+  if (entitySet.count(called) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(called);
+    intToEntityMapper.emplace(intRef, called);
+    entityToIntMapper.emplace(called, intRef);
+  }
+  callsTable.insertRow({ entityToIntMapper.at(caller), entityToIntMapper.at(called) });
 }
 
-void Pkb::addCall(int stmtNo) {
-  std::vector<std::string> vect{ std::to_string(stmtNo) };
-  callTable.insertRow(vect);
-  stmtTable.insertRow(vect);
+void Pkb::addCallsT(const std::string& caller, const std::string& called) {
+  if (entitySet.count(caller) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(caller);
+    intToEntityMapper.emplace(intRef, caller);
+    entityToIntMapper.emplace(caller, intRef);
+  }
+  if (entitySet.count(called) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(called);
+    intToEntityMapper.emplace(intRef, called);
+    entityToIntMapper.emplace(called, intRef);
+  }
+  callsTTable.insertRow({ entityToIntMapper.at(caller), entityToIntMapper.at(called) });
 }
 
-void Pkb::addCalls(std::string caller, std::string called) {
-  std::vector<std::string> vect{ caller, called };
-  callsTable.insertRow(vect);
+void Pkb::addNext(const int prev, const int next) {
+  nextTable.insertRow({ prev, next });
 }
 
-void Pkb::addCallsT(std::string caller, std::string called) {
-  std::vector<std::string> vect{ caller, called };
-  callsTTable.insertRow(vect);
+void Pkb::addNextT(const int prev, const int next) {
+  nextTTable.insertRow({ prev, next });
+}
+void Pkb::addAffects(const int affecter, const int affected) {
+  affectsTable.insertRow({ affecter, affected });
+}
+void Pkb::addAffectsT(const int affecter, const int affected) {
+  affectsTTable.insertRow({ affecter, affected });
 }
 
-void Pkb::addNext(int prev, int next) {
-  std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
-  nextTable.insertRow(vect);
+void Pkb::addNextBip(const int prev, const int next) {
+  nextBipTable.insertRow({ prev, next });
 }
 
-void Pkb::addNextT(int prev, int next) {
-  std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
-  nextTTable.insertRow(vect);
+void Pkb::addNextBipT(const int prev, const int next) {
+  nextBipTTable.insertRow({ prev, next });
 }
-void Pkb::addAffects(int affecter, int affected) {
-  std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
-  affectsTable.insertRow(vect);
+void Pkb::addAffectsBip(const int affecter, const int affected) {
+  affectsBipTable.insertRow({ affecter, affected });
 }
-void Pkb::addAffectsT(int affecter, int affected) {
-  std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
-  affectsTTable.insertRow(vect);
+void Pkb::addAffectsBipT(const int affecter, const int affected) {
+  affectsBipTTable.insertRow({ affecter, affected });
 }
 
-void Pkb::addNextBip(int prev, int next) {
-  std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
-  nextBipTable.insertRow(vect);
+void Pkb::addCallProc(const int stmtNum, const std::string& proc) {
+  callProcMapper[stmtNum] = proc;
+  if (entitySet.count(proc) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(proc);
+    intToEntityMapper.emplace(intRef, proc);
+    entityToIntMapper.emplace(proc, intRef);
+  }
+  callProcTable.insertRow({ stmtNum, entityToIntMapper[proc] });
 }
 
-void Pkb::addNextBipT(int prev, int next) {
-  std::vector<std::string> vect{ std::to_string(prev), std::to_string(next) };
-  nextBipTTable.insertRow(vect);
-}
-void Pkb::addAffectsBip(int affecter, int affected) {
-  std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
-  affectsBipTable.insertRow(vect);
-}
-void Pkb::addAffectsBipT(int affecter, int affected) {
-  std::vector<std::string> vect{ std::to_string(affecter), std::to_string(affected) };
-  affectsBipTTable.insertRow(vect);
+void Pkb::addReadVar(const int stmtNum, const std::string& var) {
+  readVarMapper[stmtNum] = var;
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  readVarTable.insertRow({ stmtNum, entityToIntMapper[var] });
 }
 
-void Pkb::addCallProc(int stmtNo, std::string proc) {
-  std::vector<std::string> vect{ std::to_string((stmtNo)), proc };
-  callProcTable.insertRow(vect);
-  callProcMapper[stmtNo] = proc;
+void Pkb::addPrintVar(const int stmtNum, const std::string& var) {
+  printVarMapper[stmtNum] = var;
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  printVarTable.insertRow({ stmtNum, entityToIntMapper[var] });
 }
 
-void Pkb::addReadVar(int stmtNo, std::string var) {
-  std::vector<std::string> vect{ std::to_string((stmtNo)), var };
-  readVarTable.insertRow(vect);
-  readVarMapper[stmtNo] = var;
+void Pkb::addVar(const std::string& var) {
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  varTable.insertRow({ entityToIntMapper[var] });
 }
 
-void Pkb::addPrintVar(int stmtNo, std::string var) {
-  std::vector<std::string> vect{ std::to_string((stmtNo)), var };
-  printVarTable.insertRow(vect);
-  printVarMapper[stmtNo] = var;
+void Pkb::addStmt(const int stmtNum) {
+  stmtTable.insertRow({ stmtNum });
 }
 
-void Pkb::addVar(std::string var) {
-  std::vector<std::string> vect{ std::move(var) };
-  varTable.insertRow(vect);
+void Pkb::addProc(const std::string& proc) {
+  if (entitySet.count(proc) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(proc);
+    intToEntityMapper.emplace(intRef, proc);
+    entityToIntMapper.emplace(proc, intRef);
+  }
+  procTable.insertRow({ entityToIntMapper[proc] });
 }
 
-void Pkb::addStmt(int stmtNo) {
-  std::vector<std::string> vect{ std::to_string(stmtNo) };
-  stmtTable.insertRow(vect);
+void Pkb::addConst(const std::string& constValue) {
+  if (entitySet.count(constValue) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(constValue);
+    intToEntityMapper.emplace(intRef, constValue);
+    entityToIntMapper.emplace(constValue, intRef);
+  }
+  constTable.insertRow({ entityToIntMapper[constValue] });
 }
 
-void Pkb::addProc(std::string proc) {
-  std::vector<std::string> vect{ std::move(proc) };
-  procTable.insertRow(vect);
+void Pkb::addIf(const int stmtNum) {
+  ifTable.insertRow({ stmtNum });
+  stmtTable.insertRow({ stmtNum });
 }
 
-void Pkb::addConst(std::string constValue) {
-  std::vector<std::string> vect{ std::move(constValue) };
-  constTable.insertRow(vect);
+void Pkb::addWhile(const int stmtNum) {
+  whileTable.insertRow({ stmtNum });
+  stmtTable.insertRow({ stmtNum });
 }
 
-void Pkb::addIf(int stmtNo) {
-  std::vector<std::string> vect{ std::to_string(stmtNo) };
-  ifTable.insertRow(vect);
-  stmtTable.insertRow(vect);
+void Pkb::addRead(const int stmtNum) {
+  readTable.insertRow({ stmtNum });
+  stmtTable.insertRow({ stmtNum });
 }
 
-void Pkb::addWhile(int stmtNo) {
-  std::vector<std::string> vect{ std::to_string(stmtNo) };
-  whileTable.insertRow(vect);
-  stmtTable.insertRow(vect);
+void Pkb::addPrint(const int stmtNum) {
+  printTable.insertRow({ stmtNum });
+  stmtTable.insertRow({ stmtNum });
 }
 
-void Pkb::addRead(int stmtNo) {
-  std::vector<std::string> vect{ std::to_string(stmtNo) };
-  readTable.insertRow(vect);
-  stmtTable.insertRow(vect);
+void Pkb::addAssign(const int stmtNum) {
+  assignTable.insertRow({ stmtNum });
+  stmtTable.insertRow({ stmtNum });
 }
 
-void Pkb::addPrint(int stmtNo) {
-  std::vector<std::string> vect{ std::to_string(stmtNo) };
-  printTable.insertRow(vect);
-  stmtTable.insertRow(vect);
-}
-
-void Pkb::addAssign(int stmtNo) {
-  std::vector<std::string> vect{ std::to_string(stmtNo) };
-  assignTable.insertRow(vect);
-  stmtTable.insertRow(vect);
-}
-
-void Pkb::addFollows(int followed, int follower) {
+void Pkb::addFollows(const int followed, const int follower) {
   assert(followed < follower);
-  std::vector<std::string> vect{ std::to_string(followed), std::to_string(follower) };
-  followsTable.insertRow(vect);
+  followsTable.insertRow({ followed, follower });
 }
 
-void Pkb::addFollowsT(int followed, int follower) {
+void Pkb::addFollowsT(const int followed, const int follower) {
   assert(followed < follower);
-  std::vector<std::string> vect{ std::to_string(followed), std::to_string(follower) };
-  followsTTable.insertRow(vect);
+  followsTTable.insertRow({ followed, follower });
 }
 
-void Pkb::addParent(int parent, int child) {
+void Pkb::addParent(const int parent, const int child) {
   assert(parent < child);
-  std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
-  parentTable.insertRow(vect);
+  parentTable.insertRow({ parent, child });
 }
 
-void Pkb::addParentT(int parent, int child) {
+void Pkb::addParentT(const int parent, const int child) {
   assert(parent < child);
-  std::vector<std::string> vect{ std::to_string(parent), std::to_string(child) };
-  parentTTable.insertRow(vect);
+  parentTTable.insertRow({ parent, child });
 }
 
-void Pkb::addUsesS(int stmtNo, std::string var) {
-  std::vector<std::string> vect{ std::to_string(stmtNo), std::move(var) };
-  usesSTable.insertRow(vect);
+void Pkb::addUsesS(const int stmtNum, const std::string& var) {
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  usesSTable.insertRow({ stmtNum, entityToIntMapper[var] });
 }
 
-void Pkb::addModifiesS(int stmtNo, std::string var) {
-  std::vector<std::string> vect{ std::to_string(stmtNo), std::move(var) };
-  modifiesSTable.insertRow(vect);
+void Pkb::addModifiesS(const int stmtNum, const std::string& var) {
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  modifiesSTable.insertRow({ stmtNum, entityToIntMapper[var] });
 }
 
-void Pkb::addPatternAssign(int stmtNo, std::string lhs, std::string rhs) {
-  std::vector<std::string> vect{ std::to_string(stmtNo), std::move(lhs), std::move(rhs) };
-  patternAssignTable.insertRow(vect);
+void Pkb::addModifiesP(const std::string& proc, const std::string& var) {
+  if (entitySet.count(proc) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(proc);
+    intToEntityMapper.emplace(intRef, proc);
+    entityToIntMapper.emplace(proc, intRef);
+  }
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  modifiesPTable.insertRow({ entityToIntMapper[proc], entityToIntMapper[var] });
+}
+
+void Pkb::addUsesP(const std::string& proc, const std::string& var) {
+  if (entitySet.count(proc) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(proc);
+    intToEntityMapper.emplace(intRef, proc);
+    entityToIntMapper.emplace(proc, intRef);
+  }
+  if (entitySet.count(var) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(var);
+    intToEntityMapper.emplace(intRef, var);
+    entityToIntMapper.emplace(var, intRef);
+  }
+  usesPTable.insertRow({ entityToIntMapper[proc], entityToIntMapper[var] });
+}
+
+void Pkb::addPatternAssign(const int stmtNum, const std::string& lhs, const std::string& rhs) {
+  if (entitySet.count(lhs) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(lhs);
+    intToEntityMapper.emplace(intRef, lhs);
+    entityToIntMapper.emplace(lhs, intRef);
+  }
+  if (entitySet.count(rhs) == 0) {
+    const int intRef = entitySet.size();
+    entitySet.insert(rhs);
+    intToEntityMapper.emplace(intRef, rhs);
+    entityToIntMapper.emplace(rhs, intRef);
+  }
+  patternAssignTable.insertRow({ stmtNum, entityToIntMapper[lhs], entityToIntMapper[rhs] });
 }
 
 // Getters
@@ -266,67 +351,79 @@ Table Pkb::getPrintVarTable() const { return printVarTable; }
 Table Pkb::getPatternIfTable() const { return patternIfTable; }
 Table Pkb::getPatternWhileTable() const { return patternWhileTable; }
 
+int Pkb::getIntRefFromEntity(const std::string& entity) const {
+  if (entitySet.count(entity) == 0) {
+    return -1;
+  }
+  return entityToIntMapper.at(entity);
+}
+
+std::string Pkb::getEntityFromIntRef(const int entity) const {
+  assert(intToEntityMapper.count(entity) == 1);
+  return intToEntityMapper.at(entity);
+}
+
 std::unordered_set<int> Pkb::getAssignUses(const std::string& varName) const {
   Table filterTable = usesSTable;
-  filterTable.filterColumn(1, { varName });
+  filterTable.filterColumn(1, { entityToIntMapper.at(varName) });
   filterTable.innerJoin(assignTable, 0, 0);
   std::unordered_set<int> stmtNumbers;
   for (Row row : filterTable.getData()) {
-    stmtNumbers.insert(std::stoi(row[0]));
+    stmtNumbers.insert(row[0]);
   }
   return stmtNumbers;
 }
 
-std::unordered_set<std::string> Pkb::getModifiedBy(const int stmtNo) const {
-  Table filterTable = modifiesSTable;
-  filterTable.filterColumn(0, { std::to_string(stmtNo) });
+std::unordered_set<std::string> Pkb::getModifiedBy(const int stmtNum) const {
+  Table filterTable(getModifiesSTable());
+  filterTable.filterColumn(0, { stmtNum });
   std::unordered_set<std::string> variablesModified;
-  for (Row row : filterTable.getData()) {
-    variablesModified.insert(row[1]);
+  for (const Row& row : filterTable.getData()) {
+    variablesModified.insert(intToEntityMapper.at(row[1]));
   }
   return variablesModified;
 }
 
-std::string Pkb::getProcNameFromCallStmt(const int stmtNo) const {
-  const bool isValidCallStmt = callTable.contains({ std::to_string(stmtNo) });
+std::string Pkb::getProcNameFromCallStmt(const int stmtNum) const {
+  const bool isValidCallStmt = callTable.contains({ stmtNum });
   if (isValidCallStmt) {
-    return callProcMapper.at(stmtNo);
+    return callProcMapper.at(stmtNum);
   } else {
     return "";
   }
 }
 
-std::string Pkb::getVarNameFromReadStmt(const int stmtNo) const {
-  const bool isValidReadStmt = readTable.contains({ std::to_string(stmtNo) });
+std::string Pkb::getVarNameFromReadStmt(const int stmtNum) const {
+  const bool isValidReadStmt = readTable.contains({ stmtNum });
   if (isValidReadStmt) {
-    return readVarMapper.at(stmtNo);
+    return readVarMapper.at(stmtNum);
   } else {
     return "";
   }
 }
 
-std::string Pkb::getVarNameFromPrintStmt(const int stmtNo) const {
-  const bool isValidPrintStmt = printTable.contains({ std::to_string(stmtNo) });
+std::string Pkb::getVarNameFromPrintStmt(const int stmtNum) const {
+  const bool isValidPrintStmt = printTable.contains({ stmtNum });
   if (isValidPrintStmt) {
-    return printVarMapper.at(stmtNo);
+    return printVarMapper.at(stmtNum);
   } else {
     return "";
   }
 }
 
-std::vector<int> Pkb::getNextStmtsFromCfg(const int stmtNo) const {
-  return cfg.getNeighbours(stmtNo);
+std::vector<int> Pkb::getNextStmtsFromCfg(const int stmtNum) const {
+  return cfg.getNeighbours(stmtNum);
 }
 
-std::vector<Cfg::BipNode> Pkb::getNextStmtsFromCfgBip(const int stmtNo) const {
-  return cfgBip.getNeighbours(stmtNo);
+std::vector<Cfg::BipNode> Pkb::getNextStmtsFromCfgBip(const int stmtNum) const {
+  return cfgBip.getNeighbours(stmtNum);
 }
 
-int Pkb::getStartStmtFromProc(const std::string proc) const {
+int Pkb::getStartStmtFromProc(const std::string& proc) const {
   return procStartMapper.at(proc);
 }
 
-std::vector<int> Pkb::getEndStmtsFromProc(const std::string proc) const {
+std::vector<int> Pkb::getEndStmtsFromProc(const std::string& proc) const {
   return procEndMapper.at(proc);
 }
 

@@ -64,17 +64,17 @@ TEST_CASE("[TestTable] Insert Data") {
 
   SECTION("valid insertion") {
     Table table;
-    table.insertRow({ "1" });
-    table.insertRow({ "2" });
-    table.insertRow({ "3" });
+    table.insertRow({ 1 });
+    table.insertRow({ 2 });
+    table.insertRow({ 3 });
     REQUIRE(!table.empty());
     REQUIRE(table.size() == 3);
-    REQUIRE(table.contains({ "2" }));
+    REQUIRE(table.contains({ 2 }));
   }
 
   SECTION("invalid insertion") {
     Table table;
-    REQUIRE_THROWS(table.insertRow({ "1", "2" }));
+    REQUIRE_THROWS(table.insertRow({ 1, 2 }));
   }
 
 }
@@ -83,40 +83,37 @@ TEST_CASE("[TestTable] Get Data") {
 
   SECTION("one column") {
     Table table;
-    table.insertRow({ "1" });
-    table.insertRow({ "2" });
-    table.insertRow({ "3" });
+    table.insertRow({ 1 });
+    table.insertRow({ 2 });
+    table.insertRow({ 3 });
     REQUIRE(table.getData().size() == 3);
-    REQUIRE(table.getData().count({ "1" }) == 1);
+    REQUIRE(table.getData().count({ 1 }) == 1);
   }
 
   SECTION("two columns") {
     Table table({ "0", "1" });
-    table.insertRow({ "1", "11" });
-    table.insertRow({ "2", "22" });
-    table.insertRow({ "3", "33" });
-    REQUIRE(table.getData().count({ "1", "11" }) == 1);
-    REQUIRE(table.getColumns({ "1" }).count({ "33" }) == 1);
-    REQUIRE(table.getColumns({ "1" }).count({ "3" }) == 0);
-    REQUIRE(table.getColumn("0") == std::unordered_set<std::string> { "1", "2", "3" });
+    table.insertRow({ 1, 11 });
+    table.insertRow({ 2, 22 });
+    table.insertRow({ 3, 33 });
+    REQUIRE(table.getData().size() == 3);
+    REQUIRE(table.getData().count({ 1, 11 }) == 1);
   }
 
-  SECTION("invalid column name") {
+  SECTION("Empty table") {
     Table table(2);
-    table.insertRow({ "1", "11" });
-    table.insertRow({ "2", "22" });
-    REQUIRE_THROWS_WITH(table.getColumns({ "4" }), Catch::Contains("4"));
+    REQUIRE(table.getData().size() == 0);
+    REQUIRE(table.empty());
   }
 
 }
 
 TEST_CASE("[TestTable] Drop Column") {
   Table table({ "a", "b" });
-  table.insertRow({ "1", "11" });
-  table.insertRow({ "2", "22" });
+  table.insertRow({ 1, 11 });
+  table.insertRow({ 2, 22 });
   REQUIRE(table.dropColumn("a") == true);
   REQUIRE(table.getHeader() == std::vector<std::string>{"b"});
-  REQUIRE(table.getData().count({ "1","11" }) == 0);
+  REQUIRE(table.getData().count({ 1, 11 }) == 0);
   REQUIRE(table.dropColumn("b") == true);
   REQUIRE(table.empty());
   REQUIRE(table.dropColumn("a") == false);
@@ -125,21 +122,21 @@ TEST_CASE("[TestTable] Drop Column") {
 TEST_CASE("[TestTable] Concatenate") {
   SECTION("valid concatenation") {
     Table table1(2);
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
     Table table2(2);
-    table2.insertRow({ "3", "33" });
+    table2.insertRow({ 3, 33 });
     table1.concatenate(table2);
-    REQUIRE(table1.contains({ "3", "33" }));
+    REQUIRE(table1.contains({ 3, 33 }));
     REQUIRE(table1.size() == 3);
   }
 
   SECTION("invalid concatenation") {
     Table table1(2);
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
     Table table2(3);
-    table2.insertRow({ "3", "33", "333" });
+    table2.insertRow({ 3, 33, 333 });
     REQUIRE_THROWS(table1.concatenate(table2));
   }
 }
@@ -147,52 +144,45 @@ TEST_CASE("[TestTable] Concatenate") {
 TEST_CASE("[TestTable] Filter Column") {
   SECTION("valid filtration") {
     Table table({ "a", "b" });
-    table.insertRow({ "1", "11" });
-    table.insertRow({ "2", "22" });
-    table.filterColumn("b", std::unordered_set<std::string>{"11"});
-    REQUIRE(!table.contains({ "2", "22" }));
-    REQUIRE(table.contains({ "1", "11" }));
+    table.insertRow({ 1, 11 });
+    table.insertRow({ 2, 22 });
+    table.filterColumn(1, { 11 });
+    REQUIRE(!table.contains({ 2, 22 }));
+    REQUIRE(table.contains({ 1, 11 }));
   }
 
   SECTION("valid filtration with empty filter values") {
     Table table({ "a", "b" });
-    table.insertRow({ "1", "11" });
-    table.insertRow({ "2", "22" });
-    table.filterColumn("b", std::unordered_set<std::string>{});
+    table.insertRow({ 1, 11 });
+    table.insertRow({ 2, 22 });
+    table.filterColumn(1, {});
     REQUIRE(table.empty());
   }
 
   SECTION("valid filtration with non-existent filter values") {
     Table table({ "a", "b" });
-    table.insertRow({ "1", "11" });
-    table.insertRow({ "2", "22" });
-    table.filterColumn("a", std::unordered_set<std::string>{"3"});
+    table.insertRow({ 1, 11 });
+    table.insertRow({ 2, 22 });
+    table.filterColumn(0, { 3 });
     REQUIRE(table.empty());
-  }
-
-  SECTION("invalid filtration") {
-    Table table({ "a", "b" });
-    table.insertRow({ "1", "11" });
-    table.insertRow({ "2", "22" });
-    REQUIRE_THROWS(table.filterColumn("c", std::unordered_set<std::string>{"11"}));
   }
 }
 
 TEST_CASE("[TestTable] naturalJoin table") {
   SECTION("cross product naturalJoin") {
     Table table1({ "a", "b" });
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
     Table table2({ "c", "d" });
-    table2.insertRow({ "3", "33" });
-    table2.insertRow({ "4", "44" });
+    table2.insertRow({ 3, 33 });
+    table2.insertRow({ 4, 44 });
     table1.naturalJoin(table2);
     REQUIRE(table1.size() == 4);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c", "d"});
-    REQUIRE(table1.contains({ "1", "11", "3", "33" }));
-    REQUIRE(table1.contains({ "1", "11", "4", "44" }));
-    REQUIRE(table1.contains({ "2", "22", "3", "33" }));
-    REQUIRE(table1.contains({ "2", "22", "4", "44" }));
+    REQUIRE(table1.contains({ 1, 11, 3, 33 }));
+    REQUIRE(table1.contains({ 1, 11, 4, 44 }));
+    REQUIRE(table1.contains({ 2, 22, 3, 33 }));
+    REQUIRE(table1.contains({ 2, 22, 4, 44 }));
   }
 
   SECTION("valid cross product naturalJoin with empty tables") {
@@ -205,44 +195,46 @@ TEST_CASE("[TestTable] naturalJoin table") {
 
   SECTION("natural naturalJoin one overlapping column") {
     Table table1({ "a", "b" });
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
     Table table2({ "a", "c" });
-    table2.insertRow({ "1", "33" });
-    table2.insertRow({ "2", "44" });
+    table2.insertRow({ 1, 33 });
+    table2.insertRow({ 2, 44 });
     table1.naturalJoin(table2);
     REQUIRE(table1.size() == 2);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
-    REQUIRE(table1.contains({ "1", "11", "33" }));
-    REQUIRE(table1.contains({ "2", "22", "44" }));
+    REQUIRE(table1.contains({ 1, 11, 33 }));
+    REQUIRE(table1.contains({ 2, 22, 44 }));
   }
 
   SECTION("natural naturalJoin one overlapping empty string column name") {
     Table table1({ "", "b" });
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
     Table table2({ "", "c" });
-    table2.insertRow({ "1", "33" });
-    table2.insertRow({ "2", "44" });
+    table2.insertRow({ 1, 33 });
+    table2.insertRow({ 2, 44 });
     table1.naturalJoin(table2);
     REQUIRE(table1.size() == 4);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"", "b", "", "c"});
-    REQUIRE(table1.contains({ "1", "11", "1", "33" }));
-    REQUIRE(table1.contains({ "2", "22", "2", "44" }));
+    REQUIRE(table1.contains({ 1, 11, 1, 33 }));
+    REQUIRE(table1.contains({ 1, 11, 2, 44 }));
+    REQUIRE(table1.contains({ 2, 22, 1, 33 }));
+    REQUIRE(table1.contains({ 2, 22, 2, 44 }));
   }
 
   SECTION("natural naturalJoin two overlapping column") {
     Table table1({ "a", "b", "c" });
-    table1.insertRow({ "1", "11", "33" });
-    table1.insertRow({ "2", "22", "43" });
+    table1.insertRow({ 1, 11, 33 });
+    table1.insertRow({ 2, 22, 43 });
     Table table2({ "a", "c" });
-    table2.insertRow({ "1", "33" });
-    table2.insertRow({ "2", "44" });
+    table2.insertRow({ 1, 33 });
+    table2.insertRow({ 2, 44 });
     table1.naturalJoin(table2);
     REQUIRE(table1.size() == 1);
     REQUIRE(table1.getHeader() == std::vector<std::string>{"a", "b", "c"});
-    REQUIRE(table1.contains({ "1", "11", "33" }));
-    REQUIRE(!table1.contains({ "2", "22", "43" }));
+    REQUIRE(table1.contains({ 1, 11, 33 }));
+    REQUIRE(!table1.contains({ 2, 22, 43 }));
   }
 
   SECTION("valid natural naturalJoin with empty tables") {
@@ -257,59 +249,55 @@ TEST_CASE("[TestTable] naturalJoin table") {
 TEST_CASE("[TestTable] inner naturalJoin with indexes") {
   SECTION("inner naturalJoin with a common header specified") {
     Table table1({ "a", "b" });
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
     Table table2({ "a", "c" });
-    table2.insertRow({ "1", "33" });
-    table2.insertRow({ "2", "44" });
+    table2.insertRow({ 1, 33 });
+    table2.insertRow({ 2, 44 });
     table1.innerJoin(table2, 0, 0);
     REQUIRE(table1.size() == 2);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
-    REQUIRE(table1.contains({ "1", "11", "33" }));
-    REQUIRE(table1.contains({ "2", "22", "44" }));
+    REQUIRE(table1.contains({ 1, 11, 33 }));
+    REQUIRE(table1.contains({ 2, 22, 44 }));
   }
 }
 
 TEST_CASE("[TestTable] inner naturalJoin with column name") {
   SECTION("inner naturalJoin with a common header specified") {
     Table table1({ "a", "b" });
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
     Table table2({ "a", "c" });
-    table2.insertRow({ "1", "33" });
-    table2.insertRow({ "2", "44" });
+    table2.insertRow({ 1, 33 });
+    table2.insertRow({ 2, 44 });
     table1.innerJoin(table2, "a");
     REQUIRE(table1.size() == 2);
     REQUIRE(table1.getHeader() == std::vector<std::string> {"a", "b", "c"});
-    REQUIRE(table1.contains({ "1", "11", "33" }));
-    REQUIRE(table1.contains({ "2", "22", "44" }));
+    REQUIRE(table1.contains({ 1, 11, 33 }));
+    REQUIRE(table1.contains({ 2, 22, 44 }));
   }
 }
 
 TEST_CASE("[TestTable] delete row") {
   SECTION("delete rows that exist") {
     Table table1({ "a", "b" });
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
-    table1.insertRow({ "3", "33" });
-    std::vector<std::string> row1({ "2","22" });
-    std::vector<std::string> row2({ "1","11" });
-    REQUIRE(table1.deleteRow(row1) == true);
-    REQUIRE(table1.deleteRow(row2) == true);
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
+    table1.insertRow({ 3, 33 });
+    REQUIRE(table1.deleteRow({ 2, 22 }) == true);
+    REQUIRE(table1.deleteRow({ 1, 11 }) == true);
     REQUIRE(table1.size() == 1);
   }
 
   SECTION("delete row that does not exist") {
     Table table1({ "a", "b" });
-    table1.insertRow({ "1", "11" });
-    table1.insertRow({ "2", "22" });
-    std::vector<std::string> row({ "3","33" });
-    REQUIRE(table1.deleteRow(row) == false);
+    table1.insertRow({ 1, 11 });
+    table1.insertRow({ 2, 22 });
+    REQUIRE(table1.deleteRow({ 3, 33 }) == false);
   }
 
   SECTION("delete row for empty table") {
     Table table1({ "a", "b" });
-    std::vector<std::string> row({ "3","33" });
-    REQUIRE(table1.deleteRow(row) == false);
+    REQUIRE(table1.deleteRow({ 3, 33 }) == false);
   }
 }
