@@ -8,19 +8,15 @@
 #include "AdjList.h"
 
 namespace std {
-  template <> struct hash<Pql::Entity>
-  {
-    size_t operator()(const Pql::Entity & e) const
-    {
+  template <> struct hash<Pql::Entity> {
+    size_t operator()(const Pql::Entity& e) const {
       return hash<string>()(e.getValue());
     }
   };
 
 
-  template <> struct hash<Pql::Clause>
-  {
-    size_t operator()(const Pql::Clause& c) const
-    {
+  template <> struct hash<Pql::Clause> {
+    size_t operator()(const Pql::Clause& c) const {
       // See https://stackoverflow.com/questions/20511347/a-good-hash-function-for-a-vector
       std::size_t seed = c.getParams().size();
       for (Pql::Entity param : c.getParams()) {
@@ -112,7 +108,7 @@ namespace {
     }
     return false;
   }
-  
+
   struct LessThanKey {
     inline bool operator() (const Pql::Clause& clause, const Pql::Clause& otherClause) {
       //   * -Prioritize clauses with one constant and one synonym.
@@ -165,7 +161,7 @@ namespace {
       if (!isThisClauseFollowsOrModifies && isOtherClauseFollowsOrModifies) {
         return false;
       }
-      
+
       // After this point we assume that both clauses are not Follows or Modifies clauses.
       //   * - Sort clauses such that at least one synonym has been
       //   * computed in a previous clause.
@@ -307,7 +303,7 @@ namespace {
   }
 
   /**
-   * Carries out the following step in Query Optimization:  
+   * Carries out the following step in Query Optimization:
    * 2. Sort groups for evaluation
    *    - Start with groups without synonyms.
    *    - Prioritize groups that do not return results in Select.
@@ -345,14 +341,14 @@ namespace {
     // Update the vector of groups
     vectorOfGroups = std::move(groupsWithoutSynonyms);
     vectorOfGroups.insert(
-        vectorOfGroups.end(),
-        std::make_move_iterator(groupsNotInSelect.begin()),
-        std::make_move_iterator(groupsNotInSelect.end())
+      vectorOfGroups.end(),
+      std::make_move_iterator(groupsNotInSelect.begin()),
+      std::make_move_iterator(groupsNotInSelect.end())
     );
     vectorOfGroups.insert(
-        vectorOfGroups.end(),
-        std::make_move_iterator(groupsInSelect.begin()),
-        std::make_move_iterator(groupsInSelect.end())
+      vectorOfGroups.end(),
+      std::make_move_iterator(groupsInSelect.begin()),
+      std::make_move_iterator(groupsInSelect.end())
     );
   }
 
@@ -405,10 +401,10 @@ namespace {
     }
 
 
-    for (Pql::Clause clause : clauseGroup) {
-      for (Pql::Clause otherClause : clauseGroup) {
-        if (LessThanKey()(clause, otherClause)) {
-          clauseGraph.insert(clauseToIdx.at(clause), clauseToIdx.at(otherClause));
+    for (int i = 1; i < counter; i++) {
+      for (int j = i + 1; j < counter; j++) {
+        if (isClausesShareSynonym(idxToClause.at(i), idxToClause.at(j))) {
+          clauseGraph.insert(i, j);
         }
       }
     }
@@ -433,7 +429,7 @@ std::vector<std::vector<Pql::Clause>> PqlPreprocessor::sortClauses(std::vector<P
   // 2. Sort groups for evaluation
   //    - Start with clauses without synonyms.
   //    - Prioritize groups that do not return results in Select.
-  sortGroups(targets,vectorOfClauseGroups);
+  sortGroups(targets, vectorOfClauseGroups);
 
   // 3. Sort clauses inside the group
   //    - Prioritize clauses with one constant and one synonym.

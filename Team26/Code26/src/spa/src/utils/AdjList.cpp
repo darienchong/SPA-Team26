@@ -185,7 +185,7 @@ std::list<int> AdjList::stableTopologicalOrder() {
   while (!tieBreaker.empty()) {
     int selectedNode = tieBreaker.top();
     tieBreaker.pop();
-    
+
     bool isUnmarked = !(hasTemporaryMark[selectedNode] || hasPermanentMark[selectedNode]);
     if (isUnmarked) {
       visit(selectedNode, hasPermanentMark, hasTemporaryMark, toReturn, internalRepresentation);

@@ -545,8 +545,6 @@ namespace Pql {
       if (lhsEntity.getValue() == rhsEntity.getValue()) {
         clauseResultTable.insertRow({ 0 }); // Dummy row to signify True
       }
-      finalTable.setHeader({ rhsEntity.getValue(), lhsEntity.getValue() });
-      clauseResultTable = std::move(finalTable);
       return;
     }
 

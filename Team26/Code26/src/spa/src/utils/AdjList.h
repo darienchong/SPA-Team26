@@ -53,7 +53,7 @@ public:
    * Applies Warshall's algorithm
    * (see https://www.dartmouth.edu/~matc/DiscreteMath/V.6.pdf) to the
    * current adjacency list. Complexity: O(size * size)
-   * 
+   *
    * @returns
    */
   void applyWarshallAlgorithm();
@@ -66,10 +66,10 @@ public:
   std::list<int> topologicalOrder();
 
   /**
-   * Returns an ordered list of nodes in topological order 
+   * Returns an ordered list of nodes in topological order
    * where ties are broken by taking the node with the smallest
    * index. Algorithm must use a DFS approach.
-   * 
+   *
    * @returns Nodes in topological order, where ties are broken by
    *   taking the node with the smallest index.
    */
@@ -77,7 +77,7 @@ public:
 
   /**
    * Returns a list of connected components.
-   * 
+   *
    * @returns
    */
   std::list<std::list<int>> getAllConnectedComponents();
