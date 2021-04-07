@@ -68,7 +68,7 @@ public:
   /**
    * Returns an ordered list of nodes in topological order 
    * where ties are broken by taking the node with the smallest
-   * index.
+   * index. Algorithm must use a DFS approach.
    * 
    * @returns Nodes in topological order, where ties are broken by
    *   taking the node with the smallest index.

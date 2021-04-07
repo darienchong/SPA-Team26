@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include <map>
 #include <unordered_set>
 #include <string>
@@ -8,6 +10,47 @@
 #include <queue>
 
 #include "AdjList.h"
+
+namespace {
+  /**
+   * Helper function to return the neighbours of a given node.
+   */
+  std::unordered_set<int> getNeighboursOf(int node, const std::map<int, std::unordered_set<int>>& internalRepresentation) {
+    bool nodeHasEntryInInternalRepresentation = internalRepresentation.count(node) > 0;
+    if (nodeHasEntryInInternalRepresentation) {
+      return internalRepresentation.at(node);
+    } else {
+      return std::unordered_set<int>();
+    }
+  }
+
+  /**
+   * Helper function for DFS topological sort.
+   * See https://en.wikipedia.org/wiki/Topological_sorting
+   */
+  void visit(int node,
+    std::vector<bool>& hasPermanentMark,
+    std::vector<bool>& hasTemporaryMark,
+    std::list<int>& resultList,
+    const std::map<int, std::unordered_set<int>>& internalRepresentation) {
+    if (hasPermanentMark[node]) {
+      return;
+    }
+
+    assert(!hasTemporaryMark[node]); // Cycle detection
+
+    hasTemporaryMark[node] = true;
+
+    std::unordered_set<int> neighboursOfNode = getNeighboursOf(node, internalRepresentation);
+    for (int neighbour : neighboursOfNode) {
+      visit(neighbour, hasPermanentMark, hasTemporaryMark, resultList, internalRepresentation);
+    }
+
+    hasTemporaryMark[node] = false;
+    hasPermanentMark[node] = true;
+    resultList.push_front(node);
+  }
+}
 
 void AdjList::insert(const int i, const int j) {
   if (i > size || j > size) {
@@ -131,46 +174,21 @@ std::list<int> AdjList::topologicalOrder() {
 }
 
 std::list<int> AdjList::stableTopologicalOrder() {
-  std::vector<int> inDegree(size + 1, 0);
   std::list<int> toReturn;
-  std::priority_queue<int, std::vector<int>, std::greater<int>> tempQueue;
-
-  // Compute the in-degrees of all the nodes
+  std::vector<bool> hasTemporaryMark(size + 1, false);
+  std::vector<bool> hasPermanentMark(size + 1, false);
+  std::priority_queue<int, std::vector<int>, std::greater<int>> tieBreaker;
   for (int i = 1; i <= size; i++) {
-    for (int j = 1; j <= size; j++) {
-      bool edgeToIExists = this->get(j, i);
-      if (edgeToIExists) {
-        inDegree[i] = inDegree[i] + 1;
-      }
-    }
+    tieBreaker.emplace(i);
   }
 
-  // Put all vertices with in-degree 0 into the queue.
-  for (int i = 1; i <= size; i++) {
-    if (inDegree[i] == 0) {
-      tempQueue.push(i);
-    }
-  }
-
-  while (tempQueue.size() > 0) {
-    int node = tempQueue.top();
-    tempQueue.pop();
-
-    toReturn.push_back(node);
-
-    // Recompute all the in-degrees of the neighbours of node
-    for (int j = 1; j <= size; j++) {
-      bool edgeFromNodeToJExists = this->get(node, j);
-      if (edgeFromNodeToJExists) {
-        inDegree[j] = inDegree[j] - 1;
-      }
-    }
-
-    for (int k = 1; k <= size; k++) {
-      bool isNeighbourOfNode = this->get(node, k);
-      if (inDegree[k] == 0 && isNeighbourOfNode) {
-        tempQueue.push(k);
-      }
+  while (!tieBreaker.empty()) {
+    int selectedNode = tieBreaker.top();
+    tieBreaker.pop();
+    
+    bool isUnmarked = !(hasTemporaryMark[selectedNode] || hasPermanentMark[selectedNode]);
+    if (isUnmarked) {
+      visit(selectedNode, hasPermanentMark, hasTemporaryMark, toReturn, internalRepresentation);
     }
   }
 
