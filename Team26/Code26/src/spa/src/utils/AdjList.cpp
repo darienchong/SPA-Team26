@@ -5,6 +5,7 @@
 #include <list>
 #include <vector>
 #include <deque>
+#include <queue>
 
 #include "AdjList.h"
 
@@ -129,13 +130,57 @@ std::list<int> AdjList::topologicalOrder() {
   return toReturn;
 }
 
+std::list<int> AdjList::stableTopologicalOrder() {
+  std::vector<int> inDegree(size + 1, 0);
+  std::list<int> toReturn;
+  std::priority_queue<int, std::vector<int>, std::greater<int>> tempQueue;
+
+  // Compute the in-degrees of all the nodes
+  for (int i = 1; i <= size; i++) {
+    for (int j = 1; j <= size; j++) {
+      bool edgeToIExists = this->get(j, i);
+      if (edgeToIExists) {
+        inDegree[i] = inDegree[i] + 1;
+      }
+    }
+  }
+
+  // Put all vertices with in-degree 0 into the queue.
+  for (int i = 1; i <= size; i++) {
+    if (inDegree[i] == 0) {
+      tempQueue.push(i);
+    }
+  }
+
+  while (tempQueue.size() > 0) {
+    int node = tempQueue.top();
+    tempQueue.pop();
+
+    toReturn.push_back(node);
+
+    // Recompute all the in-degrees of the neighbours of node
+    for (int j = 1; j <= size; j++) {
+      bool edgeFromNodeToJExists = this->get(node, j);
+      if (edgeFromNodeToJExists) {
+        inDegree[j] = inDegree[j] - 1;
+      }
+    }
+
+    for (int k = 1; k <= size; k++) {
+      bool isNeighbourOfNode = this->get(node, k);
+      if (inDegree[k] == 0 && isNeighbourOfNode) {
+        tempQueue.push(k);
+      }
+    }
+  }
+
+  return toReturn;
+}
+
 std::list<std::list<int>> AdjList::getAllConnectedComponents() {
   // Algorithm taken from http://math.hws.edu/eck/cs327_s04/chapter9.pdf
   std::list<std::list<int>> connectedComponents;
-  std::vector<bool> isVisited(size + 1);
-  for (int i = 1; i <= size; i++) {
-    isVisited[i] = false;
-  }
+  std::vector<bool> isVisited(size + 1, false);
 
   for (int j = 1; j <= size; j++) {
     std::list<int> connectedComponent;
@@ -148,6 +193,9 @@ std::list<std::list<int>> AdjList::getAllConnectedComponents() {
         queue.pop_front();
 
         connectedComponent.emplace_back(nodeInConnectedComponent);
+        if (internalRepresentation.count(nodeInConnectedComponent) == 0) {
+          continue;
+        }
         std::unordered_set<int> neighboursOfNode = internalRepresentation.at(nodeInConnectedComponent);
         for (int neighbouringNode : neighboursOfNode) {
           if (!isVisited[neighbouringNode]) {
@@ -158,7 +206,9 @@ std::list<std::list<int>> AdjList::getAllConnectedComponents() {
       }
     }
 
-    connectedComponents.push_back(connectedComponent);
+    if (!connectedComponent.empty()) {
+      connectedComponents.push_back(connectedComponent);
+    }
   }
 
   return connectedComponents;

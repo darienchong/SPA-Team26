@@ -138,6 +138,7 @@ namespace Pql {
    */
   class PqlParser {
   private:
+    std::string semanticErrorMessage;
     std::list<Token>& tokens;
     std::unordered_map<std::string, EntityType> declaredSynonyms;
 
@@ -157,6 +158,12 @@ namespace Pql {
     Query parseQuery();
 
   private:
+    /**
+     * Adds a semantic error message to the record in semanticErrorMessages.
+     * These messages will be added to the query object at the end.
+     */
+    void addSemanticErrorMessage(const std::string& message);
+
     /**
      * Parses all the declaration statements of a PQL query.
      */
@@ -327,11 +334,22 @@ namespace Pql {
     void parseModifiesClause(Clause& clauseUnderConstruction);
 
     /**
+     * Helper method used by parseUsesClause() and parseModifiesClause() that parses both Uses and 
+     * Modifies clauses according to the given clause types. Stores the result in the clause representation
+     * under construction.
+     * 
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     * @param procedureType UsesP or ModifiesP clause type.
+     * @param stmtType UsesS or ModifiesS clause type.
+     */
+    void parseUsesModifiesClause(Clause& clauseUnderConstruction, const ClauseType& procedureType, const ClauseType& stmtType);
+
+    /**
      * Parses a pattern assign clause of the PQL query and stores the result in the clause representation
      * under construction.
      *
      * @param clauseUnderConstruction Clause representation object that is under construction.
-     * @param synonymName synonym name of the pattern if clause
+     * @param synonymName Synonym name of the pattern if clause.
      */
     void parsePatternAssignClause(Clause& clauseUnderConstruction, const std::string& synonymName);
 
@@ -340,7 +358,7 @@ namespace Pql {
      * under construction.
      *
      * @param clauseUnderConstruction Clause representation object that is under construction.
-     * @param synonymName synonym name of the pattern if clause
+     * @param synonymName Synonym name of the pattern if clause.
      */
     void parsePatternIfClause(Clause& clauseUnderConstruction, const std::string& synonymName);
 
@@ -349,9 +367,19 @@ namespace Pql {
      * under construction.
      *
      * @param clauseUnderConstruction Clause representation object that is under construction.
-     * @param synonymName synonym name of the pattern while clause
+     * @param synonymName Synonym name of the pattern while clause.
      */
     void parsePatternWhileClause(Clause& clauseUnderConstruction, const std::string& synonymName);
+
+    /**
+     * Parses a semantically invalid pattern clause of the PQL query and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     * @param synonymName Synonym name.
+     * @param synonymType Synonym type.
+     */
+    void parsePatternInvalidClause(Clause& clauseUnderConstruction, const std::string& synonymName, const EntityType& synonymType);
 
     /**
      * Parses a pair of stmtRef, stmtRef arguments from the clause of the PQL query and stores the
@@ -402,6 +430,15 @@ namespace Pql {
     void parseProcRef(Clause& clauseUnderConstruction);
 
     /**
+     * Helper method that parses an entRef argument from the clause of the PQL query based on the ref 
+     * type check function specified and stores the result in the clause representation under construction.
+     * 
+     * @param clauseUnderConstruction Clause representation object that is under construction. 
+     * @param refTypeCheck Function that checks the synonym type of the entRef
+     */
+    void parseEntRef(Clause& clauseUnderConstruction, bool refTypeCheck(const Pql::EntityType&));
+
+    /**
      * Parses an expression-spec argument from the clause of the PQL query and stores the result in
      * the clause representation under construction.
      *
@@ -445,6 +482,25 @@ namespace Pql {
      * until a non-whitespace token is found.
      */
     void consumeFrontWhitespaceTokens();
+
+    /**
+     * Checks if there are anymore tokens and returns the front token.
+     * Does not consume the front token.
+     * Throws a Syntax Error if there are no more tokens left.
+     * 
+     * @return Front token.
+     */
+    Token getFrontToken();
+
+    /**
+     * Gets the synonym type from the specified synonym name.
+     * This method will check if the synonym has been declared and adds to the semantic error
+     * messages if the synonym is not declared. 
+     *
+     * @param synonymName Name of the synonym.
+     * @return Entity type that corresponds to the given synonym name.
+     */
+    EntityType getSynonymType(const std::string& synonymName);
 
     /**
      * Checks if the given synonym has already been declared.

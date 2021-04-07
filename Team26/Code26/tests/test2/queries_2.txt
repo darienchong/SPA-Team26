@@ -168,12 +168,17 @@ assign a;
 Select BOOLEAN pattern a("", _)
 
 1000
-35 - Syntax Error - With - Invalid comparator
+35 - Syntax Error - Pattern - Invalid Format
+stmt s;
+Select BOOLEAN pattern s("x", "x", _)
+
+1000
+36 - Syntax Error - With - Invalid comparator
 
 Select BOOLEAN with 1 != 2
 
 1000
-36 - Syntax Error - With - Invalid argument
+37 - Syntax Error - With - Invalid argument
 prog_line n;
 Select BOOLEAN with _ = n
 

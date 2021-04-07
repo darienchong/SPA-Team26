@@ -34,6 +34,11 @@ namespace std {
 }
 
 namespace {
+  bool isSameSynonym(const Pql::Entity entity, const Pql::Entity otherEntity) {
+    bool isSynonym = (entity.isSynonym() && otherEntity.isSynonym());
+    bool isSameValue = (entity.getValue() == otherEntity.getValue());
+    return isSynonym && isSameValue;
+  }
 
   bool isClauseWithoutSynonym(const Pql::Clause clause) {
     std::vector<Pql::Entity> clauseParams = clause.getParams();
@@ -80,17 +85,145 @@ namespace {
 
     std::vector<Pql::Entity> clauseParams = clause.getParams();
     std::vector<Pql::Entity> otherClauseParams = otherClause.getParams();
-
-    // See https://stackoverflow.com/questions/27131628/check-whether-two-elements-have-a-common-element-in-c
-    // Other way is to sort them first - need to implement some sort of total order.
-    return std::find_first_of(
-      clauseParams.begin(),
-      clauseParams.end(),
-      otherClauseParams.begin(),
+    // Filter out non-synonyms
+    clauseParams.erase(
+      std::remove_if(
+        clauseParams.begin(),
+        clauseParams.end(),
+        [](Pql::Entity entity) { return !entity.isSynonym(); }
+      ),
+      clauseParams.end()
+    );
+    otherClauseParams.erase(
+      std::remove_if(
+        otherClauseParams.begin(),
+        otherClauseParams.end(),
+        [](Pql::Entity entity) { return !entity.isSynonym(); }
+      ),
       otherClauseParams.end()
-    ) != clauseParams.end();
+    );
+
+    for (Pql::Entity synonym : clauseParams) {
+      for (Pql::Entity otherSynonym : otherClauseParams) {
+        if (isSameSynonym(synonym, otherSynonym)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
   
+  struct LessThanKey {
+    inline bool operator() (const Pql::Clause& clause, const Pql::Clause& otherClause) {
+      //   * -Prioritize clauses with one constant and one synonym.
+      //   * -Prioritize clauses with less number of results.
+      //   * -Sort clauses such that at least one synonym has been
+      //   * computed in a previous clause.
+      //   * -Prioritize with - clauses - more restrictive than such - that clauses.
+      //   * -Evaluating pattern - clauses - similar to any such - that clause.
+      //   * -Push Affects/* clauses on the last positions in a group.
+
+      //   * -Prioritize clauses with one constant and one synonym.
+      bool isThisClauseWithOneConstantOneSynonym = isClauseWithOneConstantOneSynonym(clause);
+      bool isOtherClauseWithOneConstantOneSynonym = isClauseWithOneConstantOneSynonym(otherClause);
+
+      if (isThisClauseWithOneConstantOneSynonym && isOtherClauseWithOneConstantOneSynonym) {
+        return false;
+      }
+
+      if (isThisClauseWithOneConstantOneSynonym && !isOtherClauseWithOneConstantOneSynonym) {
+        return true;
+      }
+
+      if (!isThisClauseWithOneConstantOneSynonym && isOtherClauseWithOneConstantOneSynonym) {
+        return false;
+      }
+
+      // Here we must have that both are not clauses with one constant and one synonym.
+      // We assume that this means both clauses have only synonyms, since clauses with 
+      // only constants and clauses with only synonyms should not be in the same group
+      // and we do not sort groups with no synonyms.
+
+      //   * -Prioritize clauses with less number of results.
+      // TODO: Think of a better way to formalise this.
+      // For now we just prioritise Follows and Modifies over other clauses.
+      bool isThisClauseFollows = clause.getType() == Pql::ClauseType::FOLLOWS;
+      bool isOtherClauseFollows = otherClause.getType() == Pql::ClauseType::FOLLOWS;
+      bool isThisClauseModifies = (clause.getType() == Pql::ClauseType::MODIFIES_P) || (clause.getType() == Pql::ClauseType::MODIFIES_S);
+      bool isOtherClauseModifies = (otherClause.getType() == Pql::ClauseType::MODIFIES_P) || (otherClause.getType() == Pql::ClauseType::MODIFIES_S);
+      bool isThisClauseFollowsOrModifies = isThisClauseFollows || isThisClauseModifies;
+      bool isOtherClauseFollowsOrModifies = isOtherClauseFollows || isOtherClauseModifies;
+
+      if (isThisClauseFollowsOrModifies && isOtherClauseFollowsOrModifies) {
+        return false;
+      }
+
+      if (isThisClauseFollowsOrModifies && !isOtherClauseFollowsOrModifies) {
+        return true;
+      }
+
+      if (!isThisClauseFollowsOrModifies && isOtherClauseFollowsOrModifies) {
+        return false;
+      }
+      
+      // After this point we assume that both clauses are not Follows or Modifies clauses.
+      //   * - Sort clauses such that at least one synonym has been
+      //   * computed in a previous clause.
+      // This can't be done here, do it elsewhere.
+
+      //   * -Prioritize with - clauses - more restrictive than such - that clauses.
+      bool isThisClauseWith = clause.getType() == Pql::ClauseType::WITH;
+      bool isOtherClauseWith = clause.getType() == Pql::ClauseType::WITH;
+
+      if (isThisClauseWith && isOtherClauseWith) {
+        return false;
+      }
+
+      if (isThisClauseWith && !isOtherClauseWith) {
+        return true;
+      }
+
+      if (!isThisClauseWith && isOtherClauseWith) {
+        return false;
+      }
+
+      // After this point the clauses are either pattern or such-that
+      bool isThisClausePattern = clause.getType() == Pql::ClauseType::PATTERN_ASSIGN || clause.getType() == Pql::ClauseType::PATTERN_IF || clause.getType() == Pql::ClauseType::PATTERN_WHILE;
+      bool isOtherClausePattern = otherClause.getType() == Pql::ClauseType::PATTERN_ASSIGN || otherClause.getType() == Pql::ClauseType::PATTERN_IF || otherClause.getType() == Pql::ClauseType::PATTERN_WHILE;
+
+      if (isThisClausePattern && isOtherClausePattern) {
+        return false;
+      }
+
+      if (isThisClausePattern && !isOtherClausePattern) {
+        return true;
+      }
+
+      if (!isThisClausePattern && isOtherClausePattern) {
+        return false;
+      }
+
+      // After this point the clauses must be such-that clauses
+      bool isThisClauseAffectsOrAffectsT = clause.getType() == Pql::ClauseType::AFFECTS || clause.getType() == Pql::ClauseType::AFFECTS_T;
+      bool isOtherClauseAffectsOrAffectsT = otherClause.getType() == Pql::ClauseType::AFFECTS || otherClause.getType() == Pql::ClauseType::AFFECTS_T;
+
+      if (isThisClauseAffectsOrAffectsT && isOtherClauseAffectsOrAffectsT) {
+        return false;
+      }
+
+      if (isThisClauseAffectsOrAffectsT && !isOtherClauseAffectsOrAffectsT) {
+        return false;
+      }
+
+      if (!isThisClauseAffectsOrAffectsT && isOtherClauseAffectsOrAffectsT) {
+        return true;
+      }
+
+      // Both clauses are not affects clauses
+      return false;
+    }
+  };
+
   /**
    * Carries out the following step in Query Optimization:
    * 1. Divide the clauses into multiple groups
@@ -157,9 +290,12 @@ namespace {
     // Map this back to a vector of vector of clauses.
     // TODO: Consider if std::vector is the best data structure to use here.
     std::vector<std::vector<Pql::Clause>> vectorOfClauseGroups;
-    vectorOfClauseGroups.push_back(clausesWithoutSynonyms);
+    if (!clausesWithoutSynonyms.empty()) {
+      vectorOfClauseGroups.push_back(clausesWithoutSynonyms);
+    }
     for (std::list<int> connectedComponent : connectedComponents) {
-      std::vector<Pql::Clause> clauseGroup(connectedComponent.size());
+      std::vector<Pql::Clause> clauseGroup;
+      clauseGroup.reserve(connectedComponent.size());
       for (int clauseIdx : connectedComponent) {
         Pql::Clause clause = idxToClause.at(clauseIdx);
         clauseGroup.push_back(clause);
@@ -229,56 +365,62 @@ namespace {
    *      computed in a previous clause.
    *    - Prioritize with-clauses - more restrictive than such-that clauses.
    *    - Evaluating pattern-clauses - similar to any such-that clause.
-   * - Push Affects/* clauses on the last positions in a group.
+   *    - Push Affects/* clauses on the last positions in a group.
    */
   void sortWithinGroup(std::vector<Pql::Clause>& clauseGroup) {
-    // TODO
-    // if clause group has no synonym, no sorting
-    std::vector<Pql::Clause> sortedClauseGroup;
-    std::unordered_set<Pql::Clause> notVisited(clauseGroup.begin(), clauseGroup.end());
-
-    Pql::Clause firstClause;
-    for (Pql::Clause& clause : clauseGroup) {
-      if (isClauseWithOneConstantOneSynonym(clause)) {
-        firstClause = clause;
+    bool isClauseGroupContainsSynonyms = false;
+    for (Pql::Clause clause : clauseGroup) {
+      if (isClauseWithoutSynonym(clause)) {
+        continue;
+      } else {
+        isClauseGroupContainsSynonyms = true;
         break;
       }
     }
 
-    if (firstClause.getType() == Pql::ClauseType::UNDEFINED) {
-      firstClause = clauseGroup[0];
+    if (!isClauseGroupContainsSynonyms) {
+      return;
     }
 
-    notVisited.erase(firstClause);
+    std::sort(clauseGroup.begin(), clauseGroup.end(), LessThanKey());
 
-    std::unordered_set<Pql::Entity> paramsComputed;
-    for (Pql::Entity e : firstClause.getParams()) {
-      if (e.isSynonym()) {
-        paramsComputed.insert(e);
+    // Idea on how to implement sorting such that "...at least
+    // one synonym has been computed in a previous clause..."
+    // 1) Convert the undirected synonym-connection graph into
+    //    a directed acyclic graph by this rule:
+    //    If an undirected edge between c1, c2 exists, break
+    //    the tie by setting E(c1, c2) <=> c1 < c2 in the above sort.
+    // 2) Get the stable topological order of this DAG.
+    // 3) Change the order of our vector to match the new ordering.
+
+    AdjList clauseGraph(clauseGroup.size());
+    std::unordered_map<Pql::Clause, int> clauseToIdx;
+    std::unordered_map<int, Pql::Clause> idxToClause;
+
+    int counter = 1;
+    for (Pql::Clause clause : clauseGroup) {
+      clauseToIdx.emplace(clause, counter);
+      idxToClause.emplace(counter, clause);
+      counter++;
+    }
+
+
+    for (Pql::Clause clause : clauseGroup) {
+      for (Pql::Clause otherClause : clauseGroup) {
+        if (LessThanKey()(clause, otherClause)) {
+          clauseGraph.insert(clauseToIdx.at(clause), clauseToIdx.at(otherClause));
+        }
       }
     }
+    std::list<int> stableTopologicalOrder = clauseGraph.stableTopologicalOrder();
 
-    while (!notVisited.empty()) {
-      for (Pql::Clause c : notVisited) {
-        bool containsComputedParam = false;
-        for (Pql::Entity e : c.getParams()) {
-          if (e.isSynonym() && paramsComputed.count(e)) {
-            containsComputedParam = true;
-            break;
-          }
-        }
-        if (containsComputedParam) {
-          for (Pql::Entity e : c.getParams()) {
-            if (e.isSynonym()) {
-              paramsComputed.insert(e);
-            }
-          }
-          notVisited.erase(c);
-          break;
-        }
-      }
-     
-    }
+    // Mapping over our results to the clauseGroup vector
+    std::transform(
+      stableTopologicalOrder.begin(),
+      stableTopologicalOrder.end(),
+      clauseGroup.begin(),
+      [&idxToClause](int clauseIdx) { return idxToClause.at(clauseIdx); }
+    );
   }
 }
 

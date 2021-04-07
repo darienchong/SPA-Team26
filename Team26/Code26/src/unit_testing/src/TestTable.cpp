@@ -86,8 +86,8 @@ TEST_CASE("[TestTable] Get Data") {
     table.insertRow({ 1 });
     table.insertRow({ 2 });
     table.insertRow({ 3 });
-    REQUIRE(table.getData().size() == 3);
-    REQUIRE(table.getData().count({ 1 }) == 1);
+    REQUIRE(table.size() == 3);
+    REQUIRE(table.contains({ 1 }));
   }
 
   SECTION("two columns") {
@@ -95,13 +95,13 @@ TEST_CASE("[TestTable] Get Data") {
     table.insertRow({ 1, 11 });
     table.insertRow({ 2, 22 });
     table.insertRow({ 3, 33 });
-    REQUIRE(table.getData().size() == 3);
-    REQUIRE(table.getData().count({ 1, 11 }) == 1);
+    REQUIRE(table.size() == 3);
+    REQUIRE(table.contains({ 1, 11 }));
   }
 
   SECTION("Empty table") {
     Table table(2);
-    REQUIRE(table.getData().size() == 0);
+    REQUIRE(table.size() == 0);
     REQUIRE(table.empty());
   }
 
@@ -113,10 +113,12 @@ TEST_CASE("[TestTable] Drop Column") {
   table.insertRow({ 2, 22 });
   REQUIRE(table.dropColumn("a") == true);
   REQUIRE(table.getHeader() == std::vector<std::string>{"b"});
-  REQUIRE(table.getData().count({ 1, 11 }) == 0);
-  REQUIRE(table.dropColumn("b") == true);
-  REQUIRE(table.empty());
+  REQUIRE(!table.contains({ 1, 11 }));
+  REQUIRE(table.contains({ 11 }));
+  REQUIRE(table.dropColumn("b") == false);
+  REQUIRE(table.contains({ 11 }));
   REQUIRE(table.dropColumn("a") == false);
+  REQUIRE(table.contains({ 11 }));
 }
 
 TEST_CASE("[TestTable] Concatenate") {

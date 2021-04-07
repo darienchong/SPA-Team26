@@ -182,10 +182,19 @@ namespace {
     exprParser.parse();
     return exprParser.getPostfixExprString();
   }
+
+  /**
+   * Removes and returns the given number in string format with leading zeros removed.
+   * 
+   * @param numberString Given number in string format. Must provide a valid integer number.
+   * @return Number in string format with leading zeros removed.
+   */
+  std::string removeLeadingZerosFromNumber(const std::string& numberString) {
+    return std::to_string(std::stoll(numberString));
+  }
 }
 
 namespace Pql {
-  // Constructor
   PqlParser::PqlParser(std::list<Token>& tokens)
     : tokens(tokens) {
   }
@@ -204,16 +213,21 @@ namespace Pql {
       throw SyntaxError(
         ErrorMessage::SYNTAX_ERROR_ADDITIONAL_TOKENS +
         ErrorMessage::APPEND_TOKEN_RECEIVED +
-        tokens.front().value
+        getFrontToken().value
       );
     }
+
+    pqlQuery.setSemanticErrorMessage(semanticErrorMessage);
 
     return pqlQuery;
   }
 
-  // Parses the declarations of the PQL query
+  void PqlParser::addSemanticErrorMessage(const std::string& message) {
+    semanticErrorMessage.append(message).append("\n");
+  }
+
   void PqlParser::parseDeclarations() {
-    while (!tokens.empty() && tokens.front() != SELECT) {
+    while (getFrontToken() != SELECT) {
       parseDeclaration();
     }
   }
@@ -245,7 +259,7 @@ namespace Pql {
     parseDeclarationSynonym(designEntityType);
 
     // Parses additional synonyms
-    while (!tokens.empty() && tokens.front() != SEMICOLON) {
+    while (getFrontToken() != SEMICOLON) {
       validateAndGet(COMMA);
 
       parseDeclarationSynonym(designEntityType);
@@ -254,29 +268,29 @@ namespace Pql {
     validateAndGet(SEMICOLON);
   }
 
-  // Parses the synonyms in the declarations of the PQL query and store the synonym as the specified design entity type
   void PqlParser::parseDeclarationSynonym(const EntityType& designEntityType) {
     const Token& synonymToken = validateAndGet(IDENTIFIER);
 
     // Disallow synonym to be named 'BOOLEAN' to avoid confusion
     if (synonymToken == BOOLEAN) {
-      throw SemanticError(ErrorMessage::SEMANTIC_ERROR_INVALID_DECLARATION_NAME_BOOLEAN);
+      addSemanticErrorMessage(ErrorMessage::SEMANTIC_ERROR_INVALID_DECLARATION_NAME_BOOLEAN);
+      return;
     }
 
     // Check if synonym has been declared
     if (isSynonymDeclared(synonymToken.value)) {
-      throw SemanticError(
+      addSemanticErrorMessage(
         ErrorMessage::SEMANTIC_ERROR_DUPLICATE_SYNONYM_DECLARATION +
         ErrorMessage::APPEND_TOKEN_RECEIVED +
         synonymToken.value
       );
+      return;
     }
 
     // Store synonym
     declaredSynonyms[synonymToken.value] = designEntityType;
   }
 
-  // Parses the PQL query body
   void PqlParser::parseBody(Query& queryUnderConstruction) {
     validateAndGet(SELECT);
 
@@ -286,51 +300,35 @@ namespace Pql {
 
   }
 
-  // Parses and set the PQL query targets
   void PqlParser::parseSelectTargets(Query& queryUnderConstruction) {
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
-
-    const Token frontToken = tokens.front();
-    if (frontToken == BOOLEAN) {                             // BOOLEAN query
+    const Token frontToken = getFrontToken();
+    if (frontToken == BOOLEAN) {                   // BOOLEAN query
       validateAndGet(BOOLEAN);
-    } else if (frontToken == LEFT_ANGLE_BRACKET) {           // Tuple select
+    } else if (frontToken == LEFT_ANGLE_BRACKET) { // Tuple select
       validateAndGet(LEFT_ANGLE_BRACKET);
 
       // Parse first select target in tuple
       parseSelectTarget(queryUnderConstruction);
 
       // Check for additional select targets in tuple
-      while (!tokens.empty() && tokens.front() == COMMA) {
+      while (getFrontToken() == COMMA) {
         validateAndGet(COMMA);
         parseSelectTarget(queryUnderConstruction);
       }
 
       validateAndGet(RIGHT_ANGLE_BRACKET);
-    } else {                                                 // Single select
+    } else {                                       // Single select
       parseSelectTarget(queryUnderConstruction);
     }
   }
 
-  // Parses and add a single PQL query target
   void PqlParser::parseSelectTarget(Query& queryUnderConstruction) {
     const Token& synonymToken = validateAndGet(IDENTIFIER);
-
-    // Check if synonym has been declared
-    if (!isSynonymDeclared(synonymToken.value)) {
-      throw SemanticError(
-        ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
-        ErrorMessage::APPEND_TOKEN_RECEIVED +
-        synonymToken.value
-      );
-    }
-
-    const EntityType synonymType = declaredSynonyms[synonymToken.value];
+    const EntityType& synonymType = getSynonymType(synonymToken.value);
     AttributeRefType attributeRefType = AttributeRefType::NONE;
 
     // Check if select target is an attrRef
-    if (!tokens.empty() && tokens.front() == DOT) {
+    if (!tokens.empty() && getFrontToken() == DOT) {
       validateAndGet(DOT);
       const Token& attributeNameToken = validateAndGet(IDENTIFIER, false); // Don't consume whitespaces yet due to 'stmt#'
       if (!isAttributeName(attributeNameToken)) {
@@ -350,7 +348,7 @@ namespace Pql {
 
       // Checks if synonym has the attribute name
       if (!isSemanticallyValidAttributeName(synonymType, attributeRefType)) {
-        throw SemanticError(
+        addSemanticErrorMessage(
           ErrorMessage::SEMANTIC_ERROR_INVALID_ATTRIBUTE_NAME +
           ErrorMessage::APPEND_TOKEN_RECEIVED +
           attributeNameToken.value
@@ -362,11 +360,10 @@ namespace Pql {
     queryUnderConstruction.addTarget(Entity(synonymType, synonymToken.value, attributeRefType));
   }
 
-  // Parses the PQL query body clauses
   void PqlParser::parseClauses(Query& queryUnderConstruction) {
     ParsingClauseType currentClauseType = ParsingClauseType::UNDEFINED;
     while (!tokens.empty()) {
-      const Token frontToken = tokens.front();
+      const Token frontToken = getFrontToken();
       if (frontToken == SUCH) { // such that clause
         // Consume 'such that'
         validateAndGet(SUCH, false);
@@ -414,7 +411,6 @@ namespace Pql {
     }
   }
 
-  // Parses a such that clause
   void PqlParser::parseSuchThatClause(Query& queryUnderConstruction) {
     // 'such that' OR 'and' already consumed
 
@@ -422,7 +418,7 @@ namespace Pql {
     // Do not consume space yet
     // Ensure no space between relation and *
     bool isTransitiveRelation = false;
-    const bool isNextTokenStar = !tokens.empty() && tokens.front() == STAR;
+    const bool isNextTokenStar = getFrontToken() == STAR;
     if (isNextTokenStar) {
       if (!canBeTransitive(relationToken)) {
         throw SyntaxError(
@@ -475,22 +471,12 @@ namespace Pql {
     queryUnderConstruction.addClause(clauseUnderConstruction);
   }
 
-  // Parses a pattern clause
   void PqlParser::parsePatternClause(Query& queryUnderConstruction) {
     // 'pattern' OR 'and' already consumed
-
     const Token& synonymToken = validateAndGet(IDENTIFIER);
-
-    if (!isSynonymDeclared(synonymToken.value)) {
-      throw SemanticError(
-        ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
-        ErrorMessage::APPEND_TOKEN_RECEIVED +
-        synonymToken.value
-      );
-    }
+    const EntityType& synonymType = getSynonymType(synonymToken.value);
 
     Clause clauseUnderConstruction;
-    EntityType synonymType = declaredSynonyms[synonymToken.value];
     switch (synonymType) {
     case Pql::EntityType::WHILE:
       parsePatternWhileClause(clauseUnderConstruction, synonymToken.value);
@@ -502,18 +488,18 @@ namespace Pql {
       parsePatternAssignClause(clauseUnderConstruction, synonymToken.value);
       break;
     default:
-      throw SemanticError(
-        ErrorMessage::SEMANTIC_ERROR_NON_ASSIGN_SYNONYM +
+      addSemanticErrorMessage(
+        ErrorMessage::SEMANTIC_ERROR_NON_PATTERN_CLAUSE_SYNONYM +
         ErrorMessage::APPEND_TOKEN_RECEIVED +
         synonymToken.value
       );
+      parsePatternInvalidClause(clauseUnderConstruction, synonymToken.value, synonymType);
       break;
     }
 
     queryUnderConstruction.addClause(clauseUnderConstruction);
   }
 
-  // Parses a with clause
   void PqlParser::parseWithClause(Query& queryUnderConstruction) {
     // 'with' OR 'and' already consumed
     Clause clauseUnderConstruction;
@@ -526,7 +512,7 @@ namespace Pql {
     const Entity& lhsEntity = params[0];
     const Entity& rhsEntity = params[1];
     if (!areWithClauseParamsSameType(lhsEntity, rhsEntity)) {
-      throw SemanticError(ErrorMessage::SEMANTIC_ERROR_INVALID_WITH_CLAUSE);
+      addSemanticErrorMessage(ErrorMessage::SEMANTIC_ERROR_INVALID_WITH_CLAUSE);
     }
     queryUnderConstruction.addClause(clauseUnderConstruction);
   }
@@ -583,107 +569,38 @@ namespace Pql {
 
   // 'Uses' '(' stmtRef ',' entRef ')' OR 'Uses' '(' entRef ',' entRef ')'
   void PqlParser::parseUsesClause(Clause& clauseUnderConstruction) {
-    // 'uses' already consumed
-    validateAndGet(LEFT_PARENTHESIS);
-
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
-
-    const Token frontToken = tokens.front();
-    if (frontToken == UNDERSCORE) {
-      throw SemanticError(ErrorMessage::SEMANTIC_ERROR_INVALID_WILDCARD);
-    }
-
-    if (frontToken.type == TokenType::NUMBER) {                // constant as stmtRef
-      parseStmtRef(clauseUnderConstruction);
-      clauseUnderConstruction.setType(ClauseType::USES_S);
-    } else if (frontToken == QUOTE) {                          // name as procName
-      parseProcRef(clauseUnderConstruction);
-      clauseUnderConstruction.setType(ClauseType::USES_P);
-    } else if (frontToken.type == TokenType::IDENTIFIER) {     // synonym
-      // Check if synonym is declared
-      if (!isSynonymDeclared(frontToken.value)) {
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          frontToken.value
-        );
-      }
-
-      EntityType synonymType = declaredSynonyms[frontToken.value];
-      if (isStmtRef(synonymType)) {
-        parseStmtRef(clauseUnderConstruction);
-        clauseUnderConstruction.setType(ClauseType::USES_S);
-      } else if (isProcRef(synonymType)) {
-        parseProcRef(clauseUnderConstruction);
-        clauseUnderConstruction.setType(ClauseType::USES_P);
-      } else { // Other synonym types
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_NON_ASSIGN_SYNONYM +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          frontToken.value
-        );
-      }
-    } else {
-      throw SyntaxError(
-        ErrorMessage::SYNTAX_ERROR_WRONG_TOKEN_TYPE +
-        ErrorMessage::APPEND_TOKEN_RECEIVED +
-        frontToken.value
-      );
-    }
-
-
-    validateAndGet(COMMA);
-
-    parseVarRef(clauseUnderConstruction);
-
-    validateAndGet(RIGHT_PARENTHESIS);
+    parseUsesModifiesClause(clauseUnderConstruction, ClauseType::USES_P, ClauseType::USES_S);
   }
 
   // 'Modifies' '(' stmtRef ',' entRef ')' OR 'Modifies' '(' entRef ',' entRef ')'
   void PqlParser::parseModifiesClause(Clause& clauseUnderConstruction) {
-    // 'Modifies' already consumed
+    parseUsesModifiesClause(clauseUnderConstruction, ClauseType::MODIFIES_P, ClauseType::MODIFIES_S);
+  }
+
+  // Helper method for Uses and Modifies clause
+  void PqlParser::parseUsesModifiesClause(Clause& clauseUnderConstruction, const ClauseType& procedureType, const ClauseType& stmtType) {
+    // 'Uses'/'Modifies' already consumed
     validateAndGet(LEFT_PARENTHESIS);
-
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
-
-    const Token frontToken = tokens.front();
-    if (frontToken == UNDERSCORE) {
-      throw SemanticError(ErrorMessage::SEMANTIC_ERROR_INVALID_WILDCARD);
-    }
-
-    if (frontToken.type == TokenType::NUMBER) {                // constant as stmtRef
+    const Token frontToken = getFrontToken();
+    if (frontToken == UNDERSCORE) {                            // wildcard
+      validateAndGet(UNDERSCORE);
+      addSemanticErrorMessage(ErrorMessage::SEMANTIC_ERROR_INVALID_WILDCARD);
+      clauseUnderConstruction.setType(procedureType);
+      clauseUnderConstruction.addParam(Pql::Entity(Pql::EntityType::WILDCARD, "_"));
+    } else if (frontToken.type == TokenType::NUMBER) {         // constant as stmtRef
       parseStmtRef(clauseUnderConstruction);
-      clauseUnderConstruction.setType(ClauseType::MODIFIES_S);
+      clauseUnderConstruction.setType(stmtType);
     } else if (frontToken == QUOTE) {                          // name as procName
       parseProcRef(clauseUnderConstruction);
-      clauseUnderConstruction.setType(ClauseType::MODIFIES_P);
+      clauseUnderConstruction.setType(procedureType);
     } else if (frontToken.type == TokenType::IDENTIFIER) {     // synonym
-      // Check if synonym is declared
-      if (!isSynonymDeclared(frontToken.value)) {
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          frontToken.value
-        );
-      }
-
-      EntityType synonymType = declaredSynonyms[frontToken.value];
+      const EntityType synonymType = getSynonymType(frontToken.value);
       if (isStmtRef(synonymType)) {
         parseStmtRef(clauseUnderConstruction);
-        clauseUnderConstruction.setType(ClauseType::MODIFIES_S);
-      } else if (isProcRef(synonymType)) {
+        clauseUnderConstruction.setType(stmtType);
+      } else {
         parseProcRef(clauseUnderConstruction);
-        clauseUnderConstruction.setType(ClauseType::MODIFIES_P);
-      } else { // Other synonym types
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_NON_ASSIGN_SYNONYM +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          frontToken.value
-        );
+        clauseUnderConstruction.setType(procedureType);
       }
     } else {
       throw SyntaxError(
@@ -692,7 +609,6 @@ namespace Pql {
         frontToken.value
       );
     }
-
 
     validateAndGet(COMMA);
 
@@ -753,6 +669,48 @@ namespace Pql {
     validateAndGet(RIGHT_PARENTHESIS);
   }
 
+  // invalid: syn-invalid '(' entRef ',' expression-spec ')' | syn-invalid '(' entRef ',' '_' ',' '_' ')'
+  void PqlParser::parsePatternInvalidClause(
+    Clause& clauseUnderConstruction, const std::string& synonymName, const EntityType& synonymType) {
+    Clause tempClause;
+    tempClause.addParam(Entity(synonymType, synonymName));
+    validateAndGet(LEFT_PARENTHESIS);
+
+    parseVarRef(tempClause);
+
+    validateAndGet(COMMA);
+
+    parseExprSpec(tempClause);
+
+    // Check whether the invalid pattern clause is 2 params or 3 params.
+    const Token frontToken = getFrontToken();
+    if (frontToken == RIGHT_PARENTHESIS) { // 2 params
+      validateAndGet(RIGHT_PARENTHESIS);
+
+      tempClause.setType(ClauseType::PATTERN_ASSIGN);
+      clauseUnderConstruction = std::move(tempClause);
+    } else {                               // 3 params
+      validateAndGet(COMMA);
+      validateAndGet(UNDERSCORE);
+      validateAndGet(RIGHT_PARENTHESIS);
+
+      const std::vector<Entity>& tempClauseParams = tempClause.getParams();
+      const Entity& secondParam = tempClauseParams[2]; // Second param is index 2
+      const bool isSecondParamWildCard = secondParam.getType() == EntityType::WILDCARD;
+      if (!isSecondParamWildCard) {
+        throw SyntaxError(
+          ErrorMessage::SYNTAX_ERROR_WRONG_TOKEN_TYPE +
+          ErrorMessage::APPEND_TOKEN_EXPECTED + "_" +
+          ErrorMessage::APPEND_TOKEN_RECEIVED + secondParam.getValue()
+        );
+      }
+
+      clauseUnderConstruction.setType(ClauseType::PATTERN_IF);
+      clauseUnderConstruction.addParam(Entity(synonymType, synonymName));
+      clauseUnderConstruction.addParam(tempClause.getParams()[1]); // Add first param (varRef)
+    }
+  }
+
   // '(' stmtRef ',' stmtRef ')'
   void PqlParser::parseStmtAndStmtArgs(Clause& clauseUnderConstruction) {
     validateAndGet(LEFT_PARENTHESIS);
@@ -780,13 +738,9 @@ namespace Pql {
   }
 
   void PqlParser::parseRef(Clause& clauseUnderConstruction) {
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
+    const Token frontToken = getFrontToken();
 
-    const Token frontToken = tokens.front();
-
-    if (frontToken == QUOTE) { // '"' IDENT '"'
+    if (frontToken == QUOTE) {                             // '"' IDENT '"'
       validateAndGet(QUOTE);
 
       const Token& nameToken = validateAndGet(IDENTIFIER);
@@ -794,26 +748,22 @@ namespace Pql {
       validateAndGet(QUOTE);
 
       clauseUnderConstruction.addParam(Entity(EntityType::NAME, nameToken.value));
-    } else if (frontToken.type == TokenType::NUMBER) { // INTEGER
+    } else if (frontToken.type == TokenType::NUMBER) {     // INTEGER
       const Token& numberToken = validateAndGet(NUMBER);
-      std::string removedLeadingZerosNumber = std::to_string(std::stoll(numberToken.value));
-      clauseUnderConstruction.addParam(Entity(EntityType::NUMBER, removedLeadingZerosNumber));
+      clauseUnderConstruction.addParam(Entity(EntityType::NUMBER, removeLeadingZerosFromNumber(numberToken.value)));
     } else if (frontToken.type == TokenType::IDENTIFIER) { // prog_line synoynm OR attrRef
       const Token& synonymToken = validateAndGet(IDENTIFIER);
-
-      // Check if synonym has been declared
-      if (!isSynonymDeclared(synonymToken.value)) {
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          synonymToken.value
-        );
-      }
-
-      const EntityType synonymType = declaredSynonyms[synonymToken.value];
+      const EntityType& synonymType = getSynonymType(synonymToken.value);
       if (synonymType == EntityType::PROG_LINE) { // prog_line synonym
         clauseUnderConstruction.addParam(Entity(synonymType, synonymToken.value));
-      } else { // attrRef
+      } else {                                    // attrRef
+        if (getFrontToken() != DOT) {
+          addSemanticErrorMessage(
+            ErrorMessage::SEMANTIC_ERROR_NON_ATTR_REF +
+            ErrorMessage::APPEND_SYNONYM_WITH_MISSING_ATTR_REF + synonymToken.value
+          );
+          return;
+        }
         validateAndGet(DOT);
         const Token& attributeNameToken = validateAndGet(IDENTIFIER, false); // Don't consume whitespaces yet due to 'stmt#'
         if (!isAttributeName(attributeNameToken)) {
@@ -832,7 +782,7 @@ namespace Pql {
         AttributeRefType attributeRefType = tokenToAttributeRefTypeMapper.at(attributeNameToken); // Update attributeRefType
         // Checks if synonym has the attribute name
         if (!isSemanticallyValidAttributeName(synonymType, attributeRefType)) {
-          throw SemanticError(
+          addSemanticErrorMessage(
             ErrorMessage::SEMANTIC_ERROR_INVALID_ATTRIBUTE_NAME +
             ErrorMessage::APPEND_TOKEN_RECEIVED +
             attributeNameToken.value
@@ -852,27 +802,13 @@ namespace Pql {
 
   // stmtRef: synonym | '_' | INTEGER
   void PqlParser::parseStmtRef(Clause& clauseUnderConstruction) {
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
+    const Token frontToken = getFrontToken();
 
-    const Token frontToken = tokens.front();
-
-    // Check for synonym OR '_' OR INTEGER
-    if (frontToken.type == TokenType::IDENTIFIER) {
+    if (frontToken.type == TokenType::IDENTIFIER) {     // synonym
       validateAndGet(IDENTIFIER);
-
-      if (!isSynonymDeclared(frontToken.value)) {
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          frontToken.value
-        );
-      }
-
-      const EntityType& entityType = declaredSynonyms[frontToken.value];
+      const EntityType& entityType = getSynonymType(frontToken.value);
       if (!isStmtRef(entityType)) {
-        throw SemanticError(
+        addSemanticErrorMessage(
           ErrorMessage::SEMANTIC_ERROR_NON_STMT_REF +
           ErrorMessage::APPEND_TOKEN_RECEIVED +
           frontToken.value
@@ -880,17 +816,17 @@ namespace Pql {
       }
 
       clauseUnderConstruction.addParam(Entity(entityType, frontToken.value));
-    } else if (frontToken == UNDERSCORE) {
+    } else if (frontToken == UNDERSCORE) {              // wildcard
       validateAndGet(UNDERSCORE);
 
       clauseUnderConstruction.addParam(Entity(EntityType::WILDCARD, frontToken.value));
-    } else if (frontToken.type == TokenType::NUMBER) {
+    } else if (frontToken.type == TokenType::NUMBER) {  // number
       validateAndGet(NUMBER);
 
-      std::string removedLeadingZerosNumber = std::to_string(std::stoll(frontToken.value));
+      std::string removedLeadingZerosNumber = removeLeadingZerosFromNumber(frontToken.value);
       const bool isStmtNumberZero = removedLeadingZerosNumber == "0";
       if (isStmtNumberZero) {
-        throw SemanticError(ErrorMessage::SEMANTIC_ERROR_ZERO_STMT_NUMBER);
+        addSemanticErrorMessage(ErrorMessage::SEMANTIC_ERROR_ZERO_STMT_NUMBER);
       }
 
       clauseUnderConstruction.addParam(Entity(EntityType::NUMBER, removedLeadingZerosNumber));
@@ -905,27 +841,22 @@ namespace Pql {
 
   // var-synonym | '_' | '"' IDENT '"'
   void PqlParser::parseVarRef(Clause& clauseUnderConstruction) {
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
+    parseEntRef(clauseUnderConstruction, isVarRef);
+  }
 
-    const Token frontToken = tokens.front();
+  // procedure-synonym | '_' | '"' IDENT '"'
+  void PqlParser::parseProcRef(Clause& clauseUnderConstruction) {
+    parseEntRef(clauseUnderConstruction, isProcRef);
+  }
 
-    // Check for synonym OR '_' OR '"' IDENT '"'
-    if (frontToken.type == TokenType::IDENTIFIER) {
+  void PqlParser::parseEntRef(Clause& clauseUnderConstruction, bool refTypeCheck(const Pql::EntityType&)) {
+    const Token frontToken = getFrontToken();
+
+    if (frontToken.type == TokenType::IDENTIFIER) {     // synonym
       validateAndGet(IDENTIFIER);
-
-      if (!isSynonymDeclared(frontToken.value)) {
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          frontToken.value
-        );
-      }
-
-      const EntityType& entityType = declaredSynonyms[frontToken.value];
-      if (!isVarRef(entityType)) {
-        throw SemanticError(
+      const EntityType& entityType = getSynonymType(frontToken.value);
+      if (!refTypeCheck(entityType)) {
+        addSemanticErrorMessage(
           ErrorMessage::SEMANTIC_ERROR_NON_ENT_REF +
           ErrorMessage::APPEND_TOKEN_RECEIVED +
           frontToken.value
@@ -933,11 +864,11 @@ namespace Pql {
       }
 
       clauseUnderConstruction.addParam(Entity(entityType, frontToken.value));
-    } else if (frontToken == UNDERSCORE) {
+    } else if (frontToken == UNDERSCORE) {              // wildcard
       validateAndGet(UNDERSCORE);
 
       clauseUnderConstruction.addParam(Entity(EntityType::WILDCARD, frontToken.value));
-    } else if (frontToken == QUOTE) {
+    } else if (frontToken == QUOTE) {                   // name
       validateAndGet(QUOTE);
 
       const Token& variableNameToken = validateAndGet(IDENTIFIER);
@@ -954,64 +885,9 @@ namespace Pql {
     }
   }
 
-  // procedure-synonym | '_' | '"' IDENT '"'
-  void PqlParser::parseProcRef(Clause& clauseUnderConstruction) {
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
-
-    const Token frontToken = tokens.front();
-
-    // Check for synonym OR '_' OR '"' IDENT '"'
-    if (frontToken.type == TokenType::IDENTIFIER) {
-      validateAndGet(IDENTIFIER);
-
-      if (!isSynonymDeclared(frontToken.value)) {
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          frontToken.value
-        );
-      }
-
-      const EntityType entityType = declaredSynonyms[frontToken.value];
-      if (!isProcRef(entityType)) {
-        throw SemanticError(
-          ErrorMessage::SEMANTIC_ERROR_NON_ENT_REF +
-          ErrorMessage::APPEND_TOKEN_RECEIVED +
-          frontToken.value
-        );
-      }
-
-      clauseUnderConstruction.addParam(Entity(entityType, frontToken.value));
-    } else if (frontToken == UNDERSCORE) {
-      validateAndGet(UNDERSCORE);
-
-      clauseUnderConstruction.addParam(Entity(EntityType::WILDCARD, frontToken.value));
-    } else if (frontToken == QUOTE) {
-      validateAndGet(QUOTE);
-
-      const Token& procNameToken = validateAndGet(IDENTIFIER);
-
-      validateAndGet(QUOTE);
-
-      clauseUnderConstruction.addParam(Entity(EntityType::NAME, procNameToken.value));
-    } else {
-      throw SyntaxError(
-        ErrorMessage::SYNTAX_ERROR_WRONG_TOKEN_TYPE +
-        ErrorMessage::APPEND_TOKEN_RECEIVED +
-        frontToken.value
-      );
-    }
-  }
-
   // expression-spec: '_' '"' factor '"' '_' | '_'
   void PqlParser::parseExprSpec(Clause& clauseUnderConstruction) {
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
-
-    const Token frontToken = tokens.front();
+    const Token frontToken = getFrontToken();
 
     // Check for '_' OR '"'
     if (frontToken == QUOTE) {
@@ -1019,7 +895,7 @@ namespace Pql {
     } else {
       validateAndGet(UNDERSCORE);
 
-      if (!tokens.empty() && tokens.front() == QUOTE) {
+      if (getFrontToken() == QUOTE) {
         parseExpression(clauseUnderConstruction, false);
         validateAndGet(UNDERSCORE, false);
       } else {
@@ -1034,14 +910,14 @@ namespace Pql {
 
     // Create a list of infix expression tokens
     std::list<Token> infixExpressionTokens;
-    while (!tokens.empty() && tokens.front() != QUOTE) {
-      const Token currentToken = tokens.front();
+    while (getFrontToken() != QUOTE) {
+      const Token currentToken = getFrontToken();
       if (currentToken.type == TokenType::NUMBER) {
-        // Remove leading zero for const by casting to int and back to string
-        const Token& noLeadingZeroConstToken = { currentToken.type, std::to_string(std::stoll(currentToken.value)) };
+        // Remove leading zero for numbers
+        const Token& noLeadingZeroConstToken = { currentToken.type, removeLeadingZerosFromNumber(currentToken.value) };
         infixExpressionTokens.emplace_back(noLeadingZeroConstToken);
       } else {
-        infixExpressionTokens.emplace_back(tokens.front());
+        infixExpressionTokens.emplace_back(currentToken);
       }
       tokens.pop_front();
       consumeFrontWhitespaceTokens();
@@ -1065,11 +941,7 @@ namespace Pql {
   }
 
   Token PqlParser::validateAndGet(const Token& validationToken, const bool shouldConsumeWhitespaces) {
-    if (tokens.empty()) {
-      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
-    }
-
-    const Token frontToken = tokens.front();
+    const Token frontToken = getFrontToken();
     const bool isCheckTokenType = validationToken.value.empty();
 
     if (isCheckTokenType) {
@@ -1116,7 +988,30 @@ namespace Pql {
     }
   }
 
+  Token PqlParser::getFrontToken() {
+    if (tokens.empty()) {
+      throw SyntaxError(ErrorMessage::SYNTAX_ERROR_NOT_ENOUGH_TOKENS);
+    }
+
+    return tokens.front();
+  }
+
+  EntityType PqlParser::getSynonymType(const std::string& synonymName) {
+    const bool isDeclared = isSynonymDeclared(synonymName);
+    if (!isDeclared) {
+      addSemanticErrorMessage(
+        ErrorMessage::SEMANTIC_ERROR_UNDECLARED_SYNONYM +
+        ErrorMessage::APPEND_TOKEN_RECEIVED +
+        synonymName
+      );
+    }
+
+    return isDeclared
+      ? declaredSynonyms[synonymName]
+      : Pql::EntityType::UNDEFINED;
+  }
+
   bool PqlParser::isSynonymDeclared(const std::string& synonymName) const {
-    return bool(declaredSynonyms.count(synonymName));
+    return declaredSynonyms.count(synonymName) == 1;
   }
 }

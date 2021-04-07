@@ -439,7 +439,6 @@ namespace SourceProcessor {
     if (first != stmt) {
       pkb.addFollows(first, stmt); // add Follows relation for stmt-stmt
     }
-    pkb.addStmt(stmt); // add stmts
 
     return stmt;
   }

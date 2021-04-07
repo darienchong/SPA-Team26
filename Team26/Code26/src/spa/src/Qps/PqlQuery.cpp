@@ -136,4 +136,17 @@ namespace Pql {
   void Query::addClause(const Clause clause) {
     clauses.emplace_back(clause);
   }
+
+
+  bool Query::hasSemanticError() {
+    return !semanticErrorMessage.empty();
+  }
+
+  void Query::setSemanticErrorMessage(const std::string& message) {
+    semanticErrorMessage = message;
+  }
+
+  std::string Query::getSemanticErrorMessage() {
+    return semanticErrorMessage;
+  }
 }

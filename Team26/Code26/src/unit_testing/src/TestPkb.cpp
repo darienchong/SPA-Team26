@@ -18,7 +18,7 @@ TEST_CASE("[TestPkb] stmtTable Insertion") {
   Pkb pkb;
   pkb.addStmt(2);
   auto dataCopy = pkb.getStmtTable().getData();
-  REQUIRE(dataCopy.count({ 2 }) == 1);
+  REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(2) }) == 1);
 }
 
 TEST_CASE("[TestPkb] procTable Insertion") {
@@ -39,45 +39,45 @@ TEST_CASE("[TestPkb] ifTable Insertion") {
   Pkb pkb;
   pkb.addIf(12);
   auto dataCopy = pkb.getIfTable().getData();
-  REQUIRE(dataCopy.count({ 12 }) == 1);
+  REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(12) }) == 1);
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({ 12 }) == 1);
+  REQUIRE(stmtDataCopy.count({ pkb.getIntRefFromStmtNum(12) }) == 1);
 }
 
 TEST_CASE("[TestPkb] whileTable Insertion") {
   Pkb pkb;
   pkb.addWhile(15);
   auto dataCopy = pkb.getWhileTable().getData();
-  REQUIRE(dataCopy.count({ 15 }) == 1);
+  REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(15) }) == 1);
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({ 15 }) == 1);
+  REQUIRE(stmtDataCopy.count({ pkb.getIntRefFromStmtNum(15) }) == 1);
 }
 
 TEST_CASE("[TestPkb] readTable Insertion") {
   Pkb pkb;
   pkb.addRead(15);
   auto dataCopy = pkb.getReadTable().getData();
-  REQUIRE(dataCopy.count({ 15 }) == 1);
+  REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(15) }) == 1);
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({ 15 }) == 1);
+  REQUIRE(stmtDataCopy.count({ pkb.getIntRefFromStmtNum(15) }) == 1);
 }
 
 TEST_CASE("[TestPkb] printTable Insertion") {
   Pkb pkb;
   pkb.addPrint(526);
   auto dataCopy = pkb.getPrintTable().getData();
-  REQUIRE(dataCopy.count({ 526 }) == 1);
+  REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(526) }) == 1);
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({ 526 }) == 1);
+  REQUIRE(stmtDataCopy.count({ pkb.getIntRefFromStmtNum(526) }) == 1);
 }
 
 TEST_CASE("[TestPkb] assignTable Insertion") {
   Pkb pkb;
   pkb.addAssign(32);
   auto dataCopy = pkb.getAssignTable().getData();
-  REQUIRE(dataCopy.count({ 32 }) == 1);
+  REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(32) }) == 1);
   auto stmtDataCopy = pkb.getStmtTable().getData();
-  REQUIRE(stmtDataCopy.count({ 32 }) == 1);
+  REQUIRE(stmtDataCopy.count({ pkb.getIntRefFromStmtNum(32) }) == 1);
 }
 
 TEST_CASE("[TestPkb] addFollows") {
@@ -86,7 +86,7 @@ TEST_CASE("[TestPkb] addFollows") {
   SECTION("Check valid insertion") {
     pkb.addFollows(5, 6);
     auto dataCopy = pkb.getFollowsTable().getData();
-    REQUIRE(dataCopy.count({ 5, 6 }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(6) }) == 1);
   }
 }
 
@@ -96,7 +96,7 @@ TEST_CASE("[TestPkb] addFollowsT(int, int)") {
   SECTION("Check valid insertion") {
     pkb.addFollowsT(5, 6);
     auto dataCopy = pkb.getFollowsTTable().getData();
-    REQUIRE(dataCopy.count({ 5, 6 }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(6) }) == 1);
   }
 }
 
@@ -106,7 +106,7 @@ TEST_CASE("[TestPkb] addParent") {
   SECTION("Check valid insertion") {
     pkb.addParent(5, 6);
     auto dataCopy = pkb.getParentTable().getData();
-    REQUIRE(dataCopy.count({ 5, 6 }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(6) }) == 1);
   }
 }
 
@@ -116,7 +116,7 @@ TEST_CASE("[TestPkb] addParentT(int, int)") {
   SECTION("Check valid insertion") {
     pkb.addParentT(5, 6);
     auto dataCopy = pkb.getParentTTable().getData();
-    REQUIRE(dataCopy.count({ 5, 6 }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(6) }) == 1);
   }
 }
 
@@ -127,8 +127,8 @@ TEST_CASE("[TestPkb] addUsesS") {
     pkb.addUsesS(5, "x");
     pkb.addUsesS(7, "y");
     auto dataCopy = pkb.getUsesSTable().getData();
-    REQUIRE(dataCopy.count({ 5, pkb.getIntRefFromEntity("x") }) == 1);
-    REQUIRE(dataCopy.count({ 7, pkb.getIntRefFromEntity("y") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromEntity("x") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromEntity("y") }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -153,8 +153,8 @@ TEST_CASE("[TestPkb] addModifiesS") {
     pkb.addModifiesS(5, "x");
     pkb.addModifiesS(7, "y");
     auto dataCopy = pkb.getModifiesSTable().getData();
-    REQUIRE(dataCopy.count({ 5, pkb.getIntRefFromEntity("x") }) == 1);
-    REQUIRE(dataCopy.count({ 7, pkb.getIntRefFromEntity("y") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromEntity("x") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromEntity("y") }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -207,8 +207,8 @@ TEST_CASE("[TestPkb] addNext") {
     pkb.addNext(3, 4);
     pkb.addNext(4, 5);
     auto dataCopy = pkb.getNextTable().getData();
-    REQUIRE(dataCopy.count({ 3, 4 }) == 1);
-    REQUIRE(dataCopy.count({ 4, 5 }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -221,9 +221,9 @@ TEST_CASE("[TestPkb] addNextT") {
     pkb.addNextT(4, 5);
     pkb.addNextT(3, 5);
     auto dataCopy = pkb.getNextTTable().getData();
-    REQUIRE(dataCopy.count({ 3, 4 }) == 1);
-    REQUIRE(dataCopy.count({ 4, 5 }) == 1);
-    REQUIRE(dataCopy.count({ 3, 5 }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(5) }) == 1);
     REQUIRE(dataCopy.size() == 3);
   }
 }
@@ -235,8 +235,8 @@ TEST_CASE("[TestPkb] addAffects") {
     pkb.addAffects(3, 4);
     pkb.addAffects(4, 7);
     auto dataCopy = pkb.getAffectsTable().getData();
-    REQUIRE(dataCopy.count({ 3, 4 }) == 1);
-    REQUIRE(dataCopy.count({ 4, 7 }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(7) }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -249,9 +249,9 @@ TEST_CASE("[TestPkb] addAffectsT") {
     pkb.addAffectsT(4, 7);
     pkb.addAffectsT(3, 7);
     auto dataCopy = pkb.getAffectsTTable().getData();
-    REQUIRE(dataCopy.count({ 3, 4 }) == 1);
-    REQUIRE(dataCopy.count({ 4, 7 }) == 1);
-    REQUIRE(dataCopy.count({ 3, 7 }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(7) }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(7) }) == 1);
     REQUIRE(dataCopy.size() == 3);
   }
 }
@@ -263,8 +263,8 @@ TEST_CASE("[TestPkb] addPatternAssign") {
     pkb.addPatternAssign(5, "x", " x y * ");
     pkb.addPatternAssign(7, "y", " b c * a + ");
     auto dataCopy = pkb.getPatternAssignTable().getData();
-    REQUIRE(dataCopy.count({ 5, pkb.getIntRefFromEntity("x"), pkb.getIntRefFromEntity(" x y * ") }) == 1);
-    REQUIRE(dataCopy.count({ 7, pkb.getIntRefFromEntity("y"), pkb.getIntRefFromEntity(" b c * a + ") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromEntity("x"), pkb.getIntRefFromEntity(" x y * ") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromEntity("y"), pkb.getIntRefFromEntity(" b c * a + ") }) == 1);
   }
 }
 
@@ -275,8 +275,8 @@ TEST_CASE("[TestPkb] addPatternIf") {
     pkb.addPatternIf(1, "count");
     pkb.addPatternIf(70, "a");
     auto dataCopy = pkb.getPatternIfTable().getData();
-    REQUIRE(dataCopy.count({ 1, pkb.getIntRefFromEntity("count") }) == 1);
-    REQUIRE(dataCopy.count({ 70, pkb.getIntRefFromEntity("a") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromEntity("count") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(70), pkb.getIntRefFromEntity("a") }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -288,8 +288,8 @@ TEST_CASE("[TestPkb] addPatternWhile") {
     pkb.addPatternWhile(4, "count");
     pkb.addPatternWhile(100, "i");
     auto dataCopy = pkb.getPatternWhileTable().getData();
-    REQUIRE(dataCopy.count({ 4, pkb.getIntRefFromEntity("count") }) == 1);
-    REQUIRE(dataCopy.count({ 100, pkb.getIntRefFromEntity("i") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromEntity("count") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(100), pkb.getIntRefFromEntity("i") }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -301,8 +301,8 @@ TEST_CASE("[TestPkb] addCallProc") {
     pkb.addCallProc(4, "proc1");
     pkb.addCallProc(20, "proc2");
     auto dataCopy = pkb.getCallProcTable().getData();
-    REQUIRE(dataCopy.count({ 4, pkb.getIntRefFromEntity("proc1") }) == 1);
-    REQUIRE(dataCopy.count({ 20, pkb.getIntRefFromEntity("proc2") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromEntity("proc1") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(20), pkb.getIntRefFromEntity("proc2") }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -314,8 +314,8 @@ TEST_CASE("[TestPkb] addReadVar") {
     pkb.addReadVar(1, "x");
     pkb.addReadVar(3, "y");
     auto dataCopy = pkb.getReadVarTable().getData();
-    REQUIRE(dataCopy.count({ 1, pkb.getIntRefFromEntity("x") }) == 1);
-    REQUIRE(dataCopy.count({ 3, pkb.getIntRefFromEntity("y") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromEntity("x") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromEntity("y") }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -327,8 +327,8 @@ TEST_CASE("[TestPkb] addPrintVar") {
     pkb.addPrintVar(1, "x");
     pkb.addPrintVar(3, "y");
     auto dataCopy = pkb.getPrintVarTable().getData();
-    REQUIRE(dataCopy.count({ 1, pkb.getIntRefFromEntity("x") }) == 1);
-    REQUIRE(dataCopy.count({ 3, pkb.getIntRefFromEntity("y") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromEntity("x") }) == 1);
+    REQUIRE(dataCopy.count({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromEntity("y") }) == 1);
     REQUIRE(dataCopy.size() == 2);
   }
 }
@@ -377,10 +377,10 @@ TEST_CASE("[TestPkb] CFG edges/Next") {
 
   SECTION("Next relations") {
     Table nextTable = pkb.getNextTable();
-    REQUIRE(nextTable.contains({ 1, 2 }));
-    REQUIRE(nextTable.contains({ 1, 3 }));
-    REQUIRE(nextTable.contains({ 1, 4 }));
-    REQUIRE(nextTable.contains({ 4, 5 }));
+    REQUIRE(nextTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
+    REQUIRE(nextTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(3) }));
+    REQUIRE(nextTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(4) }));
+    REQUIRE(nextTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
     REQUIRE(nextTable.size() == 4);
   }
 

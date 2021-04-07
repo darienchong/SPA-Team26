@@ -10,6 +10,73 @@
 #include "CfgBip.h"
 
 class Pkb {
+private:
+  Cfg::Cfg cfg;
+  Cfg::CfgBip cfgBip;
+
+  Table varTable{ 1 };
+  Table stmtTable{ 1 };
+  Table procTable{ 1 };
+  Table constTable{ 1 };
+
+  Table ifTable{ 1 };
+  Table whileTable{ 1 };
+  Table readTable{ 1 };
+  Table printTable{ 1 };
+  Table assignTable{ 1 };
+  Table callTable{ 1 };
+
+  Table followsTable{ 2 };
+  Table followsTTable{ 2 };
+  Table parentTable{ 2 };
+  Table parentTTable{ 2 };
+  Table usesSTable{ 2 };
+  Table usesPTable{ 2 };
+  Table modifiesSTable{ 2 };
+  Table modifiesPTable{ 2 };
+  Table callsTable{ 2 };
+  Table callsTTable{ 2 };
+  Table nextTable{ 2 };
+  Table nextTTable{ 2 };
+  Table affectsTable{ 2 };
+  Table affectsTTable{ 2 };
+
+  Table nextBipTable{ 2 };
+  Table nextBipTTable{ 2 };
+  Table affectsBipTable{ 2 };
+  Table affectsBipTTable{ 2 };
+
+  Table callProcTable{ 2 };
+  Table readVarTable{ 2 };
+  Table printVarTable{ 2 };
+
+  Table patternAssignTable{ 3 };
+  Table patternIfTable{ 2 };
+  Table patternWhileTable{ 2 };
+
+  std::unordered_set<int> varIntRefs;
+  std::unordered_set<int> stmtIntRefs;
+  std::unordered_set<int> procIntRefs;
+  std::unordered_set<int> constIntRefs;
+
+  std::unordered_set<int> ifIntRefs;
+  std::unordered_set<int> whileIntRefs;
+  std::unordered_set<int> readIntRefs;
+  std::unordered_set<int> printIntRefs;
+  std::unordered_set<int> assignIntRefs;
+  std::unordered_set<int> callIntRefs;
+
+  std::unordered_map<int, std::string> intRefToEntityMapper;
+  std::unordered_map<std::string, int> entityToIntRefMapper;
+
+  std::unordered_map<int, std::string> callIntRefToProcMapper;
+  std::unordered_map<int, std::string> readIntRefToVarMapper;
+  std::unordered_map<int, std::string> printIntRefToVarMapper;
+
+  std::unordered_map<std::string, int> procStartMapper;
+  std::unordered_map<std::string, std::vector<int>> procEndMapper;
+  std::unordered_map<int, std::string> stmtProcMapper;
+
 public:
   /*
    * Constructor of Pkb.
@@ -487,9 +554,59 @@ public:
   Table getPatternWhileTable() const;
 
   /**
-   * Returns the integer reference of a given entity. 
+   * @return varIntRefs
+   */
+  std::unordered_set<int> getVarIntRefs() const;
+
+  /**
+   * @return stmtIntRefs
+   */
+  std::unordered_set<int> getStmtIntRefs() const;
+
+  /**
+   * @return procIntRefs
+   */
+  std::unordered_set<int> getProcIntRefs() const;
+
+  /**
+   * @return constIntRefs
+   */
+  std::unordered_set<int> getConstIntRefs() const;
+
+  /**
+   * @return ifIntRefs
+   */
+  std::unordered_set<int> getIfIntRefs() const;
+
+  /**
+   * @return whileIntRefs
+   */
+  std::unordered_set<int> getWhileIntRefs() const;
+
+  /**
+   * @return assignIntRefs
+   */
+  std::unordered_set<int> getReadIntRefs() const;
+
+  /**
+   * @return assignIntRefs
+   */
+  std::unordered_set<int> getPrintIntRefs() const;
+
+  /**
+   * @return assignIntRefs
+   */
+  std::unordered_set<int> getAssignIntRefs() const;
+
+  /**
+   * @return callIntRefs
+   */
+  std::unordered_set<int> getCallIntRefs() const;
+
+  /**
+   * Returns the integer reference of a given entity.
    * Returns -1 if entity does not exist.
-   * 
+   *
    * @param entity Entity.
    * @return Integer reference of the entity.
    */
@@ -502,6 +619,25 @@ public:
    * @return Entity of the integer reference.
    */
   std::string getEntityFromIntRef(const int intRef) const;
+
+  /**
+   * Returns the integer reference of a given statement number.
+   * Returns -1 if statement number does not exist.
+   * Equivalent to getIntRefFromEntity(std::to_string(stmtNum))
+   *
+   * @param stmtNum Statement number.
+   * @return Integer reference of the statement number.
+   */
+  int getIntRefFromStmtNum(const int stmtNum) const;
+
+  /**
+   * Returns the stmt of the given existing integer reference.
+   * Equivalent to std::stoi(getEntityFromIntRef(intRef))
+   * 
+   * @param intRef Statement number integer reference.
+   * @return Statement number of the integer reference.
+   */
+  int getStmtNumFromIntRef(const int intRef) const;
 
   /**
    * Finds and returns the assign statement numbers that are uses the given variable. If no
@@ -524,31 +660,52 @@ public:
   std::unordered_set<std::string> getModifiedBy(const int stmtNum) const;
 
   /**
-   * If the stmtNum is of a call statement, will return the name of the procedure
-   * being called by stmtNum. Otherwise, returns empty String.
+   * Get the procedure name called by the given existing call statement number.
    *
-   * @param stmtNum Statement number of a call statement
-   * @return Name of procedure being called by stmtNum
+   * @param stmtNum Statement number of a call statement.
+   * @return Name of procedure being called by stmtNum.
    */
   std::string getProcNameFromCallStmt(const int stmtNum) const;
 
   /**
-   * If the stmtNum is of a read statement, will return the name of the variable
-   * being read by stmtNum. Otherwise, returns empty String.
+   * Get the procedure name called by the given existing call statement number's integer reference.
    *
-   * @param stmtNum Statement number of a read statement
-   * @return Name of var being read by stmtNum
+   * @param intRef Integer reference of a call statement.
+   * @return Name of procedure being called by the call statement.
+   */
+  std::string getProcNameFromCallStmtIntRef(const int intRef) const;
+
+  /**
+   * Get the variable name read by the given existing read statement number.
+   *
+   * @param stmtNum Statement number of a read statement.
+   * @return Name of variable being read by stmtNum.
    */
   std::string getVarNameFromReadStmt(const int stmtNum) const;
 
   /**
-   * If the stmtNum is of a print statement, will return the name of the variable
-   * being printed by stmtNum. Otherwise, returns empty String.
+   * Get the variable name read by the given existing read statement number's integer reference.
+   *
+   * @param intRef Integer reference of a read statement
+   * @return Name of variable being read by the read statement.
+   */
+  std::string getVarNameFromReadStmtIntRef(const int intRef) const;
+
+  /**
+   * Get the variable name printed by the given existing print statement number.
    *
    * @param stmtNum Statement number of a print statement
-   * @return Name of var being printed by stmtNum
+   * @return Name of variable being printed by stmtNum
    */
   std::string getVarNameFromPrintStmt(const int stmtNum) const;
+
+  /**
+   * Get the variable name printed by the given existing print statement number's integer reference.
+   *
+   * @param intRef Integer reference of a print statement
+   * @return Name of variable being printed by the print statement.
+   */
+  std::string getVarNameFromPrintStmtIntRef(const int intRef) const;
 
   /**
    * Finds the set of stmts that can be directly executed after the given stmt number in the CFG.
@@ -593,58 +750,11 @@ public:
   std::string getProcFromStmt(const int stmt) const;
 
 private:
-  Cfg::Cfg cfg;
-  Cfg::CfgBip cfgBip;
-
-  Table varTable{ 1 };
-  Table stmtTable{ 1 };
-  Table procTable{ 1 };
-  Table constTable{ 1 };
-
-  Table ifTable{ 1 };
-  Table whileTable{ 1 };
-  Table readTable{ 1 };
-  Table printTable{ 1 };
-  Table assignTable{ 1 };
-  Table callTable{ 1 };
-
-  Table followsTable{ 2 };
-  Table followsTTable{ 2 };
-  Table parentTable{ 2 };
-  Table parentTTable{ 2 };
-  Table usesSTable{ 2 };
-  Table usesPTable{ 2 };
-  Table modifiesSTable{ 2 };
-  Table modifiesPTable{ 2 };
-  Table callsTable{ 2 };
-  Table callsTTable{ 2 };
-  Table nextTable{ 2 };
-  Table nextTTable{ 2 };
-  Table affectsTable{ 2 };
-  Table affectsTTable{ 2 };
-
-  Table nextBipTable{ 2 };
-  Table nextBipTTable{ 2 };
-  Table affectsBipTable{ 2 };
-  Table affectsBipTTable{ 2 };
-
-  Table callProcTable{ 2 };
-  Table readVarTable{ 2 };
-  Table printVarTable{ 2 };
-
-  Table patternAssignTable{ 3 };
-  Table patternIfTable{ 2 };
-  Table patternWhileTable{ 2 };
-
-  std::unordered_set<std::string> entitySet;
-  std::unordered_map<int, std::string> intToEntityMapper;
-  std::unordered_map<std::string, int> entityToIntMapper;
-
-  std::unordered_map<int, std::string> callProcMapper;
-  std::unordered_map<int, std::string> readVarMapper;
-  std::unordered_map<int, std::string> printVarMapper;
-
-  std::unordered_map<std::string, int> procStartMapper;
-  std::unordered_map<std::string, std::vector<int>> procEndMapper;
-  std::unordered_map<int, std::string> stmtProcMapper;
+  /**
+   * Adds the given entity to the PKB if not yet added and returns the integer reference of the entity.
+   * 
+   * @param entity Entity to be added.
+   * @return Integer reference of the entity. 
+   */
+  int addEntity(const std::string& entity);
 };

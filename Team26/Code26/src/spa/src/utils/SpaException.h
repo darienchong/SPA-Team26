@@ -106,9 +106,10 @@ namespace Pql {
     // Semantic Errors
     const static std::string SEMANTIC_ERROR_DUPLICATE_SYNONYM_DECLARATION = "Encountered an already declared synonym.";
     const static std::string SEMANTIC_ERROR_UNDECLARED_SYNONYM = "Encountered undeclared synonym.";
-    const static std::string SEMANTIC_ERROR_NON_ASSIGN_SYNONYM = "Expected a synonym of type assign but encounted another type.";
+    const static std::string SEMANTIC_ERROR_NON_PATTERN_CLAUSE_SYNONYM = "Expected a synonym of type assign/if/while but encounted another type.";
     const static std::string SEMANTIC_ERROR_NON_STMT_REF = "Expected a stmtRef but encounted other design entity.";
-    const static std::string SEMANTIC_ERROR_NON_ENT_REF = "Expected a entRef but encounted other design entity.";
+    const static std::string SEMANTIC_ERROR_NON_ENT_REF = "Expected an entRef but encounted other design entity.";
+    const static std::string SEMANTIC_ERROR_NON_ATTR_REF = "Expected an attrRef but not found.";
     const static std::string SEMANTIC_ERROR_ZERO_STMT_NUMBER = "Encountered 0 as a statement number.";
     const static std::string SEMANTIC_ERROR_INVALID_WILDCARD = "Encountered _ but is ambiguous.";
     const static std::string SEMANTIC_ERROR_INVALID_ATTRIBUTE_NAME = "Encountered an invalid attribute name for a specific synonym.";
@@ -120,6 +121,7 @@ namespace Pql {
     // =================
     const static std::string APPEND_TOKEN_EXPECTED = "\nToken expected: ";
     const static std::string APPEND_TOKEN_RECEIVED = "\nToken received: ";
+    const static std::string APPEND_SYNONYM_WITH_MISSING_ATTR_REF = "\nSynonym with missing attrRef: ";
   }
 
   /**

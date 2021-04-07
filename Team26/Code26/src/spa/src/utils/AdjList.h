@@ -66,6 +66,16 @@ public:
   std::list<int> topologicalOrder();
 
   /**
+   * Returns an ordered list of nodes in topological order 
+   * where ties are broken by taking the node with the smallest
+   * index.
+   * 
+   * @returns Nodes in topological order, where ties are broken by
+   *   taking the node with the smallest index.
+   */
+  std::list<int> stableTopologicalOrder();
+
+  /**
    * Returns a list of connected components.
    * 
    * @returns

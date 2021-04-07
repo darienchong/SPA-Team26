@@ -279,6 +279,7 @@ namespace Pql {
   */
   class Query {
   private:
+    std::string semanticErrorMessage;
     std::vector<Entity> targets;
     std::vector<Clause> clauses;
 
@@ -317,6 +318,29 @@ namespace Pql {
      * @param clause Clause to be added.
     */
     void addClause(const Clause clause);
+
+
+    /**
+     * Checks if the PQL query has any semantic error.
+     *
+     * @return True if the query has any semantic error. Otherwise, return false.
+    */
+    bool hasSemanticError();
+
+    /**
+     * Adds a semantic error message.
+     *
+     * @param message Message to be added.
+     */
+    void setSemanticErrorMessage(const std::string& message);
+
+    /**
+     * Returns the semantic error message of the PQL query. Returns an empty string if
+     * there is no semantic error.
+     *
+     * @return Semantic error message if any semantic error exist. Otherwise, return an empty string.
+     */
+    std::string getSemanticErrorMessage();
 
     // Operator overloading
     friend bool operator==(const Query& lhs, const Query& rhs) {

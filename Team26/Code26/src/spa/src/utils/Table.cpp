@@ -73,22 +73,25 @@ int Table::getColumnIndex(const std::string& headerTitle) const {
 }
 
 bool Table::dropColumn(const int index) {
-  if (index < 0 || index >= header.size()) {
+  const int numCols = header.size();
+  if (index < 0 || index >= numCols) {
     return false;
   }
-  // Clear data if there is only one column, otherwise erase column
-  if (header.size() == 1) {
-    data.clear();
-  } else {
-    header.erase(header.begin() + index);
-    RowSet newData;
-    newData.reserve(size()); // Optimization to avoid rehashing
-    for (Row row : data) {
-      row.erase(row.begin() + index);
-      newData.emplace(row);
-    }
-    data = std::move(newData);
+
+  // Cannot remove one column
+  if (numCols == 1) {
+    return false;
   }
+
+  header.erase(header.begin() + index);
+  RowSet newData;
+  newData.reserve(size()); // Optimization to avoid rehashing
+  for (Row row : data) {
+    row.erase(row.begin() + index);
+    newData.emplace(row);
+  }
+  data = std::move(newData);
+
   return true;
 }
 
@@ -97,14 +100,23 @@ bool Table::dropColumn(const std::string& headerTitle) {
   if (index == -1) {
     return false;
   }
-  dropColumn(index);
-  return true;
+  return dropColumn(index);
 }
 
 void Table::filterColumn(const int index, const std::unordered_set<int>& values) {
-  assert(index >= 0 && index < header.size());
-  for (auto it = data.begin(); it != data.end(); ) {
-    if (!values.count((*it)[index])) {
+  const int numCols = header.size();
+  assert(index >= 0 && index < numCols);
+
+  // Initialise return values
+  std::vector<std::unordered_set<int>> filteredValues;
+  filteredValues.reserve(numCols);
+  for (int i = 0; i < numCols; i++) {
+    filteredValues.push_back({});
+  }
+
+  // Filter table
+  for (RowSet::iterator it = data.begin(); it != data.end(); ) {
+    if (values.count((*it)[index]) == 0) {
       it = data.erase(it);
     } else {
       it++;

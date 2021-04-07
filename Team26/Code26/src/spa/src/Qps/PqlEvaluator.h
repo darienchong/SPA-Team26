@@ -2,6 +2,8 @@
 
 #include <string>
 #include <list>
+#include <unordered_set>
+#include <unordered_map>
 
 #include "PqlQuery.h"
 #include "Pkb.h"
@@ -43,7 +45,7 @@ namespace Pql {
      * @param table Table to be constructed.
      * @param clause Such that clause object.
      */
-    void constructTableFromClause(Table& clauseResultTable, const Clause& clause) const;
+    void constructSuchThatTableFromClause(Table& clauseResultTable, const Clause& clause) const;
 
     /**
      * Constructs a clause result table given a clause of type PATTERN_ASSIGN.
@@ -63,21 +65,29 @@ namespace Pql {
 
 
     /**
-     * Constructs a clause result table given a clause of type with
+     * Constructs a clause result table given a with clause
      *
      * @param clauseResultTable Table to be constructed.
      * @param clause with clause object.
      */
-    void PqlEvaluator::constructWithTableFromClause(Table& clauseResultTable, const Clause& clause) const;
+    void constructWithTableFromClause(Table& clauseResultTable, const Clause& clause) const;
 
     /**
-     * Helper function to get the corresponding Table from the PKB when given an entity.
+     * Helper function to get the corresponding Table from the PKB when given a synonym entity.
      * E.g. Entity with EntityType of STMT will return the stmtTable from PKB.
      *
      * @param entity Given entity to retrieve the corresponding table from PKB.
      * @return Table corresponding to the given entity.
      */
-    Table getTableFromEntity(const Entity& entity) const;
+    Table getTableFromEntity(const Entity& synonymEntity) const;
+
+    /**
+     * Helper function to get the corresponding values of a given entity from the PKB.
+     *
+     * @param entity Given entity to retrieve the corresponding values.
+     * @return Set of possible values of the given entity.
+     */
+    std::unordered_set<int> getValuesFromEntity(const Entity& synonymEntity) const;
 
     /**
      * Helper function to get the corresponding attribute reference mapping Table from the PKB when given an entity.
@@ -94,15 +104,6 @@ namespace Pql {
      * @param resultTable Final result table from execution of all clauses.
      */
     void extractResults(const Table& resultTable) const;
-
-    /**
-     * Helper function to that maps the given entity's table number to it's actual value by consulting the PKB.
-     *
-     * @param entity Given entity to be mapped.
-     * @param tableNumber Table number to be mapped.
-     * @return Actual value.
-    */
-    std::string mapIntRefToResultValue(const Pql::Entity& entity, const int tableNumber) const;
 
   public:
     /**

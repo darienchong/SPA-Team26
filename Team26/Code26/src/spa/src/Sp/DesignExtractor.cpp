@@ -40,17 +40,13 @@ namespace {
 
     // Add the branch in and branch back links
     for (const Row stmtRow : callTable.getData()) {
-      const int callStmt = stmtRow[0]; // call stmt of interest
+      const int callStmt = pkb.getStmtNumFromIntRef(stmtRow[0]); // call stmt of interest
       const std::string calledProc = pkb.getProcNameFromCallStmt(callStmt); // get the called proc from the call stmt
       const int calledProcStartStmt = pkb.getStartStmtFromProc(calledProc); // get the starting stmt num of the called proc
       const int dummyNode = -1 * calledProcStartStmt;
       const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(callStmt); // get next stmts from call stmt. Note: fromCfg not fromCfgBip
       assert(nextStmts.size() == 1);
-
-      int nextStmt;
-      for (int next : nextStmts) {
-        nextStmt = next;
-      }
+      const int nextStmt = nextStmts[0];
 
       // Add NextBip from end stmt of called proc to stmt directly after call stmt if the latter is not a dummy node
       for (int end : pkb.getEndStmtsFromProc(calledProc)) {
@@ -68,8 +64,7 @@ namespace {
   }
 
   void fillNextBipTTable(Pkb& pkb) {
-    const Table stmtTable = pkb.getStmtTable();
-    const int largest = stmtTable.size();
+    const int largest = pkb.getStmtTable().size();
 
     for (int row = 1; row <= largest; ++row) {
       // =============== //
@@ -147,17 +142,6 @@ namespace {
     }
   }
 
-  void pseudocodeFillBipT() {
-    // for each proc, get the nextT table and store into a map of proc -> nextT
-    // for each proc's next table duplicate it and find the corresponding call stmts, then
-    //  1) Duplicate called proc's nextT table and add to to this proc's duplicated table
-    //  2) Add a row correseponding to call stmt to first stmt of the called proc
-    //  3) Add rows corresponding to call proc's last stmts to next stmt after call stmt
-    //  4) Repeat steps 1 - 3 for each new proc added on to the target proc
-    //  5) Do transitive closure
-    // Profit
-  }
-
   void fillAffectsBipTable(Pkb& pkb) {
     const Table assignTable = pkb.getAssignTable();
     const Table callTable = pkb.getCallTable();
@@ -166,7 +150,7 @@ namespace {
 
     // Fill up the affects table for each assign statement
     for (const Row assignRow : assignTable.getData()) {
-      const int affecterAssignStmt = assignRow[0];
+      const int affecterAssignStmt = pkb.getStmtNumFromIntRef(assignRow[0]);
 
       // Extract the varModifed by affecterAssignStmt
       std::string varModified;
@@ -228,7 +212,7 @@ namespace {
         // Check if currentStmt modifies the varModified
         // Stop searching this path if the currentStmt is an assign stmt or read stmt
         const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
-        const bool isReadOrAssignStmt = readTable.contains({ currentStmt }) || assignTable.contains({ currentStmt });
+        const bool isReadOrAssignStmt = readTable.contains({ pkb.getIntRefFromStmtNum(currentStmt) }) || assignTable.contains({ pkb.getIntRefFromStmtNum(currentStmt) });
         if (isModified && isReadOrAssignStmt) {
           continue;
         }
@@ -284,7 +268,7 @@ namespace {
 
     // Fill up the affects table for each assign statement
     for (Row assignRow : assignTable.getData()) {
-      int affecterAssignStmt = assignRow[0];
+      const int affecterAssignStmt = pkb.getStmtNumFromIntRef(assignRow[0]);
 
       // Extract the varModifed by affecterAssignStmt
       std::string varModified;
@@ -327,7 +311,8 @@ namespace {
         // Check if currentStmt modifies the varModified
         // Stop searching this path if the currentStmt is not a container stmt and it modifies the varModified
         const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
-        const bool isContainerStmt = ifTable.contains({ currentStmt }) || whileTable.contains({ currentStmt });
+        const bool isContainerStmt = ifTable.contains({ pkb.getIntRefFromStmtNum(currentStmt) }) ||
+          whileTable.contains({ pkb.getIntRefFromStmtNum(currentStmt) });
         if (isModified && !isContainerStmt) {
           continue;
         }
@@ -452,7 +437,7 @@ namespace {
 
     Table parentTTable = generateTransitiveClosure(pkb.getParentTable(), stmtList);
     for (const Row& row : parentTTable.getData()) {
-      pkb.addParentT(row[0], row[1]);
+      pkb.addParentT(pkb.getStmtNumFromIntRef(row[0]), pkb.getStmtNumFromIntRef(row[1]));
     }
   }
 
@@ -477,7 +462,7 @@ namespace {
     Table followsTTable = generateTransitiveClosure(pkb.getFollowsTable(),
       stmtList);
     for (const Row row : followsTTable.getData()) {
-      pkb.addFollowsT(row[0], row[1]);
+      pkb.addFollowsT(pkb.getStmtNumFromIntRef(row[0]), pkb.getStmtNumFromIntRef(row[1]));
     }
   }
 
@@ -529,7 +514,7 @@ namespace {
     Table nextTTable = generateTransitiveClosure(pkb.getNextTable(),
       stmtList);
     for (const Row row : nextTTable.getData()) {
-      pkb.addNextT(row[0], row[1]);
+      pkb.addNextT(pkb.getStmtNumFromIntRef(row[0]), pkb.getStmtNumFromIntRef(row[1]));
     }
   }
 
@@ -555,7 +540,7 @@ namespace {
     Table affectsTTable = generateTransitiveClosure(pkb.getAffectsTable(),
       assignStmtList);
     for (const Row row : affectsTTable.getData()) {
-      pkb.addAffectsT(row[0], row[1]);
+      pkb.addAffectsT(pkb.getStmtNumFromIntRef(row[0]), pkb.getStmtNumFromIntRef(row[1]));
     }
   }
 
@@ -573,7 +558,7 @@ namespace {
   void fillUsesSTableNonCallStmts(Pkb& pkb) {
     Table newUsesSTable = fillIndirectRelation(pkb.getUsesSTable(), pkb.getParentTTable());
     for (const Row row : newUsesSTable.getData()) {
-      pkb.addUsesS(row[0], pkb.getEntityFromIntRef(row[1]));
+      pkb.addUsesS(pkb.getStmtNumFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
 
@@ -602,7 +587,7 @@ namespace {
     callProcTable.dropColumn(1);
 
     for (const Row row : callProcTable.getData()) {
-      pkb.addUsesS(row[0], pkb.getEntityFromIntRef(row[1]));
+      pkb.addUsesS(pkb.getStmtNumFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
 
@@ -631,7 +616,7 @@ namespace {
     callProcTable.dropColumn(1);
 
     for (const Row row : callProcTable.getData()) {
-      pkb.addModifiesS(row[0], pkb.getEntityFromIntRef(row[1]));
+      pkb.addModifiesS(pkb.getStmtNumFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
 
@@ -649,7 +634,7 @@ namespace {
   void fillModifiesSTableNonCallStmts(Pkb& pkb) {
     Table newModifiesSTable = fillIndirectRelation(pkb.getModifiesSTable(), pkb.getParentTTable());
     for (const Row row : newModifiesSTable.getData()) {
-      pkb.addModifiesS(row[0], pkb.getEntityFromIntRef(row[1]));
+      pkb.addModifiesS(pkb.getStmtNumFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
 

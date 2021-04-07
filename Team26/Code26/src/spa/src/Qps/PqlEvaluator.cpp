@@ -12,6 +12,7 @@
 #include "Pkb.h"
 #include "Table.h"
 #include "PqlOptimizer.h"
+#include "PqlPreprocessor.h"
 
 namespace {
   /**
@@ -106,6 +107,77 @@ namespace {
       return false;
     }
   }
+
+  /**
+   * Helper function to get procedure name from call stmt's integer reference with
+   * the given PKB and integer reference.
+   *
+   * @param pkb PKB.
+   * @param intRef Integer Reference.
+   * @return Procedure name.
+  */
+  std::string getProcNameFromCallStmtIntRef(const Pkb& pkb, const int intRef) {
+    return pkb.getProcNameFromCallStmtIntRef(intRef);
+  }
+
+  /**
+   * Helper function to get variable name from read stmt's integer reference with
+   * the given PKB and integer reference.
+   *
+   * @param pkb PKB.
+   * @param intRef Integer Reference.
+   * @return Variable name.
+  */
+  std::string getVarNameFromReadStmtIntRef(const Pkb& pkb, const int intRef) {
+    return pkb.getVarNameFromReadStmtIntRef(intRef);
+  }
+
+  /**
+   * Helper function to get variable name from print stmt's integer reference with
+   * the given PKB and integer reference.
+   *
+   * @param pkb PKB.
+   * @param intRef Integer Reference.
+   * @return Variable name.
+  */
+  std::string getVarNameFromPrintStmtIntRef(const Pkb& pkb, const int intRef) {
+    return pkb.getVarNameFromPrintStmtIntRef(intRef);
+  }
+
+  /**
+   * Helper function to get entity value from its integer reference with
+   * the given PKB and integer reference.
+   *
+   * @param pkb PKB.
+   * @param intRef Integer Reference.
+   * @return Entity value.
+  */
+  std::string getEntityFromIntRef(const Pkb& pkb, const int intRef) {
+    return pkb.getEntityFromIntRef(intRef);
+  }
+
+  /**
+   * Helper function to get the mapping function for mapping the table element to the select target result.
+   *
+   * @param entity Given entity to be mapped.
+   * @return Function that will be used for mapping the table element to the select target result.
+   */
+  std::string(*getMappingFunction(const Pql::Entity& entity)) (const Pkb&, const int) {
+    if (needsAttrRefMapping(entity)) {
+      switch (entity.getType()) {
+      case Pql::EntityType::CALL:
+        return getProcNameFromCallStmtIntRef;
+      case Pql::EntityType::READ:
+        return getVarNameFromReadStmtIntRef;
+      case Pql::EntityType::PRINT:
+        return getVarNameFromPrintStmtIntRef;
+      default:
+        assert(false);
+        return nullptr;
+      }
+    }
+    return getEntityFromIntRef;
+  }
 }
 
 namespace Pql {
@@ -196,16 +268,31 @@ namespace Pql {
 
   //  Executes query and returns the result table
   Table PqlEvaluator::executeQuery() const {
+    //const std::vector<Clause>& clauses = query.getClauses();
+    //std::vector<Table> clauseResultTables;
+    //clauseResultTables.reserve(clauses.size()); // Optimization to avoid resizing of vector
+    //for (const Clause& clause : clauses) {
+    //  Table clauseResult = executeClause(clause);
+    //  if (clauseResult.empty()) {
+    //    // short circuit
+    //    return Table();
+    //  }
+    //  clauseResultTables.emplace_back(clauseResult);
+    //}
+
     const std::vector<Clause>& clauses = query.getClauses();
+    std::vector<std::vector<Clause>> clauseGroups = PqlPreprocessor().sortClauses(query.getTargets(), clauses);
     std::vector<Table> clauseResultTables;
     clauseResultTables.reserve(clauses.size()); // Optimization to avoid resizing of vector
-    for (const Clause& clause : clauses) {
-      Table clauseResult = executeClause(clause);
-      if (clauseResult.empty()) {
-        // short circuit
-        return Table();
+    for (const std::vector<Clause>& clauseGroup : clauseGroups) {
+      for (const Clause& clause : clauseGroup) {
+        Table clauseResult = executeClause(clause);
+        if (clauseResult.empty()) {
+          // short circuit
+          return Table();
+        }
+        clauseResultTables.emplace_back(clauseResult);
       }
-      clauseResultTables.emplace_back(clauseResult);
     }
 
     Table finalResultTable = Table({ "" });
@@ -213,13 +300,13 @@ namespace Pql {
 
 
     if (!clauses.empty()) {
-      // Initialise optimizer to get order of joining tables
-      Optimizer optimizer(clauseResultTables);
-      std::vector<int> order = optimizer.getOptimizedOrder();
+      //// Initialise optimizer to get order of joining tables
+      //Optimizer optimizer(clauseResultTables);
+      //std::vector<int> order = optimizer.getOptimizedOrder();
 
-       // Join each clause result table to finalResultTable
+      // Join each clause result table to finalResultTable
       for (size_t i = 0; i < clauseResultTables.size(); i++) {
-        const int tableIndex = order[i];
+        const int tableIndex = i;
 
         // natural join on finalResultTable
         bool areAllHeadersEmptyStrings = true;
@@ -259,59 +346,59 @@ namespace Pql {
     switch (clauseType) {
     case ClauseType::FOLLOWS:
       clauseResultTable = pkb.getFollowsTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::FOLLOWS_T:
       clauseResultTable = pkb.getFollowsTTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::PARENT:
       clauseResultTable = pkb.getParentTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::PARENT_T:
       clauseResultTable = pkb.getParentTTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::USES_S:
       clauseResultTable = pkb.getUsesSTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::USES_P:
       clauseResultTable = pkb.getUsesPTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::MODIFIES_S:
       clauseResultTable = pkb.getModifiesSTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::MODIFIES_P:
       clauseResultTable = pkb.getModifiesPTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::CALLS:
       clauseResultTable = pkb.getCallsTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::CALLS_T:
       clauseResultTable = pkb.getCallsTTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::NEXT:
       clauseResultTable = pkb.getNextTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::NEXT_T:
       clauseResultTable = pkb.getNextTTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::AFFECTS:
       clauseResultTable = pkb.getAffectsTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::AFFECTS_T:
       clauseResultTable = pkb.getAffectsTTable();
-      constructTableFromClause(clauseResultTable, clause);
+      constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::PATTERN_ASSIGN:
       clauseResultTable = pkb.getPatternAssignTable();
@@ -337,7 +424,7 @@ namespace Pql {
   }
 
   // Constructs Design Abstraction table from given clause
-  void PqlEvaluator::constructTableFromClause(Table& clauseResultTable, const Clause& clause) const {
+  void PqlEvaluator::constructSuchThatTableFromClause(Table& clauseResultTable, const Clause& clause) const {
     const std::vector<Entity>& params = clause.getParams();
     const Entity& lhsEntity = params[0];
     const Entity& rhsEntity = params[1];
@@ -349,15 +436,11 @@ namespace Pql {
       if (lhsEntity.isSynonym()) {
         // Update header name to reflect name of synonym
         header1 = lhsEntity.getValue();
-
-        // Short circuit
-        if (!canOmitJoinSuchThatLhs(clause.getType(), lhsEntity)) {
-          clauseResultTable.innerJoin(getTableFromEntity(lhsEntity), 0, 0); // inner join on first column
+        if (!canOmitJoinSuchThatLhs(clause.getType(), lhsEntity)) { // Shortcircuit
+          clauseResultTable.filterColumn(0, getValuesFromEntity(lhsEntity));
         }
-      } else if (lhsEntity.isName()) {
+      } else if (lhsEntity.isName() || lhsEntity.isNumber()) {
         clauseResultTable.filterColumn(0, { pkb.getIntRefFromEntity(lhsEntity.getValue()) });
-      } else if (lhsEntity.isNumber()) {
-        clauseResultTable.filterColumn(0, { std::stoi(lhsEntity.getValue()) });
       } else {
         assert(false);
       }
@@ -380,15 +463,11 @@ namespace Pql {
       if (rhsEntity.isSynonym()) {
         // Update header name to reflect name of synonym
         header2 = rhsEntity.getValue();
-
-        // Short circuit
-        if (!canOmitJoinSuchThatRhs(clause.getType(), rhsEntity)) {
-          clauseResultTable.innerJoin(getTableFromEntity(rhsEntity), 1, 0); // inner join on second column
+        if (!canOmitJoinSuchThatRhs(clause.getType(), rhsEntity)) { // Shortcircuit
+          clauseResultTable.filterColumn(1, getValuesFromEntity(rhsEntity));
         }
-      } else if (rhsEntity.isName()) {
+      } else if (rhsEntity.isName() || rhsEntity.isNumber()) {
         clauseResultTable.filterColumn(1, { pkb.getIntRefFromEntity(rhsEntity.getValue()) });
-      } else if (rhsEntity.isNumber()) {
-        clauseResultTable.filterColumn(1, { std::stoi(rhsEntity.getValue()) });
       } else {
         assert(false);
       }
@@ -405,19 +484,22 @@ namespace Pql {
     const Entity& lhsEntity = params[1];
     const Entity& rhsEntity = params[2];
 
+    const std::string header1 = synonymEntity.getValue();
     std::string header2 = ""; // only second header can have different possible values
 
     if (lhsEntity.isSynonym()) { // Guaranteed to be of type VARIABLE
       header2 = lhsEntity.getValue();
+      clauseResultTable.filterColumn(1, getValuesFromEntity(lhsEntity));
     } else if (lhsEntity.isName()) {
-      clauseResultTable.filterColumn(1, { pkb.getIntRefFromEntity(lhsEntity.getValue()) }); // filter second column 
+      clauseResultTable.filterColumn(1, { pkb.getIntRefFromEntity(lhsEntity.getValue()) });
     }
     // else wildcard. do not join with any tables. 
 
     std::string postfixExpr = rhsEntity.getValue();
     if (rhsEntity.isExpression()) {
-      clauseResultTable.filterColumn(2, { pkb.getIntRefFromEntity(postfixExpr) }); // filter third column
+      clauseResultTable.filterColumn(2, { pkb.getIntRefFromEntity(postfixExpr) });
     } else if (rhsEntity.isSubExpression()) {
+      // Manual filtering for sub expressions
       for (const Row& row : clauseResultTable.getData()) {
         const bool doesNotMatch = pkb.getEntityFromIntRef(row[2]).find(postfixExpr) == std::string::npos;
         if (doesNotMatch) {
@@ -427,7 +509,8 @@ namespace Pql {
     }
     // else wildcard. do not join with any tables. 
 
-    clauseResultTable.setHeader({ synonymEntity.getValue(), header2, "" });
+    clauseResultTable.dropColumn(2); // drop third column
+    clauseResultTable.setHeader({ header1, header2 });
   }
 
   void PqlEvaluator::constructPatternCondTableFromClause(Table& clauseResultTable, const Clause& clause) const {
@@ -436,16 +519,18 @@ namespace Pql {
     const Entity& synonymEntity = params[0];
     const Entity& condEntity = params[1];
 
+    const std::string header1 = synonymEntity.getValue();
     std::string header2 = ""; // only second header can have different possible values
 
     if (condEntity.isSynonym()) { // Guaranteed to be of type VARIABLE
       header2 = condEntity.getValue();
+      clauseResultTable.filterColumn(1, getValuesFromEntity(condEntity));
     } else if (condEntity.isName()) {
-      clauseResultTable.filterColumn(1, { pkb.getIntRefFromEntity(condEntity.getValue()) }); // filter second column
+      clauseResultTable.filterColumn(1, { pkb.getIntRefFromEntity(condEntity.getValue()) });
     }
     // else wildcard. do not join with any tables. 
 
-    clauseResultTable.setHeader({ synonymEntity.getValue(), header2 });
+    clauseResultTable.setHeader({ header1, header2 });
   }
 
   void PqlEvaluator::constructWithTableFromClause(Table& clauseResultTable, const Clause& clause) const {
@@ -460,41 +545,12 @@ namespace Pql {
       if (lhsEntity.getValue() == rhsEntity.getValue()) {
         clauseResultTable.insertRow({ 0 }); // Dummy row to signify True
       }
-      return;
-    }
-
-    // LHS and RHS both not constants - Special case: stmt.stmt#/prog_line = constant.value
-    if ((lhsEntity.isProgLineSynonym() || 
-      lhsEntity.getAttributeRefType() == AttributeRefType::STMT_NUMBER) && 
-      rhsEntity.getAttributeRefType() == AttributeRefType::VALUE) {
-      Table& lhsTable = getTableFromEntity(lhsEntity);
-      Table finalTable(2);
-      for (Row row : lhsTable.getData()) {
-        const int intRef = pkb.getIntRefFromEntity(std::to_string(row[0]));
-        if (intRef != -1) {
-          finalTable.insertRow({ row[0], intRef });
-        }
-      }
-      finalTable.setHeader({ lhsEntity.getValue(), rhsEntity.getValue() });
-      clauseResultTable = std::move(finalTable);
-      return;
-    } else if ((rhsEntity.isProgLineSynonym() || 
-      rhsEntity.getAttributeRefType() == AttributeRefType::STMT_NUMBER) && 
-      lhsEntity.getAttributeRefType() == AttributeRefType::VALUE) {
-      Table& rhsTable = getTableFromEntity(rhsEntity);
-      Table finalTable(2);
-      for (Row row : rhsTable.getData()) {
-        const int intRef = pkb.getIntRefFromEntity(std::to_string(row[0]));
-        if (intRef != -1) {
-          finalTable.insertRow({ row[0], intRef });
-        }
-      }
       finalTable.setHeader({ rhsEntity.getValue(), lhsEntity.getValue() });
       clauseResultTable = std::move(finalTable);
       return;
     }
 
-    // LHS and RHS both not constants - Other case
+    // LHS and RHS both not constants
     int lhsColumnIdxToJoin = -1;
     if ((lhsEntity.isProgLineSynonym() || lhsEntity.isAttributeRef()) &&
       (rhsEntity.isProgLineSynonym() || rhsEntity.isAttributeRef())) {
@@ -533,28 +589,22 @@ namespace Pql {
     const bool isLhsNameOrNum = lhsEntity.isName() || lhsEntity.isNumber();
     const Entity& synonymEntity = isLhsNameOrNum ? rhsEntity : lhsEntity;
     const Entity& constantEntity = isLhsNameOrNum ? lhsEntity : rhsEntity;
-
-    const bool isReferenceToStmtNumber = synonymEntity.getAttributeRefType() == AttributeRefType::STMT_NUMBER ||
-      synonymEntity.getType() == EntityType::PROG_LINE;
-    const int filterValue = isReferenceToStmtNumber
-      ? std::stoi(constantEntity.getValue())
-      : pkb.getIntRefFromEntity(constantEntity.getValue());
-
+    const std::unordered_set<int> filterValueSet{ pkb.getIntRefFromEntity(constantEntity.getValue()) };
+    const std::string& synonymName = synonymEntity.getValue();
     if (needsAttrRefMapping(synonymEntity)) {
       clauseResultTable = std::move(getAttrRefMappingTableFromEntity(synonymEntity)); // Two column table
-      clauseResultTable.filterColumn(1, { filterValue });
-      clauseResultTable.setHeader({ synonymEntity.getValue(), "" });
+      clauseResultTable.filterColumn(1, filterValueSet);
+      clauseResultTable.setHeader({ synonymName, "" });
     } else {
       clauseResultTable = std::move(getTableFromEntity(synonymEntity)); // One column table
-      clauseResultTable.filterColumn(0, { filterValue });
-      clauseResultTable.setHeader({ synonymEntity.getValue() });
+      clauseResultTable.filterColumn(0, filterValueSet);
+      clauseResultTable.setHeader({ synonymName });
     }
   }
 
-  // Get table from given entity 
-  // If entity is a line number or variable name, return a table with a row with the entity's value.
-  Table PqlEvaluator::getTableFromEntity(const Entity& entity) const {
-    switch (entity.getType()) {
+  // Get table from given synonym entity 
+  Table PqlEvaluator::getTableFromEntity(const Entity& synonymEntity) const {
+    switch (synonymEntity.getType()) {
     case EntityType::PROG_LINE:
     case EntityType::STMT:
       return pkb.getStmtTable();
@@ -576,11 +626,38 @@ namespace Pql {
       return pkb.getConstTable();
     case EntityType::PROCEDURE:
       return pkb.getProcTable();
-    case EntityType::NUMBER:
-    case EntityType::NAME:
     default:
       assert(false);
       return Table();
+    }
+  }
+
+  std::unordered_set<int> PqlEvaluator::getValuesFromEntity(const Entity& synonymEntity) const {
+    switch (synonymEntity.getType()) {
+    case EntityType::PROG_LINE:
+    case EntityType::STMT:
+      return pkb.getStmtIntRefs();
+    case EntityType::READ:
+      return pkb.getReadIntRefs();
+    case EntityType::PRINT:
+      return pkb.getPrintIntRefs();
+    case EntityType::CALL:
+      return pkb.getCallIntRefs();
+    case EntityType::WHILE:
+      return pkb.getWhileIntRefs();
+    case EntityType::IF:
+      return pkb.getIfIntRefs();
+    case EntityType::ASSIGN:
+      return pkb.getAssignIntRefs();
+    case EntityType::VARIABLE:
+      return pkb.getVarIntRefs();
+    case EntityType::CONSTANT:
+      return pkb.getConstIntRefs();
+    case EntityType::PROCEDURE:
+      return pkb.getProcIntRefs();
+    default:
+      assert(false);
+      return {};
     }
   }
 
@@ -624,19 +701,38 @@ namespace Pql {
     }
 
     const std::vector<Entity>& queryTargets = query.getTargets();
-    std::vector<int> columns;
-    for (Entity target : queryTargets) {
-      columns.emplace_back(resultTable.getColumnIndex(target.getValue()));
+    const int numTargets = queryTargets.size();
+
+    // Header -> Column index mapping
+    std::unordered_map<std::string, int> headerToColIdxMapping;
+    std::vector<std::string>& headers = resultTable.getHeader();
+    for (uint32_t i = 0; i < headers.size(); i++) {
+      headerToColIdxMapping[headers[i]] = i;
     }
 
+    // Query target index -> Table Column index mapping
+    std::vector<int> targetToTableColIdxMapping;
+    targetToTableColIdxMapping.reserve(numTargets);
+
+    // Query target index -> mapping function
+    std::vector<std::string(*)(const Pkb&, const int)> targetToFunctionMapping;
+    targetToFunctionMapping.reserve(numTargets);
+
+    for (const Entity& target : queryTargets) {
+      targetToTableColIdxMapping.emplace_back(headerToColIdxMapping[target.getValue()]);
+      targetToFunctionMapping.emplace_back(getMappingFunction(target));
+    }
+
+    // Insert results
     std::unordered_set<std::string> set; // for checking of repeated elements
     set.reserve(resultTable.size()); // optimization to avoid rehashing
     for (const Row& row : resultTable.getData()) {
       std::string outputLine;
-      for (size_t i = 0; i < columns.size(); i++) {
-        const int rowColumnIdx = columns[i];
+      for (int i = 0; i < numTargets; i++) {
+        const int tableColIdx = targetToTableColIdxMapping[i];
+        std::string(*mappingFunction)(const Pkb&, const int)  = targetToFunctionMapping[i];
         outputLine
-          .append(mapIntRefToResultValue(queryTargets[i], row[rowColumnIdx]))
+          .append(mappingFunction(pkb, row[tableColIdx]))
           .append(" ");
       }
       outputLine.pop_back();
@@ -645,43 +741,6 @@ namespace Pql {
         set.emplace(outputLine);
         results.emplace_back(outputLine);
       }
-    }
-  }
-
-  std::string PqlEvaluator::mapIntRefToResultValue(const Pql::Entity& entity, const int intRef) const {
-    if (needsAttrRefMapping(entity)) {
-      switch (entity.getType()) {
-      case Pql::EntityType::CALL:
-        return pkb.getProcNameFromCallStmt(intRef);
-      case Pql::EntityType::READ:
-        return pkb.getVarNameFromReadStmt(intRef);
-      case Pql::EntityType::PRINT:
-        return pkb.getVarNameFromPrintStmt(intRef);
-      default:
-        assert(false);
-        return "";
-      }
-    }
-
-    switch (entity.getType()) {
-    case EntityType::PROG_LINE:
-    case EntityType::STMT:
-    case EntityType::READ:
-    case EntityType::PRINT:
-    case EntityType::CALL:
-    case EntityType::WHILE:
-    case EntityType::IF:
-    case EntityType::ASSIGN:
-      return std::to_string(intRef);
-
-    case EntityType::VARIABLE:
-    case EntityType::CONSTANT:
-    case EntityType::PROCEDURE:
-      return pkb.getEntityFromIntRef(intRef);
-
-    default:
-      assert(false);
-      return "";
     }
   }
 }

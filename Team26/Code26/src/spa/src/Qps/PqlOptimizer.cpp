@@ -83,10 +83,8 @@ namespace Pql {
     for (int i = 2; i < n; i++) {
       ClauseNode localMinCostNode = globalMinCostNode;
       localMinCostNode.cost = LLONG_MAX;
-      for (size_t j = 0; j < nonJoinedIndices.size(); j++) {
-        std::unordered_set<int>::iterator it = nonJoinedIndices.begin();
-        std::advance(it, j);
-        ClauseNode joinedNode(globalMinCostNode, clauseNodes[*it]);
+      for (const int nonJoinedIndex : nonJoinedIndices) {
+        ClauseNode joinedNode(globalMinCostNode, clauseNodes[nonJoinedIndex]);
         if (joinedNode.cost < localMinCostNode.cost) {
           localMinCostNode = joinedNode;
         }

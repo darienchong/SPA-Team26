@@ -14,6 +14,7 @@
 #include "DesignExtractor.h"
 #include "Token.h"
 #include "Tokeniser.h"
+#include "SpaException.h"
 
 Spa::Spa()
   : pkb(Pkb()) {
@@ -56,8 +57,14 @@ void Spa::evaluateQuery(const std::string& queryString, std::list<std::string>& 
       .notConsumingWhitespace()
       .tokenise(ss);
     Pql::PqlParser parser(tokens);
-    Pql::Query queryStruct = parser.parseQuery();
-    Pql::PqlEvaluator evaluator(pkb, queryStruct, results);
+    Pql::Query queryObject = parser.parseQuery();
+    if (queryObject.hasSemanticError()) {
+      if (queryObject.isBoolean()) {
+        results.push_back("FALSE");
+      }
+      throw Pql::SemanticError(queryObject.getSemanticErrorMessage());
+    }
+    Pql::PqlEvaluator evaluator(pkb, queryObject, results);
     evaluator.evaluateQuery();
   } catch (const std::exception& e) {
     std::cout << e.what() << std::endl;
