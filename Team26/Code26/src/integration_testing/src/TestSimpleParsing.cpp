@@ -2757,9 +2757,6 @@ TEST_CASE("[TestSimpleParser] Affects relation - Example CFG (Figure 5) - Advanc
   }
 
   SECTION("AffectsT") {
-    SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
-
     Table affectsTTable = pkb.getAffectsTTable();
 
     REQUIRE(affectsTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(11) }));
@@ -3351,4 +3348,80 @@ TEST_CASE("[TestSimpleParser] AffectsBip relation - Week 7 lecture quiz", "[Simp
   REQUIRE(affectsBipTable.contains({ pkb.getIntRefFromStmtNum(24), pkb.getIntRefFromStmtNum(27) }));
   REQUIRE(affectsBipTable.contains({ pkb.getIntRefFromStmtNum(26), pkb.getIntRefFromStmtNum(11) }));
   REQUIRE(affectsBipTable.size() == 23);
+}
+
+/////////////////////////////
+// AffectsBipStar relation //
+/////////////////////////////
+
+TEST_CASE("[TestSimpleParser] AffectsBipStar relation - Call proc directly modifies target var", "[SimpleParser][AffectsBipStar]") {
+  std::string string("procedure B{call C;call C;call C;}procedure C{d=a;a=b;b=c;c=d;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTTable = pkb.getAffectsBipTTable();
+
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(affectsBipTTable.size() == 11);
+}
+
+TEST_CASE("[TestSimpleParser] AffectsBipStar relation - While loop", "[SimpleParser][AffectsBipStar]") {
+  std::string string("procedure loop{while(true==false){d=a;a=b;b=c;c=d;}}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTTable = pkb.getAffectsBipTTable();
+
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(affectsBipTTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(affectsBipTTable.size() == 16);
+}
+
+TEST_CASE("[TestSimpleParser] AffectsBipStar relation - Call while while loop", "[SimpleParser][AffectsBipStar]") {
+  std::string string("procedure call{while(1==2){call loop;}}procedure loop{while(true==false){d=a;a=b;b=c;c=d;}}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
+
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractDesignAbstractions();
+
+  Table affectsBipTTable = pkb.getAffectsBipTTable();
+
+  REQUIRE(affectsBipTTable.size() == 16);
 }

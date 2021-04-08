@@ -144,106 +144,245 @@ namespace {
 
   void fillAffectsBipTable(Pkb& pkb) {
     const Table assignTable = pkb.getAssignTable();
-    const Table callTable = pkb.getCallTable();
-    const Table modifiesPTable = pkb.getModifiesPTable();
     const Table readTable = pkb.getReadTable();
+    const Table affectsBipTable = pkb.getAffectsBipTable();
+    const Table procTable = pkb.getProcTable();
 
-    // Fill up the affects table for each assign statement
-    for (const Row assignRow : assignTable.getData()) {
-      const int affecterAssignStmt = pkb.getStmtNumFromIntRef(assignRow[0]);
+    for (const Row procRow : procTable.getData()) {
+      const int startStmt = pkb.getStartStmtFromProc(pkb.getEntityFromIntRef(procRow[0]));
 
-      // Extract the varModifed by affecterAssignStmt
-      std::string varModified;
-      for (const std::string& variable : pkb.getModifiedBy(affecterAssignStmt)) {
-        varModified = variable;
-      }
+      std::stack<std::tuple<Cfg::BipNode, std::unordered_set<int>, std::vector<int>>> procSnapshots;
+      procSnapshots.push(std::make_tuple(Cfg::BipNode{ startStmt, 0, Cfg::NodeType::NORMAL }, std::unordered_set<int>(), std::vector<int>()));
 
-      const std::unordered_set<int> potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
-      if (potentiallyAffectedAssigns.empty()) {
-        continue;  // shortcircuit if no assign uses the varModified
-      }
+      while (!procSnapshots.empty()) {
+        std::tuple<Cfg::BipNode, std::unordered_set<int>, std::vector<int>> currProcSnapshot = procSnapshots.top();
+        procSnapshots.pop();
 
-      // =============== //
-      //  DFS algorithm  //
-      // =============== //
-      std::unordered_set<int> visited; // keep track of visited nodes
-      std::stack<Cfg::BipNode> dfsStack; // stack for dfs
-      std::stack<int> branchStack; // to branch back
-      const std::string assignProc = pkb.getProcFromStmt(affecterAssignStmt); // procedure that statement belongs to
+        std::stack<Cfg::BipNode> procTraversalStack;
+        std::unordered_set<int> procTraversalVisited = std::get<1>(currProcSnapshot);
+        std::vector<int> procTraversalBranchBack = std::get<2>(currProcSnapshot);
 
-      // Get the next stmts in the CFG from the starting affecterAssignStmt stmt and push to the stack
-      for (const Cfg::BipNode& nextEdge : pkb.getNextStmtsFromCfgBip(affecterAssignStmt)) {
-        dfsStack.push(nextEdge);
-      }
+        procTraversalStack.push(std::get<0>(currProcSnapshot));
 
-      while (!dfsStack.empty()) {
-        const Cfg::BipNode currentNode = dfsStack.top();
-        dfsStack.pop();
-        const int currentStmt = currentNode.node;
+        while (!procTraversalStack.empty()) {
+          const Cfg::BipNode currNode = procTraversalStack.top();
+          procTraversalStack.pop();
 
-        // Check and pop branch stack if current node is a branch back node
-        if (currentNode.type == Cfg::NodeType::BRANCH_BACK) {
-          if (!branchStack.empty()) {
-            assert(currentNode.label == branchStack.top());
-            branchStack.pop();
+          const int currStmt = currNode.node;
+
+
+          if (procTraversalVisited.count(currStmt) == 1) {
+            continue;
           }
-        }
+          procTraversalVisited.emplace(currStmt);
 
-        // Check if currentStmt has been visited
-        if (visited.count(currentStmt) == 1) {
-          // Clear any branchStack top element
-          if (currentNode.type == Cfg::NodeType::DUMMY) {
-            for (const Cfg::BipNode& branchBackNode : pkb.getNextStmtsFromCfgBip(currentStmt)) {
-              if (!branchStack.empty() && branchBackNode.label == branchStack.top()) {
-                dfsStack.push(branchBackNode);
+          // Check for branch in and branch back
+          if (currNode.type == Cfg::NodeType::BRANCH_BACK) {
+            assert(currNode.label == procTraversalBranchBack.back());
+            procTraversalBranchBack.pop_back();
+          }
+          else if (currNode.type == Cfg::NodeType::BRANCH_IN) {
+            procTraversalBranchBack.push_back(currNode.label);
+          }
+
+          if (assignTable.contains({ pkb.getIntRefFromStmtNum(currStmt) })) {
+
+            std::stack<std::tuple<int, Cfg::BipNode, std::unordered_set<int>, std::vector<int>, std::vector<std::vector<int>>>> snapshotStack;
+            std::vector<int> branchCopy;
+            std::vector<std::vector<int>> branchStmts;
+            RowSet affectsSet;
+            for (int branch : procTraversalBranchBack) {
+              branchCopy.push_back(branch);
+              branchStmts.push_back(std::vector<int>());
+            }
+
+            Cfg::BipNode nodeAfterAssign = pkb.getNextStmtsFromCfgBip(currStmt)[0];
+
+            snapshotStack.push(std::make_tuple(currStmt, nodeAfterAssign, std::unordered_set<int>(), branchCopy, branchStmts));
+
+            while (!snapshotStack.empty()) {
+              auto snapshot = snapshotStack.top();
+              snapshotStack.pop();
+
+              const int currTargetAssign = std::get<0>(snapshot);
+              const Cfg::BipNode startNode = std::get<1>(snapshot);
+              std::unordered_set<int> assignTraversalVisited = std::get<2>(snapshot);
+              std::vector<int> assignTraversalBranchBack = std::get<3>(snapshot);
+              std::vector<std::vector<int>> stmtsInBranch = std::get<4>(snapshot);
+
+              // Extract the varModifed by currTargetAssign
+              std::string varModified;
+              for (const std::string& variable : pkb.getModifiedBy(currTargetAssign)) {
+                varModified = variable;
+              }
+
+              // Extract the assign statements that uses varModified
+              const std::unordered_set<int> potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
+              if (potentiallyAffectedAssigns.empty()) {
+                continue;  // shortcircuit if no assign uses the varModified
+              }
+
+              std::stack<Cfg::BipNode> assignTraversalStack;
+              assignTraversalStack.push(startNode);
+
+              // =============== //
+              //  DFS algorithm  //
+              // =============== //
+
+              while (!assignTraversalStack.empty()) {
+                const Cfg::BipNode currentAssignTraversalNode = assignTraversalStack.top();
+                assignTraversalStack.pop();
+
+                const int currentAssignTraversalStmt = currentAssignTraversalNode.node;
+                const int currentAssignTraversalLabel = currentAssignTraversalNode.label;
+                const Cfg::NodeType currentAssignTraversalType = currentAssignTraversalNode.type;
+
+                // Check for branch in and branch back
+                if (currentAssignTraversalType == Cfg::NodeType::BRANCH_BACK) {
+                  assert(currentAssignTraversalLabel == assignTraversalBranchBack.back());
+                  assert(stmtsInBranch.size() == assignTraversalBranchBack.size());
+                  assignTraversalBranchBack.pop_back();
+                  for (int stmt : stmtsInBranch.back()) {
+                    assignTraversalVisited.erase(stmt);
+                  }
+                  stmtsInBranch.pop_back();
+                }
+                else if (currentAssignTraversalType == Cfg::NodeType::BRANCH_IN) {
+                  assert(stmtsInBranch.size() == assignTraversalBranchBack.size());
+                  assignTraversalBranchBack.push_back(currentAssignTraversalLabel);
+                  stmtsInBranch.push_back(std::vector<int>());
+                }
+
+                if (assignTraversalVisited.count(currentAssignTraversalStmt) == 1) {
+                  continue;
+                }
+                assignTraversalVisited.emplace(currentAssignTraversalStmt);
+                if (!assignTraversalBranchBack.empty()) {
+                  stmtsInBranch.back().push_back(currentAssignTraversalStmt);
+                }
+
+                // Check if currentStmt satisfy the AffectsBip(affecterAssignStmt, currentStmt) relation
+                if (potentiallyAffectedAssigns.count(currentAssignTraversalStmt) == 1) {
+                  pkb.addAffectsBip(currTargetAssign, currentAssignTraversalStmt); // add AffectsBip relation to pkb
+                  Row affects = { currTargetAssign, currentAssignTraversalStmt };
+                  if (affectsSet.count(affects) == 0) {
+                    affectsSet.emplace(affects);
+                    Row affectsStar = { currStmt, currentAssignTraversalStmt };
+                    affectsSet.emplace(affectsStar);
+
+                    std::vector<int> branchDup;
+                    std::vector<std::vector<int>> branchStmtDup;
+                    for (const int branch : assignTraversalBranchBack) {
+                      branchDup.push_back(branch);
+                      branchStmtDup.push_back(std::vector<int>());
+                    }
+                    Cfg::BipNode nodeAfterCurrentAssign = pkb.getNextStmtsFromCfgBip(currentAssignTraversalStmt)[0];
+                    snapshotStack.push(std::make_tuple(currentAssignTraversalStmt, nodeAfterCurrentAssign, std::unordered_set<int>(), branchDup, branchStmtDup));
+                  }
+                }
+
+                // Check if currentStmt modifies the varModified
+                // Stop searching this path if the currentStmt is an assign stmt or read stmt
+                const bool isModified = pkb.getModifiedBy(currentAssignTraversalStmt).count(varModified) == 1;
+                const bool isReadOrAssignStmt = readTable.contains({ pkb.getIntRefFromStmtNum(currentAssignTraversalStmt) }) || assignTable.contains({ pkb.getIntRefFromStmtNum(currentAssignTraversalStmt) });
+                if (isModified && isReadOrAssignStmt) {
+                  continue;
+                }
+
+                // Adding the next statement for DFS - everytime branching occurs within a proc, we need to duplicate and create a new snapshot
+                std::vector<Cfg::BipNode> nextAssignTraversalNodes = pkb.getNextStmtsFromCfgBip(currentAssignTraversalStmt);
+                if (nextAssignTraversalNodes.size() == 1) { // if size only 1, then just add directly to stack
+                  const Cfg::BipNode& nextNode = nextAssignTraversalNodes[0];
+                  if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
+                    if (!assignTraversalBranchBack.empty() && nextNode.label == assignTraversalBranchBack.back()) {
+                      assignTraversalStack.push(nextNode);
+                    }
+                  }
+                  else {
+                    assignTraversalStack.push(nextNode);
+                  }
+                }
+                else {
+                  for (const Cfg::BipNode& nextNode : nextAssignTraversalNodes) {
+                    // If the next node is of type branch in and has already been visited
+                    assert(!(nextNode.type == Cfg::NodeType::BRANCH_IN && assignTraversalVisited.count(nextNode.node) == 1)); // should always be true
+                    // If next node is of type branch back, check that the edge label corresponds to branch stack's top
+                    if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
+                      if (!assignTraversalBranchBack.empty() && nextNode.label == assignTraversalBranchBack.back()) {
+                        assignTraversalStack.push(nextNode);
+                      }
+                    }
+                    // Else current node is a while/if branch, multiple paths - create new snapshot
+                    else {
+                      std::unordered_set<int> visitedDup;
+                      std::vector<int> branchDup;
+                      std::vector<std::vector<int>> branchStmtDup;
+                      for (const int visited : assignTraversalVisited) {
+                        visitedDup.emplace(visited);
+                      }
+                      for (const int branch : assignTraversalBranchBack) {
+                        branchDup.push_back(branch);
+                      }
+                      for (const std::vector<int> stmts : stmtsInBranch) {
+                        branchStmtDup.push_back(std::vector<int>());
+                        for (const int stmt : stmts) {
+                          branchStmtDup.back().push_back(stmt);
+                        }
+                      }
+                      snapshotStack.push(std::make_tuple(currTargetAssign, nextNode, visitedDup, branchDup, branchStmtDup));
+                    }
+                  }
+                }
+              }
+            }
+
+            for (Row row : affectsSet) {
+              pkb.addAffectsBipT(row[0], row[1]);
+            }
+          }
+
+          std::vector<Cfg::BipNode> nextProcTraversalNodes = pkb.getNextStmtsFromCfgBip(currStmt);
+          if (nextProcTraversalNodes.size() == 1) { // if size only 1, then just add directly to stack
+            const Cfg::BipNode& nextNode = nextProcTraversalNodes[0];
+            // If the next node is of type branch in and has already been visited, push the node directly after current node instead
+            if (nextNode.type == Cfg::NodeType::BRANCH_IN && procTraversalVisited.count(nextNode.node) == 1) {
+              const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(currStmt); // Note: get from CFG, not from CFGBip
+              assert(nextStmts.size() == 1);
+              procTraversalStack.push(Cfg::BipNode{ nextStmts[0], 0, Cfg::NodeType::NORMAL });
+            }
+            // If the next node is of type branch back, check that the edge label corresponds to branch stack's top
+            else if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
+              if (!procTraversalBranchBack.empty() && nextNode.label == procTraversalBranchBack.back()) {
+                procTraversalStack.push(nextNode);
+              }
+            }
+            else {
+              procTraversalStack.push(nextNode);
+            }
+          }
+          else {
+            for (const Cfg::BipNode& nextNode : nextProcTraversalNodes) {
+              // If next node is of type branch back, check that the edge label corresponds to branch stack's top
+              if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
+                if (!procTraversalBranchBack.empty() && nextNode.label == procTraversalBranchBack.back()) {
+                  procTraversalStack.push(nextNode);
+                }
+              }
+              // Else current node is a while/if branch, multiple paths - create new snapshot
+              else {
+                std::unordered_set<int> visitedProcDup;
+                std::vector<int> branchProcDup;
+                for (const int visited : procTraversalVisited) {
+                  visitedProcDup.emplace(visited);
+                }
+                for (const int branch : procTraversalBranchBack) {
+                  branchProcDup.push_back(branch);
+                }
+                procSnapshots.push(std::make_tuple(nextNode, visitedProcDup, branchProcDup));
               }
             }
           }
-          continue; // Skip this currentStmt if already visited
         }
-        visited.emplace(currentStmt); // Set currentStmt as visited
-
-        // Check if currentStmt satisfy the AffectsBip(affecterAssignStmt, currentStmt) relation
-        if (potentiallyAffectedAssigns.count(currentStmt) == 1) {
-          pkb.addAffectsBip(affecterAssignStmt, currentStmt); // add AffectsBip relation to pkb
-          pkb.addAffectsBipT(affecterAssignStmt, currentStmt); // add AffectsBipT relation to pkb
-        }
-
-        // Check if currentStmt modifies the varModified
-        // Stop searching this path if the currentStmt is an assign stmt or read stmt
-        const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
-        const bool isReadOrAssignStmt = readTable.contains({ pkb.getIntRefFromStmtNum(currentStmt) }) || assignTable.contains({ pkb.getIntRefFromStmtNum(currentStmt) });
-        if (isModified && isReadOrAssignStmt) {
-          continue;
-        }
-
-        // Add to branch stack if current node is a branching in node - for keeping track of which branch back node to take
-        const bool isBranchInToSameProc = assignProc == pkb.getProcFromStmt(currentNode.node);
-        if (currentNode.type == Cfg::NodeType::BRANCH_IN && !isBranchInToSameProc) {
-          branchStack.push(currentNode.label);
-        }
-
-        // Push all next stmts into the stack under certain conditions
-        for (const Cfg::BipNode& nextNode : pkb.getNextStmtsFromCfgBip(currentStmt)) {
-          // If the next node is of type branch in and has already been visited, push the node directly after current node instead
-          if (nextNode.type == Cfg::NodeType::BRANCH_IN && visited.count(nextNode.node) == 1) {
-            const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(currentStmt);
-            for (const int next : nextStmts) { // Note: get from CFG, not from CFGBip
-              dfsStack.push(Cfg::BipNode{ next, 0, Cfg::NodeType::NORMAL });
-            }
-          }
-          // If next node is of type branch back, check that the edge label corresponds to branch stack's top
-          else if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-            if (branchStack.empty() || nextNode.label == branchStack.top()) {
-              dfsStack.push(nextNode);
-            }
-          }
-          // Else next node is of type normal or dummy or (is a branch in node and is not in visited)
-          else {
-            dfsStack.push(nextNode);
-          }
-        }
-
       }
     }
   }
