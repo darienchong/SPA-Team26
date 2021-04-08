@@ -151,9 +151,6 @@ namespace SourceProcessor {
      */
     int parseAssign();
 
-    // TODO: For Iteration 2
-    //int parseCall();
-
     /**
      * Parses tokens into a statement if valid and returns its statement number.
      * Statements are as follow - if/ while/ read/ print/ call/ assign.

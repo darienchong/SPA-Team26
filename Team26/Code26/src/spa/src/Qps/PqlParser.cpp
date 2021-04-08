@@ -130,7 +130,24 @@ namespace {
    * @return Number in string format with leading zeros removed.
    */
   std::string removeLeadingZerosFromNumber(const std::string& numberString) {
-    return std::to_string(std::stoll(numberString));
+    std::string removedZeroesNumberString;
+    bool isFirstNonZeroReached = false;
+    for (const char& digit : numberString) {
+      if (isFirstNonZeroReached) {
+        removedZeroesNumberString.push_back(digit);
+      } else {
+        if (digit != '0') {
+          isFirstNonZeroReached = true;
+          removedZeroesNumberString.push_back(digit);
+        }
+      }
+    }
+
+    if (removedZeroesNumberString.empty()) {
+      return "0";
+    }
+
+    return removedZeroesNumberString;
   }
 }
 

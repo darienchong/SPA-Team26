@@ -186,7 +186,7 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
     }
   }
 
-  std::unordered_map<int, std::vector<Row>> hashmap;
+  std::unordered_map<Row, std::vector<Row>, RowHash> hashmap;
 
   const bool isOtherTableSmaller = otherTable.size() < size();
   const RowSet& lhsTableData = isOtherTableSmaller ? otherTable.data : data;
@@ -197,12 +197,12 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
   // Build phase: construct hash table mapping from common attributes to rows
   for (const Row& lhsTableRow : lhsTableData) {
 
-    std::uint32_t key = lhsTableDroppedIndexes.size();
-    for (const uint32_t& i : lhsTableDroppedIndexes) {
-      key ^= lhsTableRow[i] + 0x9e3779b9 + (key << 6) + (key >> 2);
+    Row key;
+    for (const int& i : lhsTableDroppedIndexes) {
+      key.emplace_back(lhsTableRow[i]);
     }
 
-    const bool isInMap = hashmap.count(key) == 1;;
+    const bool isInMap = hashmap.count(key) == 1;
     if (!isInMap) {
       hashmap[key] = { lhsTableRow };
     } else {
@@ -213,9 +213,9 @@ void Table::innerJoin(const Table& otherTable, const std::vector<std::pair<int, 
   // Probe phase: find relevant rows in hash table
   RowSet newData;
   for (const Row& rhsTableRow : rhsTableData) {
-    std::uint32_t key = rhsTableDroppedIndexes.size();
+    Row key;
     for (const uint32_t& i : rhsTableDroppedIndexes) {
-      key ^= rhsTableRow[i] + 0x9e3779b9 + (key << 6) + (key >> 2);
+      key.emplace_back(rhsTableRow[i]);
     }
 
     const bool isInMap = hashmap.count(key) == 1;;

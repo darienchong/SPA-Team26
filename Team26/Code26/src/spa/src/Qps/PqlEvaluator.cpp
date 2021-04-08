@@ -187,82 +187,7 @@ namespace Pql {
 
   // Executes query and extract results
   void PqlEvaluator::evaluateQuery() {
-    if (canShortCircuit()) {
-      extractResults(Table());
-    } else {
-      extractResults(executeQuery());
-    }
-  }
-
-  bool PqlEvaluator::canShortCircuit() {
-    const std::vector<Clause>& clauses = query.getClauses();
-    for (const Clause& clause : clauses) {
-      const std::vector<Entity>& params = clause.getParams();
-      switch (clause.getType()) {
-      case ClauseType::FOLLOWS:
-      case ClauseType::FOLLOWS_T:
-      {
-        const Entity& lhsEntity = params[0];
-        const Entity& rhsEntity = params[1];
-        if (!lhsEntity.isWildcard() && lhsEntity == rhsEntity) {
-          return true;
-        }
-
-        const bool isRhsSmallerThanLhs =
-          lhsEntity.isNumber() &&
-          rhsEntity.isNumber() &&
-          stoll(rhsEntity.getValue()) < stoll(lhsEntity.getValue());
-        if (isRhsSmallerThanLhs) {
-          return true;
-        }
-      }
-      break;
-      case ClauseType::PARENT:
-      case ClauseType::PARENT_T:
-      {
-        const Entity& lhsEntity = params[0];
-        const Entity& rhsEntity = params[1];
-        if (!lhsEntity.isWildcard() && lhsEntity == rhsEntity) {
-          return true;
-        }
-        const bool isRhsSmallerThanLhs =
-          lhsEntity.isNumber() &&
-          rhsEntity.isNumber() &&
-          stoll(rhsEntity.getValue()) < stoll(lhsEntity.getValue());
-        if (isRhsSmallerThanLhs) {
-          return true;
-        }
-
-        const bool isLhsNotContainerStmt =
-          lhsEntity.isSynonym() &&
-          !lhsEntity.isStmtSynonym() &&
-          !lhsEntity.isWhileSynonym() &&
-          !lhsEntity.isIfSynonym() &&
-          !lhsEntity.isProgLineSynonym();
-        if (isLhsNotContainerStmt) {
-          return true;
-        }
-      }
-      break;
-      case ClauseType::USES_S:
-      {
-        const Entity& lhsEntity = params[0];
-        if (lhsEntity.isReadSynonym()) {
-          return true;
-        }
-      }
-      break;
-      case ClauseType::MODIFIES_S:
-      {
-        const Entity& lhsEntity = params[0];
-        if (lhsEntity.isPrintSynonym()) {
-          return true;
-        }
-      }
-      break;
-      }
-    }
-    return false;
+    extractResults(executeQuery());
   }
 
   //  Executes query and returns the result table
@@ -284,18 +209,14 @@ namespace Pql {
     Table finalResultTable = Table({ "" });
     finalResultTable.insertRow({ 0 }); // dummy row
 
-    // For BOOLEAN select, reaching this point would mean there exist some result
-    if (query.isBoolean()) {
-      return finalResultTable;
-    }
-
-    // For Non-BOOLEAN select, continue to join all tables
     // Initialise optimizer to get order of joining tables
     if (!clauses.empty()) {
       Optimizer optimizer(clauseResultTables);
       std::vector<int> order = optimizer.getOptimizedOrder();
 
-      finalResultTable = clauseResultTables[order[0]];
+      const int firstIdx = order[0];
+      clauseResultTables[firstIdx].dropColumn(""); // drop empty column - Guaranteed to be only 1 column max
+      finalResultTable = clauseResultTables[firstIdx];
 
       // Join each clause result table to finalResultTable
       for (size_t i = 1; i < clauseResultTables.size(); i++) {

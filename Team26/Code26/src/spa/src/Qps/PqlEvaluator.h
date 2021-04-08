@@ -24,14 +24,6 @@ namespace Pql {
     Table executeQuery() const;
 
     /**
-     * Check if any clause in the query can be short-circuited.
-     * Short-circuit means that the result will be empty.
-     *
-     * @return True if the query can be short-circuited. Otherwise, false.
-     */
-    bool canShortCircuit();
-
-    /**
      * Executes a given clause and returns the clause result table.
      *
      * @param clause Clause to be executed.

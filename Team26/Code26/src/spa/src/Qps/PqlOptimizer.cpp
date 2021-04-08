@@ -25,8 +25,9 @@ namespace Pql {
       cost = (long long)size * (long long)header.size();
     } else {
       // inner join
-      size = std::min(left.size, right.size);
-      cost = (long long)left.size * (long long)left.header.size() + (long long)right.size * (long long)right.header.size();
+      size = left.size + right.size;
+      cost = (long long)left.size * (long long)left.header.size() 
+        + (long long)right.size * (long long)right.header.size();
     }
   }
 
