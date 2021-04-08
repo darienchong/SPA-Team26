@@ -2,9 +2,7 @@
 
 #include <list>
 #include <unordered_map>
-#include <map>
 #include <unordered_set>
-#include <exception>
 #include <string>
 
 #include "Token.h"
@@ -79,11 +77,10 @@ namespace Pql {
   const static Token PROC_NAME{ TokenType::IDENTIFIER, "procName" };
   const static Token VAR_NAME{ TokenType::IDENTIFIER, "varName" };
   const static Token VALUE{ TokenType::IDENTIFIER, "value" };
-
   // STMT already defined
 
   // relRef : ModifiesS | UsesS | Parent | ParentT | Follows | FollowsT | Calls | CallsT | Next | 
-  //          NextT | Affects | AffectsT
+  //          NextT | Affects | AffectsT | NextBip | NextBipT | AffectsBip | AffectsBipT
   const static Token MODIFIES{ TokenType::IDENTIFIER, "Modifies" };
   const static Token USES{ TokenType::IDENTIFIER, "Uses" };
   const static Token PARENT{ TokenType::IDENTIFIER, "Parent" };
@@ -91,11 +88,13 @@ namespace Pql {
   const static Token CALLS{ TokenType::IDENTIFIER, "Calls" };
   const static Token NEXT{ TokenType::IDENTIFIER, "Next" };
   const static Token AFFECTS{ TokenType::IDENTIFIER, "Affects" };
+  const static Token NEXT_BIP{ TokenType::IDENTIFIER, "NextBip" };
+  const static Token AFFECTS_BIP{ TokenType::IDENTIFIER, "AffectsBip" };
 
   /**
    * Map that maps a given token to the corresponding entity type.
    */
-  const static std::map<Token, EntityType> tokenToDesignEntityTypeMapper({
+  const static std::unordered_map<Token, EntityType> tokenToDesignEntityTypeMapper({
       {STMT, EntityType::STMT},
       {READ, EntityType::READ},
       {PRINT, EntityType::PRINT},
@@ -112,7 +111,7 @@ namespace Pql {
   /**
    * Map that maps a given token to the corresponding attribute reference type.
    */
-  const static std::map<Token, AttributeRefType> tokenToAttributeRefTypeMapper({
+  const static std::unordered_map<Token, AttributeRefType> tokenToAttributeRefTypeMapper({
       {PROC_NAME, AttributeRefType::PROC_NAME},
       {VAR_NAME, AttributeRefType::VAR_NAME},
       {VALUE, AttributeRefType::VALUE},
@@ -131,6 +130,61 @@ namespace Pql {
       EntityType::IF,
       EntityType::ASSIGN,
       EntityType::PROG_LINE
+    });
+
+  /**
+   * Set that contains the tokens that refers to a relation with transitive version.
+   */
+  const static std::unordered_set<Token> transitiveRelationTokens({
+      FOLLOWS, PARENT, CALLS, NEXT, AFFECTS, NEXT_BIP, AFFECTS_BIP
+    });
+
+  /**
+   * Hashing algorithm for the (EntityType, AttributeRefType) pair
+   */
+  struct EntityTypeAttrRefTypePairHash {
+    std::size_t operator()(std::pair<EntityType, AttributeRefType> const& pair) const {
+      std::size_t h1 = std::hash<EntityType>{}(pair.first);
+      std::size_t h2 = std::hash<AttributeRefType>{}(pair.second);
+      return h1 ^ (h2 << 1);
+    }
+  };
+
+  /**
+   * Set that contains the semantically valid attribute references.
+   */
+  const static std::unordered_set<std::pair<EntityType, AttributeRefType>, EntityTypeAttrRefTypePairHash> 
+    semanticallyValidAttributeReferences({
+      {EntityType::PROCEDURE, AttributeRefType::PROC_NAME},
+      {EntityType::CALL, AttributeRefType::PROC_NAME},
+      {EntityType::VARIABLE, AttributeRefType::VAR_NAME},
+      {EntityType::READ, AttributeRefType::VAR_NAME},
+      {EntityType::PRINT, AttributeRefType::VAR_NAME},
+      {EntityType::CONSTANT, AttributeRefType::VALUE},
+      {EntityType::STMT, AttributeRefType::STMT_NUMBER},
+      {EntityType::READ, AttributeRefType::STMT_NUMBER},
+      {EntityType::PRINT, AttributeRefType::STMT_NUMBER},
+      {EntityType::CALL, AttributeRefType::STMT_NUMBER},
+      {EntityType::WHILE, AttributeRefType::STMT_NUMBER},
+      {EntityType::IF, AttributeRefType::STMT_NUMBER},
+      {EntityType::ASSIGN, AttributeRefType::STMT_NUMBER}
+    });
+
+  /**
+   * Set that contains the number references.
+   */
+  const static std::unordered_set<std::pair<EntityType, AttributeRefType>, EntityTypeAttrRefTypePairHash> 
+    numberReferences({
+      {EntityType::PROG_LINE, AttributeRefType::NONE},
+      {EntityType::NUMBER, AttributeRefType::NONE},
+      {EntityType::CONSTANT, AttributeRefType::VALUE},
+      {EntityType::STMT, AttributeRefType::STMT_NUMBER},
+      {EntityType::READ, AttributeRefType::STMT_NUMBER},
+      {EntityType::PRINT, AttributeRefType::STMT_NUMBER},
+      {EntityType::CALL, AttributeRefType::STMT_NUMBER},
+      {EntityType::WHILE, AttributeRefType::STMT_NUMBER},
+      {EntityType::IF, AttributeRefType::STMT_NUMBER},
+      {EntityType::ASSIGN, AttributeRefType::STMT_NUMBER}
     });
 
   /**
@@ -318,6 +372,38 @@ namespace Pql {
     void parseAffectsTClause(Clause& clauseUnderConstruction);
 
     /**
+     * Parses the NextBip clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseNextBipClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the NextBip* clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseNextBipTClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the AffectsBip clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseAffectsBipClause(Clause& clauseUnderConstruction);
+
+    /**
+     * Parses the AffectsBip* clause and its parameters and stores the result in the clause representation
+     * under construction.
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
+     */
+    void parseAffectsBipTClause(Clause& clauseUnderConstruction);
+
+    /**
      * Parses the Uses clause and its parameters and stores the result in the clause representation
      * under construction.
      *
@@ -334,10 +420,10 @@ namespace Pql {
     void parseModifiesClause(Clause& clauseUnderConstruction);
 
     /**
-     * Helper method used by parseUsesClause() and parseModifiesClause() that parses both Uses and 
+     * Helper method used by parseUsesClause() and parseModifiesClause() that parses both Uses and
      * Modifies clauses according to the given clause types. Stores the result in the clause representation
      * under construction.
-     * 
+     *
      * @param clauseUnderConstruction Clause representation object that is under construction.
      * @param procedureType UsesP or ModifiesP clause type.
      * @param stmtType UsesS or ModifiesS clause type.
@@ -430,10 +516,10 @@ namespace Pql {
     void parseProcRef(Clause& clauseUnderConstruction);
 
     /**
-     * Helper method that parses an entRef argument from the clause of the PQL query based on the ref 
+     * Helper method that parses an entRef argument from the clause of the PQL query based on the ref
      * type check function specified and stores the result in the clause representation under construction.
-     * 
-     * @param clauseUnderConstruction Clause representation object that is under construction. 
+     *
+     * @param clauseUnderConstruction Clause representation object that is under construction.
      * @param refTypeCheck Function that checks the synonym type of the entRef
      */
     void parseEntRef(Clause& clauseUnderConstruction, bool refTypeCheck(const Pql::EntityType&));
@@ -487,7 +573,7 @@ namespace Pql {
      * Checks if there are anymore tokens and returns the front token.
      * Does not consume the front token.
      * Throws a Syntax Error if there are no more tokens left.
-     * 
+     *
      * @return Front token.
      */
     Token getFrontToken();
@@ -495,7 +581,7 @@ namespace Pql {
     /**
      * Gets the synonym type from the specified synonym name.
      * This method will check if the synonym has been declared and adds to the semantic error
-     * messages if the synonym is not declared. 
+     * messages if the synonym is not declared.
      *
      * @param synonymName Name of the synonym.
      * @return Entity type that corresponds to the given synonym name.

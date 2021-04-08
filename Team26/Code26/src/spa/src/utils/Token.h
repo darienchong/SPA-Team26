@@ -61,17 +61,17 @@ struct Token {
   friend bool operator!=(const Token& lhs, const Token& rhs) {
     return !(lhs == rhs);
   }
-
-  friend bool operator<(const Token& lhs, const Token& rhs) {
-    return lhs.type != rhs.type ? lhs.type < rhs.type : lhs.value < rhs.value;
-  }
-  friend bool operator>(const Token& lhs, const Token& rhs) {
-    return rhs < lhs;
-  }
-  friend bool operator<=(const Token& lhs, const Token& rhs) {
-    return !(lhs > rhs);
-  }
-  friend bool operator>=(const Token& lhs, const Token& rhs) {
-    return !(lhs < rhs);
-  }
 };
+
+namespace std {
+  /**
+   * Hash function for the Token class.
+   */
+  template<> struct hash<Token> {
+    std::size_t operator()(Token const& token) const noexcept {
+      std::size_t h1 = std::hash<TokenType>{}(token.type);
+      std::size_t h2 = std::hash<std::string>{}(token.value);
+      return h1 ^ (h2 << 1);
+    }
+  };
+}

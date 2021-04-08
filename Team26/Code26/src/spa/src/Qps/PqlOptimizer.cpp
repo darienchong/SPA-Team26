@@ -2,13 +2,9 @@
 
 #include <assert.h>
 
-#include <map>
 #include <vector>
-#include <algorithm>
-#include <set>
+#include <string>
 #include <unordered_set>
-#include <functional>
-#include <cmath>
 
 namespace Pql {
   ClauseNode::ClauseNode()

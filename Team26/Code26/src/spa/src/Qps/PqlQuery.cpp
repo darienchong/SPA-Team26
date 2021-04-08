@@ -1,6 +1,7 @@
 #include "PqlQuery.h"
 
 #include <string>
+#include <vector>
 
 namespace Pql {
   // Entity methods

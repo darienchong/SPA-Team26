@@ -1180,6 +1180,274 @@ TEST_CASE("[TestPqlParsing] Valid Query Such that clause", "[PqlParser][Valid][s
     REQUIRE(parsingResult == expectedResult);
     REQUIRE(!parsingResult.hasSemanticError());
   }
+
+  SECTION("NextBip(synonym, synonym)") {
+    // PQL query to test
+    std::string queryString(R"(
+      print p; call cl;
+      Select BOOLEAN such that NextBip(p, cl)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::NEXT_BIP, {
+      Pql::Entity(Pql::EntityType::PRINT, "p"),
+      Pql::Entity(Pql::EntityType::CALL, "cl")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("NextBip(wildcard, wildcard)") {
+    // PQL query to test
+    std::string queryString(R"(
+      Select BOOLEAN such that NextBip(_, _)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::NEXT_BIP, {
+      Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+      Pql::Entity(Pql::EntityType::WILDCARD, "_")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("NextBip(stmtNum, stmtNum)") {
+    // PQL query to test
+    std::string queryString(R"(
+      Select BOOLEAN such that NextBip(10, 6)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::NEXT_BIP, {
+      Pql::Entity(Pql::EntityType::NUMBER, "10"),
+      Pql::Entity(Pql::EntityType::NUMBER, "6")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("NextBip*(synonym, synonym)") {
+    // PQL query to test
+    std::string queryString(R"(
+      print p; call cl;
+      Select BOOLEAN such that NextBip*(p, cl)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::NEXT_BIP_T, {
+      Pql::Entity(Pql::EntityType::PRINT, "p"),
+      Pql::Entity(Pql::EntityType::CALL, "cl")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("NextBip*(wildcard, wildcard)") {
+    // PQL query to test
+    std::string queryString(R"(
+      Select BOOLEAN such that NextBip*(_, _)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::NEXT_BIP_T, {
+      Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+      Pql::Entity(Pql::EntityType::WILDCARD, "_")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("NextBip*(stmtNum, stmtNum)") {
+    // PQL query to test
+    std::string queryString(R"(
+      Select BOOLEAN such that NextBip*(10, 6)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::NEXT_BIP_T, {
+      Pql::Entity(Pql::EntityType::NUMBER, "10"),
+      Pql::Entity(Pql::EntityType::NUMBER, "6")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("AffectsBip(synonym, synonym)") {
+    // PQL query to test
+    std::string queryString(R"(
+      assign a1, a2;
+      Select BOOLEAN such that AffectsBip(a1, a2)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::AFFECTS_BIP, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
+      Pql::Entity(Pql::EntityType::ASSIGN, "a2")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("AffectsBip(wildcard, wildcard)") {
+    // PQL query to test
+    std::string queryString(R"(
+      Select BOOLEAN such that AffectsBip(_, _)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::AFFECTS_BIP, {
+      Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+      Pql::Entity(Pql::EntityType::WILDCARD, "_")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("AffectsBip(stmtNum, stmtNum)") {
+    // PQL query to test
+    std::string queryString(R"(
+      Select BOOLEAN such that AffectsBip(10, 6)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::AFFECTS_BIP, {
+      Pql::Entity(Pql::EntityType::NUMBER, "10"),
+      Pql::Entity(Pql::EntityType::NUMBER, "6")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("AffectsBip*(synonym, synonym)") {
+    // PQL query to test
+    std::string queryString(R"(
+      assign a1, a2;
+      Select BOOLEAN such that AffectsBip*(a1, a2)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::AFFECTS_BIP_T, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
+      Pql::Entity(Pql::EntityType::ASSIGN, "a2")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("AffectsBip*(wildcard, wildcard)") {
+    // PQL query to test
+    std::string queryString(R"(
+      Select BOOLEAN such that AffectsBip*(_, _)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::AFFECTS_BIP_T, {
+      Pql::Entity(Pql::EntityType::WILDCARD, "_"),
+      Pql::Entity(Pql::EntityType::WILDCARD, "_")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
+
+  SECTION("AffectsBip*(stmtNum, stmtNum)") {
+    // PQL query to test
+    std::string queryString(R"(
+      Select BOOLEAN such that AffectsBip*(10, 6)
+    )");
+    std::list<Token> queryTokens = queryStringToTokens(queryString);
+    Pql::PqlParser pqlParser(queryTokens);
+
+    // Get parsing result
+    Pql::Query parsingResult = pqlParser.parseQuery();
+
+    // Build expected result
+    Pql::Query expectedResult;
+    expectedResult.addClause(Pql::Clause(Pql::ClauseType::AFFECTS_BIP_T, {
+      Pql::Entity(Pql::EntityType::NUMBER, "10"),
+      Pql::Entity(Pql::EntityType::NUMBER, "6")
+      }));
+
+    REQUIRE(parsingResult == expectedResult);
+    REQUIRE(!parsingResult.hasSemanticError());
+  }
 }
 
 TEST_CASE("[TestPqlParsing] Valid Query Pattern clause", "[PqlParser][Valid][pattern-cl]") {

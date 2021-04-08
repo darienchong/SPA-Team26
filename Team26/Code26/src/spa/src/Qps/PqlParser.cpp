@@ -31,11 +31,7 @@ namespace {
    * @return True if the token is a relation that can have a transitive version. Otherwise, false.
    */
   bool canBeTransitive(const Token& relationToken) {
-    return relationToken == Pql::FOLLOWS ||
-      relationToken == Pql::PARENT ||
-      relationToken == Pql::CALLS ||
-      relationToken == Pql::NEXT ||
-      relationToken == Pql::AFFECTS;
+    return Pql::transitiveRelationTokens.count(relationToken) == 1;
   }
 
   /**
@@ -56,33 +52,8 @@ namespace {
    * @param attributeRefType Attribute reference type to verify.
    * @return True if the pair is valid. Otherwise, false.
    */
-  bool isSemanticallyValidAttributeName(Pql::EntityType synonymType, Pql::AttributeRefType attributeRefType) {
-    switch (attributeRefType) {
-    case Pql::AttributeRefType::PROC_NAME:
-      return
-        synonymType == Pql::EntityType::PROCEDURE ||
-        synonymType == Pql::EntityType::CALL;
-    case Pql::AttributeRefType::VAR_NAME:
-      return
-        synonymType == Pql::EntityType::VARIABLE ||
-        synonymType == Pql::EntityType::READ ||
-        synonymType == Pql::EntityType::PRINT;
-    case Pql::AttributeRefType::VALUE:
-      return
-        synonymType == Pql::EntityType::CONSTANT;
-    case Pql::AttributeRefType::STMT_NUMBER:
-      return
-        synonymType == Pql::EntityType::STMT ||
-        synonymType == Pql::EntityType::READ ||
-        synonymType == Pql::EntityType::PRINT ||
-        synonymType == Pql::EntityType::CALL ||
-        synonymType == Pql::EntityType::WHILE ||
-        synonymType == Pql::EntityType::IF ||
-        synonymType == Pql::EntityType::ASSIGN;
-    default:
-      assert(false);
-      return true;
-    }
+  bool isSemanticallyValidAttributeName(const Pql::EntityType& synonymType, const Pql::AttributeRefType& attributeRefType) {
+    return Pql::semanticallyValidAttributeReferences.count({ synonymType, attributeRefType }) == 1;
   }
 
   /**
@@ -92,7 +63,7 @@ namespace {
    * @return True if the entity type refers to a statement. Otherwise, false.
    */
   bool isStmtRef(const Pql::EntityType& entityType) {
-    return bool(Pql::synonymStmtEntityTypes.count(entityType));
+    return Pql::synonymStmtEntityTypes.count(entityType) == 1;
   }
 
   /**
@@ -122,37 +93,7 @@ namespace {
    * @return True if the entity is a number type param. Otherwise, false.
    */
   bool isWithClauseParamNumber(const Pql::Entity& entity) {
-    const Pql::EntityType entityType = entity.getType();
-    switch (entityType) {
-      // Alway true
-    case Pql::EntityType::PROG_LINE:
-    case Pql::EntityType::NUMBER:
-      return true;
-    case Pql::EntityType::CONSTANT:
-      assert(entity.getAttributeRefType() == Pql::AttributeRefType::VALUE);
-      return true;
-    case Pql::EntityType::ASSIGN:
-    case Pql::EntityType::IF:
-    case Pql::EntityType::WHILE:
-    case Pql::EntityType::STMT:
-      assert(entity.getAttributeRefType() == Pql::AttributeRefType::STMT_NUMBER);
-      return true;
-
-      // May be true
-    case Pql::EntityType::READ:
-    case Pql::EntityType::PRINT:
-    case Pql::EntityType::CALL:
-      return entity.getAttributeRefType() == Pql::AttributeRefType::STMT_NUMBER;
-
-      // Always false
-    case Pql::EntityType::NAME:
-    case Pql::EntityType::PROCEDURE:
-    case Pql::EntityType::VARIABLE:
-      return false;
-    default:
-      assert(false); // no other cases
-      return false;
-    }
+    return Pql::numberReferences.count({ entity.getType(), entity.getAttributeRefType() }) == 1;
   }
 
   /**
@@ -170,7 +111,6 @@ namespace {
       !isLhsNumber && !isRhsNumber;      // both are names (guaranteed)
   }
 
-
   /**
    * Converts infix expression tokens into postfix expression as a whitespace delimited string.
    *
@@ -185,7 +125,7 @@ namespace {
 
   /**
    * Removes and returns the given number in string format with leading zeros removed.
-   * 
+   *
    * @param numberString Given number in string format. Must provide a valid integer number.
    * @return Number in string format with leading zeros removed.
    */
@@ -364,6 +304,8 @@ namespace Pql {
     ParsingClauseType currentClauseType = ParsingClauseType::UNDEFINED;
     while (!tokens.empty()) {
       const Token frontToken = getFrontToken();
+
+      // NOTE: Cannot use switch-case due to Token being a struct and not enum
       if (frontToken == SUCH) { // such that clause
         // Consume 'such that'
         validateAndGet(SUCH, false);
@@ -435,6 +377,7 @@ namespace Pql {
     consumeFrontWhitespaceTokens();
 
     // Construct the clause
+    // NOTE: Cannot use switch-case due to Token being a struct and not enum
     Clause clauseUnderConstruction;
     if (relationToken == FOLLOWS) {
       isTransitiveRelation
@@ -456,6 +399,14 @@ namespace Pql {
       isTransitiveRelation
         ? parseAffectsTClause(clauseUnderConstruction)
         : parseAffectsClause(clauseUnderConstruction);
+    } else if (relationToken == NEXT_BIP) {
+      isTransitiveRelation
+        ? parseNextBipTClause(clauseUnderConstruction)
+        : parseNextBipClause(clauseUnderConstruction);
+    } else if (relationToken == AFFECTS_BIP) {
+      isTransitiveRelation
+        ? parseAffectsBipTClause(clauseUnderConstruction)
+        : parseAffectsBipClause(clauseUnderConstruction);
     } else if (relationToken == USES) {
       parseUsesClause(clauseUnderConstruction);
     } else if (relationToken == MODIFIES) {
@@ -567,6 +518,26 @@ namespace Pql {
     parseStmtAndStmtArgs(clauseUnderConstruction);
   }
 
+  void PqlParser::parseNextBipClause(Clause& clauseUnderConstruction) {
+    clauseUnderConstruction.setType(ClauseType::NEXT_BIP);
+    parseStmtAndStmtArgs(clauseUnderConstruction);
+  }
+
+  void PqlParser::parseNextBipTClause(Clause& clauseUnderConstruction) {
+    clauseUnderConstruction.setType(ClauseType::NEXT_BIP_T);
+    parseStmtAndStmtArgs(clauseUnderConstruction);
+  }
+
+  void PqlParser::parseAffectsBipClause(Clause& clauseUnderConstruction) {
+    clauseUnderConstruction.setType(ClauseType::AFFECTS_BIP);
+    parseStmtAndStmtArgs(clauseUnderConstruction);
+  }
+
+  void PqlParser::parseAffectsBipTClause(Clause& clauseUnderConstruction) {
+    clauseUnderConstruction.setType(ClauseType::AFFECTS_BIP_T);
+    parseStmtAndStmtArgs(clauseUnderConstruction);
+  }
+
   // 'Uses' '(' stmtRef ',' entRef ')' OR 'Uses' '(' entRef ',' entRef ')'
   void PqlParser::parseUsesClause(Clause& clauseUnderConstruction) {
     parseUsesModifiesClause(clauseUnderConstruction, ClauseType::USES_P, ClauseType::USES_S);
@@ -582,6 +553,8 @@ namespace Pql {
     // 'Uses'/'Modifies' already consumed
     validateAndGet(LEFT_PARENTHESIS);
     const Token frontToken = getFrontToken();
+
+    // NOTE: Cannot use switch-case due to Token being a struct and not enum
     if (frontToken == UNDERSCORE) {                            // wildcard
       validateAndGet(UNDERSCORE);
       addSemanticErrorMessage(ErrorMessage::SEMANTIC_ERROR_INVALID_WILDCARD);
@@ -740,6 +713,7 @@ namespace Pql {
   void PqlParser::parseRef(Clause& clauseUnderConstruction) {
     const Token frontToken = getFrontToken();
 
+    // NOTE: Cannot use switch-case due to Token being a struct and not enum
     if (frontToken == QUOTE) {                             // '"' IDENT '"'
       validateAndGet(QUOTE);
 
@@ -804,6 +778,7 @@ namespace Pql {
   void PqlParser::parseStmtRef(Clause& clauseUnderConstruction) {
     const Token frontToken = getFrontToken();
 
+    // NOTE: Cannot use switch-case due to Token being a struct and not enum
     if (frontToken.type == TokenType::IDENTIFIER) {     // synonym
       validateAndGet(IDENTIFIER);
       const EntityType& entityType = getSynonymType(frontToken.value);
@@ -852,6 +827,7 @@ namespace Pql {
   void PqlParser::parseEntRef(Clause& clauseUnderConstruction, bool refTypeCheck(const Pql::EntityType&)) {
     const Token frontToken = getFrontToken();
 
+    // NOTE: Cannot use switch-case due to Token being a struct and not enum
     if (frontToken.type == TokenType::IDENTIFIER) {     // synonym
       validateAndGet(IDENTIFIER);
       const EntityType& entityType = getSynonymType(frontToken.value);

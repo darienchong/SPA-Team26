@@ -3,7 +3,6 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
-#include <functional>
 #include <exception>
 
 typedef std::vector<std::string> Header;
@@ -11,17 +10,17 @@ typedef std::vector<int> Row;
 
 // Hash function from boost::hash_combine
 // Source: https://www.boost.org/doc/libs/1_55_0/doc/html/hash/reference.html#boost.hash_combine
-struct IntVectorHash {
-  std::uint32_t operator()(Row const& elements) const {
-    std::uint32_t seed = elements.size();
-    for (const uint32_t& i : elements) {
+struct RowHash {
+  std::size_t operator()(Row const& elements) const {
+    std::size_t seed = elements.size();
+    for (const size_t& i : elements) {
       seed ^= i + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     }
     return seed;
   }
 };
 
-typedef std::unordered_set<Row, IntVectorHash> RowSet;
+typedef std::unordered_set<Row, RowHash> RowSet;
 
 class TableException : public std::exception {
 public:

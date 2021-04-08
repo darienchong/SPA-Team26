@@ -3,11 +3,8 @@
 #include <assert.h>
 
 #include <string>
-#include <stack>
 #include <unordered_set>
-#include <stdexcept>
 #include <unordered_map>
-#include <utility>
 
 TableException::TableException(const std::string& msg)
   : std::exception(msg.c_str()) {}

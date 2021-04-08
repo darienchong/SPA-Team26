@@ -31,7 +31,8 @@ namespace {
       print d;
       call next;
     }
-     procedure next {
+    
+    procedure next {
       a = 3;
     }
     */
@@ -238,6 +239,97 @@ namespace {
     pkb.addAffects(6, 6);
 
     // Add AffectsT
+    pkb.addAffectsT(1, 2);
+    pkb.addAffectsT(1, 3);
+    pkb.addAffectsT(1, 6);
+    pkb.addAffectsT(1, 7);
+    pkb.addAffectsT(2, 3);
+    pkb.addAffectsT(2, 7);
+    pkb.addAffectsT(3, 7);
+    pkb.addAffectsT(6, 6);
+
+    // Add NextBip
+    pkb.addNextBip(1, 2);
+    pkb.addNextBip(2, 3);
+    pkb.addNextBip(3, 4);
+    pkb.addNextBip(4, 5);
+    pkb.addNextBip(5, 6);
+    pkb.addNextBip(6, 5);
+    pkb.addNextBip(5, 8);
+    pkb.addNextBip(4, 7);
+    pkb.addNextBip(7, 8);
+    pkb.addNextBip(8, 9);
+    pkb.addNextBip(9, 10);
+    pkb.addNextBip(10, 11);
+
+    // Add NextBipT
+        // Add NextT
+    pkb.addNextBipT(1, 2);
+    pkb.addNextBipT(1, 3);
+    pkb.addNextBipT(1, 4);
+    pkb.addNextBipT(1, 5);
+    pkb.addNextBipT(1, 6);
+    pkb.addNextBipT(1, 7);
+    pkb.addNextBipT(1, 8);
+    pkb.addNextBipT(1, 9);
+    pkb.addNextBipT(1, 10);
+    pkb.addNextBipT(1, 11);
+    pkb.addNextBipT(2, 3);
+    pkb.addNextBipT(2, 4);
+    pkb.addNextBipT(2, 5);
+    pkb.addNextBipT(2, 6);
+    pkb.addNextBipT(2, 7);
+    pkb.addNextBipT(2, 8);
+    pkb.addNextBipT(2, 9);
+    pkb.addNextBipT(2, 10);
+    pkb.addNextBipT(2, 11);
+    pkb.addNextBipT(3, 4);
+    pkb.addNextBipT(3, 5);
+    pkb.addNextBipT(3, 6);
+    pkb.addNextBipT(3, 7);
+    pkb.addNextBipT(3, 8);
+    pkb.addNextBipT(3, 9);
+    pkb.addNextBipT(3, 10);
+    pkb.addNextBipT(3, 11);
+    pkb.addNextBipT(4, 5);
+    pkb.addNextBipT(4, 6);
+    pkb.addNextBipT(4, 7);
+    pkb.addNextBipT(4, 8);
+    pkb.addNextBipT(4, 9);
+    pkb.addNextBipT(4, 10);
+    pkb.addNextBipT(4, 11);
+    pkb.addNextBipT(5, 5);
+    pkb.addNextBipT(5, 6);
+    pkb.addNextBipT(5, 8);
+    pkb.addNextBipT(5, 9);
+    pkb.addNextBipT(5, 10);
+    pkb.addNextBipT(5, 11);
+    pkb.addNextBipT(6, 5);
+    pkb.addNextBipT(6, 6);
+    pkb.addNextBipT(6, 8);
+    pkb.addNextBipT(6, 9);
+    pkb.addNextBipT(6, 10);
+    pkb.addNextBipT(6, 11);
+    pkb.addNextBipT(7, 8);
+    pkb.addNextBipT(7, 9);
+    pkb.addNextBipT(7, 10);
+    pkb.addNextBipT(7, 11);
+    pkb.addNextBipT(8, 9);
+    pkb.addNextBipT(8, 10);
+    pkb.addNextBipT(9, 10);
+    pkb.addNextBipT(9, 11);
+    pkb.addNextBipT(10, 11);
+
+    // Add AffectsBip
+    pkb.addAffects(1, 2);
+    pkb.addAffects(1, 3);
+    pkb.addAffects(1, 6);
+    pkb.addAffects(2, 3);
+    pkb.addAffects(2, 7);
+    pkb.addAffects(3, 7);
+    pkb.addAffects(6, 6);
+
+    // Add AffectsBipT
     pkb.addAffectsT(1, 2);
     pkb.addAffectsT(1, 3);
     pkb.addAffectsT(1, 6);

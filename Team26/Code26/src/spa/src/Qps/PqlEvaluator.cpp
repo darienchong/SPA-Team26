@@ -5,14 +5,13 @@
 #include <list>
 #include <string>
 #include <vector>
-#include <set>
 #include <unordered_set>
+#include <unordered_map>
 
 #include "PqlQuery.h"
 #include "Pkb.h"
 #include "Table.h"
 #include "PqlOptimizer.h"
-#include "PqlPreprocessor.h"
 
 namespace {
   /**
@@ -268,69 +267,69 @@ namespace Pql {
 
   //  Executes query and returns the result table
   Table PqlEvaluator::executeQuery() const {
-    //const std::vector<Clause>& clauses = query.getClauses();
-    //std::vector<Table> clauseResultTables;
-    //clauseResultTables.reserve(clauses.size()); // Optimization to avoid resizing of vector
-    //for (const Clause& clause : clauses) {
-    //  Table clauseResult = executeClause(clause);
-    //  if (clauseResult.empty()) {
-    //    // short circuit
-    //    return Table();
-    //  }
-    //  clauseResultTables.emplace_back(clauseResult);
-    //}
-
     const std::vector<Clause>& clauses = query.getClauses();
-    std::vector<std::vector<Clause>> clauseGroups = PqlPreprocessor().sortClauses(query.getTargets(), clauses);
+
+    // Form clause tables
     std::vector<Table> clauseResultTables;
     clauseResultTables.reserve(clauses.size()); // Optimization to avoid resizing of vector
-    for (const std::vector<Clause>& clauseGroup : clauseGroups) {
-      for (const Clause& clause : clauseGroup) {
-        Table clauseResult = executeClause(clause);
-        if (clauseResult.empty()) {
-          // short circuit
-          return Table();
-        }
-        clauseResultTables.emplace_back(clauseResult);
+    for (const Clause& clause : clauses) {
+      Table clauseResult = executeClause(clause);
+      if (clauseResult.empty()) {
+        // short circuit
+        return Table();
       }
+      clauseResultTables.emplace_back(clauseResult);
     }
 
     Table finalResultTable = Table({ "" });
     finalResultTable.insertRow({ 0 }); // dummy row
 
+    // For BOOLEAN select, reaching this point would mean there exist some result
+    if (query.isBoolean()) {
+      return finalResultTable;
+    }
 
+    // For Non-BOOLEAN select, continue to join all tables
+    // Initialise optimizer to get order of joining tables
     if (!clauses.empty()) {
-      //// Initialise optimizer to get order of joining tables
-      //Optimizer optimizer(clauseResultTables);
-      //std::vector<int> order = optimizer.getOptimizedOrder();
+      Optimizer optimizer(clauseResultTables);
+      std::vector<int> order = optimizer.getOptimizedOrder();
+
+      finalResultTable = clauseResultTables[order[0]];
 
       // Join each clause result table to finalResultTable
-      for (size_t i = 0; i < clauseResultTables.size(); i++) {
-        const int tableIndex = i;
+      for (size_t i = 1; i < clauseResultTables.size(); i++) {
+        const int tableIndex = order[i];
 
-        // natural join on finalResultTable
+        // Natural join on finalResultTable
         bool areAllHeadersEmptyStrings = true;
         for (const std::string& header : clauseResultTables[tableIndex].getHeader()) {
           if (!header.empty()) {
             areAllHeadersEmptyStrings = false;
           }
         }
-
-        if (!areAllHeadersEmptyStrings) {
+        if (!areAllHeadersEmptyStrings) { // Don't need to join if all headers empty strings
           clauseResultTables[tableIndex].dropColumn(""); // drop empty column - Guaranteed to be only 1 column max
           finalResultTable.naturalJoin(clauseResultTables[tableIndex]);
         }
-        // Don't need to join if all headers empty strings
       }
     }
 
-    // Join remaining query targets that is not found in the finalResultTable
+    // Join remaining query targets that are not found in the finalResultTable
     const std::vector<Entity>& queryTargets = query.getTargets();
-    for (Entity target : queryTargets) {
-      const bool doesTargetExist = finalResultTable.getColumnIndex(target.getValue()) != -1;
-      if (!doesTargetExist) {
+    const std::vector<std::string>& finalResultTableHeaders = finalResultTable.getHeader();
+
+    std::unordered_set<std::string> existingSynonyms;
+    existingSynonyms.reserve(finalResultTableHeaders.size());
+    for (const std::string& header : finalResultTableHeaders) {
+      existingSynonyms.emplace(header);
+    }
+
+    for (const Entity& target : queryTargets) {
+      const std::string& synonymName = target.getValue();
+      if (existingSynonyms.count(synonymName) == 0) {
         Table& entityTable = getTableFromEntity(target);
-        entityTable.setHeader({ target.getValue() });
+        entityTable.setHeader({ synonymName });
         finalResultTable.naturalJoin(entityTable);
       }
     }
@@ -398,6 +397,22 @@ namespace Pql {
       break;
     case ClauseType::AFFECTS_T:
       clauseResultTable = pkb.getAffectsTTable();
+      constructSuchThatTableFromClause(clauseResultTable, clause);
+      break;
+    case ClauseType::NEXT_BIP:
+      clauseResultTable = pkb.getNextBipTable();
+      constructSuchThatTableFromClause(clauseResultTable, clause);
+      break;
+    case ClauseType::NEXT_BIP_T:
+      clauseResultTable = pkb.getNextBipTTable();
+      constructSuchThatTableFromClause(clauseResultTable, clause);
+      break;
+    case ClauseType::AFFECTS_BIP:
+      clauseResultTable = pkb.getAffectsBipTable();
+      constructSuchThatTableFromClause(clauseResultTable, clause);
+      break;
+    case ClauseType::AFFECTS_BIP_T:
+      clauseResultTable = pkb.getAffectsBipTTable();
       constructSuchThatTableFromClause(clauseResultTable, clause);
       break;
     case ClauseType::PATTERN_ASSIGN:
@@ -728,7 +743,7 @@ namespace Pql {
       std::string outputLine;
       for (int i = 0; i < numTargets; i++) {
         const int tableColIdx = targetToTableColIdxMapping[i];
-        std::string(*mappingFunction)(const Pkb&, const int)  = targetToFunctionMapping[i];
+        std::string(*mappingFunction)(const Pkb&, const int) = targetToFunctionMapping[i];
         outputLine
           .append(mappingFunction(pkb, row[tableColIdx]))
           .append(" ");
