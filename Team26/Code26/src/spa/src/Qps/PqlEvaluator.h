@@ -12,16 +12,39 @@
 namespace Pql {
   class PqlEvaluator {
   private:
-    Query& query;
+    std::vector<Clause> clauses;
+    std::vector<Entity> targets;
+    bool isQueryBoolean;
     Pkb& pkb;
     std::list<std::string>& results;
 
     /**
-     * @brief Execute the query in PqlEvaluator using the PKB and returns the result in a Table.
+     * Executes the all given clauses indexes without synonyms and returns 
+     * true if there are exist any result.
      *
-     * @return Table containing the result.
+     * @param clauseIdxs Set of clause indexes without synonyms.
+     * @return True if there exist any result. Otherwise false.
      */
-    Table executeQuery() const;
+    bool executeNoSynonymClauses(const std::unordered_set<int>& clauseIdxs) const;
+
+    /**
+     * Executes the all given clauses groups indexes that are disconnected from the query targets 
+     * and returns true if there are exist any result.
+     *
+     * @param clauseGroupsIdxs Groups of set of clause indexes that are disconnected.
+     * @return True if there exist any result. Otherwise false.
+     */
+    bool executeDisconnectedClauses(const std::vector< std::unordered_set<int>>& clauseGroupsIdxs) const;
+
+    /**
+     * Executes the all given clauses groups indexes that are connected to the query targets
+     * and returns the joined result table.
+     *
+     * @param clauseGroupsIdxs Groups of set of clause indexes that are connected.
+     * @param unusedTargets Set of targets that are unused.
+     * @return Result table.
+     */
+    Table executeConnectedClauses(const std::vector< std::unordered_set<int>>& clauseGroupsIdxs, const std::unordered_set<Entity>& unusedTargets) const;
 
     /**
      * Executes a given clause and returns the clause result table.

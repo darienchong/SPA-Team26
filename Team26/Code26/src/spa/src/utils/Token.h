@@ -68,9 +68,9 @@ namespace std {
    * Hash function for the Token class.
    */
   template<> struct hash<Token> {
-    std::size_t operator()(Token const& token) const noexcept {
-      std::size_t h1 = std::hash<TokenType>{}(token.type);
-      std::size_t h2 = std::hash<std::string>{}(token.value);
+    size_t operator()(Token const& token) const noexcept {
+      size_t h1 = hash<TokenType>{}(token.type);
+      size_t h2 = hash<string>{}(token.value);
       return h1 ^ (h2 << 1);
     }
   };

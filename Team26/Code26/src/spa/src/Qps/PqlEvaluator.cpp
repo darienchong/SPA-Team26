@@ -10,6 +10,7 @@
 
 #include "Pkb.h"
 #include "PqlOptimizer.h"
+#include "PqlPreprocessor.h"
 #include "PqlQuery.h"
 #include "Table.h"
 
@@ -182,43 +183,114 @@ namespace {
 namespace Pql {
   // Constructor
   PqlEvaluator::PqlEvaluator(Pkb& pkb, Query& query, std::list<std::string>& results)
-    : pkb(pkb), query(query), results(results) {
+    : clauses(query.getClauses()), targets(query.getTargets()), pkb(pkb), isQueryBoolean(query.isBoolean()),results(results) {
   }
 
   // Executes query and extract results
   void PqlEvaluator::evaluateQuery() {
-    extractResults(executeQuery());
-  }
+    PqlPreprocessor preprocessor(clauses, targets);
+    ClauseGroups clauseGroups = preprocessor.generateClauseGroups();
 
-  //  Executes query and returns the result table
-  Table PqlEvaluator::executeQuery() const {
-    const std::vector<Clause>& clauses = query.getClauses();
-
-    // Form clause tables
-    std::vector<Table> clauseResultTables;
-    clauseResultTables.reserve(clauses.size()); // Optimization to avoid resizing of vector
-    for (const Clause& clause : clauses) {
-      Table clauseResult = executeClause(clause);
-      if (clauseResult.empty()) {
-        // short circuit
-        return Table();
-      }
-      clauseResultTables.emplace_back(clauseResult);
+    if (!executeNoSynonymClauses(clauseGroups.withoutSynonyms)) {
+      extractResults(Table()); // no results
+      return;
     }
 
-    Table finalResultTable = Table({ "" });
-    finalResultTable.insertRow({ 0 }); // dummy row
+    if (!executeDisconnectedClauses(clauseGroups.disconnected)) {
+      extractResults(Table()); // no results
+      return;
+    }
 
-    // Initialise optimizer to get order of joining tables
-    if (!clauses.empty()) {
+    extractResults(executeConnectedClauses(clauseGroups.connected, clauseGroups.unusedTargets));
+  }
+
+  bool PqlEvaluator::executeNoSynonymClauses(const std::unordered_set<int>& clauseIdxs) const {
+    for (const int idx : clauseIdxs) {
+      const Clause& clause = clauses[idx];
+      const Table& clauseResult = executeClause(clause);
+      if (clauseResult.empty()) {
+        // Short circuit
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool PqlEvaluator::executeDisconnectedClauses(const std::vector< std::unordered_set<int>>& clauseGroupsIdxs) const {
+    for (const std::unordered_set<int>& idxs : clauseGroupsIdxs) {
+      std::vector<Table> clauseResultTables;
+      clauseResultTables.reserve(idxs.size());
+      for (const int idx : idxs) {
+        const Clause& clause = clauses[idx];
+        Table& clauseResult = executeClause(clause);
+        if (clauseResult.empty()) {
+          // Short circuit
+          return false;
+        }
+        clauseResultTables.emplace_back(std::move(clauseResult));
+      }
+
       Optimizer optimizer(clauseResultTables);
       std::vector<int> order = optimizer.getOptimizedOrder();
 
       const int firstIdx = order[0];
       clauseResultTables[firstIdx].dropColumn(""); // drop empty column - Guaranteed to be only 1 column max
-      finalResultTable = clauseResultTables[firstIdx];
+      Table& groupResultTable = clauseResultTables[firstIdx];
 
-      // Join each clause result table to finalResultTable
+      // Join each clause result table to groupResultTable
+      for (size_t i = 1; i < clauseResultTables.size(); i++) {
+        const int tableIndex = order[i];
+
+        // Natural join on groupResultTable
+        bool areAllHeadersEmptyStrings = true;
+        for (const std::string& header : clauseResultTables[tableIndex].getHeader()) {
+          if (!header.empty()) {
+            areAllHeadersEmptyStrings = false;
+          }
+        }
+        if (!areAllHeadersEmptyStrings) { // Don't need to join if all headers empty strings
+          clauseResultTables[tableIndex].dropColumn(""); // drop empty column - Guaranteed to be only 1 column max
+          groupResultTable.naturalJoin(clauseResultTables[tableIndex]);
+        }
+      }
+
+      if (groupResultTable.empty()) {
+        return false;
+      }
+    }
+
+    // Non of the groupResultTable is empty
+    return true;
+  }
+
+  Table PqlEvaluator::executeConnectedClauses(
+    const std::vector< std::unordered_set<int>>& clauseGroupsIdxs, 
+    const std::unordered_set<Entity>& unusedTargets) const {
+    
+    std::vector<Table> groupResultTables; // Stores all tables to be cross joined
+    groupResultTables.reserve(clauseGroupsIdxs.size() + unusedTargets.size());
+
+    for (const std::unordered_set<int>& idxs : clauseGroupsIdxs) {
+      std::vector<Table> clauseResultTables;
+      clauseResultTables.reserve(idxs.size());
+      for (const int idx : idxs) {
+        const Clause& clause = clauses[idx];
+        Table& clauseResult = executeClause(clause);
+        if (clauseResult.empty()) {
+          // short circuit
+          return Table();
+        }
+        clauseResultTables.emplace_back(std::move(clauseResult));
+      }
+
+      // Join all clauseResultTables to get groupResultTable
+      Optimizer optimizer(clauseResultTables);
+      std::vector<int> order = optimizer.getOptimizedOrder();
+
+      const int firstIdx = order[0];
+      clauseResultTables[firstIdx].dropColumn(""); // drop empty column - Guaranteed to be only 1 column max
+      Table& groupResultTable = clauseResultTables[firstIdx];
+
       for (size_t i = 1; i < clauseResultTables.size(); i++) {
         const int tableIndex = order[i];
 
@@ -231,30 +303,42 @@ namespace Pql {
         }
         if (!areAllHeadersEmptyStrings) { // Don't need to join if all headers empty strings
           clauseResultTables[tableIndex].dropColumn(""); // drop empty column - Guaranteed to be only 1 column max
-          finalResultTable.naturalJoin(clauseResultTables[tableIndex]);
+          groupResultTable.naturalJoin(clauseResultTables[tableIndex]);
         }
       }
+
+      groupResultTables.emplace_back(std::move(groupResultTable));
     }
 
-    // Join remaining query targets that are not found in the finalResultTable
-    const std::vector<Entity>& queryTargets = query.getTargets();
-    const std::vector<std::string>& finalResultTableHeaders = finalResultTable.getHeader();
-
-    std::unordered_set<std::string> existingSynonyms;
-    existingSynonyms.reserve(finalResultTableHeaders.size());
-    for (const std::string& header : finalResultTableHeaders) {
-      existingSynonyms.emplace(header);
-    }
-
-    for (const Entity& target : queryTargets) {
+    // Add remaining unusedTargets enitiy tables groupResultTables
+    std::unordered_set<std::string> addedTargetSynonyms;
+    addedTargetSynonyms.reserve(unusedTargets.size());
+    for (const Entity& target : unusedTargets) {
       const std::string& synonymName = target.getValue();
-      if (existingSynonyms.count(synonymName) == 0) {
+      if (addedTargetSynonyms.count(synonymName) == 0) {
         Table& entityTable = getTableFromEntity(target);
         entityTable.setHeader({ synonymName });
-        finalResultTable.naturalJoin(entityTable);
+        groupResultTables.emplace_back(std::move(entityTable));
+        addedTargetSynonyms.emplace(synonymName);
       }
     }
 
+    // Empty groupResultTables signifies TRUE
+    if (groupResultTables.empty()) {
+      Table finalResultTable = Table({ "" });
+      finalResultTable.insertRow({ 0 }); // dummy row
+      return finalResultTable;
+    }
+
+    // Join each groupResultTable to finalResultTable
+    Optimizer optimizer(groupResultTables);
+    std::vector<int> order = optimizer.getOptimizedOrder();
+    const int firstIdx = order[0];
+    Table& finalResultTable = groupResultTables[firstIdx];
+    for (size_t i = 1; i < groupResultTables.size(); i++) {
+      const int tableIndex = order[i];
+      finalResultTable.crossJoin(groupResultTables[tableIndex]); // Guaranteed to be cross join
+    }
     return finalResultTable;
   }
 
@@ -493,7 +577,7 @@ namespace Pql {
         clauseResultTable.setHeader({ lhsEntity.getValue(), "" });
         lhsColumnIdxToJoin = 1;
       } else {
-        clauseResultTable = getTableFromEntity(lhsEntity);
+        clauseResultTable = std::move(getTableFromEntity(lhsEntity));
         clauseResultTable.setHeader({ lhsEntity.getValue() }); // One column
         lhsColumnIdxToJoin = 0;
       }
@@ -610,13 +694,11 @@ namespace Pql {
     }
   }
 
-
-  // Extract query result from result table
   void PqlEvaluator::extractResults(const Table& resultTable) const {
     // ===============
     // BOOLEAN Select
     // ===============
-    if (query.isBoolean()) {
+    if (isQueryBoolean) {
       if (resultTable.empty()) {
         results.emplace_back("FALSE");
       } else {
@@ -634,13 +716,12 @@ namespace Pql {
       return;
     }
 
-    const std::vector<Entity>& queryTargets = query.getTargets();
-    const int numTargets = queryTargets.size();
+    const int numTargets = targets.size();
 
     // Header -> Column index mapping
     std::unordered_map<std::string, int> headerToColIdxMapping;
     std::vector<std::string>& headers = resultTable.getHeader();
-    for (uint32_t i = 0; i < headers.size(); i++) {
+    for (size_t i = 0; i < headers.size(); i++) {
       headerToColIdxMapping[headers[i]] = i;
     }
 
@@ -652,7 +733,7 @@ namespace Pql {
     std::vector<std::string(*)(const Pkb&, const int)> targetToFunctionMapping;
     targetToFunctionMapping.reserve(numTargets);
 
-    for (const Entity& target : queryTargets) {
+    for (const Entity& target : targets) {
       targetToTableColIdxMapping.emplace_back(headerToColIdxMapping[target.getValue()]);
       targetToFunctionMapping.emplace_back(getMappingFunction(target));
     }

@@ -352,3 +352,34 @@ namespace Pql {
     }
   };
 }
+
+namespace std {
+  /**
+   * Hash function for the Entity class.
+   */
+  template<> struct hash<Pql::Entity> {
+    size_t operator()(Pql::Entity const& entity) const noexcept {
+      size_t seed = hash<Pql::EntityType>{}(entity.getType());
+      seed ^= hash<string>{}(entity.getValue())
+        + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      seed ^= hash<Pql::AttributeRefType>{}(entity.getAttributeRefType())
+        + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      return seed;
+    }
+  };
+
+  /**
+   * Hash function for the Clause class.
+   */
+  template<> struct hash<Pql::Clause> {
+    size_t operator()(Pql::Clause const& clause) const noexcept {
+      const vector<Pql::Entity>& params = clause.getParams();
+      size_t seed = hash<Pql::ClauseType>{}(clause.getType());
+      for (const Pql::Entity& param : params) {
+        seed ^= hash<Pql::Entity>{}(param)
+          + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      }
+      return seed;
+    }
+  };
+}

@@ -8,10 +8,10 @@
 
 namespace Pql {
   ClauseNode::ClauseNode()
-    : index(NULL_INDEX), size(0), cost(LLONG_MAX), left(NULL_INDEX), right(NULL_INDEX) {
+    : index(NULL_INDEX), size(0), cost(ULLONG_MAX), left(NULL_INDEX), right(NULL_INDEX) {
   };
 
-  ClauseNode::ClauseNode(const std::vector<std::string>& header, const int index, const int size)
+  ClauseNode::ClauseNode(const std::vector<std::string>& header, const int index, const size_t size)
     : index(index), size(size), cost(0), left(NULL_INDEX), right(NULL_INDEX) {
     this->header.insert(header.begin(), header.end());
   };
@@ -22,12 +22,12 @@ namespace Pql {
     if (header.size() == left.header.size() + right.header.size()) {
       // cross product
       size = left.size * right.size;
-      cost = (long long)size * (long long)header.size();
+      cost = (unsigned long long)size * (unsigned long long)header.size();
     } else {
       // inner join
       size = left.size + right.size;
-      cost = (long long)left.size * (long long)left.header.size() 
-        + (long long)right.size * (long long)right.header.size();
+      cost = (unsigned long long)left.size * (unsigned long long)left.header.size()
+        + (unsigned long long)right.size * (unsigned long long)right.header.size();
     }
   }
 
@@ -37,7 +37,7 @@ namespace Pql {
     return headerSet;
   }
 
-  Optimizer::Optimizer(const std::vector<Table>& clauseTables) : clauseTables(clauseTables) {
+  Optimizer::Optimizer(std::vector<Table>& clauseTables) : clauseTables(clauseTables) {
     assert(!clauseTables.empty());
   }
 
@@ -54,12 +54,12 @@ namespace Pql {
       clauseNodes.emplace_back(ClauseNode(clauseTables[i].getHeader(), i, clauseTables[i].size()));
     }
 
-    std::unordered_set<int> nonJoinedIndices;
+    std::unordered_set<int> nonJoinedIndexes;
     for (int i = 0; i < n; i++) {
-      nonJoinedIndices.emplace(i);
+      nonJoinedIndexes.emplace(i);
     }
 
-    ClauseNode globalMinCostNode = ClauseNode();
+    ClauseNode globalMinCostNode;
     // Initialise  base case for joining of 2 tables
     for (int i = 0; i < n - 1; i++) {
       for (int j = i + 1; j < n; j++) {
@@ -69,25 +69,28 @@ namespace Pql {
         }
       }
     }
-    // Remove joined clauses from nonJoinedIndices
-    nonJoinedIndices.erase(globalMinCostNode.left);
-    nonJoinedIndices.erase(globalMinCostNode.right);
+    // Remove joined clauses from nonJoinedIndexes
+    nonJoinedIndexes.erase(globalMinCostNode.left);
+    nonJoinedIndexes.erase(globalMinCostNode.right);
 
     // To store final result
-    std::vector<int> resultOrder{ globalMinCostNode.left, globalMinCostNode.right };
+    std::vector<int> resultOrder;
+    resultOrder.reserve(n);
+    resultOrder.emplace_back(globalMinCostNode.left);
+    resultOrder.emplace_back(globalMinCostNode.right);
 
     // Other cases
     for (int i = 2; i < n; i++) {
       ClauseNode localMinCostNode = globalMinCostNode;
-      localMinCostNode.cost = LLONG_MAX;
-      for (const int nonJoinedIndex : nonJoinedIndices) {
+      localMinCostNode.cost = ULLONG_MAX;
+      for (const int nonJoinedIndex : nonJoinedIndexes) {
         ClauseNode joinedNode(globalMinCostNode, clauseNodes[nonJoinedIndex]);
         if (joinedNode.cost < localMinCostNode.cost) {
           localMinCostNode = joinedNode;
         }
       }
       globalMinCostNode = localMinCostNode;
-      nonJoinedIndices.erase(globalMinCostNode.right);
+      nonJoinedIndexes.erase(globalMinCostNode.right);
       resultOrder.emplace_back(globalMinCostNode.right);
     }
 

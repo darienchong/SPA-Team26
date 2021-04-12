@@ -22,11 +22,6 @@ struct RowHash {
 
 typedef std::unordered_set<Row, RowHash> RowSet;
 
-class TableException : public std::exception {
-public:
-  TableException(const std::string& msg);
-};
-
 class Table {
 private:
   Header header;
@@ -43,7 +38,7 @@ public:
    *
    * @param n The number of columns.
    */
-  explicit Table(int n);
+  explicit Table(size_t n);
 
   /**
    * Constructor for Table with specified headers.
@@ -64,7 +59,7 @@ public:
    *
    * @param row The new row of data to be inserted.
    */
-  void insertRow(Row row);
+  void insertRow(const Row& row);
 
   /**
    * @return The headers of the Table.
@@ -83,7 +78,7 @@ public:
    * @param headerTitle The specified header.
    * @return The index of the column under the header if found. Otherwise, return -1.
    */
-  int getColumnIndex(const std::string& headerTitle) const;
+  size_t getColumnIndex(const std::string& headerTitle) const;
 
   /**
    * Deletes a column from the Table at the specified index if the index is not out of bound.
@@ -92,7 +87,7 @@ public:
    * @param index The column index of the Table.
    * @return boolean Whether column has been dropped.
    */
-  bool dropColumn(const int index);
+  bool dropColumn(const size_t index);
 
   /**
    * Deletes a column from the Table at the index corresponding to the specified
@@ -113,7 +108,7 @@ public:
    * @param index The column index to be based on for filtering the Table.
    * @param values A set of values to be checked upon when filtering the Table.
    */
-  void filterColumn(const int index, const std::unordered_set<int>& values);
+  void filterColumn(const size_t index, const std::unordered_set<int>& values);
 
   /**
    * Concatenates two tables with the same header size.
@@ -154,7 +149,7 @@ public:
    * @param otherTable The other table.
    * @param indexPairs The index pairs representing the column index for each table.
    */
-  void innerJoin(const Table& otherTable, const std::vector<std::pair<int, int>>& indexPairs);
+  void innerJoin(const Table& otherTable, const std::vector<std::pair<size_t, size_t>>& indexPairs);
 
   /**
    * Joins two tables using inner join based on the specified indices.
@@ -166,7 +161,7 @@ public:
    * @param thisTableIndex The index of the original table.
    * @param otherTableIndex The index of the other table.
    */
-  void innerJoin(const Table& otherTable, int thisTableIndex, int otherTableIndex);
+  void innerJoin(const Table& otherTable, size_t thisTableIndex, size_t otherTableIndex);
 
   /**
    * Joins two tables using inner join based on the specified common header.
@@ -191,7 +186,7 @@ public:
   /**
    * @return Returns the number of rows of the Table data.
    */
-  int size() const;
+  size_t size() const;
 
   /**
    * @param row The specified row.
@@ -213,5 +208,5 @@ private:
    * @param otherTable The second table to be compared with the first table.
    * @return A list of integer pairs corresponding to the column index of the tables.
    */
-  std::vector<std::pair<int, int>> getColumnIndexPairs(const Table& otherTable) const;
+  std::vector<std::pair<size_t, size_t>> getColumnIndexPairs(const Table& otherTable) const;
 };

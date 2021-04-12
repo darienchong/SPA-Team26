@@ -52,12 +52,6 @@ TEST_CASE("[TestTable] Set Header") {
     std::vector<std::string> expectedHeader{ "", "" };
     REQUIRE(table.getHeader() == expectedHeader);
   }
-
-  SECTION("invalid header") {
-    Table table(2);
-    REQUIRE_THROWS(table.setHeader({ "a", "a" }));
-  }
-
 }
 
 TEST_CASE("[TestTable] Insert Data") {
@@ -71,12 +65,6 @@ TEST_CASE("[TestTable] Insert Data") {
     REQUIRE(table.size() == 3);
     REQUIRE(table.contains({ 2 }));
   }
-
-  SECTION("invalid insertion") {
-    Table table;
-    REQUIRE_THROWS(table.insertRow({ 1, 2 }));
-  }
-
 }
 
 TEST_CASE("[TestTable] Get Data") {
@@ -131,15 +119,6 @@ TEST_CASE("[TestTable] Concatenate") {
     table1.concatenate(table2);
     REQUIRE(table1.contains({ 3, 33 }));
     REQUIRE(table1.size() == 3);
-  }
-
-  SECTION("invalid concatenation") {
-    Table table1(2);
-    table1.insertRow({ 1, 11 });
-    table1.insertRow({ 2, 22 });
-    Table table2(3);
-    table2.insertRow({ 3, 33, 333 });
-    REQUIRE_THROWS(table1.concatenate(table2));
   }
 }
 

@@ -15,7 +15,7 @@ namespace Pql {
    */
   struct ClauseNode {
     ClauseNode();
-    ClauseNode(const std::vector<std::string>& header, const int index, const int size);
+    ClauseNode(const std::vector<std::string>& header, const int index, const size_t size);
     ClauseNode(const ClauseNode& left, const ClauseNode& right);
 
     /**
@@ -28,8 +28,8 @@ namespace Pql {
     static std::unordered_set<std::string> mergeHeaders(const std::unordered_set<std::string>& leftHeader, const std::unordered_set<std::string>& rightHeader);
     std::unordered_set<std::string> header;
     int index;
-    int size;
-    long long cost;
+    size_t size;
+    unsigned long long cost;
 
     int left;
     int right;
@@ -40,7 +40,7 @@ namespace Pql {
    */
   class Optimizer {
   private:
-    std::vector<Table> clauseTables;
+    std::vector<Table>& clauseTables;
 
   public:
     /**
@@ -48,7 +48,7 @@ namespace Pql {
      * 
      * @param clauseTables Clause tables.
      */
-    Optimizer(const std::vector<Table>& clauseTables);
+    Optimizer(std::vector<Table>& clauseTables);
 
     /**
      * Calculates the best order to join the clause tables an returns the index order of the clause tables.
