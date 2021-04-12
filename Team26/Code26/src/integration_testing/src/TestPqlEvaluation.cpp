@@ -321,28 +321,27 @@ namespace {
     pkb.addNextBipT(10, 11);
 
     // Add AffectsBip
-    pkb.addAffects(1, 2);
-    pkb.addAffects(1, 3);
-    pkb.addAffects(1, 6);
-    pkb.addAffects(2, 3);
-    pkb.addAffects(2, 7);
-    pkb.addAffects(3, 7);
-    pkb.addAffects(6, 6);
+    pkb.addAffectsBip(1, 2);
+    pkb.addAffectsBip(1, 3);
+    pkb.addAffectsBip(1, 6);
+    pkb.addAffectsBip(2, 3);
+    pkb.addAffectsBip(2, 7);
+    pkb.addAffectsBip(3, 7);
+    pkb.addAffectsBip(6, 6);
 
     // Add AffectsBipT
-    pkb.addAffectsT(1, 2);
-    pkb.addAffectsT(1, 3);
-    pkb.addAffectsT(1, 6);
-    pkb.addAffectsT(1, 7);
-    pkb.addAffectsT(2, 3);
-    pkb.addAffectsT(2, 7);
-    pkb.addAffectsT(3, 7);
-    pkb.addAffectsT(6, 6);
+    pkb.addAffectsBipT(1, 2);
+    pkb.addAffectsBipT(1, 3);
+    pkb.addAffectsBipT(1, 6);
+    pkb.addAffectsBipT(1, 7);
+    pkb.addAffectsBipT(2, 3);
+    pkb.addAffectsBipT(2, 7);
+    pkb.addAffectsBipT(3, 7);
+    pkb.addAffectsBipT(6, 6);
 
     return pkb;
   }
 }
-
 
 TEST_CASE("[TestPqlEvaluation] Valid Query, Select", "[PqlEvaluator]") {
   // Populate pkb to test
@@ -697,13 +696,36 @@ TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single such that clau
 TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single pattern assign clause") {
   // Populate pkb to test
   Pkb pkb = getPkb();
-  SECTION("Unrelated and none result") {
 
+  SECTION("Unrelated to Select target, (variable, sub expression)") {
     // Create PQL query to test
-    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a2");
     Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
-      Pql::Entity(Pql::EntityType::VARIABLE, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, "0") });
+      Pql::Entity(Pql::EntityType::VARIABLE, "v"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 ") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "1","2","3","6","7","11" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("Unrelated to select target, none result, (variable, expression)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a2");
+    Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
+      Pql::Entity(Pql::EntityType::VARIABLE, "v"), Pql::Entity(Pql::EntityType::EXPRESSION, "0") });
     Pql::Query query;
     query.addTarget(target);
     query.addClause(clause);
@@ -721,12 +743,58 @@ TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single pattern assign
     REQUIRE(evaluationResult == expectedResult);
   }
 
-  SECTION("Unrelated to Select target") {
+  SECTION("Related to Select target, (variable, wildcard)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::VARIABLE, "v");
+    Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
+      Pql::Entity(Pql::EntityType::VARIABLE, "v"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "a", "b", "c" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("Unrelated to Select target, (synonym, sub expression)") {
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::ASSIGN, "a1");
     Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a2"),
-      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 ") });
+      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::SUB_EXPRESSION, " 1 a * ") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "1", "2", "3", "6", "7", "11" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("Unrelated to Select target, (synonym, expression)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a1");
+    Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a2"),
+      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 a * ") });
     Pql::Query query;
     query.addTarget(target);
     query.addClause(clause);
@@ -787,6 +855,28 @@ TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single pattern assign
 
     // Build expected result
     std::list<std::string> expectedResult{ "1", "6" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("Related to Select target, (synonym, expression)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Clause clause(Pql::ClauseType::PATTERN_ASSIGN, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a"),
+      Pql::Entity(Pql::EntityType::NAME, "a"), Pql::Entity(Pql::EntityType::EXPRESSION, " 1 a * ") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "6" };
     expectedResult.sort();
 
     REQUIRE(evaluationResult == expectedResult);
@@ -989,6 +1079,7 @@ TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single pattern if cla
 TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single pattern while clause", "[PqlEvaluator]") {
   // Populate pkb to test
   Pkb pkb = getPkb();
+
   SECTION("Related to Select target, wildcard") {
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::WHILE, "w");
@@ -1066,6 +1157,7 @@ TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single pattern while 
 TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single such that clause, Single pattern assign clause", "[PqlEvaluator]") {
   // Populate pkb to test
   Pkb pkb = getPkb();
+
   SECTION("Parent, both related") {
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::ASSIGN, "a");
@@ -1196,13 +1288,13 @@ TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single such that clau
     REQUIRE(evaluationResult == expectedResult);
   }
 
-  SECTION("ModifiesS, both not unrelated to Select and unrelated to each other") {
+  SECTION("ModifiesS, both unrelated to Select and unrelated to each other") {
     // Create PQL query to test
     Pql::Entity target(Pql::EntityType::STMT, "s");
     Pql::Clause clause1(Pql::ClauseType::MODIFIES_S, {
       Pql::Entity(Pql::EntityType::ASSIGN, "a"), Pql::Entity(Pql::EntityType::NAME, "d") });
     Pql::Clause clause2(Pql::ClauseType::PATTERN_ASSIGN, {
-      Pql::Entity(Pql::EntityType::ASSIGN, "a"),
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
       Pql::Entity(Pql::EntityType::WILDCARD, "_"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
     Pql::Query query;
     query.addTarget(target);
@@ -1221,6 +1313,431 @@ TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single such that clau
 
     REQUIRE(evaluationResult == expectedResult);
   }
+}
+
+TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single such that clause, Single pattern if clause", "[PqlEvaluator]") {
+  // Populate pkb to test
+  Pkb pkb = getPkb();
+
+  SECTION("Next, both related") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::IF, "ifs");
+    Pql::Clause clause1(Pql::ClauseType::NEXT, {
+      Pql::Entity(Pql::EntityType::PROG_LINE, "3"), Pql::Entity(Pql::EntityType::IF, "ifs") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_IF, {
+      Pql::Entity(Pql::EntityType::IF, "ifs"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "4" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("NextT, both related") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::IF, "ifs");
+    Pql::Clause clause1(Pql::ClauseType::NEXT_T, {
+      Pql::Entity(Pql::EntityType::PROG_LINE, "1"), Pql::Entity(Pql::EntityType::IF, "ifs") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_IF, {
+      Pql::Entity(Pql::EntityType::IF, "ifs"), Pql::Entity(Pql::EntityType::NAME, "a") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "4" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("UsesP, one indirectly related") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::PROCEDURE, "proc");
+    Pql::Clause clause1(Pql::ClauseType::USES_P, {
+      Pql::Entity(Pql::EntityType::PROCEDURE, "proc"), Pql::Entity(Pql::EntityType::VARIABLE, "v") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_IF, {
+      Pql::Entity(Pql::EntityType::IF, "ifs"), Pql::Entity(Pql::EntityType::VARIABLE, "v") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "TestPqlEvaluation" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("ModifiesP, one indirectly related") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::PROCEDURE, "proc");
+    Pql::Clause clause1(Pql::ClauseType::MODIFIES_P, {
+      Pql::Entity(Pql::EntityType::PROCEDURE, "proc"), Pql::Entity(Pql::EntityType::VARIABLE, "v") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_IF, {
+      Pql::Entity(Pql::EntityType::IF, "ifs"), Pql::Entity(Pql::EntityType::VARIABLE, "v") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "TestPqlEvaluation", "next" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("UsesS, both unrelated") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Clause clause1(Pql::ClauseType::USES_S, {
+      Pql::Entity(Pql::EntityType::IF, "ifs"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_IF, {
+      Pql::Entity(Pql::EntityType::IF, "ifs"), Pql::Entity(Pql::EntityType::NAME, "a") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "1", "2", "3", "6", "7", "11" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("Calls, both unrelated and unrelated to each other") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Clause clause1(Pql::ClauseType::CALLS, {
+      Pql::Entity(Pql::EntityType::PROCEDURE, "TestPqlEvaluation"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_IF, {
+      Pql::Entity(Pql::EntityType::IF, "ifs"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "1", "2", "3", "6", "7", "11" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+}
+
+TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single such that clause, Single pattern while clause", "[PqlEvaluator]") {
+  // Populate pkb to test
+  Pkb pkb = getPkb();
+
+  SECTION("NextBip, both related") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::WHILE, "w");
+    Pql::Clause clause1(Pql::ClauseType::NEXT_BIP, {
+      Pql::Entity(Pql::EntityType::WHILE, "w"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_WHILE, {
+      Pql::Entity(Pql::EntityType::WHILE, "w"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "5" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("NextBipT, one indirectly related") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::VARIABLE, "v");
+    Pql::Clause clause1(Pql::ClauseType::NEXT_BIP_T, {
+      Pql::Entity(Pql::EntityType::WHILE, "w"), Pql::Entity(Pql::EntityType::PROG_LINE, "11") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_WHILE, {
+      Pql::Entity(Pql::EntityType::WHILE, "w"), Pql::Entity(Pql::EntityType::VARIABLE, "v") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "a" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("CallsT, both unrelated and unrelated to each other") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::CALL, "cl");
+    Pql::Clause clause1(Pql::ClauseType::CALLS_T, {
+      Pql::Entity(Pql::EntityType::PROCEDURE, "proc"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Clause clause2(Pql::ClauseType::PATTERN_WHILE, {
+      Pql::Entity(Pql::EntityType::WHILE, "w"), Pql::Entity(Pql::EntityType::WILDCARD, "_") });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "10" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+}
+
+TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single with clause", "[PqlEvaluator]") {
+  // Populate pkb to test
+  Pkb pkb = getPkb();
+
+  SECTION("no attr ref mapping (attr ref, attr ref)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::STMT, "s");
+    Pql::Clause clause1(Pql::ClauseType::WITH, {
+      Pql::Entity(Pql::EntityType::STMT, "s", Pql::AttributeRefType::STMT_NUMBER),
+      Pql::Entity(Pql::EntityType::PROG_LINE, "n", Pql::AttributeRefType::NONE) });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("no attr ref mapping (attr ref, attr ref)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Clause clause1(Pql::ClauseType::WITH, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a", Pql::AttributeRefType::STMT_NUMBER),
+      Pql::Entity(Pql::EntityType::CONSTANT, "c", Pql::AttributeRefType::VALUE) });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "1", "3" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("attr ref mapping (attr ref, attr ref)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::READ, "r");
+    Pql::Clause clause1(Pql::ClauseType::WITH, {
+      Pql::Entity(Pql::EntityType::READ, "r", Pql::AttributeRefType::VAR_NAME),
+      Pql::Entity(Pql::EntityType::PRINT, "pr", Pql::AttributeRefType::VAR_NAME) });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "8" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+}
+
+TEST_CASE("[TestPqlEvaluation] Valid Query, Single Select, Single such that clause, Single with clause", "[PqlEvaluator]") {
+  // Populate pkb to test
+  Pkb pkb = getPkb();
+
+  SECTION("Affects, both unrelated, (constant, constant)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Clause clause1(Pql::ClauseType::AFFECTS, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
+      Pql::Entity(Pql::EntityType::PROG_LINE, "2") });
+    Pql::Clause clause2(Pql::ClauseType::WITH, {
+      Pql::Entity(Pql::EntityType::NUMBER, "10", Pql::AttributeRefType::NONE),
+      Pql::Entity(Pql::EntityType::NUMBER, "10", Pql::AttributeRefType::NONE) });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "1", "2", "3", "6", "7", "11" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("AffectsT, both unrelated and not related to each other, (constant, attr ref)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Clause clause1(Pql::ClauseType::AFFECTS_T, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1"),
+      Pql::Entity(Pql::EntityType::ASSIGN, "a2") });
+    Pql::Clause clause2(Pql::ClauseType::WITH, {
+      Pql::Entity(Pql::EntityType::NAME, "d", Pql::AttributeRefType::NONE),
+      Pql::Entity(Pql::EntityType::READ, "r", Pql::AttributeRefType::VAR_NAME) });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "1", "2", "3", "6", "7", "11" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("AffectsBip, one indirectly related, (attr ref, constant)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Clause clause1(Pql::ClauseType::AFFECTS_BIP, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a"),
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1") });
+    Pql::Clause clause2(Pql::ClauseType::WITH, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1", Pql::AttributeRefType::STMT_NUMBER),
+      Pql::Entity(Pql::EntityType::NUMBER, "7", Pql::AttributeRefType::NONE) });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "2", "3" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
+  SECTION("AffectsBipT, both related, (attr ref, attr ref)") {
+    // Create PQL query to test
+    Pql::Entity target(Pql::EntityType::ASSIGN, "a");
+    Pql::Clause clause1(Pql::ClauseType::AFFECTS_BIP_T, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a"),
+      Pql::Entity(Pql::EntityType::ASSIGN, "a1") });
+    Pql::Clause clause2(Pql::ClauseType::WITH, {
+      Pql::Entity(Pql::EntityType::ASSIGN, "a", Pql::AttributeRefType::STMT_NUMBER),
+      Pql::Entity(Pql::EntityType::NUMBER, "2", Pql::AttributeRefType::NONE) });
+    Pql::Query query;
+    query.addTarget(target);
+    query.addClause(clause1);
+    query.addClause(clause2);
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "2" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
+
 }
 
 TEST_CASE("[TestPqlEvaluation] Valid Query, Complex query", "[PqlEvaluator]") {
@@ -1273,4 +1790,65 @@ TEST_CASE("[TestPqlEvaluation] Valid Query, Complex query", "[PqlEvaluator]") {
     REQUIRE(evaluationResult == expectedResult);
   }
 
+  SECTION("BOOLEAN Select, Two clauses, related, none empty, TRUE") {
+    // Create PQL query to test
+    std::vector<Pql::Clause> clauses{
+      Pql::Clause(Pql::ClauseType::WITH, {
+        Pql::Entity(Pql::EntityType::ASSIGN, "a", Pql::AttributeRefType::STMT_NUMBER),
+        Pql::Entity(Pql::EntityType::STMT, "s", Pql::AttributeRefType::STMT_NUMBER)
+      }),
+      Pql::Clause(Pql::ClauseType::WITH, {
+        Pql::Entity(Pql::EntityType::ASSIGN, "a", Pql::AttributeRefType::STMT_NUMBER),
+        Pql::Entity(Pql::EntityType::NUMBER, "2", Pql::AttributeRefType::NONE)
+      })
+    };
+
+    Pql::Query query;
+    for (const Pql::Clause& clause : clauses) {
+      query.addClause(clause);
+    }
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "TRUE" };
+    expectedResult.sort();
+
+  }
+
+  SECTION("BOOLEAN Select, Two clauses, related, none empty, FALSE") {
+    // Create PQL query to test
+    std::vector<Pql::Clause> clauses{
+      Pql::Clause(Pql::ClauseType::WITH, {
+        Pql::Entity(Pql::EntityType::ASSIGN, "a", Pql::AttributeRefType::STMT_NUMBER),
+        Pql::Entity(Pql::EntityType::NUMBER, "1", Pql::AttributeRefType::NONE)
+      }),
+      Pql::Clause(Pql::ClauseType::WITH, {
+        Pql::Entity(Pql::EntityType::ASSIGN, "a", Pql::AttributeRefType::STMT_NUMBER),
+        Pql::Entity(Pql::EntityType::NUMBER, "2", Pql::AttributeRefType::NONE)
+      })
+    };
+
+    Pql::Query query;
+    for (const Pql::Clause& clause : clauses) {
+      query.addClause(clause);
+    }
+
+    // Get Evaluation result
+    std::list<std::string> evaluationResult;
+    Pql::PqlEvaluator pqlEvaluator(pkb, query, evaluationResult);
+    pqlEvaluator.evaluateQuery();
+    evaluationResult.sort();
+
+    // Build expected result
+    std::list<std::string> expectedResult{ "FALSE" };
+    expectedResult.sort();
+
+    REQUIRE(evaluationResult == expectedResult);
+  }
 }
+
