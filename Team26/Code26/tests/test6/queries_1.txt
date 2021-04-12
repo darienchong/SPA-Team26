@@ -1,0 +1,125 @@
+1 - Select all procedures
+procedure p;
+Select p
+proc1, proc2, proc3, proc4, proc5, proc6, proc7, proc8, proc9, proc10, proc11, proc12, proc13, proc14, proc15, proc16, proc17, proc18, proc19, proc20, proc21, proc22, proc23, proc24, proc25, proc26, proc27, proc28, proc29, proc30, proc31, proc32, proc33, proc34, proc35, proc36, proc37, proc38, proc39, proc40, proc41, proc42, proc43, proc44, proc45, proc46, proc47, proc48, proc49, proc50, proc51, proc52, proc53, proc54, proc55, proc56, proc57, proc58, proc59, proc60, proc61, proc62, proc63, proc64, proc65, proc66, proc67, proc68, proc69, proc70, proc71, proc72, proc73, proc74, proc75, proc76, proc77, proc78, proc79, proc80, proc81, proc82, proc83, proc84, proc85, proc86, proc87, proc88, proc89, proc90, proc91, proc92, proc93, proc94, proc95, proc96, proc97, proc98, proc99, proc100
+5000
+2 - Select all variables
+variable v;
+Select v
+r1, r2, r3, r4, r5, r6, r7, r8, r9, r10, r11, r12, r13, r14, r15, r16, r17, r18, r19, r20, r21, r22, r23, r24, r25, r26, r27, r28, r29, r30, r31, r32, r33, r34, r35, r36, r37, r38, r39, r40, r41, r42, r43, r44, r45, r46, r47, r48, r49, r50, r51, r52, r53, r54, r55, r56, r57, r58, r59, r60, r61, r62, r63, r64, r65, r66, r67, r68, r69, r70, r71, r72, r73, r74, r75, r76, r77, r78, r79, r80, r81, r82, r83, r84, r85, r86, r87, r88, r89, r90, r91, r92, r93, r94, r95, r96, r97, r98, r99, r100, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17, v18, v19, v20, v21, v22, v23, v24, v25, v26, v27, v28, v29, v30, v31, v32, v33, v34, v35, v36, v37, v38, v39, v40, v41, v42, v43, v44, v45, v46, v47, v48, v49, v50, v51, v52, v53, v54, v55, v56, v57, v58, v59, v60, v61, v62, v63, v64, v65, v66, v67, v68, v69, v70, v71, v72, v73, v74, v75, v76, v77, v78, v79, v80, v81, v82, v83, v84, v85, v86, v87, v88, v89, v90, v91, v92, v93, v94, v95, v96, v97, v98, v99, v100
+5000
+3 - Select all read statements
+read r;
+Select r
+1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 129, 133, 137, 141, 145, 149, 153, 157, 161, 165, 169, 173, 177, 181, 185, 189, 193, 197, 201, 205, 209, 213, 217, 221, 225, 229, 233, 237, 241, 245, 249, 253, 257, 261, 265, 269, 273, 277, 281, 285, 289, 293, 297, 301, 305, 309, 313, 317, 321, 325, 329, 333, 337, 341, 345, 349, 353, 357, 361, 365, 369, 373, 377, 381, 385, 389, 393, 397
+5000
+4 - Follows - Single select
+assign a; print p;
+Select a such that Follows(a,p)
+2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 70, 74, 78, 82, 86, 90, 94, 98, 102, 106, 110, 114, 118, 122, 126, 130, 134, 138, 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198, 202, 206, 210, 214, 218, 222, 226, 230, 234, 238, 242, 246, 250, 254, 258, 262, 266, 270, 274, 278, 282, 286, 290, 294, 298, 302, 306, 310, 314, 318, 322, 326, 330, 334, 338, 342, 346, 350, 354, 358, 362, 366, 370, 374, 378, 382, 386, 390, 394, 398
+5000
+5 - Follows - Boolean select
+assign a; print p;
+Select BOOLEAN such that Follows(p,a)
+FALSE
+5000
+6 - Follows* - Single select
+assign a; call c;
+Select a such that Follows*(a,c)
+2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 50, 54, 58, 62, 66, 70, 74, 78, 82, 86, 90, 94, 98, 102, 106, 110, 114, 118, 122, 126, 130, 134, 138, 142, 146, 150, 154, 158, 162, 166, 170, 174, 178, 182, 186, 190, 194, 198, 202, 206, 210, 214, 218, 222, 226, 230, 234, 238, 242, 246, 250, 254, 258, 262, 266, 270, 274, 278, 282, 286, 290, 294, 298, 302, 306, 310, 314, 318, 322, 326, 330, 334, 338, 342, 346, 350, 354, 358, 362, 366, 370, 374, 378, 382, 386, 390, 394
+5000
+7 - Follows* - Tuple select
+read r; print p;
+Select <r,p> such that Follows*(r,p)
+1 3, 5 7, 9 11, 13 15, 17 19, 21 23, 25 27, 29 31, 33 35, 37 39, 41 43, 45 47, 49 51, 53 55, 57 59, 61 63, 65 67, 69 71, 73 75, 77 79, 81 83, 85 87, 89 91, 93 95, 97 99, 101 103, 105 107, 109 111, 113 115, 117 119, 121 123, 125 127, 129 131, 133 135, 137 139, 141 143, 145 147, 149 151, 153 155, 157 159, 161 163, 165 167, 169 171, 173 175, 177 179, 181 183, 185 187, 189 191, 193 195, 197 199, 201 203, 205 207, 209 211, 213 215, 217 219, 221 223, 225 227, 229 231, 233 235, 237 239, 241 243, 245 247, 249 251, 253 255, 257 259, 261 263, 265 267, 269 271, 273 275, 277 279, 281 283, 285 287, 289 291, 293 295, 297 299, 301 303, 305 307, 309 311, 313 315, 317 319, 321 323, 325 327, 329 331, 333 335, 337 339, 341 343, 345 347, 349 351, 353 355, 357 359, 361 363, 365 367, 369 371, 373 375, 377 379, 381 383, 385 387, 389 391, 393 395, 397 399
+5000
+8 - Parent - Boolean select
+stmt s, s1;
+Select BOOLEAN such that Parent(s,s1)
+FALSE
+5000
+9 - Parent* - Tuple select
+stmt s,s1;
+Select <s,s1> such that Parent*(s,s1)
+
+5000
+10 - UsesS - Single select
+stmt s;
+Select s such that Uses(s, "r100")
+4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144, 148, 152, 156, 160, 164, 168, 172, 176, 180, 184, 188, 192, 196, 200, 204, 208, 212, 216, 220, 224, 228, 232, 236, 240, 244, 248, 252, 256, 260, 264, 268, 272, 276, 280, 284, 288, 292, 296, 300, 304, 308, 312, 316, 320, 324, 328, 332, 336, 340, 344, 348, 352, 356, 360, 364, 368, 372, 376, 380, 384, 388, 392, 396, 398
+5000
+11 - UsesP - Single select
+procedure p;
+Select p such that Uses(p, "v10")
+proc1, proc2, proc3, proc4, proc5, proc6, proc7, proc8, proc9, proc10
+5000
+12 - ModifiesS - Single select
+assign s;
+Select s such that Modifies(s, "r36")
+
+5000
+13 - ModifiesP - Single select
+procedure p;
+Select p such that Modifies(p, "r36")
+proc1, proc2, proc3, proc4, proc5, proc6, proc7, proc8, proc9, proc10, proc11, proc12, proc13, proc14, proc15, proc16, proc17, proc18, proc19, proc20, proc21, proc22, proc23, proc24, proc25, proc26, proc27, proc28, proc29, proc30, proc31, proc32, proc33, proc34, proc35, proc36
+5000
+14 - Calls - Tuple select
+procedure p, p1;
+Select <p,p1> such that Calls(p,p1)
+proc1 proc2, proc2 proc3, proc3 proc4, proc4 proc5, proc5 proc6, proc6 proc7, proc7 proc8, proc8 proc9, proc9 proc10, proc10 proc11, proc11 proc12, proc12 proc13, proc13 proc14, proc14 proc15, proc15 proc16, proc16 proc17, proc17 proc18, proc18 proc19, proc19 proc20, proc20 proc21, proc21 proc22, proc22 proc23, proc23 proc24, proc24 proc25, proc25 proc26, proc26 proc27, proc27 proc28, proc28 proc29, proc29 proc30, proc30 proc31, proc31 proc32, proc32 proc33, proc33 proc34, proc34 proc35, proc35 proc36, proc36 proc37, proc37 proc38, proc38 proc39, proc39 proc40, proc40 proc41, proc41 proc42, proc42 proc43, proc43 proc44, proc44 proc45, proc45 proc46, proc46 proc47, proc47 proc48, proc48 proc49, proc49 proc50, proc50 proc51, proc51 proc52, proc52 proc53, proc53 proc54, proc54 proc55, proc55 proc56, proc56 proc57, proc57 proc58, proc58 proc59, proc59 proc60, proc60 proc61, proc61 proc62, proc62 proc63, proc63 proc64, proc64 proc65, proc65 proc66, proc66 proc67, proc67 proc68, proc68 proc69, proc69 proc70, proc70 proc71, proc71 proc72, proc72 proc73, proc73 proc74, proc74 proc75, proc75 proc76, proc76 proc77, proc77 proc78, proc78 proc79, proc79 proc80, proc80 proc81, proc81 proc82, proc82 proc83, proc83 proc84, proc84 proc85, proc85 proc86, proc86 proc87, proc87 proc88, proc88 proc89, proc89 proc90, proc90 proc91, proc91 proc92, proc92 proc93, proc93 proc94, proc94 proc95, proc95 proc96, proc96 proc97, proc97 proc98, proc98 proc99, proc99 proc100
+5000
+15 - Calls* - Single select
+procedure p;
+Select p such that Calls*(p, "proc40")
+proc1, proc2, proc3, proc4, proc5, proc6, proc7, proc8, proc9, proc10, proc11, proc12, proc13, proc14, proc15, proc16, proc17, proc18, proc19, proc20, proc21, proc22, proc23, proc24, proc25, proc26, proc27, proc28, proc29, proc30, proc31, proc32, proc33, proc34, proc35, proc36, proc37, proc38, proc39
+5000
+16 - Calls* - Boolean select
+
+Select BOOLEAN such that Calls*(_, "proc1")
+FALSE
+5000
+17 - Next - Single select
+read r; assign a;
+Select r such that Next(r,a)
+1, 5, 9, 13, 17, 21, 25, 29, 33, 37, 41, 45, 49, 53, 57, 61, 65, 69, 73, 77, 81, 85, 89, 93, 97, 101, 105, 109, 113, 117, 121, 125, 129, 133, 137, 141, 145, 149, 153, 157, 161, 165, 169, 173, 177, 181, 185, 189, 193, 197, 201, 205, 209, 213, 217, 221, 225, 229, 233, 237, 241, 245, 249, 253, 257, 261, 265, 269, 273, 277, 281, 285, 289, 293, 297, 301, 305, 309, 313, 317, 321, 325, 329, 333, 337, 341, 345, 349, 353, 357, 361, 365, 369, 373, 377, 381, 385, 389, 393, 397
+5000
+18 - Next* - Single select
+assign a;
+Select a such that Next*(a,100)
+98
+5000
+19 - Affects - Tuple select
+prog_line n;
+Select n such that Affects(n,_)
+
+5000
+20 - Affects* - Boolean select
+
+Select BOOLEAN such that Affects*(_,_)
+FALSE
+5000
+21 - Pattern assign - Single select
+assign a;
+Select a.stmt# pattern a(_,_"r20 + r19"_)
+78
+5000
+22 - Pattern assign - Tuple select
+assign a; variable v;
+Select <a,v> pattern a(v,_)
+2 v1, 6 v2, 10 v3, 14 v4, 18 v5, 22 v6, 26 v7, 30 v8, 34 v9, 38 v10, 42 v11, 46 v12, 50 v13, 54 v14, 58 v15, 62 v16, 66 v17, 70 v18, 74 v19, 78 v20, 82 v21, 86 v22, 90 v23, 94 v24, 98 v25, 102 v26, 106 v27, 110 v28, 114 v29, 118 v30, 122 v31, 126 v32, 130 v33, 134 v34, 138 v35, 142 v36, 146 v37, 150 v38, 154 v39, 158 v40, 162 v41, 166 v42, 170 v43, 174 v44, 178 v45, 182 v46, 186 v47, 190 v48, 194 v49, 198 v50, 202 v51, 206 v52, 210 v53, 214 v54, 218 v55, 222 v56, 226 v57, 230 v58, 234 v59, 238 v60, 242 v61, 246 v62, 250 v63, 254 v64, 258 v65, 262 v66, 266 v67, 270 v68, 274 v69, 278 v70, 282 v71, 286 v72, 290 v73, 294 v74, 298 v75, 302 v76, 306 v77, 310 v78, 314 v79, 318 v80, 322 v81, 326 v82, 330 v83, 334 v84, 338 v85, 342 v86, 346 v87, 350 v88, 354 v89, 358 v90, 362 v91, 366 v92, 370 v93, 374 v94, 378 v95, 382 v96, 386 v97, 390 v98, 394 v99, 398 v100
+5000
+23 - Pattern if - Single select
+if ifs; variable v;
+Select v.varName pattern ifs(v,_,_)
+
+5000
+24 - Pattern while - Boolean select
+while w;
+Select BOOLEAN pattern w(_,_)
+FALSE
+5000
+25 - With - Single select
+procedure p; call c;
+Select p with p.procName = c.procName
+proc2, proc3, proc4, proc5, proc6, proc7, proc8, proc9, proc10, proc11, proc12, proc13, proc14, proc15, proc16, proc17, proc18, proc19, proc20, proc21, proc22, proc23, proc24, proc25, proc26, proc27, proc28, proc29, proc30, proc31, proc32, proc33, proc34, proc35, proc36, proc37, proc38, proc39, proc40, proc41, proc42, proc43, proc44, proc45, proc46, proc47, proc48, proc49, proc50, proc51, proc52, proc53, proc54, proc55, proc56, proc57, proc58, proc59, proc60, proc61, proc62, proc63, proc64, proc65, proc66, proc67, proc68, proc69, proc70, proc71, proc72, proc73, proc74, proc75, proc76, proc77, proc78, proc79, proc80, proc81, proc82, proc83, proc84, proc85, proc86, proc87, proc88, proc89, proc90, proc91, proc92, proc93, proc94, proc95, proc96, proc97, proc98, proc99, proc100
+5000

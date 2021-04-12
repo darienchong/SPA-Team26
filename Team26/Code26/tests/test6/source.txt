@@ -1,0 +1,699 @@
+procedure proc1 {
+	read r1;
+	v1 = r1;
+	print v1;
+	call proc2;
+}
+
+procedure proc2 {
+	read r2;
+	v2 = r2 + r1;
+	print v2;
+	call proc3;
+}
+
+procedure proc3 {
+	read r3;
+	v3 = r3 + r2 + r1;
+	print v3;
+	call proc4;
+}
+
+procedure proc4 {
+	read r4;
+	v4 = r4 + r3 + r2 + r1;
+	print v4;
+	call proc5;
+}
+
+procedure proc5 {
+	read r5;
+	v5 = r5 + r4 + r3 + r2 + r1;
+	print v5;
+	call proc6;
+}
+
+procedure proc6 {
+	read r6;
+	v6 = r6 + r5 + r4 + r3 + r2 + r1;
+	print v6;
+	call proc7;
+}
+
+procedure proc7 {
+	read r7;
+	v7 = r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v7;
+	call proc8;
+}
+
+procedure proc8 {
+	read r8;
+	v8 = r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v8;
+	call proc9;
+}
+
+procedure proc9 {
+	read r9;
+	v9 = r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v9;
+	call proc10;
+}
+
+procedure proc10 {
+	read r10;
+	v10 = r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v10;
+	call proc11;
+}
+
+procedure proc11 {
+	read r11;
+	v11 = r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v11;
+	call proc12;
+}
+
+procedure proc12 {
+	read r12;
+	v12 = r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v12;
+	call proc13;
+}
+
+procedure proc13 {
+	read r13;
+	v13 = r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v13;
+	call proc14;
+}
+
+procedure proc14 {
+	read r14;
+	v14 = r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v14;
+	call proc15;
+}
+
+procedure proc15 {
+	read r15;
+	v15 = r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v15;
+	call proc16;
+}
+
+procedure proc16 {
+	read r16;
+	v16 = r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v16;
+	call proc17;
+}
+
+procedure proc17 {
+	read r17;
+	v17 = r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v17;
+	call proc18;
+}
+
+procedure proc18 {
+	read r18;
+	v18 = r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v18;
+	call proc19;
+}
+
+procedure proc19 {
+	read r19;
+	v19 = r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v19;
+	call proc20;
+}
+
+procedure proc20 {
+	read r20;
+	v20 = r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v20;
+	call proc21;
+}
+
+procedure proc21 {
+	read r21;
+	v21 = r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v21;
+	call proc22;
+}
+
+procedure proc22 {
+	read r22;
+	v22 = r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v22;
+	call proc23;
+}
+
+procedure proc23 {
+	read r23;
+	v23 = r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v23;
+	call proc24;
+}
+
+procedure proc24 {
+	read r24;
+	v24 = r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v24;
+	call proc25;
+}
+
+procedure proc25 {
+	read r25;
+	v25 = r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v25;
+	call proc26;
+}
+
+procedure proc26 {
+	read r26;
+	v26 = r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v26;
+	call proc27;
+}
+
+procedure proc27 {
+	read r27;
+	v27 = r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v27;
+	call proc28;
+}
+
+procedure proc28 {
+	read r28;
+	v28 = r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v28;
+	call proc29;
+}
+
+procedure proc29 {
+	read r29;
+	v29 = r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v29;
+	call proc30;
+}
+
+procedure proc30 {
+	read r30;
+	v30 = r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v30;
+	call proc31;
+}
+
+procedure proc31 {
+	read r31;
+	v31 = r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v31;
+	call proc32;
+}
+
+procedure proc32 {
+	read r32;
+	v32 = r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v32;
+	call proc33;
+}
+
+procedure proc33 {
+	read r33;
+	v33 = r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v33;
+	call proc34;
+}
+
+procedure proc34 {
+	read r34;
+	v34 = r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v34;
+	call proc35;
+}
+
+procedure proc35 {
+	read r35;
+	v35 = r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v35;
+	call proc36;
+}
+
+procedure proc36 {
+	read r36;
+	v36 = r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v36;
+	call proc37;
+}
+
+procedure proc37 {
+	read r37;
+	v37 = r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v37;
+	call proc38;
+}
+
+procedure proc38 {
+	read r38;
+	v38 = r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v38;
+	call proc39;
+}
+
+procedure proc39 {
+	read r39;
+	v39 = r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v39;
+	call proc40;
+}
+
+procedure proc40 {
+	read r40;
+	v40 = r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v40;
+	call proc41;
+}
+
+procedure proc41 {
+	read r41;
+	v41 = r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v41;
+	call proc42;
+}
+
+procedure proc42 {
+	read r42;
+	v42 = r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v42;
+	call proc43;
+}
+
+procedure proc43 {
+	read r43;
+	v43 = r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v43;
+	call proc44;
+}
+
+procedure proc44 {
+	read r44;
+	v44 = r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v44;
+	call proc45;
+}
+
+procedure proc45 {
+	read r45;
+	v45 = r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v45;
+	call proc46;
+}
+
+procedure proc46 {
+	read r46;
+	v46 = r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v46;
+	call proc47;
+}
+
+procedure proc47 {
+	read r47;
+	v47 = r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v47;
+	call proc48;
+}
+
+procedure proc48 {
+	read r48;
+	v48 = r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v48;
+	call proc49;
+}
+
+procedure proc49 {
+	read r49;
+	v49 = r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v49;
+	call proc50;
+}
+
+procedure proc50 {
+	read r50;
+	v50 = r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v50;
+	call proc51;
+}
+
+procedure proc51 {
+	read r51;
+	v51 = r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v51;
+	call proc52;
+}
+
+procedure proc52 {
+	read r52;
+	v52 = r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v52;
+	call proc53;
+}
+
+procedure proc53 {
+	read r53;
+	v53 = r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v53;
+	call proc54;
+}
+
+procedure proc54 {
+	read r54;
+	v54 = r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v54;
+	call proc55;
+}
+
+procedure proc55 {
+	read r55;
+	v55 = r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v55;
+	call proc56;
+}
+
+procedure proc56 {
+	read r56;
+	v56 = r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v56;
+	call proc57;
+}
+
+procedure proc57 {
+	read r57;
+	v57 = r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v57;
+	call proc58;
+}
+
+procedure proc58 {
+	read r58;
+	v58 = r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v58;
+	call proc59;
+}
+
+procedure proc59 {
+	read r59;
+	v59 = r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v59;
+	call proc60;
+}
+
+procedure proc60 {
+	read r60;
+	v60 = r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v60;
+	call proc61;
+}
+
+procedure proc61 {
+	read r61;
+	v61 = r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v61;
+	call proc62;
+}
+
+procedure proc62 {
+	read r62;
+	v62 = r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v62;
+	call proc63;
+}
+
+procedure proc63 {
+	read r63;
+	v63 = r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v63;
+	call proc64;
+}
+
+procedure proc64 {
+	read r64;
+	v64 = r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v64;
+	call proc65;
+}
+
+procedure proc65 {
+	read r65;
+	v65 = r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v65;
+	call proc66;
+}
+
+procedure proc66 {
+	read r66;
+	v66 = r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v66;
+	call proc67;
+}
+
+procedure proc67 {
+	read r67;
+	v67 = r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v67;
+	call proc68;
+}
+
+procedure proc68 {
+	read r68;
+	v68 = r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v68;
+	call proc69;
+}
+
+procedure proc69 {
+	read r69;
+	v69 = r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v69;
+	call proc70;
+}
+
+procedure proc70 {
+	read r70;
+	v70 = r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v70;
+	call proc71;
+}
+
+procedure proc71 {
+	read r71;
+	v71 = r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v71;
+	call proc72;
+}
+
+procedure proc72 {
+	read r72;
+	v72 = r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v72;
+	call proc73;
+}
+
+procedure proc73 {
+	read r73;
+	v73 = r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v73;
+	call proc74;
+}
+
+procedure proc74 {
+	read r74;
+	v74 = r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v74;
+	call proc75;
+}
+
+procedure proc75 {
+	read r75;
+	v75 = r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v75;
+	call proc76;
+}
+
+procedure proc76 {
+	read r76;
+	v76 = r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v76;
+	call proc77;
+}
+
+procedure proc77 {
+	read r77;
+	v77 = r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v77;
+	call proc78;
+}
+
+procedure proc78 {
+	read r78;
+	v78 = r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v78;
+	call proc79;
+}
+
+procedure proc79 {
+	read r79;
+	v79 = r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v79;
+	call proc80;
+}
+
+procedure proc80 {
+	read r80;
+	v80 = r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v80;
+	call proc81;
+}
+
+procedure proc81 {
+	read r81;
+	v81 = r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v81;
+	call proc82;
+}
+
+procedure proc82 {
+	read r82;
+	v82 = r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v82;
+	call proc83;
+}
+
+procedure proc83 {
+	read r83;
+	v83 = r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v83;
+	call proc84;
+}
+
+procedure proc84 {
+	read r84;
+	v84 = r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v84;
+	call proc85;
+}
+
+procedure proc85 {
+	read r85;
+	v85 = r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v85;
+	call proc86;
+}
+
+procedure proc86 {
+	read r86;
+	v86 = r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v86;
+	call proc87;
+}
+
+procedure proc87 {
+	read r87;
+	v87 = r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v87;
+	call proc88;
+}
+
+procedure proc88 {
+	read r88;
+	v88 = r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v88;
+	call proc89;
+}
+
+procedure proc89 {
+	read r89;
+	v89 = r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v89;
+	call proc90;
+}
+
+procedure proc90 {
+	read r90;
+	v90 = r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v90;
+	call proc91;
+}
+
+procedure proc91 {
+	read r91;
+	v91 = r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v91;
+	call proc92;
+}
+
+procedure proc92 {
+	read r92;
+	v92 = r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v92;
+	call proc93;
+}
+
+procedure proc93 {
+	read r93;
+	v93 = r93 + r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v93;
+	call proc94;
+}
+
+procedure proc94 {
+	read r94;
+	v94 = r94 + r93 + r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v94;
+	call proc95;
+}
+
+procedure proc95 {
+	read r95;
+	v95 = r95 + r94 + r93 + r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v95;
+	call proc96;
+}
+
+procedure proc96 {
+	read r96;
+	v96 = r96 + r95 + r94 + r93 + r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v96;
+	call proc97;
+}
+
+procedure proc97 {
+	read r97;
+	v97 = r97 + r96 + r95 + r94 + r93 + r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v97;
+	call proc98;
+}
+
+procedure proc98 {
+	read r98;
+	v98 = r98 + r97 + r96 + r95 + r94 + r93 + r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v98;
+	call proc99;
+}
+
+procedure proc99 {
+	read r99;
+	v99 = r99 + r98 + r97 + r96 + r95 + r94 + r93 + r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v99;
+	call proc100;
+}
+
+procedure proc100 {
+	read r100;
+	v100 = r100 + r99 + r98 + r97 + r96 + r95 + r94 + r93 + r92 + r91 + r90 + r89 + r88 + r87 + r86 + r85 + r84 + r83 + r82 + r81 + r80 + r79 + r78 + r77 + r76 + r75 + r74 + r73 + r72 + r71 + r70 + r69 + r68 + r67 + r66 + r65 + r64 + r63 + r62 + r61 + r60 + r59 + r58 + r57 + r56 + r55 + r54 + r53 + r52 + r51 + r50 + r49 + r48 + r47 + r46 + r45 + r44 + r43 + r42 + r41 + r40 + r39 + r38 + r37 + r36 + r35 + r34 + r33 + r32 + r31 + r30 + r29 + r28 + r27 + r26 + r25 + r24 + r23 + r22 + r21 + r20 + r19 + r18 + r17 + r16 + r15 + r14 + r13 + r12 + r11 + r10 + r9 + r8 + r7 + r6 + r5 + r4 + r3 + r2 + r1;
+	print v100;
+}
+

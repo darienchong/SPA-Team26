@@ -1,0 +1,230 @@
+procedure procDeepNest {
+	v0 = 12;
+	if ( v0 < 10 ) then {
+		v1 = 13;
+		if ( v1 < 10 ) then {
+			v2 = 1;
+			while ( v2 < 10 ) {
+				v3 = 8;
+				while ( v3 < 10 ) {
+					v4 = 16;
+					if ( v4 < 10 ) then {
+						v5 = 15;
+						if ( v5 < 10 ) then {
+							v6 = 12;
+							while ( v6 < 10 ) {
+								v7 = 9;
+								while ( v7 < 10 ) {
+									v8 = 15;
+									if ( v8 < 10 ) then {
+										v9 = 11;
+										if ( v9 < 10 ) then {
+											v10 = 18;
+											while ( v10 < 10 ) {
+												v11 = 6;
+												while ( v11 < 10 ) {
+													v12 = 16;
+													if ( v12 < 10 ) then {
+														v13 = 4;
+														if ( v13 < 10 ) then {
+															v14 = 9;
+															while ( v14 < 10 ) {
+																v15 = 4;
+																while ( v15 < 10 ) {
+																	v16 = 3;
+																	if ( v16 < 10 ) then {
+																		v17 = 19;
+																		if ( v17 < 10 ) then {
+																			v18 = 8;
+																			while ( v18 < 10 ) {
+																				v19 = 17;
+																				while ( v19 < 10 ) {
+																					v20 = 19;
+																					if ( v20 < 10 ) then {
+																						v21 = 4;
+																						if ( v21 < 10 ) then {
+																							v22 = 9;
+																							while ( v22 < 10 ) {
+																								v23 = 3;
+																								while ( v23 < 10 ) {
+																									v24 = 2;
+																									if ( v24 < 10 ) then {
+																										v25 = 10;
+																										if ( v25 < 10 ) then {
+																											v26 = 15;
+																											while ( v26 < 10 ) {
+																												v27 = 17;
+																												while ( v27 < 10 ) {
+																													v28 = 3;
+																													if ( v28 < 10 ) then {
+																														v29 = 11;
+																														if ( v29 < 10 ) then {
+																															v30 = 13;
+																															while ( v30 < 10 ) {
+																																v31 = 10;
+																																while ( v31 < 10 ) {
+																																	v32 = 19;
+																																	if ( v32 < 10 ) then {
+																																		v33 = 20;
+																																		if ( v33 < 10 ) then {
+																																			v34 = 6;
+																																			while ( v34 < 10 ) {
+																																				v35 = 17;
+																																				while ( v35 < 10 ) {
+																																					v36 = 15;
+																																					if ( v36 < 10 ) then {
+																																						v37 = 14;
+																																						if ( v37 < 10 ) then {
+																																							v38 = 16;
+																																							while ( v38 < 10 ) {
+																																								v39 = 8;
+																																								while ( v39 < 10 ) {
+																																									v40 = 1;
+																																									if ( v40 < 10 ) then {
+																																										v41 = 17;
+																																										if ( v41 < 10 ) then {
+																																											v42 = 0;
+																																											while ( v42 < 10 ) {
+																																												v43 = 2;
+																																												while ( v43 < 10 ) {
+																																													v44 = 12;
+																																													if ( v44 < 10 ) then {
+																																														v45 = 20;
+																																														if ( v45 < 10 ) then {
+																																															v46 = 0;
+																																															while ( v46 < 10 ) {
+																																																v47 = 19;
+																																																while ( v47 < 10 ) {
+																																																	v48 = 15;
+																																																	if ( v48 < 10 ) then {
+																																																		v49 = 10;
+																																																		if ( v49 < 10 ) then {
+																																																			v50 = 7;
+																																																		} else { 
+																																																			v50 = 10;
+																																																		}
+																																																	} else { 
+																																																		v49 = 2;
+																																																	}
+																																																	v47 = v47 + 1;
+																																																}
+																																																v46 = v46 + 1;
+																																															}
+																																														} else { 
+																																															v46 = 6;
+																																														}
+																																													} else { 
+																																														v45 = 18;
+																																													}
+																																													v43 = v43 + 1;
+																																												}
+																																												v42 = v42 + 1;
+																																											}
+																																										} else { 
+																																											v42 = 7;
+																																										}
+																																									} else { 
+																																										v41 = 7;
+																																									}
+																																									v39 = v39 + 1;
+																																								}
+																																								v38 = v38 + 1;
+																																							}
+																																						} else { 
+																																							v38 = 4;
+																																						}
+																																					} else { 
+																																						v37 = 17;
+																																					}
+																																					v35 = v35 + 1;
+																																				}
+																																				v34 = v34 + 1;
+																																			}
+																																		} else { 
+																																			v34 = 14;
+																																		}
+																																	} else { 
+																																		v33 = 2;
+																																	}
+																																	v31 = v31 + 1;
+																																}
+																																v30 = v30 + 1;
+																															}
+																														} else { 
+																															v30 = 2;
+																														}
+																													} else { 
+																														v29 = 10;
+																													}
+																													v27 = v27 + 1;
+																												}
+																												v26 = v26 + 1;
+																											}
+																										} else { 
+																											v26 = 16;
+																										}
+																									} else { 
+																										v25 = 15;
+																									}
+																									v23 = v23 + 1;
+																								}
+																								v22 = v22 + 1;
+																							}
+																						} else { 
+																							v22 = 3;
+																						}
+																					} else { 
+																						v21 = 9;
+																					}
+																					v19 = v19 + 1;
+																				}
+																				v18 = v18 + 1;
+																			}
+																		} else { 
+																			v18 = 17;
+																		}
+																	} else { 
+																		v17 = 9;
+																	}
+																	v15 = v15 + 1;
+																}
+																v14 = v14 + 1;
+															}
+														} else { 
+															v14 = 3;
+														}
+													} else { 
+														v13 = 17;
+													}
+													v11 = v11 + 1;
+												}
+												v10 = v10 + 1;
+											}
+										} else { 
+											v10 = 10;
+										}
+									} else { 
+										v9 = 17;
+									}
+									v7 = v7 + 1;
+								}
+								v6 = v6 + 1;
+							}
+						} else { 
+							v6 = 6;
+						}
+					} else { 
+						v5 = 19;
+					}
+					v3 = v3 + 1;
+				}
+				v2 = v2 + 1;
+			}
+		} else { 
+			v2 = 17;
+		}
+	} else { 
+		v1 = 18;
+	}
+}
+
