@@ -1,20 +1,20 @@
 #include "Spa.h"
 
+#include <exception>
 #include <iostream>
 #include <fstream>
-#include <string>
 #include <list>
 #include <sstream>
-#include <exception>
+#include <string>
 
+#include "DesignExtractor.h"
 #include "PqlEvaluator.h"
 #include "PqlParser.h"
 #include "PqlQuery.h"
 #include "SimpleParser.h"
-#include "DesignExtractor.h"
+#include "SpaException.h"
 #include "Token.h"
 #include "Tokeniser.h"
-#include "SpaException.h"
 
 Spa::Spa()
   : pkb(Pkb()) {
@@ -36,7 +36,7 @@ void Spa::parseSourceFile(const std::string& filename) {
 
     SourceProcessor::SimpleParser parser(pkb, tokens);
     parser.parse();
-    SourceProcessor::DesignExtractor(pkb).extractDesignAbstractions();
+    SourceProcessor::DesignExtractor(pkb).extractAllDesignAbstractions();
 
   } catch (const std::exception& e) {
     pkb = Pkb();

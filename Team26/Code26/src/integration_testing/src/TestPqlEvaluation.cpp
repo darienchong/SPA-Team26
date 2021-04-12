@@ -2,13 +2,13 @@
 
 #include <iostream>
 #include <list>
-#include <string>
 #include <sstream>
+#include <string>
 
+#include "Pkb.h"
 #include "PqlEvaluator.h"
 #include "PqlParser.h"
 #include "PqlQuery.h"
-#include "Pkb.h"
 #include "Token.h"
 #include "Tokeniser.h"
 

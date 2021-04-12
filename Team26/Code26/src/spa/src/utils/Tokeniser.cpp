@@ -1,10 +1,10 @@
 #include "Tokeniser.h"
 
 #include <fstream>
+#include <iostream>
 #include <list>
 #include <string>
 #include <unordered_set>
-#include <iostream>
 
 namespace {
   /**

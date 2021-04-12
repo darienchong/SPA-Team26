@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "Token.h"
-#include "SpaException.h"
 #include "ExprParser.h"
 #include "Pkb.h"
+#include "SpaException.h"
+#include "Token.h"
 
 namespace SourceProcessor {
   // Delimiters

@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 #include "Table.h"
 

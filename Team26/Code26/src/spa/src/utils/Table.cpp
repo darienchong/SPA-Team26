@@ -3,8 +3,8 @@
 #include <assert.h>
 
 #include <string>
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
 
 TableException::TableException(const std::string& msg)
   : std::exception(msg.c_str()) {}
@@ -101,16 +101,7 @@ bool Table::dropColumn(const std::string& headerTitle) {
 }
 
 void Table::filterColumn(const int index, const std::unordered_set<int>& values) {
-  const int numCols = header.size();
-  assert(index >= 0 && index < numCols);
-
-  // Initialise return values
-  std::vector<std::unordered_set<int>> filteredValues;
-  filteredValues.reserve(numCols);
-  for (int i = 0; i < numCols; i++) {
-    filteredValues.push_back({});
-  }
-
+  assert(index >= 0 && index < (int)header.size());
   // Filter table
   for (RowSet::iterator it = data.begin(); it != data.end(); ) {
     if (values.count((*it)[index]) == 0) {

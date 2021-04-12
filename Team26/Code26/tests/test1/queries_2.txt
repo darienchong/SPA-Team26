@@ -1,0 +1,185 @@
+1 - Syntax Error - Empty query
+
+
+
+1000
+2 - Syntax Error - General - Extra token after end of query
+stmt s;
+Select s;
+
+1000
+3 - Syntax Error - Declaration - Missing ;
+stmt s
+Select s
+
+1000
+4 - Syntax Error - Declaration - Missing synonym name
+stmt s; stmt;
+Select s
+
+1000
+5 - Syntax Error - Declaration - Invalid type
+stmt s; hello c;
+Select s
+
+1000
+6 - Syntax Error - Declaration - Invalid synonym name
+stmt 0s;
+Select 0s
+
+1000
+7 - Syntax Error - Declaration - Invalid synonym name
+stmt s*3+4;
+Select s
+
+1000
+8 - Syntax Error - Declaration - Invalid synonym name
+stmt s*;
+Select s
+
+1000
+9 - Syntax Error - Body - Unrecognised keyword 'Pattern'
+assign s; assign a;
+Select s Pattern a(_, _"1"_)
+
+1000
+10 - Syntax Error - Such That - More than one space between 'such' and 'that'
+stmt s;
+Select s such   that Follows(1, 2)
+
+1000
+11 - Syntax Error - Such That - Invalid relRef
+stmt s;
+Select s such that Follow(1, 2)
+
+1000
+12 - Syntax Error - Such That - Space between Follows and *
+stmt s;
+Select s such that Follows *(1, 2)
+
+1000
+13 - Syntax Error - Such That - Space between Follows and *
+stmt s;
+Select s such that Follows *(1, 2)
+
+1000
+14 - Syntax Error - Such That - More than one such that clause
+stmt s;
+Select s such that Follows(1, 2) and Follows(2, 3)
+
+1000
+15 - Syntax Error - Such That - More than one such that clause
+stmt s;
+Select s such that Follows(1, 2) such that Follows(2, 3)
+
+1000
+16 - Syntax Error - Such That - Invalid EntRef
+stmt s;
+Select s such that Uses(s, "1")
+
+1000
+17 - Syntax Error - Pattern - Invalid EntRef
+assign a;
+Select a pattern a(3, _)
+
+1000
+18 - Syntax Error - Such That - Invalid StmtRef
+stmt s;
+Select s such that Follows(-1, s)
+
+1000
+19 - Syntax Error - Such That - Invalid StmtRef
+stmt s;
+Select s such that Follows*(s, "x")
+
+1000
+20 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, "x"_)
+
+1000
+21 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, _"x")
+
+1000
+22 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, "x == y")
+
+1000
+26 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, _"x y +")
+
+1000
+23 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, "x + + y")
+
+1000
+24 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, _""_)
+
+1000
+25 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, _"()"_)
+
+1000
+26 - Syntax Error - Body - Incomplete such that clause
+assign a;
+Select a such that pattern a(_, _"1"_)
+
+1000
+27 - Syntax Error - Such That - Missing 'such that'
+assign a;
+Select a Uses(a, "x")
+
+1000
+28 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, "")
+
+1000
+29 - Syntax Error - Pattern - Invalid expression-spec
+assign a;
+Select a pattern a(_, )
+
+1000
+34 - Syntax Error - Pattern - Invalid EntRef
+assign a;
+Select a pattern a("1", _"1"_)
+
+1000
+30 - Syntax Error - Pattern - Invalid EntRef
+assign a; stmt s;
+Select a pattern a(s, _"1"_)
+
+1000
+31 - Syntax Error - Pattern - Invalid EntRef
+assign a; procedure pr;
+Select a pattern a(pr, _"1"_)
+
+1000
+32 - Syntax Error - Pattern - Invalid EntRef
+assign a;
+Select a pattern a("", _"1"_)
+
+1000
+33 - Syntax Error - Declaration - Extra ; after declaration
+stmt s;;
+Select s
+
+1000
+34 - Syntax Error - Pattern - Invalid EntRef (empty)
+assign a;
+Select a pattern a(, _"1"_)
+
+1000
+35 - Syntax Error - Declartion - Missing , OR using , instead of ;
+assign a, stmt s;
+Select s
+
+1000

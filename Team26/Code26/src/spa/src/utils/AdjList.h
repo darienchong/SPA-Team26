@@ -1,13 +1,13 @@
 #pragma once
 
-#include <map>
 #include <list>
+#include <unordered_map>
 #include <unordered_set>
 
 class AdjList {
 private:
   // The internal representation of the adjacency list.
-  std::map<int, std::unordered_set<int>> internalRepresentation;
+  std::unordered_map<int, std::unordered_set<int>> internalRepresentation;
 
   // Number of nodes in the graph.
   int size;
@@ -22,11 +22,13 @@ private:
    */
   void warshallRowOperation(int i, int j);
 
-  const std::string INDEX_GREATER_THAN_SIZE_ERROR_MSG = "One of i, j is"
-    " greater than the size allocated to this adjacency list.";
 public:
-  AdjList(int size) : size(size) {}
-  ~AdjList() {}
+  /**
+   * Constructs an adjacency list object of the given size.
+   *
+   * @param size Size of graph. i.e. number of nodes.
+   */
+  AdjList(int size);
 
   /**
    * Records a directed edge into the adjacency list i.e.

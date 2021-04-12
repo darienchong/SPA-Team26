@@ -2,9 +2,9 @@
 
 #include <assert.h>
 
-#include <vector>
 #include <string>
 #include <unordered_set>
+#include <vector>
 
 namespace Pql {
   ClauseNode::ClauseNode()

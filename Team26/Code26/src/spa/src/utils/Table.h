@@ -1,9 +1,9 @@
 #pragma once
 
+#include <exception>
 #include <string>
 #include <unordered_set>
 #include <vector>
-#include <exception>
 
 typedef std::vector<std::string> Header;
 typedef std::vector<int> Row;

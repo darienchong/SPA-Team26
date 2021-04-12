@@ -5,10 +5,10 @@
 #include <list>
 #include <string>
 
-#include "PqlQuery.h"
-#include "Token.h"
 #include "ExprParser.h"
+#include "PqlQuery.h"
 #include "SpaException.h"
+#include "Token.h"
 
 // Helper methods
 namespace {

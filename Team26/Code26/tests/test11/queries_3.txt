@@ -1,0 +1,170 @@
+1 - Semantic Error - Repeated declaration of same name
+stmt s, s;
+Select BOOLEAN 
+FALSE
+1000
+2 - Semantic Error - Repeated delcaration of same name
+stmt s; variable s;
+Select BOOLEAN 
+FALSE
+1000
+3 - Semantic Error - Use undeclared variable in select
+
+Select s
+
+1000
+4 - Semantic Error - Use undeclared variable in clauses
+
+Select BOOLEAN such that Follows(1, p)
+FALSE
+1000
+5 - Semantic Error - Declaration of BOOLEAN as synonym name
+stmt BOOLEAN;
+Select BOOLEAN
+FALSE
+1000
+6 - Semantic Error - Delcaration of BOOLEAN as synonym name
+stmt BOOLEAN, s;
+Select <BOOLEAN, s>
+
+1000
+7 - Semantic Error - Pattern does not use assign/if/while
+stmt s;
+Select BOOLEAN pattern s(_, _)
+FALSE
+1000
+8 - Semantic Error - Pattern does not use assign/if/while
+stmt s;
+Select BOOLEAN pattern s(_, _, _)
+FALSE
+1000
+9 - Semantic Error - IllegalEntRef
+stmt s1, s2;
+Select BOOLEAN such that Modifies(s1, s2)
+FALSE
+1000
+10 - Semantic Error - IllegalEntRef
+stmt s; constant c;
+Select BOOLEAN such that Uses(s, c)
+FALSE
+1000
+11 - Semantic Error - Illegal EntRef
+assign a; procedure pr;
+Select BOOLEAN pattern a(pr, _)
+FALSE
+1000
+12 - Semantic Error - Illegal StmtRef
+stmt s; variable v;
+Select BOOLEAN such that Parent(s, v)
+FALSE
+1000
+13 - Semantic Error - Illegal StmtRef
+stmt s; procedure pr;
+Select BOOLEAN such that Parent*(pr, s)
+FALSE
+1000
+14 - Semantic Error - 0 as StmtRef
+
+Select BOOLEAN such that Follows(0, 1)
+FALSE
+1000
+15 - Semantic Error - Illegal with-clause comparison 
+
+Select BOOLEAN with 0 = "x"
+FALSE
+1000
+16 - Semantic Error - Illegal with-clause comparison 
+stmt s;
+Select BOOLEAN with s = 1
+FALSE
+1000
+17 - Semantic Error - Illegal with-clause comparison 
+constant c;
+Select BOOLEAN with c = 0
+FALSE
+1000
+18 - Semantic Error - Illegal with-clause comparison 
+variable v;
+Select BOOLEAN with v = "x"
+FALSE
+1000
+19 - Semantic Error - Illegal with-clause comparison 
+procedure pr; constant c;
+Select BOOLEAN with pr.procName = c.value
+FALSE
+1000
+20 - Semantic Error - Illegal with-clause comparison
+prog_line n;
+Select BOOLEAN with n = "general" 
+FALSE
+1000
+21 - Semantic Error - Illegal attrRef 
+stmt s;
+Select BOOLEAN with s.varName = "x" 
+FALSE
+1000
+22 - Semantic Error - Illegal attrRef 
+stmt s;
+Select BOOLEAN with s.procName = "general" 
+FALSE
+1000
+23 - Semantic Error - Illegal attrRef 
+stmt s;
+Select BOOLEAN with s.value = 1 
+FALSE
+1000
+24 - Semantic Error - Illegal attrRef 
+constant c;
+Select BOOLEAN with c.varName = "x" 
+FALSE
+1000
+25 - Semantic Error - Illegal attrRef 
+constant c;
+Select BOOLEAN with c.procName = "general" 
+FALSE
+1000
+26 - Semantic Error - Illegal attrRef 
+constant c;
+Select BOOLEAN with c.stmt# = 0 
+FALSE
+1000
+27 - Semantic Error - Illegal attrRef 
+variable v;
+Select BOOLEAN with v.procName = "general" 
+FALSE
+1000
+28 - Semantic Error - Illegal attrRef 
+variable v;
+Select BOOLEAN with v.value = "x" 
+FALSE
+1000
+29 - Semantic Error - Illegal attrRef 
+variable v;
+Select BOOLEAN with v.stmt# = 1 
+FALSE
+1000
+30 - Semantic Error - Illegal attrRef 
+procedure pr;
+Select BOOLEAN with pr.varName = "x" 
+FALSE
+1000
+31 - Semantic Error - Illegal attrRef 
+procedure pr;
+Select BOOLEAN with pr.value = 0 
+FALSE
+1000
+32 - Semantic Error - Illegal attrRef 
+procedure pr;
+Select BOOLEAN with pr.stmt# = 1 
+FALSE
+1000
+33 - Semantic Error - Illegal attrRef in Select
+procedure pr;
+Select pr.stmt#
+
+1000
+34 - Semantic Error - Illegal attrRef in Select
+stmt s;
+Select s.procName
+
+1000

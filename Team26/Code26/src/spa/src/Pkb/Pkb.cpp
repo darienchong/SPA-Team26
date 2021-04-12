@@ -2,17 +2,25 @@
 
 #include <assert.h>
 
+#include <memory>
+#include <stdexcept>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
-#include <unordered_set>
-#include <stdexcept>
 
-#include "Table.h"
 #include "Cfg.h"
-#include "CfgBip.h"
+#include "Table.h"
 
 Pkb::Pkb() {}
+
+void Pkb::initialiseCfgBip(const std::list<std::string>& topoProc) {
+  std::unordered_map<int, std::string> callStmtToProcMapper;
+  for (const std::pair<int, std::string>& callProcPair : callIntRefToProcMapper) {
+    callStmtToProcMapper.emplace(getStmtNumFromIntRef(callProcPair.first), callProcPair.second);
+  }
+  cfg.initialiseCfgBip(topoProc, procStartMapper, procEndMapper, callStmtToProcMapper);
+}
 
 void Pkb::addProcRange(const std::string proc, const int first, const int last) {
   for (int stmt = first; stmt <= last; ++stmt) {
@@ -25,27 +33,13 @@ void Pkb::addProcStartEnd(const std::string proc, const int start, const std::ve
   procEndMapper.emplace(proc, end);
 }
 
-void Pkb::addCfgBipEdge(const int from, const int to, const int label, const Cfg::NodeType type) {
-  cfgBip.addBipEdge(from, to, label, type);
-  if (type != Cfg::NodeType::DUMMY && type != Cfg::NodeType::BRANCH_BACK) {
-    addNextBip(from, to);
-  }
-}
-
 void Pkb::addCfgEdge(const int from, const int to) {
   if (to < 0) {
     assert(from > 0);
     cfg.addEdge(from, to);
-    if (!callTable.contains({ getIntRefFromStmtNum(from) })) {
-      cfgBip.addBipEdge(from, to, 0, Cfg::NodeType::DUMMY);
-    }
   } else {
     cfg.addEdge(from, to);
     addNext(from, to);
-    if (!callTable.contains({ getIntRefFromStmtNum(from) })) {
-      cfgBip.addBipEdge(from, to, 0, Cfg::NodeType::NORMAL);
-      addNextBip(from, to);
-    }
   }
 }
 
@@ -336,10 +330,6 @@ std::vector<int> Pkb::getNextStmtsFromCfg(const int stmtNum) const {
   return cfg.getNeighbours(stmtNum);
 }
 
-std::vector<Cfg::BipNode> Pkb::getNextStmtsFromCfgBip(const int stmtNum) const {
-  return cfgBip.getNeighbours(stmtNum);
-}
-
 int Pkb::getStartStmtFromProc(const std::string& proc) const {
   return procStartMapper.at(proc);
 }
@@ -362,4 +352,8 @@ int Pkb::addEntity(const std::string& entity) {
     entityToIntRefMapper.emplace(entity, intRef);
   }
   return entityToIntRefMapper[entity];
+}
+
+std::vector<std::shared_ptr<Cfg::BipNode>> Pkb::getStartBipNodes() const {
+  return cfg.getStartBipNodes();
 }

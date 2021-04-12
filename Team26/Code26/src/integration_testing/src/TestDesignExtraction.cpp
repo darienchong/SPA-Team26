@@ -1,7 +1,7 @@
 #include "catch.hpp"
 
-#include "Table.h"
 #include "DesignExtractor.h"
+#include "Table.h"
 
 TEST_CASE("[TestDesignExtractor] ParentT extraction") {
   Pkb pkb;
@@ -69,11 +69,6 @@ TEST_CASE("[TestDesignExtractor] CallsT extraction") {
   pkb.addCalls("p1", "p2");
   pkb.addCalls("p2", "p3");
   pkb.addCalls("p3", "p4");
-
-  pkb.addProcStartEnd("p1", 1, std::vector<int> { 3 }); // to be changed if wrong
-  pkb.addProcStartEnd("p2", 4, std::vector<int> { 5 }); // to be changed if wrong
-  pkb.addProcStartEnd("p3", 6, std::vector<int> { 6 }); // to be changed if wrong
-  pkb.addProcStartEnd("p4", 7, std::vector<int> { 9 }); // to be changed if wrong
 
   designExtractor.extractDesignAbstractions();
   Table callsTTable = pkb.getCallsTTable();
@@ -152,9 +147,6 @@ TEST_CASE("[TestDesignExtractor] NextT extraction") {
   pkb.addCfgEdge(11, 12);
   pkb.addCfgEdge(9, 10);
 
-  pkb.addProcStartEnd("Second", 1, std::vector<int> { 12 }); // to be changed if wrong
-  pkb.addProcStartEnd("Third", 13, std::vector<int> { 13 }); // to be changed if wrong
-
   designExtractor.extractDesignAbstractions();
 
   Table nextTTable = pkb.getNextTTable();
@@ -207,10 +199,6 @@ TEST_CASE("[TestDesignExtractor] Indirect UsesP extraction") {
   pkb.addUsesP("p2", "usedByP2");
   pkb.addUsesP("p3", "usedByP3");
 
-  pkb.addProcStartEnd("p1", 1, std::vector<int> { 12 }); // to be changed if wrong
-  pkb.addProcStartEnd("p2", 13, std::vector<int> { 13 }); // to be changed if wrong
-  pkb.addProcStartEnd("p3", 14, std::vector<int> { 16 }); // to be changed if wrong
-
   designExtractor.extractDesignAbstractions();
   Table usesPTable = pkb.getUsesPTable();
 
@@ -247,15 +235,11 @@ TEST_CASE("[TestDesignExtractor] Uses(c, v) in container => Uses(ifs/w, v)") {
   pkb.addProc("p2");
 
   // Would normally be added by the parser, etc.
-  pkb.addCfgEdge(2, 1); // Dummy edge
   pkb.addParent(1, 2);
   pkb.addCallProc(2, "p2");
   pkb.addCalls("p1", "p2");
   pkb.addUsesP("p2", "x");
   pkb.addUsesS(4, "x");
-
-  pkb.addProcStartEnd("p1", 1, std::vector<int> { 3 }); // to be changed if wrong
-  pkb.addProcStartEnd("p2", 4, std::vector<int> { 4 }); // to be changed if wrong
 
   designExtractor.extractDesignAbstractions();
 
@@ -305,10 +289,6 @@ TEST_CASE("[TestDesignExtractor] Indirect ModifiesP extraction") {
   pkb.addModifiesP("p2", "modifiedByP2");
   pkb.addModifiesP("p3", "modifiedByP3");
 
-  pkb.addProcStartEnd("p1", 1, std::vector<int> { 2 }); // to be changed if wrong
-  pkb.addProcStartEnd("p2", 3, std::vector<int> { 4 }); // to be changed if wrong
-  pkb.addProcStartEnd("p3", 5, std::vector<int> { 6 }); // to be changed if wrong
-
   designExtractor.extractDesignAbstractions();
   Table usesPTable = pkb.getModifiesPTable();
 
@@ -347,9 +327,6 @@ TEST_CASE("[TestDesignExtractor] Modifies(c, v) in container => Modifies(ifs/w, 
   pkb.addCalls("p1", "p2");
   pkb.addModifiesP("p2", "x");
   pkb.addModifiesS(3, "x");
-
-  pkb.addProcStartEnd("p1", 1, std::vector<int> { 2 }); // to be changed if wrong
-  pkb.addProcStartEnd("p2", 3, std::vector<int> { 3 }); // to be changed if wrong
 
   designExtractor.extractDesignAbstractions();
 
@@ -430,8 +407,6 @@ TEST_CASE("[TestDesignExtractor] Affects extraction") {
 
   // adding other relevant information
   pkb.addCallProc(5, "third");
-  pkb.addProcStartEnd("second", 1, std::vector<int> { 12 });
-  pkb.addProcStartEnd("third", 13, std::vector<int> { 14 });
 
   designExtractor.extractDesignAbstractions();
 
@@ -523,11 +498,6 @@ TEST_CASE("[TestDesignExtractor] AffectsT extraction") {
   pkb.addModifiesS(12, "x");
   pkb.addModifiesS(13, "z");
   pkb.addModifiesS(14, "v");
-
-  // adding other relevant information
-  pkb.addCallProc(5, "Third");
-  pkb.addProcStartEnd("Second", 1, std::vector<int> { 12 });
-  pkb.addProcStartEnd("Third", 13, std::vector<int> { 14 });
 
   designExtractor.extractDesignAbstractions();
 

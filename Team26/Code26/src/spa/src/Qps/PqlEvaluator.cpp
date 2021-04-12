@@ -4,14 +4,14 @@
 
 #include <list>
 #include <string>
-#include <vector>
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
-#include "PqlQuery.h"
 #include "Pkb.h"
-#include "Table.h"
 #include "PqlOptimizer.h"
+#include "PqlQuery.h"
+#include "Table.h"
 
 namespace {
   /**

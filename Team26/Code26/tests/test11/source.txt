@@ -1,0 +1,17 @@
+procedure
+general{while	(x !=
+0)
+	
+
+{x=x-		
+	 x + 0
+;}
+if (x == 0)then {
+  call next; 	
+} 	
+else { print x; }}
+
+procedure next {
+  	
+read x;
+}

@@ -1,0 +1,135 @@
+69 - Such that and such that - Single select
+assign a; assign a1;
+Select a such that Modifies(a, "var2") such that Next(a, a1)
+6
+5000
+70 - Such that and such that - Tuple select
+stmt s; while w;
+Select <s, w> such that Modifies(s, "var2") such that Next(s, w)
+2 3, 4 3
+5000
+71 - Such that and such that - Boolean select
+stmt s; while w;
+Select BOOLEAN such that Parent*(w, s) such that Affects*(s, 21)
+TRUE
+5000
+72 - Such that and pattern - Single select
+assign a; if f;
+Select a such that Modifies(a, "var1") pattern f ("var1", _, _)
+7, 11
+5000
+73 - Such that and pattern - Tuple select
+prog_line n; assign a;
+Select <n, a> such that Affects(n, 21) pattern a (_, _"a111111111111111111"_)
+19 19, 19 21
+5000
+74 - Such that and pattern - Boolean select
+prog_line n; if f; variable v;
+Select BOOLEAN such that Affects(n, 7) pattern f (v, _, _)
+TRUE
+5000
+75 - Such that and with - Single select
+assign a; prog_line n;
+Select a.stmt# such that Affects(a, n) with n = 7
+6
+5000
+76 - Such that and with - Tuple select
+assign a; prog_line n; if f;
+Select <a, f> such that Affects(a, n) with n = 7 such that Uses(f, "var1")
+6 5, 6 22
+5000
+77 - Such that and with - Boolean select
+prog_line n;
+Select BOOLEAN such that Affects(n, 21) with n = 10
+FALSE
+5000
+78 - Pattern and with - Single select
+if f; prog_line n;
+Select f pattern f ("var1", _, _) with n = 10
+5, 22
+5000
+79 - Pattern and with - Tuple select
+while w; prog_line n; if f;
+Select <w, n, f> pattern w ("var2", _) with n = 20 pattern f ("a", _, _)
+3 20 22, 16 20 22
+5000
+80 - Pattern and with - Boolean select
+while w; constant c; stmt s;
+Select BOOLEAN pattern w ("var2", _) with s.stmt# = c.value
+TRUE
+5000
+81 - With and with - Single select
+stmt s; constant c;
+Select s with s.stmt# = c.value with c.value = 2
+2
+5000
+82 - With and with - Tuple select
+stmt s; constant c; variable v;
+Select <s, v> with s.stmt# = c.value with v.varName = "var2"
+1 var2, 2 var2, 3 var2, 12 var2, 15 var2, 25 var2
+5000
+83 - With and with - Boolean select
+variable v; constant c;
+Select BOOLEAN with v.varName = "var2" with c.value = 4
+FALSE
+5000
+84 - Pattern and pattern - Single select
+assign a; if f; stmt s;
+Select s pattern a ("var3", "var1 + var2") pattern f ("var5", _, _)
+
+5000
+85 - Pattern and pattern - Tuple select
+assign a; if f; variable v;
+Select <a, f> pattern a ("var3", _"var1"_) pattern f (v, _, _)
+10 5, 10 22
+5000
+86 - Pattern and pattern - Boolean select
+while w; assign a;
+Select BOOLEAN pattern a (_, _"a11111"_) pattern w("abc", _)
+FALSE
+5000
+87 - Such that and and - Single select
+assign a; assign a1; while w;
+Select a such that Follows(a, a1) and Next*(a, w)
+6, 10, 19, 20
+5000
+88 - Such that and and - Tuple select
+assign a; assign a1; while w;
+Select <a, w> such that Follows(a, a1) and Next*(a, w)
+6 14, 10 14, 19 14, 20 14, 6 16, 10 16, 19 16, 20 16
+5000
+89 - Such that and and - Boolean select
+assign a, a1, a2; while w;
+Select BOOLEAN such that Next(a, a1) and Next(a1, a2) and Next(a2, w)
+TRUE
+5000
+90 - With and and - Single select
+prog_line n; constant c; stmt s;
+Select s with s.stmt# = c.value and n = s.stmt# and n = 10
+
+5000
+91 - With and and - Tuple select
+prog_line n; constant c; stmt s;
+Select <s, n> with s.stmt# = n and n = c.value and c.value = 25
+25 25
+5000
+92 - With and and - Boolean select
+constant c; variable v; prog_line n;
+Select BOOLEAN with c.value = n and n = 10
+FALSE
+5000
+93 - Pattern and and - Single select
+assign a; if f; stmt s;
+Select s pattern a ("var3", "var1 + var2") and f ("var5", _, _)
+
+5000
+94 - Pattern and and - Tuple select
+assign a; if f; variable v;
+Select <a, f> pattern a ("var3", _"var1"_) and f (v, _, _)
+10 5, 10 22
+5000
+95 - Pattern and and - Boolean select
+while w; assign a;
+Select BOOLEAN pattern a (_, _) and w("var3", _)
+TRUE
+5000

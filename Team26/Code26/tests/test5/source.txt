@@ -1,123 +1,36 @@
-procedure proc1 {
-   print var4;
-   print var8;
-   read var8;
-   print var9;
-}
-procedure proc2 {
-   if (((var3 < (36916 - 24893)) || (33884 != (var6 + var3))) || ((36916 - 79653) != 27)) then {
-       print var10;
-       call proc3;
-       read var2;
-       print var9;
-    } else {
-      read var1;
-      var5 = (var3 % var10 / 90957) - var2 / 28227;
-      var5 = 36916 / 8672 - 11845;
-      var6 = (var1 - var5) / (36916 + var9) % (28227 + 79653) - ((90957 + 36916) / var4) * var1 * var8;
-    }
-  read var1;
-  var6 = 27 + var1 % 74139 * 90957 + var5;
-  print var8;
-  print var5;
-  var2 = (79653 - (33884 - (var9 + var8) - var2)) / var3 / var10;
-  print var3;
-  print var2;
-  call proc1;
-}
-procedure proc3 {
-  read var6;
-  read var4;
-  read var2;
-  var9 = var10 - 74139 - 27 % 27;
-  print var4;
-  if (36916 >= (((24893 + var4)) - var1 - var5 - ((11845 + 8672)) % var8)) then {
-      print var8;
-      var2 = var8 % var4 + ((74139 / var7) / (79653 % var1)) + 27 % 8672;
-      print var8;
-      while (!((((27 - 28227) < var2) || (90957 == 90957)) && (11845 < 28227))) {
-          print var4;
-          print var9;
-          var9 = var9;
-          var6 = ((24893 + (((((79653 / var3))))) + 28227)) - 11845 + var3 / var8 - 74139;
-          var7 = 28227 + var10;
-          print var1;
-          var10 = (var9 + var3) / (36916 - 36916) * (((var6 * var1) % var9) + var3) - (var7 + ((var5 / 24893))) * 11845;
-          var9 = 24893 / (var9 - var5) - ((var4 * (90957 - 74139) + var7) + var6) + var10;
-          if ((74139 % 79653 - 33884) != var2) then {
-              read var6;
-              print var6;
-            } else {
-              print var4;
-              read var3;
-              read var10;
-              print var3;
-              var9 = ((28227 + var4) * 79653) * (var1 - var3) + var3;
-              print var10;
-              read var7;
-          }
-      }
-      call proc4;
-      while ((var10 > 36916) && ((var9 - var1) > 90957)) {
-          read var6;
-          print var7;
-          read var2;
-          var7 = 11845 * (var7 % var2) / var5 + var8 * (24893 + 28227);
-          print var9;
-      }
-      read var8;
-  } else {
-      var6 = ((90957 % 24893) * var3 * var9 * 24893) + 24893 / 11845;
-      print var4;
-      read var2;
-  }
-}
-procedure proc4 {
-  var1 = 90957 + (var6 % 24893) / ((11845 + 90957)) % 90957;
-  print var8;
-  read var3;
-  print var7;
-  print var3;
-  print var2;
-  print var7;
-  while (36916 == (((var8 + var6)))) {
-      read var10;
-      read var6;
-      var2 = ((var6 - (24893 + var1)) - 28227 * 90957) * var3 + (((var4 + 90957) * 28227)) + (74139 % 27);
-      print var10;
-      var8 = (90957 / (var3 + 24893) + 36916 * var5) + 27;
-      print var10;
-      if (((var5 + (var7 + 11845)) >= var4) || (var4 < var9)) then {
-          read var3;
-          var2 = var4 % ((79653 - var10) / var8 - var10) % (var5 - 28227);
-          read var4;
-          read var2;
-          read var9;
-          print var5;
-          while ((8672 * var5) < (79653 + 90957)) {
-              call proc1;
-              call proc1;
-              while ((var6 <= ((var2 % 8672))) || (var3 > 28227)) {
-                  read var5;
-                  var5 = (8672 + 79653) * 11845 + 90957;
-                  read var4;
-                  var2 = (((79653 - 8672))) * 11845 - 79653 / (11845 - 24893) / var9 / 11845;
-                  call proc5;
-                  var1 = 8672;
-              }
-              var6 = ((var4 * var2)) - 36916 % 74139 - (24893 * 8672) * var4 - 36916 / var7 - 11845 - 36916;
-          }
-          var9 = var9 + ((11845 + 90957) / 36916 / var9 + 27) * 28227 + var3 / var6;
+procedure rocksolid{
+  read levels;
+  read val1;
+  val2 = 0;
+  count1 = 1;
+  count2 = 0;
+  iterations = 0;
+  while (iterations < levels) {
+    if (val2 == 0) then {
+      if (val1 % 2 == 0) then {
+        val1 = val1 / 2;
+        count1 = count1 * 2;
+        count2 = 0;
       } else {
-          read var1;
-          read var2;
-          print var8;
+        val2 = (val1 - 1) / 2;
+        val1 = (val1 + 1) / 2;
+        count2 = count1;
       }
+    } else {
+      if (val1 % 2 == 0) then {
+        val1 = val1 / 2;
+        count1 = count1 * 2 + count2;
+        val2 = val1 - 1;
+      } else {
+        val2 = val2 / 2;
+        count2 = count2 * 2 + count1;
+        val1 = val2 + 1;
+      }
+    }
+    iterations = iterations + 1;
   }
-  read var5;
-  read var5;
-}
-procedure proc5 {
-  var5 = 74139;
- var4 = var10 + var5;
+  print val1;
+  print count1;
+  print val2;
+  print count2;
 }

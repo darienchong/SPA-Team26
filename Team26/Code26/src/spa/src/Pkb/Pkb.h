@@ -1,18 +1,17 @@
 #pragma once
 
 #include <map>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
-#include "Table.h"
 #include "Cfg.h"
-#include "CfgBip.h"
+#include "Table.h"
 
 class Pkb {
 private:
   Cfg::Cfg cfg;
-  Cfg::CfgBip cfgBip;
 
   Table varTable{ 1 };
   Table stmtTable{ 1 };
@@ -84,6 +83,12 @@ public:
   Pkb();
 
   /**
+   * Initialises the CFGBip.
+   * 
+   */
+  void initialiseCfgBip(const std::list<std::string>& topoProc);
+
+  /**
    * Adds the range of statement numbers that belong to a procedure.
    *
    * @param proc Procedure in question.
@@ -100,16 +105,6 @@ public:
    * @param end List of statement numbers of the last statements in the procedure's control flow path.
    */
   void addProcStartEnd(const std::string proc, const int start, const std::vector<int> end);
-
-  /**
-  * Adds a directed edge into the CFGBip and populates the NextBip relation.
-  *
-  * @param from Statement number of the statement executed first.
-  * @param to Statement number of the statement which can be executed immediately after.
-  * @param label Label of the edge.
-  * @param type Type of the edge.
-  */
-  void addCfgBipEdge(const int from, const int to, const int label, const Cfg::NodeType type);
 
   /**
    * Adds a directed edge into the CFG and CFGBip. Also populates Next and NextBip relation.
@@ -717,15 +712,6 @@ public:
   std::vector<int> getNextStmtsFromCfg(const int stmtNum) const;
 
   /**
-   * Finds the list of stmts that can be directly executed after the given stmt number in the CFGBip.
-   * If there are no nodes following, an empty list is returned.
-   *
-   * @param stmtNum Statement number of interest.
-   * @return std::vector<BipNode> List of nodes.
-   */
-  std::vector<Cfg::BipNode> getNextStmtsFromCfgBip(const int stmtNum) const;
-
-  /**
    * Finds the first statement of a given procedure.
    *
    * @param proc Procedure in question.
@@ -748,6 +734,13 @@ public:
    * @return std::string Procedure that the statement belongs to.
    */
   std::string getProcFromStmt(const int stmt) const;
+
+  /**
+   * Gets the list of pointers to the startNodes of relevant topo-sorted procedures in the CFGBip.
+   *
+   * @return std::vector<std::shared_ptr<Cfg::BipNode>> List of pointers to the startNodes of relevant topo-sorted procedures in the CFGBip.
+   */
+  std::vector<std::shared_ptr<Cfg::BipNode>> getStartBipNodes() const;
 
 private:
   /**

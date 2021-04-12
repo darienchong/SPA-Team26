@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <exception>
+#include <string>
 
 namespace ExprProcessor {
   namespace ErrorMessage {

@@ -1,10 +1,10 @@
 #include "catch.hpp"
 
 #include <fstream>
+#include <iostream>
 #include <list>
 #include <sstream>
 #include <string>
-#include <iostream>
 
 #include "Token.h"
 #include "Tokeniser.h"

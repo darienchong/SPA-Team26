@@ -1,17 +1,16 @@
 #include "catch.hpp"
 
 #include <iostream>
-#include <string>
 #include <list>
 #include <sstream>
+#include <string>
 
 #include "DesignExtractor.h"
 #include "Pkb.h"
 #include "SimpleParser.h"
 #include "Table.h"
-#include "Tokeniser.h"
 #include "Token.h"
-#include "CfgBip.h"
+#include "Tokeniser.h"
 
 
 /*
@@ -48,7 +47,7 @@ TEST_CASE("[TestSimpleParser] Procedures with semantic errors", "[SimpleParser][
     Pkb pkb;
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
-    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractDesignAbstractions());
+    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractAllDesignAbstractions());
   }
 
   SECTION("Recursive call of procedure") {
@@ -57,7 +56,7 @@ TEST_CASE("[TestSimpleParser] Procedures with semantic errors", "[SimpleParser][
     Pkb pkb;
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
-    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractDesignAbstractions());
+    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractAllDesignAbstractions());
   }
 
   SECTION("Cyclic call of procedure") {
@@ -66,7 +65,7 @@ TEST_CASE("[TestSimpleParser] Procedures with semantic errors", "[SimpleParser][
     Pkb pkb;
     SourceProcessor::SimpleParser parser(pkb, simpleProg);
     parser.parse();
-    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractDesignAbstractions());
+    REQUIRE_THROWS(SourceProcessor::DesignExtractor(pkb).extractAllDesignAbstractions());
   }
 }
 
@@ -141,7 +140,7 @@ TEST_CASE("[TestSimpleParser] Multiple procedures - independent", "[SimpleParser
 
   SECTION("Transitive") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table modifiesPTable = pkb.getModifiesPTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -195,7 +194,7 @@ TEST_CASE("[TestSimpleParser] Multiple procedures - Direct calls", "[SimpleParse
 
   SECTION("Transitive") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table callsTTable = pkb.getCallsTTable();
     Table modifiesPTable = pkb.getModifiesPTable();
@@ -257,7 +256,7 @@ TEST_CASE("[TestSimpleParser] Multiple procedures - Indirect calls", "[SimplePar
 
   SECTION("Transitive") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table callsTTable = pkb.getCallsTTable();
     Table modifiesPTable = pkb.getModifiesPTable();
@@ -865,7 +864,7 @@ TEST_CASE("[TestSimpleParser] Valid if statement - Basic", "[SimpleParser][If]")
 
   SECTION("With DE relations") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table followsTTable = pkb.getFollowsTTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -990,7 +989,7 @@ TEST_CASE("[TestSimpleParser] Valid if statement - Singly nested if", "[SimplePa
 
   SECTION("With DE relations") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table followsTTable = pkb.getFollowsTTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -1165,7 +1164,7 @@ TEST_CASE("[TestSimpleParser] Valid if statement - Doubly nested if", "[SimplePa
 
   SECTION("With DE relations") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table followsTTable = pkb.getFollowsTTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -1408,7 +1407,7 @@ TEST_CASE("[TestSimpleParser] Valid while statement - Basic", "[SimpleParser][Wh
 
   SECTION("With DE relations") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table followsTTable = pkb.getFollowsTTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -1523,7 +1522,7 @@ TEST_CASE("[TestSimpleParser] Valid while statement - Singly nested while", "[Si
 
   SECTION("With DE relations") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table followsTTable = pkb.getFollowsTTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -1691,7 +1690,7 @@ TEST_CASE("[TestSimpleParser] Valid while statement - Doubly nested while", "[Si
 
   SECTION("With DE relations") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table followsTTable = pkb.getFollowsTTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -1924,7 +1923,7 @@ TEST_CASE("[TestSimpleParser] Loops - Nested/follows if/while loops", "[SimplePa
 
   SECTION("With DE relations") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table followsTTable = pkb.getFollowsTTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -2144,7 +2143,7 @@ TEST_CASE("[TestSimpleParser] Loops - Random example", "[SimpleParser][Assign][I
 
   SECTION("With DE relations") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table followsTTable = pkb.getFollowsTTable();
     Table modifiesSTable = pkb.getModifiesSTable();
@@ -2278,7 +2277,7 @@ TEST_CASE("[TestSimpleParser] Next relation - No loops", "[SimpleParser][Next]")
   }
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("NextT") {
     Table nextTTable = pkb.getNextTTable();
@@ -2317,7 +2316,7 @@ TEST_CASE("[TestSimpleParser] Next relation - Example CFG (Figure 5) - Advanced 
   }
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("NextT") {
     Table nextTTable = pkb.getNextTTable();
@@ -2410,7 +2409,7 @@ TEST_CASE("[TestSimpleParser] Next relation - If within while", "[SimpleParser][
   }
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("NextT") {
     Table nextTTable = pkb.getNextTTable();
@@ -2467,7 +2466,7 @@ TEST_CASE("[TestSimpleParser] Next relation - While within while", "[SimpleParse
   }
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("NextT") {
     Table nextTTable = pkb.getNextTTable();
@@ -2515,7 +2514,7 @@ TEST_CASE("[TestSimpleParser] Next relation - If within if", "[SimpleParser][Nex
 
   SECTION("NextT") {
     SourceProcessor::DesignExtractor designExtractor(pkb);
-    designExtractor.extractDesignAbstractions();
+    designExtractor.extractAllDesignAbstractions();
 
     Table nextTTable = pkb.getNextTTable();
 
@@ -2552,7 +2551,7 @@ TEST_CASE("[TestSimpleParser] Next relation - While within if", "[SimpleParser][
   }
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("NextT") {
     Table nextTTable = pkb.getNextTTable();
@@ -2623,99 +2622,7 @@ TEST_CASE("[TestSimpleParser] CFG - Example CFG (Figure 5) - Advanced SPA requir
   }
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
-
-  SECTION("CFGBip") {
-    std::vector<Cfg::BipNode> bipStmt1 = pkb.getNextStmtsFromCfgBip(1);
-    std::vector<Cfg::BipNode> bipStmt2 = pkb.getNextStmtsFromCfgBip(2);
-    std::vector<Cfg::BipNode> bipStmt3 = pkb.getNextStmtsFromCfgBip(3);
-    std::vector<Cfg::BipNode> bipStmt4 = pkb.getNextStmtsFromCfgBip(4);
-    std::vector<Cfg::BipNode> bipStmt5 = pkb.getNextStmtsFromCfgBip(5);
-    std::vector<Cfg::BipNode> bipStmt6 = pkb.getNextStmtsFromCfgBip(6);
-    std::vector<Cfg::BipNode> bipStmt7 = pkb.getNextStmtsFromCfgBip(7);
-    std::vector<Cfg::BipNode> bipStmt8 = pkb.getNextStmtsFromCfgBip(8);
-    std::vector<Cfg::BipNode> bipStmt9 = pkb.getNextStmtsFromCfgBip(9);
-    std::vector<Cfg::BipNode> bipStmt10 = pkb.getNextStmtsFromCfgBip(10);
-    std::vector<Cfg::BipNode> bipStmt11 = pkb.getNextStmtsFromCfgBip(11);
-    std::vector<Cfg::BipNode> bipStmt12 = pkb.getNextStmtsFromCfgBip(12);
-    std::vector<Cfg::BipNode> bipStmt13 = pkb.getNextStmtsFromCfgBip(13);
-    std::vector<Cfg::BipNode> bipStmt14 = pkb.getNextStmtsFromCfgBip(14);
-    std::vector<Cfg::BipNode> bipStmt15 = pkb.getNextStmtsFromCfgBip(15);
-    std::vector<Cfg::BipNode> dummy1 = pkb.getNextStmtsFromCfgBip(-1);
-    std::vector<Cfg::BipNode> dummy13 = pkb.getNextStmtsFromCfgBip(-13);
-
-    REQUIRE(bipStmt1[0].node == 2);
-    REQUIRE(bipStmt1[0].label == 0);
-    REQUIRE(bipStmt1[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt1.size() == 1);
-    REQUIRE(bipStmt2[0].node == 3);
-    REQUIRE(bipStmt2[0].label == 0);
-    REQUIRE(bipStmt2[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt2.size() == 1);
-    REQUIRE(bipStmt3[0].node == 4);
-    REQUIRE(bipStmt3[0].label == 0);
-    REQUIRE(bipStmt3[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt3[1].node == 7);
-    REQUIRE(bipStmt3[1].label == 0);
-    REQUIRE(bipStmt3[1].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt3.size() == 2);
-    REQUIRE(bipStmt4[0].node == 5);
-    REQUIRE(bipStmt4[0].label == 0);
-    REQUIRE(bipStmt4[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt4.size() == 1);
-    REQUIRE(bipStmt5[0].node == 13);
-    REQUIRE(bipStmt5[0].label == 5);
-    REQUIRE(bipStmt5[0].type == Cfg::NodeType::BRANCH_IN);
-    REQUIRE(bipStmt5.size() == 1);
-    REQUIRE(bipStmt6[0].node == 3);
-    REQUIRE(bipStmt6[0].label == 0);
-    REQUIRE(bipStmt6[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt6.size() == 1);
-    REQUIRE(bipStmt7[0].node == 8);
-    REQUIRE(bipStmt7[0].label == 0);
-    REQUIRE(bipStmt7[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt7[1].node == 9);
-    REQUIRE(bipStmt7[1].label == 0);
-    REQUIRE(bipStmt7[1].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt7.size() == 2);
-    REQUIRE(bipStmt8[0].node == 10);
-    REQUIRE(bipStmt8[0].label == 0);
-    REQUIRE(bipStmt8[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt8.size() == 1);
-    REQUIRE(bipStmt9[0].node == 10);
-    REQUIRE(bipStmt9[0].label == 0);
-    REQUIRE(bipStmt9[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt9.size() == 1);
-    REQUIRE(bipStmt10[0].node == 11);
-    REQUIRE(bipStmt10[0].label == 0);
-    REQUIRE(bipStmt10[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt10.size() == 1);
-    REQUIRE(bipStmt11[0].node == 12);
-    REQUIRE(bipStmt11[0].label == 0);
-    REQUIRE(bipStmt11[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt11.size() == 1);
-    REQUIRE(bipStmt12[0].node == -1);
-    REQUIRE(bipStmt12[0].label == 0);
-    REQUIRE(bipStmt12[0].type == Cfg::NodeType::DUMMY);
-    REQUIRE(bipStmt12.size() == 1);
-    REQUIRE(bipStmt13[0].node == 14);
-    REQUIRE(bipStmt13[0].label == 0);
-    REQUIRE(bipStmt13[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt13.size() == 1);
-    REQUIRE(bipStmt14[0].node == 15);
-    REQUIRE(bipStmt14[0].label == 0);
-    REQUIRE(bipStmt14[0].type == Cfg::NodeType::NORMAL);
-    REQUIRE(bipStmt14.size() == 1);
-    REQUIRE(bipStmt15[0].node == -13);
-    REQUIRE(bipStmt15[0].label == 0);
-    REQUIRE(bipStmt15[0].type == Cfg::NodeType::DUMMY);
-    REQUIRE(bipStmt15.size() == 1);
-    REQUIRE(dummy1.size() == 0);
-    REQUIRE(dummy13[0].node == 6);
-    REQUIRE(dummy13[0].label == 5);
-    REQUIRE(dummy13[0].type == Cfg::NodeType::BRANCH_BACK);
-    REQUIRE(dummy13.size() == 1);
-  }
+  designExtractor.extractAllDesignAbstractions();
 }
 
 ///////////////////////////////////
@@ -2729,7 +2636,7 @@ TEST_CASE("[TestSimpleParser] Affects relation - Example CFG (Figure 5) - Advanc
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("Affects") {
     Table affectsTable = pkb.getAffectsTable();
@@ -2779,7 +2686,7 @@ TEST_CASE("[TestSimpleParser] Affects relation - Call proc directly modifies tar
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("Affects", "[SimpleParser][Affects]") {
     Table affectsTable = pkb.getAffectsTable();
@@ -2801,7 +2708,7 @@ TEST_CASE("[TestSimpleParser] Affects relation - Call proc indirectly modifies t
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("Affects", "[SimpleParser][Affects]") {
     Table affectsTable = pkb.getAffectsTable();
@@ -2823,7 +2730,7 @@ TEST_CASE("[TestSimpleParser] Affects relation - Container statement - Advanced 
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("Affects") {
     Table affectsTable = pkb.getAffectsTable();
@@ -2847,7 +2754,7 @@ TEST_CASE("[TestSimpleParser] Affects relation - Procedure call - Advanced SPA r
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("Affects") {
     Table affectsTable = pkb.getAffectsTable();
@@ -2874,7 +2781,7 @@ TEST_CASE("[TestSimpleParser] Affects relation - Advanced SPA in class quiz", "[
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("Affects") {
     Table affectsTable = pkb.getAffectsTable();
@@ -2915,7 +2822,7 @@ TEST_CASE("[TestSimpleParser] Affects relation - Week 7 lecture quiz", "[SimpleP
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   SECTION("Affects") {
     Table affectsTable = pkb.getAffectsTable();
@@ -2942,210 +2849,231 @@ TEST_CASE("[TestSimpleParser] Affects relation - Week 7 lecture quiz", "[SimpleP
 // NextBip and NextBipT relation //
 ///////////////////////////////////
 
-TEST_CASE("[TestSimpleParser] NextBip relation - Example 1 - Project iteration 2 and 3", "[SimpleParser][NextBip]") {
+TEST_CASE("[TestSimpleParser] NextBip & NextBipT relation - Example 1 - Project iteration 2 and 3", "[SimpleParser][NextBip]c") {
   std::string string("procedure Bill{x=5;call Mary;y=x+6;x=5;z=x*y+2;}procedure Mary{y=x*3;call John;z=x+y;}procedure John{if(i>0)then{x=x+z;}else{y=x*y;}}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
 
-  SECTION("NextBip - Before Extraction") {
-    Table nextBipTable = pkb.getNextBipTable();
-
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTable.size() == 6);
-  }
-
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
-  SECTION("NextBip - After Extraction") {
-    Table nextBipTable = pkb.getNextBipTable();
+  // NextBip
+  Table nextBipTable = pkb.getNextBipTable();
 
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTable.size() == 11);
-  }
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTable.size() == 11);
 
-  SECTION("NextBipT") {
-    Table nextBipTTable = pkb.getNextBipTTable();
+  // NextBipT
+  Table nextBipTTable = pkb.getNextBipTTable();
 
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(6) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(7) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(7) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.size() == 54);
-  }
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.size() == 54);
 }
 
-TEST_CASE("[TestSimpleParser] NextBip relation - Example 2 - Project iteration 2 and 3", "[SimpleParser][NextBip]") {
+TEST_CASE("[TestSimpleParser] NextBip & NextBipT relation - Example 2 - Project iteration 2 and 3", "[SimpleParser][NextBip][NextBip]") {
   std::string string("procedure Bill{x=5;call Mary;y=x+6;call John;z=x*y+2;}procedure Mary{y=x*3;call John;z=x+y;}procedure John{if(i>0)then{x=x+z;}else{y=x*y;}}");
   std::list<Token> simpleProg = expressionStringToTokens(string);
   Pkb pkb;
   SourceProcessor::SimpleParser parser(pkb, simpleProg);
   parser.parse();
 
-  SECTION("NextBip - Before Extraction") {
-    Table nextBipTable = pkb.getNextBipTable();
+  SourceProcessor::DesignExtractor designExtractor(pkb);
+  designExtractor.extractAllDesignAbstractions();
 
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTable.size() == 5);
-  }
+  // NextBip
+  Table nextBipTable = pkb.getNextBipTable();
+
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTable.size() == 13);
+
+  // NextBipT
+  Table nextBipTTable = pkb.getNextBipTTable();
+
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(8) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(9) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(10) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(11) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.size() == 70);
+}
+
+TEST_CASE("[TestSimpleParser] NextBip & NextBipT relation - Branch-back to dummy", "[SimpleParser][NextBip][NextBip]") {
+  std::string string("procedure a{x=3;call b;y=3;}procedure b{call c;}procedure c{call d;}procedure d{y=4;}procedure e{call d;}");
+  std::list<Token> simpleProg = expressionStringToTokens(string);
+  Pkb pkb;
+  SourceProcessor::SimpleParser parser(pkb, simpleProg);
+  parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
-  SECTION("NextBip - After Extraction") {
-    Table nextBipTable = pkb.getNextBipTable();
+  // NextBip
+  Table nextBipTable = pkb.getNextBipTable();
 
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTable.size() == 13);
-  }
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTable.size() == 6);
 
-  SECTION("NextBipT") {
-    Table nextBipTTable = pkb.getNextBipTTable();
+  // NextBipT
+  Table nextBipTTable = pkb.getNextBipTTable();
 
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(2) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(6) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(7) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(7) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(3), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(7) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(6), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(7), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(8), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(9), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(10), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(8) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(3) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(4) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(9) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(10) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(11) }));
-    REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(11), pkb.getIntRefFromStmtNum(5) }));
-    REQUIRE(nextBipTTable.size() == 70);
-  }
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(4) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(1), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(5) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(2), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(4), pkb.getIntRefFromStmtNum(6) }));
+  REQUIRE(nextBipTTable.contains({ pkb.getIntRefFromStmtNum(5), pkb.getIntRefFromStmtNum(3) }));
+  REQUIRE(nextBipTTable.size() == 16);
 }
 
 /////////////////////////
@@ -3160,7 +3088,7 @@ TEST_CASE("[TestSimpleParser] AffectsBip relation - Call proc directly modifies 
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTable = pkb.getAffectsBipTable();
 
@@ -3175,7 +3103,7 @@ TEST_CASE("[TestSimpleParser] AffectsBip relation - Call proc indirectly modifie
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTable = pkb.getAffectsBipTable();
 
@@ -3191,7 +3119,7 @@ TEST_CASE("[TestSimpleParser] AffectsBip relation - Container statement - Advanc
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTable = pkb.getAffectsBipTable();
 
@@ -3208,7 +3136,7 @@ TEST_CASE("[TestSimpleParser] AffectsBip relation - Procedure call - Advanced SP
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTable = pkb.getAffectsBipTable();
 
@@ -3226,7 +3154,7 @@ TEST_CASE("[TestSimpleParser] AffectsBip relation - Example CFG (Figure 5) - Adv
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTable = pkb.getAffectsBipTable();
 
@@ -3266,7 +3194,7 @@ TEST_CASE("[TestSimpleParser] AffectsBip relation - Advanced SPA in class quiz",
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTable = pkb.getAffectsBipTable();
 
@@ -3320,7 +3248,7 @@ TEST_CASE("[TestSimpleParser] AffectsBip relation - Week 7 lecture quiz", "[Simp
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTable = pkb.getAffectsBipTable();
 
@@ -3362,7 +3290,7 @@ TEST_CASE("[TestSimpleParser] AffectsBipStar relation - Call proc directly modif
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTTable = pkb.getAffectsBipTTable();
 
@@ -3388,7 +3316,7 @@ TEST_CASE("[TestSimpleParser] AffectsBipStar relation - While loop", "[SimplePar
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTTable = pkb.getAffectsBipTTable();
 
@@ -3419,7 +3347,7 @@ TEST_CASE("[TestSimpleParser] AffectsBipStar relation - Call while while loop", 
   parser.parse();
 
   SourceProcessor::DesignExtractor designExtractor(pkb);
-  designExtractor.extractDesignAbstractions();
+  designExtractor.extractAllDesignAbstractions();
 
   Table affectsBipTTable = pkb.getAffectsBipTTable();
 

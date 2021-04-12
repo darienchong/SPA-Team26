@@ -1,0 +1,175 @@
+1 - Error
+
+Select v such that Uses(10,v)
+
+5000
+2 - Error
+stmt s;
+Select s such that Follow(s,14)
+
+5000
+3 - Error
+variable v
+Select v
+
+5000
+4 - Follows
+while w;
+Select w such that Follows(6, w)
+
+5000
+5 - Follows
+stmt s;
+Select s such that Follows(10, s)
+21
+5000
+6 - Follows
+stmt s;if f;
+Select s such that Follows(f, s)
+21
+5000
+7 - Follows*
+while w;
+Select w such that Follows*(6, w)
+8
+5000
+8 - Follows*
+if f;
+Select f such that Follows*(6, f)
+
+5000
+9 - Follows*
+while w; print p;
+Select p such that Follows*(w, p)
+25, 26, 27, 28
+5000
+10 - Parent
+while w;
+Select w such that Parent(w, 21)
+9
+5000
+11 - Parent
+if f;while w;
+Select f such that Parent(f,w)
+
+5000
+12 - Parent
+assign a;if f;
+Select a such that Parent(f,a)
+14, 17, 19
+5000
+13 - Parent*
+while w;
+Select w such that Parent*(w,21)
+8, 9
+5000
+14 - Parent*
+stmt s;assign a;
+Select s such that Parent*(s, a)
+8, 9, 10, 11, 15
+5000
+15 - Parent*
+stmt s;if f;
+Select s such that Parent*(f, s)
+11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+5000
+16 - Uses
+stmt s;
+Select s such that Uses(s, "count")
+
+5000
+17 - Uses
+stmt s;
+Select s such that Uses(s, "countFizzBuzz")
+8, 9, 10, 11, 14, 23, 27
+5000
+18 - Uses
+variable v;
+Select v such that Uses(23, v)
+countFizz, countBuzz, countFizzBuzz
+5000
+19 - Uses
+while w;
+Select w such that Uses(w, "x")
+8, 9
+5000
+20 - Modifies
+if f;
+Select f such that Modifies(f, "countFizz")
+10, 11, 15
+5000
+21 - Modifies
+variable v;
+Select v such that Modifies (15, v)
+countFizz, countBuzz
+5000
+22 - Modifies
+read r; variable v;
+Select v such that Modifies(r, v)
+n, fizz, buzz
+5000
+23 - Pattern
+assign a;
+Select a pattern a ("remainder", _)
+24
+5000
+24 - Pattern
+assign a;
+Select a pattern a (_, "(countFizz + countBuzz) + countFizzBuzz")
+23
+5000
+25 - Pattern
+assign a;
+Select a pattern a (_, _"countFizz + (countBuzz + countFizzBuzz)"_)
+
+5000
+26 - Combination
+assign a; if f;
+Select a such that Follows*(f,a) pattern a (_, _"01"_)
+21
+5000
+27 - Combination
+assign a; print p;
+Select p such that Follows(p, a) pattern a (_, "countFizzBuzz + 1")
+13
+5000
+28 - Combination
+assign a;while w;
+Select w such that Parent*(w,a) pattern a ("countCombined", _)
+
+5000
+29 - Combination
+assign a;variable v;
+Select a such that Uses(a,v) pattern a (v, _)
+14, 17, 19, 21, 22
+5000
+30 - Combination
+assign a;variable v;
+Select a such that Uses(a, v) pattern a ("countFizzBuzz", _)
+14
+5000
+31 - Combination
+assign a;while w;
+Select a such that Follows(w,a) pattern a (_, _"n - (1)"_)
+22
+5000
+32 - Combination
+assign a;stmt s;
+Select s such that Follows(s,a) pattern a (_, _"countFizz"_)
+8, 16
+5000
+33 - Combination
+assign a; read r;
+Select r such that Follows*(a, r) pattern a ("x", _)
+5, 6, 7
+5000
+34 - Combination
+assign a; while w;
+Select a such that Follows*(w,a) pattern a (_, _"(((n) - 001))"_)
+22
+5000
+35 - Combination
+assign a; print p; variable v;
+Select p such that Uses(p, v) pattern a (v, "countFizz + 1")
+25
+5000

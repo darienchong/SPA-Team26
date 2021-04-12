@@ -1,12 +1,12 @@
 #pragma once
 
 #include <list>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <string>
 
-#include "Token.h"
 #include "PqlQuery.h"
+#include "Token.h"
 
 /**
  * Standard tokens in a PQL query.

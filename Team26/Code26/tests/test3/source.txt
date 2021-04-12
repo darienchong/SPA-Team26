@@ -1,36 +1,42 @@
-procedure AdvancedSpaOneProcedureWithNesting {
-  read var1;
-  read var2;
-  while (var2 < var1) {
-    read var2;
-  }
-  if (var1 <= 12) then {
-    var2 = var2 + 1;
-    var1 = var1 - var2;
-    print var2;
-    print var2;
+procedure MultipleDeepNesting {
+  read nest1;
+  if (a != 0) then {
+    while (b != 0) {
+      while (c != 0) {
+        if (d != 0) then {
+          if (e % 3 != 0) then {
+            print nest1;
+            e = e - d - c - b - a;
+          } else {
+            while (f != 0) {
+              print e;
+              f = f - 1;
+            }
+            a = a - b * c * d * e;
+          }
+        } else {
+          read nest2;
+        }
+      }
+    }
+    nest1 = nest1 + nest2;
   } else {
-    var3 = var1 + var2;
-    var1 = var1 * 2;
-    print var1;
-  }
-  print var2;
-
-  while ((var3 >= var1) && (var3 != 100)) {
-    var3 = var3 - 25;
-    while (var2 == 15) {
-      read a111111111111111111;
-      read a0;
-      a111111111111111111 = a111111111111111111 + 2;
-      AdvancedSpaOneProcedureWithNesting = AdvancedSpaOneProced / 2 * a0 + (var2 * v1);
-      a = b / (c / d + 3) * asdf - a111111111111111111;
-    }
-    if (a != 2 * 25 * var1) then {
-      A = 50 + a;
-    } else {
-      A = B;
-      print B;
+    while (i != 0) {
+      while (j != 0) {
+        while (k != 0) {
+          while (l != 0) {
+            while (m != 0) {
+              while (n != 0) {
+                while (o != 0) {
+                  while (p != 0) {
+                    print nest1;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   }
-  print AdvancedSpaOneProcedureWithNesting;
 }

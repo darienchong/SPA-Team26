@@ -2,9 +2,9 @@
 
 #include "Token.h"
 
-#include <string>
-#include <list>
 #include <fstream>
+#include <list>
+#include <string>
 
 class TokeniserException : public std::exception {
 public:

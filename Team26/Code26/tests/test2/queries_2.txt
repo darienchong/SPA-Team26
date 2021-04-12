@@ -1,185 +1,285 @@
-1 - Syntax Error - Empty query
+1 - Follows/Error
+variable v;
+Select v such that Follows(10,v)
 
+5000
+2 - Follows/Error
+procedure p; stmt s;
+Select s such that Follows(10, p)
 
+5000
+3 - Follows/Error
+constant c; stmt s;
+Select s such that Follows(c, s)
 
-1000
-2 - Syntax Error - General - Extra token after end of query
+5000
+4 - Follows/Error
+call c; stmt s;
+Select s such that Follows(c, s)
 
-Select BOOLEAN;
+5000
+5 - Follows/Valid
+read r; assign a;
+Select r such that Follows(a, r)
+4, 6, 8, 12
+5000
+6 - Follows/Valid
+print p; if ifs;
+Select p such that Follows(p, ifs)
 
-1000
-3 - Syntax Error - Declaration - Missing ;
-stmt s
-Select BOOLEAN
+5000
+7 - Follows/Valid
+print p; stmt s;
+Select p such that Follows(10, s)
+2, 9, 13, 15, 17, 18
+5000
+8 - Follows*/Error
+read r;
+Select r such that Follows* (-33, r)
 
-1000
-4 - Syntax Error - Declaration - Missing synonym name
-stmt s; stmt;
-Select BOOLEAN
+5000
+9 - Follows*/Error
+read r;
+Select r such that Follows* (r, 0)
 
-1000
-5 - Syntax Error - Declaration - Extra ; after declaration
-stmt s;;
-Select s
+5000
+10 - Follows*/Valid
+read r;
+Select r such that Follows* (20, r)
 
-1000
-6 - Syntax Error - Declartion - Missing , OR using , instead of ;
-assign a, stmt s;
-Select s
+5000
+11 - Follows*/Valid
+read r;
+Select r such that Follows*                                            (11, r)
+12
+5000
+12 - Follows*/Valid
+assign a ;
+Select a such that Follows*(10, a)
+11, 14, 16, 19, 20
+5000
+13 - Follows*/Valid
+stmt a ;
+Select a such that Follows*(10, a)
+11, 12, 13, 14, 15, 16, 17, 18, 19, 20
+5000
+14 - Follows*/Error
+read r;
+Select r such that Follows* (3, 2)
 
-1000
-7 - Syntax Error - Declaration - Invalid type
-stmt s; hello c;
-Select BOOLEAN
+5000
+15 - Follows*/Error
+read r;
+Select r such that Follows(3, 3)
 
-1000
-8 - Syntax Error - Declaration - Invalid synonym name
-stmt 0s;
-Select BOOLEAN
+5000
+16 - Parent/Error
+variable v;
+Select v such that Parent(10,v)
 
-1000
-9 - Syntax Error - Declaration - Invalid synonym name
-stmt s*3+4;
-Select BOOLEAN
+5000
+17 - Parent/Error
+procedure p; stmt s;
+Select s such that Parent(10, p)
 
-1000
-10 - Syntax Error - Declaration - Invalid synonym name
-stmt s*;
-Select BOOLEAN
+5000
+18 - Parent/Error
+constant c; stmt s;
+Select s such that Parent(c, s)
 
-1000
-11 - Syntax Error - Select - Tuple without comma
-stmt s1, s2;
-Select <s1 s2>
+5000
+19 - Parent/Error
+call c; stmt s;
+Select s such that Parent(s, c)
 
-1000
-12 - Syntax Error - Select - Tuple with additional angle brackets
-stmt s1, s2;
-Select <<s1, s2>>
+5000
+20 - Parent/Valid
+if ifs; assign a;
+Select a such that Parent(ifs, a)
 
-1000
-13 - Syntax Error - Body - Unrecognised keyword 'Pattern'
-assign a;
-Select BOOLEAN Pattern a(_, _)
+5000
+21 - Parent/Valid
+while w; print p;
+Select w such that Parent(w, p)
 
-1000
-14 - Syntax Error - Such That - More than one space between 'such' and 'that'
+5000
+22 - Parent/Valid
+stmt w;
+Select w such that Parent(w, 14)
 
-Select BOOLEAN such   that Follows(1, 3)
+5000
+23 - Parent/Valid
+stmt w;
+Select w such that Parent(w, 2545700000)
 
-1000
-15 - Syntax Error - Such That - Invalid relRef
+5000
+24 - Uses/Error
+variable v; constant c;
+Select v such that Uses(3, c)
 
-Select BOOLEAN such that Follow(1, 3)
+5000
+25 - Uses/Error
+variable v; stmt s;
+Select v such that Uses(3, s)
 
-1000
-16 - Syntax Error - Such That - Space between Follows and *
+5000
+26 - Uses/Error
+variable v;procedure p;
+Select v such that Uses(3, p)
+
+5000
+27 - Uses/Error
+variable v; constant c;
+Select v such that Uses(c, v)
+
+5000
+28 - Uses/Error
+variable v; call c;
+Select v such that Uses(c, v)
+
+5000
+29 - Uses/Valid
+variable v;procedure p;
+Select v such that Uses(p, v)
+C47Lm370n1gHt, a, apple, b, c, call, d, e, errors, f, g, h, i, if, pen, pineapple, pineapplepen,pinepineappleapplepen, print, procedure, read, while
+5000
+30 - Uses/Valid
+variable v; if ifs;
+Select v such that Uses(ifs, v)
+
+5000
+31 - Uses/Valid
+variable v; while w;
+Select v such that Uses(w, v)
+
+5000
+32 - Uses/Valid
+variable v; print p;
+Select v such that Uses(p, v)
+print, call, errors, read, while, if
+5000
+33 - Uses/Valid
+variable v;assign a;
+Select v such that Uses(a, v)
+call, procedure, a, b, c, d, e, f, g, h, i, while, pen, apple, pineapple, pinepineappleapplepen, pineapplepen, C47Lm370n1gHt
+5000
+34 - Uses/Valid
+variable v; print p; read r;
+Select r such that Uses(p, v)
+4, 6, 8, 10, 12
+5000
+35 - Uses/Valid
+variable v; 
+Select v such that Uses(9, v)
+call
+5000
+36 - Uses/Valid
 stmt s;
-Select BOOLEAN such that Follows *(1, 3)
-
-1000
-17 - Syntax Error - Such That - Invalid EntRef
-
-Select BOOLEAN such that Uses(_, "1")
-
-1000
-18 - Syntax Error - Such That - Invalid StmtRef
-
-Select BOOLEAN such that Follows(-1, _)
-
-1000
-19 - Syntax Error - Such That - Invalid StmtRef
-
-Select BOOLEAN such that Follows*(_, "x")
-
-1000
-20 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, "x"_)
-
-1000
-21 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, _"x")
-
-1000
-22 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, "x == y")
-
-1000
-23 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, _"x y +")
-
-1000
-24 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, "x + + y")
-
-1000
-25 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, _""_)
-
-1000
-26 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, _"()"_)
-
-1000
-27 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, "")
-
-1000
-28 - Syntax Error - Pattern - Invalid expression-spec
-assign a;
-Select BOOLEAN pattern a(_, )
-
-1000
-29 - Syntax Error - Body - Incomplete such that clause
-assign a;
-Select BOOLEAN such that pattern a(_, _)
-
-1000
-30 - Syntax Error - Such That - Missing 'such that'
-
-Select BOOLEAN Uses(_, _)
-
-1000
-31 - Syntax Error - Pattern - Invalid EntRef
-
-Select BOOLEAN pattern a(3, _)
-
-1000
-32 - Syntax Error - Pattern - Invalid EntRef
-assign a;
-Select BOOLEAN pattern a("1", _)
-
-1000
-33 - Syntax Error - Pattern - Invalid EntRef (empty)
-assign a;
-Select a pattern a(, _)
-
-1000
-34 - Syntax Error - Pattern - Invalid EntRef
-assign a;
-Select BOOLEAN pattern a("", _)
-
-1000
-35 - Syntax Error - Pattern - Invalid Format
+Select s such that Uses(s, "pen")
+16, 19
+5000
+37 - Uses/Valid
 stmt s;
-Select BOOLEAN pattern s("x", "x", _)
+Select s such that Uses(21, "pen")
 
-1000
-36 - Syntax Error - With - Invalid comparator
+5000
+38 - Uses/Error
+variable v;
+Select v such that Uses(0, v)
 
-Select BOOLEAN with 1 != 2
+5000
+39 - Uses/Error
+variable v;
+Select v such that Uses(-34, v)
 
-1000
-37 - Syntax Error - With - Invalid argument
-prog_line n;
-Select BOOLEAN with _ = n
+5000
+40 - Uses/Error
+variable v;
+Select v such that Uses(_, v)
 
-1000
+5000
+41 - Modifies/Error
+variable v; constant c;
+Select v such that Modifies(3, c)
+
+5000
+42 - Modifies/Error
+variable v; stmt s;
+Select v such that Modifies(3, s)
+
+5000
+43 - Modifies/Error
+variable v;procedure p;
+Select v such that Modifies(3, p)
+
+5000
+44 - Modifies/Error
+variable v; constant c;
+Select v such that Modifies(c, v)
+
+5000
+45 - Modifies/Error
+variable v; call c;
+Select v such that Modifies(c, v)
+
+5000
+46 - Modifies/Valid
+variable v;procedure p;
+Select v such that Modifies(p, v)
+Applepen, Pineapplepen, applepen, call, exampleReport, if, print, read, while
+5000
+47 - Modifies/Valid
+variable v; if ifs;
+Select v such that Modifies(ifs, v)
+
+5000
+48 - Modifies/Valid
+variable v; while w;
+Select v such that Modifies(w, v)
+
+5000
+49 - Modifies/Valid
+variable v; read p;
+Select v such that Modifies(p, v)
+print, call, read, while, if
+5000
+50 - Modifies/Valid
+variable v;assign a;
+Select v such that Modifies(a, v)
+print, read, while, exampleReport, if, call, applepen, Pineapplepen, Applepen
+5000
+51 - Modifies/Valid
+variable v; print p; read r;
+Select p such that Modifies(r, v)
+2, 9, 13, 15, 17, 18
+5000
+52 - Modifies/Valid
+variable v; 
+Select v such that Modifies(10, v)
+print
+5000
+53 - Modifies/Valid
+stmt s;
+Select s such that Modifies(s, "applepen")
+16
+5000
+54 - Modifies/Valid
+stmt s;
+Select s such that Modifies(21, "applepen")
+
+5000
+55 - Modifies/Error
+variable v;
+Select v such that Modifies(0, v)
+
+5000
+56 - Modifies/Error
+variable v;
+Select v such that Modifies(-34, v)
+
+5000
+57 - Modifies/Error
+variable v;
+Select v such that Modifies(_, v)
+
+5000

@@ -2,35 +2,33 @@
 
 #include <assert.h>
 
-#include <string>
-#include <vector>
+#include <memory>
 #include <stack>
 #include <stdexcept>
-#include <map>
-#include <unordered_set>
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
-#include "Table.h"
-#include "Pkb.h"
 #include "AdjList.h"
 #include "Cfg.h"
-#include "CfgBip.h"
+#include "Pkb.h"
 #include "SpaException.h"
+#include "Table.h"
 
 namespace {
   /**
-   * Preprocesses the CFGBip to add in directed edges from call stmt to the first statement of called procedure.
-   * Also adds directed edges from last statements of the called procedure to the next statement after the call stmt.
+   * Initialises the CFGBip, by adding dummy nodes to the CFG and using the graph explosion method to generate the sequence
+   * of CFGBip traversal for each procedure.
    *
    * @param pkb The PKB to refer to.
    */
-  void preprocessCfgBip(Pkb& pkb) {
-    const Table callTable = pkb.getCallTable();
-    const Table procTable = pkb.getProcTable();
+  void initialiseCfgBip(Pkb& pkb, std::list<std::string>& topoProc) {
+    const std::unordered_set<int>& procIntRefs = pkb.getProcIntRefs();
 
     // Create dummy nodes and adding edge from end statements of each proc to their respective dummy nodes
-    for (const Row procRow : procTable.getData()) {
-      const std::string proc = pkb.getEntityFromIntRef(procRow[0]);
+    for (const int procIntRef : procIntRefs) {
+      const std::string& proc = pkb.getEntityFromIntRef(procIntRef);
       const int dummyNode = -1 * pkb.getStartStmtFromProc(proc);
 
       for (const int end : pkb.getEndStmtsFromProc(proc)) {
@@ -38,466 +36,205 @@ namespace {
       }
     }
 
-    // Add the branch in and branch back links
-    for (const Row stmtRow : callTable.getData()) {
-      const int callStmt = pkb.getStmtNumFromIntRef(stmtRow[0]); // call stmt of interest
-      const std::string calledProc = pkb.getProcNameFromCallStmt(callStmt); // get the called proc from the call stmt
-      const int calledProcStartStmt = pkb.getStartStmtFromProc(calledProc); // get the starting stmt num of the called proc
-      const int dummyNode = -1 * calledProcStartStmt;
-      const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(callStmt); // get next stmts from call stmt. Note: fromCfg not fromCfgBip
-      assert(nextStmts.size() == 1);
-      const int nextStmt = nextStmts[0];
-
-      // Add NextBip from end stmt of called proc to stmt directly after call stmt if the latter is not a dummy node
-      for (int end : pkb.getEndStmtsFromProc(calledProc)) {
-        if (nextStmt > 0) { // if nextStmt is not a dummy node
-          pkb.addNextBip(end, nextStmt);
-        }
-      }
-
-      // Add CFGBip branch in edge from call stmt to first statement of called proc
-      pkb.addCfgBipEdge(callStmt, calledProcStartStmt, callStmt, Cfg::NodeType::BRANCH_IN);
-
-      // Add CFGBip branch back edge from dummy node to the stmt directly after the call stmt
-      pkb.addCfgBipEdge(dummyNode, nextStmt, callStmt, Cfg::NodeType::BRANCH_BACK);
-    }
+    pkb.initialiseCfgBip(topoProc);
   }
 
-  void fillNextBipTTable(Pkb& pkb) {
-    const Table procTable = pkb.getProcTable();
+  /**
+    * Fills the NextBip and NextBipT relations.
+    *
+    * @param pkb The PKB to refer to.
+    */
+  void fillNextBipTable(Pkb& pkb) {
+    // Get starting node for each proc
+    for (const std::shared_ptr<Cfg::BipNode>& startPtr : pkb.getStartBipNodes()) {
+      std::unordered_set<std::shared_ptr<Cfg::BipNode>> outerVisited;
+      std::stack<std::shared_ptr<Cfg::BipNode>> outerDfsStack;
+      outerDfsStack.push(startPtr); // push startNode to stack
+      outerVisited.emplace(startPtr); // mark startNode as visited
 
-    for (const Row procRow : procTable.getData()) {
-      const int startStmt = pkb.getStartStmtFromProc(pkb.getEntityFromIntRef(procRow[0]));
+      // Do DFS from each node
+      while (!outerDfsStack.empty()) {
+        const std::shared_ptr<Cfg::BipNode>& currPtr = outerDfsStack.top();
+        const int currStmt = currPtr->node;
+        outerDfsStack.pop();
 
-      std::stack<std::tuple<Cfg::BipNode, std::unordered_set<int>, std::vector<int>>> procSnapshots;
-      procSnapshots.push(std::make_tuple(Cfg::BipNode{ startStmt, 0, Cfg::NodeType::NORMAL }, std::unordered_set<int>(), std::vector<int>()));
-
-      while (!procSnapshots.empty()) {
-        std::tuple<Cfg::BipNode, std::unordered_set<int>, std::vector<int>> currProcSnapshot = procSnapshots.top();
-        procSnapshots.pop();
-
-        std::stack<Cfg::BipNode> procTraversalStack;
-        std::unordered_set<int> procTraversalVisited = std::get<1>(currProcSnapshot);
-        std::vector<int> procTraversalBranchBack = std::get<2>(currProcSnapshot);
-
-        procTraversalStack.push(std::get<0>(currProcSnapshot));
-
-        while (!procTraversalStack.empty()) {
-          const Cfg::BipNode currNode = procTraversalStack.top();
-          procTraversalStack.pop();
-
-          const int currStmt = currNode.node;
-          //std::cout << "Looking at: " << currStmt << std::endl;
-          if (procTraversalVisited.count(currStmt) == 1) {
-            //std::cout << "Visited!" << std::endl;
-            continue;
-          }
-          procTraversalVisited.emplace(currStmt);
-
-          // Check for branch in and branch back
-          if (currNode.type == Cfg::NodeType::BRANCH_BACK) {
-            assert(currNode.label == procTraversalBranchBack.back());
-            procTraversalBranchBack.pop_back();
-          }
-          else if (currNode.type == Cfg::NodeType::BRANCH_IN) {
-            procTraversalBranchBack.push_back(currNode.label);
-          }
-
-          // for adding to snapshot - only do snapshot for non-dummy nodes
-          if (currStmt > 0) {
-            //std::cout << "Generating internal snapshot..." << std::endl;
-
-            std::stack<std::tuple<Cfg::BipNode, std::unordered_set<int>, std::vector<int>, std::vector<std::vector<int>>>> stmtSnapshots;
-            
-            for (Cfg::BipNode nextNode : pkb.getNextStmtsFromCfgBip(currStmt)) {
-              std::vector<int> stmtBranchBackStack;
-              std::vector<std::vector<int>> branchStmts;
-              for (int branch : procTraversalBranchBack) {
-                stmtBranchBackStack.push_back(branch);
-                branchStmts.push_back(std::vector<int>());
+        // Only proceed with inner dfs for non dummy nodes
+        if (currStmt > 0) {
+          std::unordered_set<std::shared_ptr<Cfg::BipNode>> innerVisited;
+          std::stack<std::shared_ptr<Cfg::BipNode>> innerDfsStack;
+          for (std::shared_ptr<Cfg::BipNode>& nextPtr : currPtr->nexts) {
+            // Iterate through to find the first non-dummy node
+            while (nextPtr->node < 0) {
+              assert(nextPtr->nexts.size() <= 1);
+              if (nextPtr->nexts.empty()) {
+                break;
               }
-              stmtSnapshots.push(std::make_tuple(nextNode, std::unordered_set<int>(), stmtBranchBackStack, branchStmts));
+              nextPtr = nextPtr->nexts[0];
             }
 
-            while (!stmtSnapshots.empty()) {
-              auto stmtSnapshot = stmtSnapshots.top();
-              stmtSnapshots.pop();
+            // Add to nextBip relation if non-dummy node
+            if (nextPtr->node > 0) {
+              pkb.addNextBip(currStmt, nextPtr->node);
+            }
 
-              std::stack<Cfg::BipNode> stmtTraversalStack;
-              std::unordered_set<int> stmtTraversalVisited = std::get<1>(stmtSnapshot);
-              std::vector<int> stmtTraversalBranchBack = std::get<2>(stmtSnapshot);
-              std::vector<std::vector<int>> stmtsInBranch = std::get<3>(stmtSnapshot);
+            innerDfsStack.push(nextPtr); // push nextNodes to stack
+            innerVisited.emplace(nextPtr); // mark nextNodes as visited
+          }
 
-              stmtTraversalStack.push(std::get<0>(stmtSnapshot));
+          // Do DFS
+          while (!innerDfsStack.empty()) {
+            const std::shared_ptr<Cfg::BipNode>& targetPtr = innerDfsStack.top();
+            const int targetStmt = targetPtr->node;
+            innerDfsStack.pop();
 
-              while (!stmtTraversalStack.empty()) {
-                const Cfg::BipNode stmtNode = stmtTraversalStack.top();
-                stmtTraversalStack.pop();
+            if (targetStmt > 0) {
+              pkb.addNextBipT(currStmt, targetStmt);
+            }
 
-                const int targetStmt = stmtNode.node;
-                //std::cout << "Target stmt: " << targetStmt << std::endl;
-
-                if (stmtTraversalVisited.count(targetStmt) == 1) {
-                  continue;
-                }
-                stmtTraversalVisited.emplace(targetStmt);
-                if (!stmtTraversalBranchBack.empty()) {
-                  stmtsInBranch.back().push_back(targetStmt);
-                }
-
-                // Check for branch in and branch back
-                if (stmtNode.type == Cfg::NodeType::BRANCH_BACK) {
-                  assert(stmtNode.label == stmtTraversalBranchBack.back());
-                  stmtTraversalBranchBack.pop_back();
-                  for (int stmt : stmtsInBranch.back()) {
-                    stmtTraversalVisited.erase(stmt);
-                  }
-                  stmtsInBranch.pop_back();
-                }
-                else if (stmtNode.type == Cfg::NodeType::BRANCH_IN) {
-                  stmtTraversalBranchBack.push_back(stmtNode.label);
-                  stmtsInBranch.push_back(std::vector<int>());
-                }
-
-                //add NextBipT relation
-                if (targetStmt > 0) {
-                  //std::cout << "adding to nextBipT " << currStmt << " "<< targetStmt << std::endl;
-                  pkb.addNextBipT(currStmt, targetStmt);
-                }
-
-                std::vector<Cfg::BipNode> nextStmtTraversalNodes = pkb.getNextStmtsFromCfgBip(targetStmt);
-                if (nextStmtTraversalNodes.size() == 1) { // if size only 1, then just add directly to stack
-                  const Cfg::BipNode& nextNode = nextStmtTraversalNodes[0];
-                  // If the next node is of type branch back, check that the edge label corresponds to branch stack's top
-                  if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-                    if (!stmtTraversalBranchBack.empty() && nextNode.label == stmtTraversalBranchBack.back()) {
-                      stmtTraversalStack.push(nextNode);
-                    }
-                  }
-                  else {
-                    stmtTraversalStack.push(nextNode);
-                  }
-                }
-                else {
-                  for (const Cfg::BipNode& nextNode : nextStmtTraversalNodes) {
-                    // If the next node is of type branch in and has already been visited
-                    assert(!(nextNode.type == Cfg::NodeType::BRANCH_IN && stmtTraversalVisited.count(nextNode.node) == 1)); // should always be true
-                    // If next node is of type branch back, check that the edge label corresponds to branch stack's top
-                    if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-                      if (!stmtTraversalBranchBack.empty() && nextNode.label == stmtTraversalBranchBack.back()) {
-                        stmtTraversalStack.push(nextNode);
-                      }
-                    }
-                    // Else current node is a while/if branch, multiple paths - create new snapshot
-                    else {
-                      std::unordered_set<int> visitedStmtDup;
-                      std::vector<int> branchDup;
-                      std::vector<std::vector<int>> branchStmtDup;
-                      for (const int visited : stmtTraversalVisited) {
-                        visitedStmtDup.emplace(visited);
-                      }
-                      for (const int branch : stmtTraversalBranchBack) {
-                        branchDup.push_back(branch);
-                      }
-                      for (const std::vector<int> stmts : stmtsInBranch) {
-                        branchStmtDup.push_back(std::vector<int>());
-                        for (const int stmt : stmts) {
-                          branchStmtDup.back().push_back(stmt);
-                        }
-                      }
-                      stmtSnapshots.push(std::make_tuple(nextNode, visitedStmtDup, branchDup, branchStmtDup));
-                    }
-                  }
-                }
+            // Add nextNodes to the stack under certain conditions
+            for (const std::shared_ptr<Cfg::BipNode>& nextPtr : targetPtr->nexts) {
+              // Add nextNode to stack only if not visited
+              if (innerVisited.count(nextPtr) == 0) {
+                innerDfsStack.push(nextPtr);
+                innerVisited.emplace(nextPtr); // mark nextNode as visited
               }
             }
           }
+        }
 
-          std::vector<Cfg::BipNode> nextProcTraversalNodes = pkb.getNextStmtsFromCfgBip(currStmt);
-          if (nextProcTraversalNodes.size() == 1) { // if size only 1, then just add directly to stack
-            const Cfg::BipNode& nextNode = nextProcTraversalNodes[0];
-            // If the next node is of type branch in and has already been visited, push the node directly after current node instead
-            if (nextNode.type == Cfg::NodeType::BRANCH_IN && procTraversalVisited.count(nextNode.node) == 1) {
-              const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(currStmt); // Note: get from CFG, not from CFGBip
-              assert(nextStmts.size() == 1);
-              procTraversalStack.push(Cfg::BipNode{ nextStmts[0], 0, Cfg::NodeType::NORMAL });
-            }
-            // If the next node is of type branch back, check that the edge label corresponds to branch stack's top
-            else if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-              if (!procTraversalBranchBack.empty() && nextNode.label == procTraversalBranchBack.back()) {
-                procTraversalStack.push(nextNode);
-              }
-            }
-            else {
-              procTraversalStack.push(nextNode);
-            }
-          }
-          else {
-            for (const Cfg::BipNode& nextNode : nextProcTraversalNodes) {
-              // If next node is of type branch back, check that the edge label corresponds to branch stack's top
-              if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-                if (!procTraversalBranchBack.empty() && nextNode.label == procTraversalBranchBack.back()) {
-                  procTraversalStack.push(nextNode);
-                }
-              }
-              // Else current node is a while/if branch, multiple paths - create new snapshot
-              else {
-                std::unordered_set<int> visitedProcDup;
-                std::vector<int> branchProcDup;
-                for (const int visited : procTraversalVisited) {
-                  visitedProcDup.emplace(visited);
-                }
-                for (const int branch : procTraversalBranchBack) {
-                  branchProcDup.push_back(branch);
-                }
-                procSnapshots.push(std::make_tuple(nextNode, visitedProcDup, branchProcDup));
-              }
-            }
+        // Add nextNodes to the stack under certain conditions
+        for (const std::shared_ptr<Cfg::BipNode>& nextPtr : currPtr->nexts) {
+          // Add nextNode to stack only if not visited
+          if (outerVisited.count(nextPtr) == 0) {
+            outerDfsStack.push(nextPtr);
+            outerVisited.emplace(nextPtr); // mark nextNode as visited
           }
         }
       }
     }
   }
 
+  /**
+  * Fills the AffectsBip and AffectsBipT relations.
+  *
+  * @param pkb The PKB to refer to.
+  */
   void fillAffectsBipTable(Pkb& pkb) {
-    const Table assignTable = pkb.getAssignTable();
-    const Table readTable = pkb.getReadTable();
-    const Table affectsBipTable = pkb.getAffectsBipTable();
-    const Table procTable = pkb.getProcTable();
+    std::unordered_set<std::shared_ptr<Cfg::BipNode>> affectsBipPtrs;
+    std::unordered_set<std::string> visitedProcs;
+    const Table& assignTable = pkb.getAssignTable();
+    const Table& callTable = pkb.getCallTable();
+    const Table& readTable = pkb.getReadTable();
 
-    for (const Row procRow : procTable.getData()) {
-      const int startStmt = pkb.getStartStmtFromProc(pkb.getEntityFromIntRef(procRow[0]));
+    // Generate AffectsBip graph and create edges for AffectsBipT
+    for (const std::shared_ptr<Cfg::BipNode>& startPtr : pkb.getStartBipNodes()) {
 
-      std::stack<std::tuple<Cfg::BipNode, std::unordered_set<int>, std::vector<int>>> procSnapshots;
-      procSnapshots.push(std::make_tuple(Cfg::BipNode{ startStmt, 0, Cfg::NodeType::NORMAL }, std::unordered_set<int>(), std::vector<int>()));
+      std::unordered_set<std::shared_ptr<Cfg::BipNode>> outerVisited;
+      std::stack<std::shared_ptr<Cfg::BipNode>> outerDfsStack;
+      outerDfsStack.push(startPtr); // push startNode to stack
+      outerVisited.emplace(startPtr); // mark startNode as visited
 
-      while (!procSnapshots.empty()) {
-        std::tuple<Cfg::BipNode, std::unordered_set<int>, std::vector<int>> currProcSnapshot = procSnapshots.top();
-        procSnapshots.pop();
+      // Do DFS from each node
+      while (!outerDfsStack.empty()) {
+        const std::shared_ptr<Cfg::BipNode>& currPtr = outerDfsStack.top();
+        const int currStmt = currPtr->node;
+        outerDfsStack.pop();
 
-        std::stack<Cfg::BipNode> procTraversalStack;
-        std::unordered_set<int> procTraversalVisited = std::get<1>(currProcSnapshot);
-        std::vector<int> procTraversalBranchBack = std::get<2>(currProcSnapshot);
+        // Only proceed with inner dfs for assign statements
+        if (assignTable.contains({ pkb.getIntRefFromStmtNum(currStmt) })) {
+          std::unordered_set<std::shared_ptr<Cfg::BipNode>> innerVisited;
+          std::stack<std::shared_ptr<Cfg::BipNode>> innerDfsStack;
 
-        procTraversalStack.push(std::get<0>(currProcSnapshot));
-
-        while (!procTraversalStack.empty()) {
-          const Cfg::BipNode currNode = procTraversalStack.top();
-          procTraversalStack.pop();
-
-          const int currStmt = currNode.node;
-
-
-          if (procTraversalVisited.count(currStmt) == 1) {
-            continue;
-          }
-          procTraversalVisited.emplace(currStmt);
-
-          // Check for branch in and branch back
-          if (currNode.type == Cfg::NodeType::BRANCH_BACK) {
-            assert(currNode.label == procTraversalBranchBack.back());
-            procTraversalBranchBack.pop_back();
-          }
-          else if (currNode.type == Cfg::NodeType::BRANCH_IN) {
-            procTraversalBranchBack.push_back(currNode.label);
+          // Extract the varModifed by currTargetAssign
+          std::string varModified;
+          for (const std::string& variable : pkb.getModifiedBy(currStmt)) {
+            varModified = variable;
           }
 
-          if (assignTable.contains({ pkb.getIntRefFromStmtNum(currStmt) })) {
-
-            std::stack<std::tuple<int, Cfg::BipNode, std::unordered_set<int>, std::vector<int>, std::vector<std::vector<int>>>> snapshotStack;
-            std::vector<int> branchCopy;
-            std::vector<std::vector<int>> branchStmts;
-            RowSet affectsSet;
-            for (int branch : procTraversalBranchBack) {
-              branchCopy.push_back(branch);
-              branchStmts.push_back(std::vector<int>());
-            }
-
-            Cfg::BipNode nodeAfterAssign = pkb.getNextStmtsFromCfgBip(currStmt)[0];
-
-            snapshotStack.push(std::make_tuple(currStmt, nodeAfterAssign, std::unordered_set<int>(), branchCopy, branchStmts));
-
-            while (!snapshotStack.empty()) {
-              auto snapshot = snapshotStack.top();
-              snapshotStack.pop();
-
-              const int currTargetAssign = std::get<0>(snapshot);
-              const Cfg::BipNode startNode = std::get<1>(snapshot);
-              std::unordered_set<int> assignTraversalVisited = std::get<2>(snapshot);
-              std::vector<int> assignTraversalBranchBack = std::get<3>(snapshot);
-              std::vector<std::vector<int>> stmtsInBranch = std::get<4>(snapshot);
-
-              // Extract the varModifed by currTargetAssign
-              std::string varModified;
-              for (const std::string& variable : pkb.getModifiedBy(currTargetAssign)) {
-                varModified = variable;
-              }
-
-              // Extract the assign statements that uses varModified
-              const std::unordered_set<int> potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
-              if (potentiallyAffectedAssigns.empty()) {
-                continue;  // shortcircuit if no assign uses the varModified
-              }
-
-              std::stack<Cfg::BipNode> assignTraversalStack;
-              assignTraversalStack.push(startNode);
-
-              // =============== //
-              //  DFS algorithm  //
-              // =============== //
-
-              while (!assignTraversalStack.empty()) {
-                const Cfg::BipNode currentAssignTraversalNode = assignTraversalStack.top();
-                assignTraversalStack.pop();
-
-                const int currentAssignTraversalStmt = currentAssignTraversalNode.node;
-                const int currentAssignTraversalLabel = currentAssignTraversalNode.label;
-                const Cfg::NodeType currentAssignTraversalType = currentAssignTraversalNode.type;
-
-                // Check for branch in and branch back
-                if (currentAssignTraversalType == Cfg::NodeType::BRANCH_BACK) {
-                  assert(currentAssignTraversalLabel == assignTraversalBranchBack.back());
-                  assert(stmtsInBranch.size() == assignTraversalBranchBack.size());
-                  assignTraversalBranchBack.pop_back();
-                  for (int stmt : stmtsInBranch.back()) {
-                    assignTraversalVisited.erase(stmt);
-                  }
-                  stmtsInBranch.pop_back();
-                }
-                else if (currentAssignTraversalType == Cfg::NodeType::BRANCH_IN) {
-                  assert(stmtsInBranch.size() == assignTraversalBranchBack.size());
-                  assignTraversalBranchBack.push_back(currentAssignTraversalLabel);
-                  stmtsInBranch.push_back(std::vector<int>());
-                }
-
-                if (assignTraversalVisited.count(currentAssignTraversalStmt) == 1) {
-                  continue;
-                }
-                assignTraversalVisited.emplace(currentAssignTraversalStmt);
-                if (!assignTraversalBranchBack.empty()) {
-                  stmtsInBranch.back().push_back(currentAssignTraversalStmt);
-                }
-
-                // Check if currentStmt satisfy the AffectsBip(affecterAssignStmt, currentStmt) relation
-                if (potentiallyAffectedAssigns.count(currentAssignTraversalStmt) == 1) {
-                  pkb.addAffectsBip(currTargetAssign, currentAssignTraversalStmt); // add AffectsBip relation to pkb
-                  Row affects = { currTargetAssign, currentAssignTraversalStmt };
-                  if (affectsSet.count(affects) == 0) {
-                    affectsSet.emplace(affects);
-                    Row affectsStar = { currStmt, currentAssignTraversalStmt };
-                    affectsSet.emplace(affectsStar);
-
-                    std::vector<int> branchDup;
-                    std::vector<std::vector<int>> branchStmtDup;
-                    for (const int branch : assignTraversalBranchBack) {
-                      branchDup.push_back(branch);
-                      branchStmtDup.push_back(std::vector<int>());
-                    }
-                    Cfg::BipNode nodeAfterCurrentAssign = pkb.getNextStmtsFromCfgBip(currentAssignTraversalStmt)[0];
-                    snapshotStack.push(std::make_tuple(currentAssignTraversalStmt, nodeAfterCurrentAssign, std::unordered_set<int>(), branchDup, branchStmtDup));
-                  }
-                }
-
-                // Check if currentStmt modifies the varModified
-                // Stop searching this path if the currentStmt is an assign stmt or read stmt
-                const bool isModified = pkb.getModifiedBy(currentAssignTraversalStmt).count(varModified) == 1;
-                const bool isReadOrAssignStmt = readTable.contains({ pkb.getIntRefFromStmtNum(currentAssignTraversalStmt) }) || assignTable.contains({ pkb.getIntRefFromStmtNum(currentAssignTraversalStmt) });
-                if (isModified && isReadOrAssignStmt) {
-                  continue;
-                }
-
-                // Adding the next statement for DFS - everytime branching occurs within a proc, we need to duplicate and create a new snapshot
-                std::vector<Cfg::BipNode> nextAssignTraversalNodes = pkb.getNextStmtsFromCfgBip(currentAssignTraversalStmt);
-                if (nextAssignTraversalNodes.size() == 1) { // if size only 1, then just add directly to stack
-                  const Cfg::BipNode& nextNode = nextAssignTraversalNodes[0];
-                  if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-                    if (!assignTraversalBranchBack.empty() && nextNode.label == assignTraversalBranchBack.back()) {
-                      assignTraversalStack.push(nextNode);
-                    }
-                  }
-                  else {
-                    assignTraversalStack.push(nextNode);
-                  }
-                }
-                else {
-                  for (const Cfg::BipNode& nextNode : nextAssignTraversalNodes) {
-                    // If the next node is of type branch in and has already been visited
-                    assert(!(nextNode.type == Cfg::NodeType::BRANCH_IN && assignTraversalVisited.count(nextNode.node) == 1)); // should always be true
-                    // If next node is of type branch back, check that the edge label corresponds to branch stack's top
-                    if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-                      if (!assignTraversalBranchBack.empty() && nextNode.label == assignTraversalBranchBack.back()) {
-                        assignTraversalStack.push(nextNode);
-                      }
-                    }
-                    // Else current node is a while/if branch, multiple paths - create new snapshot
-                    else {
-                      std::unordered_set<int> visitedDup;
-                      std::vector<int> branchDup;
-                      std::vector<std::vector<int>> branchStmtDup;
-                      for (const int visited : assignTraversalVisited) {
-                        visitedDup.emplace(visited);
-                      }
-                      for (const int branch : assignTraversalBranchBack) {
-                        branchDup.push_back(branch);
-                      }
-                      for (const std::vector<int> stmts : stmtsInBranch) {
-                        branchStmtDup.push_back(std::vector<int>());
-                        for (const int stmt : stmts) {
-                          branchStmtDup.back().push_back(stmt);
-                        }
-                      }
-                      snapshotStack.push(std::make_tuple(currTargetAssign, nextNode, visitedDup, branchDup, branchStmtDup));
-                    }
-                  }
-                }
+          // Extract the assign statements that uses varModified
+          const std::unordered_set<int>& potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
+          if (potentiallyAffectedAssigns.empty()) {
+            for (const std::shared_ptr<Cfg::BipNode>& nextPtr : currPtr->nexts) {
+              // Add nextNode to stack only if not visited
+              if (outerVisited.count(nextPtr) == 0) {
+                outerDfsStack.push(nextPtr);
+                outerVisited.emplace(nextPtr); // mark nextNode as visited
               }
             }
-
-            for (Row row : affectsSet) {
-              pkb.addAffectsBipT(row[0], row[1]);
-            }
+            continue;  // shortcircuit if no assign uses the varModified
           }
 
-          std::vector<Cfg::BipNode> nextProcTraversalNodes = pkb.getNextStmtsFromCfgBip(currStmt);
-          if (nextProcTraversalNodes.size() == 1) { // if size only 1, then just add directly to stack
-            const Cfg::BipNode& nextNode = nextProcTraversalNodes[0];
-            // If the next node is of type branch in and has already been visited, push the node directly after current node instead
-            if (nextNode.type == Cfg::NodeType::BRANCH_IN && procTraversalVisited.count(nextNode.node) == 1) {
-              const std::vector<int> nextStmts = pkb.getNextStmtsFromCfg(currStmt); // Note: get from CFG, not from CFGBip
-              assert(nextStmts.size() == 1);
-              procTraversalStack.push(Cfg::BipNode{ nextStmts[0], 0, Cfg::NodeType::NORMAL });
+          for (std::shared_ptr<Cfg::BipNode>& nextPtr : currPtr->nexts) {
+            // Iterate through to find the first non-dummy node
+            innerDfsStack.push(nextPtr); // push nextNodes to stack
+            innerVisited.emplace(nextPtr); // mark nextNodes as visited
+          }
+          assert(currPtr->nexts.size() <= 1);
+
+          // Do DFS
+          while (!innerDfsStack.empty()) {
+            const std::shared_ptr<Cfg::BipNode>& targetPtr = innerDfsStack.top();
+            const int targetStmt = targetPtr->node;
+            innerDfsStack.pop();
+
+            // Check if currentStmt satisfy the AffectsBip(currStmt, targetStmt) relation
+            if (potentiallyAffectedAssigns.count(targetStmt) == 1) {
+              pkb.addAffectsBip(currStmt, targetStmt);
+              currPtr->affectsNexts.push_back(targetPtr);
+              affectsBipPtrs.emplace(currPtr);
             }
-            // If the next node is of type branch back, check that the edge label corresponds to branch stack's top
-            else if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-              if (!procTraversalBranchBack.empty() && nextNode.label == procTraversalBranchBack.back()) {
-                procTraversalStack.push(nextNode);
+
+            // Check if targetStmt modifies the varModified
+            const bool isModified = pkb.getModifiedBy(targetStmt).count(varModified) == 1;
+            const int ref = pkb.getIntRefFromStmtNum(targetStmt);
+            const bool isReadOrAssignStmt = readTable.contains({ ref }) || assignTable.contains({ ref });
+            // Stop searching this path if the targetStmt is an assign stmt or read stmt
+            if (isModified && isReadOrAssignStmt) {
+              continue;
+            }
+
+            // Add nextNodes to the stack under certain conditions
+            for (const std::shared_ptr<Cfg::BipNode>& nextPtr : targetPtr->nexts) {
+              // Add nextNode to stack only if not visited
+              if (innerVisited.count(nextPtr) == 0) {
+                innerDfsStack.push(nextPtr);
+                innerVisited.emplace(nextPtr); // mark nextNode as visited
               }
-            }
-            else {
-              procTraversalStack.push(nextNode);
             }
           }
-          else {
-            for (const Cfg::BipNode& nextNode : nextProcTraversalNodes) {
-              // If next node is of type branch back, check that the edge label corresponds to branch stack's top
-              if (nextNode.type == Cfg::NodeType::BRANCH_BACK) {
-                if (!procTraversalBranchBack.empty() && nextNode.label == procTraversalBranchBack.back()) {
-                  procTraversalStack.push(nextNode);
-                }
-              }
-              // Else current node is a while/if branch, multiple paths - create new snapshot
-              else {
-                std::unordered_set<int> visitedProcDup;
-                std::vector<int> branchProcDup;
-                for (const int visited : procTraversalVisited) {
-                  visitedProcDup.emplace(visited);
-                }
-                for (const int branch : procTraversalBranchBack) {
-                  branchProcDup.push_back(branch);
-                }
-                procSnapshots.push(std::make_tuple(nextNode, visitedProcDup, branchProcDup));
-              }
-            }
+        }
+
+        // Add nextNodes to the stack under certain conditions
+        for (const std::shared_ptr<Cfg::BipNode>& nextPtr : currPtr->nexts) {
+          // Add nextNode to stack only if not visited
+          if (outerVisited.count(nextPtr) == 0) {
+            outerDfsStack.push(nextPtr);
+            outerVisited.emplace(nextPtr); // mark nextNode as visited
+          }
+        }
+      }
+    }
+
+    // Adding of AffectsBipT relations
+    for (const std::shared_ptr<Cfg::BipNode>& affectsBipPtr : affectsBipPtrs) {
+      const int currAssign = affectsBipPtr->node;
+      std::stack<std::shared_ptr<Cfg::BipNode>> dfsStack;
+      std::unordered_set<std::shared_ptr<Cfg::BipNode>> visited;
+      for (std::shared_ptr<Cfg::BipNode>& nextAssignPtr : affectsBipPtr->affectsNexts) {
+        dfsStack.push(nextAssignPtr);
+        visited.emplace(nextAssignPtr);
+      }
+
+      while (!dfsStack.empty()) {
+        const std::shared_ptr<Cfg::BipNode>& assignPtr = dfsStack.top();
+        dfsStack.pop();
+
+        pkb.addAffectsBipT(currAssign, assignPtr->node);
+
+        for (std::shared_ptr<Cfg::BipNode>& nextAssignPtr : assignPtr->affectsNexts) {
+          if (visited.count(nextAssignPtr) == 0) {
+            dfsStack.push(nextAssignPtr);
+            visited.emplace(nextAssignPtr);
           }
         }
       }
@@ -516,15 +253,13 @@ namespace {
    * @param pkb The PKB to refer to.
    */
   void fillAffectsTable(Pkb& pkb) {
-    Table assignTable = pkb.getAssignTable();
-    Table ifTable = pkb.getIfTable();
-    Table whileTable = pkb.getWhileTable();
-    Table callTable = pkb.getCallTable();
-    Table modifiesPTable = pkb.getModifiesPTable();
+    const std::unordered_set<int>& assignIntRefs = pkb.getAssignIntRefs();
+    const std::unordered_set<int>& ifIntRefs = pkb.getIfIntRefs();
+    const std::unordered_set<int>& whileIntRefs = pkb.getWhileIntRefs();
 
     // Fill up the affects table for each assign statement
-    for (Row assignRow : assignTable.getData()) {
-      const int affecterAssignStmt = pkb.getStmtNumFromIntRef(assignRow[0]);
+    for (const int assignIntRef : assignIntRefs) {
+      const int affecterAssignStmt = pkb.getStmtNumFromIntRef(assignIntRef);
 
       // Extract the varModifed by affecterAssignStmt
       std::string varModified;
@@ -532,7 +267,7 @@ namespace {
         varModified = variable;
       }
 
-      std::unordered_set<int> potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
+      const std::unordered_set<int>& potentiallyAffectedAssigns = pkb.getAssignUses(varModified);
       if (potentiallyAffectedAssigns.empty()) {
         continue;  // shortcircuit if no assign uses the varModified
       }
@@ -546,18 +281,12 @@ namespace {
       // Get the next stmts in the CFG from the starting affecterAssignStmt stmt and push to the stack
       for (const int nextStmt : pkb.getNextStmtsFromCfg(affecterAssignStmt)) {
         stack.push(nextStmt);
+        visited.emplace(nextStmt);
       }
 
       while (!stack.empty()) {
         int currentStmt = stack.top();
         stack.pop();
-
-        // Check if currentStmt has been visited
-        // Skip this currentStmt if already visited
-        if (visited.count(currentStmt) == 1) {
-          continue;
-        }
-        visited.emplace(currentStmt); // Set currentStmt as visited
 
         // Check if currentStmt satisfy the Affects(affecterAssignStmt, currentStmt) relation
         if (potentiallyAffectedAssigns.count(currentStmt) == 1) {
@@ -567,15 +296,20 @@ namespace {
         // Check if currentStmt modifies the varModified
         // Stop searching this path if the currentStmt is not a container stmt and it modifies the varModified
         const bool isModified = pkb.getModifiedBy(currentStmt).count(varModified) == 1;
-        const bool isContainerStmt = ifTable.contains({ pkb.getIntRefFromStmtNum(currentStmt) }) ||
-          whileTable.contains({ pkb.getIntRefFromStmtNum(currentStmt) });
+        const bool isContainerStmt =
+          ifIntRefs.count(pkb.getIntRefFromStmtNum(currentStmt)) == 1 ||
+          whileIntRefs.count(pkb.getIntRefFromStmtNum(currentStmt)) == 1;
         if (isModified && !isContainerStmt) {
           continue;
         }
 
         // Push all next stmts into the stack
         for (const int nextStmt : pkb.getNextStmtsFromCfg(currentStmt)) {
-          stack.push(nextStmt);
+          // Add non-visited nextStmt to stack and mark as visited
+          if (visited.count(nextStmt) == 0) {
+            stack.push(nextStmt);
+            visited.emplace(nextStmt);
+          }
         }
       }
     }
@@ -594,21 +328,19 @@ namespace {
    *     for all x, y, z, if R(x, y) and R(y, z)
    *     then R(x, z)
    *
-   * @param table The table to use when generating
+   * @param table The table to use and modify when generating
    *     the transitive closure.
    * @param listOfEntities The list of all entities in the table.
-   * @returns A Table with entries as detailed above.
    */
-  Table generateTransitiveClosure(const Table& table, const std::list<int>& listOfEntities) {
+  void generateTransitiveClosure(Table& table, const std::list<int>& listOfEntities) {
     assert(table.getHeader().size() == 2); // Guaranteed to receive a table with 2 columns
 
     int numEntities = listOfEntities.size();
-    Table newTable = table;
 
     // Tables may sometimes have non-consecutive entries.
     // We use this to perform conversion to and from.
-    std::map<int, int> nameToNum;
-    std::map<int, int> numToName;
+    std::unordered_map<int, int> nameToNum;
+    std::unordered_map<int, int> numToName;
     int counter = 1;
     for (const int name : listOfEntities) {
       nameToNum.emplace(name, counter);
@@ -619,7 +351,7 @@ namespace {
     // We insert the initial relations into the adjacency list
     // for use in the Warshall algorithm later.
     AdjList adjList(numEntities);
-    for (const Row row : table.getData()) {
+    for (const Row& row : table.getData()) {
       adjList.insert(nameToNum.at(row[0]), nameToNum.at(row[1]));
     }
 
@@ -631,13 +363,10 @@ namespace {
     for (int i = 1; i <= numEntities; i++) {
       for (int j = 1; j <= numEntities; j++) {
         if (adjList.get(i, j)) {
-          Row newRow = { numToName.at(i), numToName.at(j) };
-          newTable.insertRow(newRow);
+          table.insertRow({ numToName.at(i), numToName.at(j) });
         }
       }
     }
-
-    return newTable;
   }
 
   /**
@@ -656,19 +385,18 @@ namespace {
    * Then we have a new indirect relation to be put in the
    * first table, R(x, z).
    *
-   * @param table The table to use/modify.
-   * @param parentTTable The second table to refer to.
+   * @param table Copy of the table to use/modify.
+   * @param parentTTable Copy of the parentT table to refer to.
    * @returns The table with new indirect relation entries.
    */
-  Table fillIndirectRelation(Table table, const Table& parentTTable) {
+  Table fillIndirectRelation(Table& table, Table& parentTTable) {
     const bool areTableColumnCountTwo = (table.getHeader().size() == 2) &&
       (parentTTable.getHeader().size() == 2);
     assert(areTableColumnCountTwo); // Guaranteed to receive tables with 2 columns
 
-    Table newParentTTable = parentTTable;
-    newParentTTable.innerJoin(table, 1, 0);
-    newParentTTable.dropColumn(1);
-    table.concatenate(newParentTTable);
+    parentTTable.innerJoin(table, 1, 0);
+    parentTTable.dropColumn(1);
+    table.concatenate(parentTTable);
 
     return table;
   }
@@ -687,11 +415,12 @@ namespace {
    */
   void fillParentTTable(Pkb& pkb) {
     std::list<int> stmtList;
-    for (const Row row : pkb.getStmtTable().getData()) {
+    for (const Row& row : pkb.getStmtTable().getData()) {
       stmtList.push_back(row[0]);
     }
 
-    Table parentTTable = generateTransitiveClosure(pkb.getParentTable(), stmtList);
+    Table& parentTTable = pkb.getParentTable();
+    generateTransitiveClosure(parentTTable, stmtList);
     for (const Row& row : parentTTable.getData()) {
       pkb.addParentT(pkb.getStmtNumFromIntRef(row[0]), pkb.getStmtNumFromIntRef(row[1]));
     }
@@ -711,13 +440,13 @@ namespace {
    */
   void fillFollowsTTable(Pkb& pkb) {
     std::list<int> stmtList;
-    for (const Row row : pkb.getStmtTable().getData()) {
+    for (const Row& row : pkb.getStmtTable().getData()) {
       stmtList.push_back(row[0]);
     }
 
-    Table followsTTable = generateTransitiveClosure(pkb.getFollowsTable(),
-      stmtList);
-    for (const Row row : followsTTable.getData()) {
+    Table& followsTTable = pkb.getFollowsTable();
+    generateTransitiveClosure(followsTTable, stmtList);
+    for (const Row& row : followsTTable.getData()) {
       pkb.addFollowsT(pkb.getStmtNumFromIntRef(row[0]), pkb.getStmtNumFromIntRef(row[1]));
     }
   }
@@ -737,13 +466,13 @@ namespace {
    */
   void fillCallsTTable(Pkb& pkb) {
     std::list<int> procList;
-    for (const Row row : pkb.getProcTable().getData()) {
+    for (const Row& row : pkb.getProcTable().getData()) {
       procList.push_back(row[0]);
     }
 
-    Table callsTTable = generateTransitiveClosure(pkb.getCallsTable(),
-      procList);
-    for (const Row row : callsTTable.getData()) {
+    Table& callsTTable = pkb.getCallsTable();
+    generateTransitiveClosure(callsTTable, procList);
+    for (const Row& row : callsTTable.getData()) {
       pkb.addCallsT(pkb.getEntityFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
@@ -763,13 +492,13 @@ namespace {
    */
   void fillNextTTable(Pkb& pkb) {
     std::list<int> stmtList;
-    for (const Row row : pkb.getStmtTable().getData()) {
+    for (const Row& row : pkb.getStmtTable().getData()) {
       stmtList.push_back(row[0]);
     }
 
-    Table nextTTable = generateTransitiveClosure(pkb.getNextTable(),
-      stmtList);
-    for (const Row row : nextTTable.getData()) {
+    Table& nextTTable = pkb.getNextTable();
+    generateTransitiveClosure(nextTTable, stmtList);
+    for (const Row& row : nextTTable.getData()) {
       pkb.addNextT(pkb.getStmtNumFromIntRef(row[0]), pkb.getStmtNumFromIntRef(row[1]));
     }
   }
@@ -785,17 +514,16 @@ namespace {
    *      containing all the assign statements in the program.
    *
    * @param pkb The PKB to refer to.
-   * @returns
    */
   void fillAffectsTTable(Pkb& pkb) {
     std::list<int> assignStmtList;
-    for (const Row row : pkb.getAssignTable().getData()) {
+    for (const Row& row : pkb.getAssignTable().getData()) {
       assignStmtList.push_back(row[0]);
     }
 
-    Table affectsTTable = generateTransitiveClosure(pkb.getAffectsTable(),
-      assignStmtList);
-    for (const Row row : affectsTTable.getData()) {
+    Table& affectsTTable = pkb.getAffectsTable();
+    generateTransitiveClosure(affectsTTable, assignStmtList);
+    for (const Row& row : affectsTTable.getData()) {
       pkb.addAffectsT(pkb.getStmtNumFromIntRef(row[0]), pkb.getStmtNumFromIntRef(row[1]));
     }
   }
@@ -809,11 +537,10 @@ namespace {
    * 1) ParentTTable
    *
    * @param pkb The PKB to use/modify.
-   * @returns
    */
   void fillUsesSTableNonCallStmts(Pkb& pkb) {
-    Table newUsesSTable = fillIndirectRelation(pkb.getUsesSTable(), pkb.getParentTTable());
-    for (const Row row : newUsesSTable.getData()) {
+    const Table& newUsesSTable = fillIndirectRelation(pkb.getUsesSTable(), pkb.getParentTTable());
+    for (const Row& row : newUsesSTable.getData()) {
       pkb.addUsesS(pkb.getStmtNumFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
@@ -827,11 +554,10 @@ namespace {
    * 2) usesPTable in PKB
    *
    * @param pkb The PKB to use/modify.
-   * @returns
    */
   void fillUsesSTableCallStmts(Pkb& pkb) {
     Table callProcTable = pkb.getCallProcTable();
-    Table usesPTable = pkb.getUsesPTable();
+    const Table& usesPTable = pkb.getUsesPTable();
 
     // Inner join the callProcTable{"stmtNum","procName"}
     // and usesPTable{"proc","var"}, so we only retain the 
@@ -842,7 +568,7 @@ namespace {
     callProcTable.innerJoin(usesPTable, 1, 0);
     callProcTable.dropColumn(1);
 
-    for (const Row row : callProcTable.getData()) {
+    for (const Row& row : callProcTable.getData()) {
       pkb.addUsesS(pkb.getStmtNumFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
@@ -856,7 +582,6 @@ namespace {
    * 2) modifiesPTable in PKB
    *
    * @param pkb The PKB to use/modify.
-   * @returns
    */
   void fillModifiesSTableCallStmts(Pkb& pkb) {
     Table callProcTable = pkb.getCallProcTable();
@@ -871,7 +596,7 @@ namespace {
     callProcTable.innerJoin(modifiesPTable, 1, 0);
     callProcTable.dropColumn(1);
 
-    for (const Row row : callProcTable.getData()) {
+    for (const Row& row : callProcTable.getData()) {
       pkb.addModifiesS(pkb.getStmtNumFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
@@ -885,11 +610,10 @@ namespace {
    * 1) ParentTTable
    *
    * @param pkb The PKB to use/modify.
-   * @returns
    */
   void fillModifiesSTableNonCallStmts(Pkb& pkb) {
-    Table newModifiesSTable = fillIndirectRelation(pkb.getModifiesSTable(), pkb.getParentTTable());
-    for (const Row row : newModifiesSTable.getData()) {
+    const Table& newModifiesSTable = fillIndirectRelation(pkb.getModifiesSTable(), pkb.getParentTTable());
+    for (const Row& row : newModifiesSTable.getData()) {
       pkb.addModifiesS(pkb.getStmtNumFromIntRef(row[0]), pkb.getEntityFromIntRef(row[1]));
     }
   }
@@ -901,9 +625,10 @@ namespace {
    * @param pkb The PKB to refer to.
    * @param procName The procedure to check against.
    */
-  std::unordered_set<std::string> getProceduresCalledBy(Pkb& pkb, std::string procName) {
+  std::unordered_set<std::string> getProceduresCalledBy(const Pkb& pkb, std::string procName) {
     Table callsTable = pkb.getCallsTable();
     std::unordered_set<std::string> toReturn;
+    toReturn.reserve(callsTable.size());
 
     for (const Row row : callsTable.getData()) {
       bool isProcNameCaller = (pkb.getEntityFromIntRef(row[0]) == procName);
@@ -925,9 +650,10 @@ namespace {
    * 2) callsTable
    *
    * @param pkb The PKB to use/modify.
-   * @returns
+   * @param topoProc The list of topologically sorted procedures in reverse order.
    */
-  void fillUsesPTable(Pkb& pkb) {
+  void fillUsesPTable(Pkb& pkb,
+    std::list<std::string>& reverseTopoSortedProcs) {
     // Key idea:
     // 1) Construct a graph where an E(p1, p2) holds if p2 calls p1
     //    i.e. an inversion of the usual procedure call graph.
@@ -940,48 +666,15 @@ namespace {
     //    E(p1, p2) => p1 comes before p2 in the topological ordering.
     // Same logic should work for ModifiesP as well.
 
-    Table callsTable = pkb.getCallsTable();
-    AdjList invertedProcGraph(pkb.getProcTable().size());
-
-    // We need to build a bijective mapping between
-    // node numbers and procedure names since our 
-    // adjacency list only allows numeric identifiers
-    // for the graph vertices.
-
-    // Maps procedure names to a vertex number.
-    std::map<std::string, int> procNameToNum;
-    // Maps vertex numbers back to a procedure name.
-    std::map<int, std::string> numToProcName;
-
-    int counter = 1;
-    for (const Row row : pkb.getProcTable().getData()) {
-      std::string procName = pkb.getEntityFromIntRef(row[0]);
-      procNameToNum.emplace(procName, counter);
-      numToProcName.emplace(counter, procName);
-      counter++;
-    }
-
-    assert(counter == (pkb.getProcTable().size() + 1));
-
-    // Populate the graph
-    for (const Row row : callsTable.getData()) {
-      std::string caller = pkb.getEntityFromIntRef(row[0]);
-      std::string callee = pkb.getEntityFromIntRef(row[1]);
-      invertedProcGraph.insert(procNameToNum.at(callee), procNameToNum.at(caller));
-    }
-
-    std::list<int> topoOrder = invertedProcGraph.topologicalOrder();
-
-    // Now we compute the Uses(p, v) relations in topological order.
-    for (int nodeNum : topoOrder) {
-      std::string procName = numToProcName.at(nodeNum);
+    // We compute the Uses(p, v) relations in topological order.
+    for (const std::string& procName : reverseTopoSortedProcs) {
 
       // No need to compute "direct" Uses(p, v) 
       // i.e. relations where some stmt s in p satisfies Uses(s, v)
       // since that is done by the parser. We just add the relations from
       // procedures that are called by our current procedure.
 
-      std::unordered_set<std::string> proceduresCalledByProcName = getProceduresCalledBy(pkb, procName);
+      const std::unordered_set<std::string>& proceduresCalledByProcName = getProceduresCalledBy(pkb, procName);
       for (const Row row : pkb.getUsesPTable().getData()) {
         bool isFirstArgCalledByProcName = (proceduresCalledByProcName.count(pkb.getEntityFromIntRef(row[0])) > 0);
         std::string var = pkb.getEntityFromIntRef(row[1]);
@@ -1001,48 +694,12 @@ namespace {
    * the ParentTTable be populated first.
    *
    * @param pkb The PKB to use/modify.
-   * @returns
+   * @param topoProc The list of topologically sorted procedures in reverse order.
    */
-  void fillModifiesPTable(Pkb& pkb) {
-    Table callsTable = pkb.getCallsTable();
-    AdjList invertedProcGraph(pkb.getProcTable().size());
-
-    // We need to build a bijective mapping between
-    // node numbers and procedure names since our 
-    // adjacency list only allows numeric identifiers
-    // for the graph vertices.
-
-    // Maps procedure names to a vertex number.
-    std::map<std::string, int> procNameToNum;
-    // Maps vertex numbers back to a procedure name.
-    std::map<int, std::string> numToProcName;
-
-    int counter = 1;
-    for (const Row row : pkb.getProcTable().getData()) {
-      std::string procName = pkb.getEntityFromIntRef(row[0]);
-      procNameToNum.emplace(procName, counter);
-      numToProcName.emplace(counter, procName);
-      counter++;
-    }
-
-    // After mapping all the procedures, the counter
-    // should be equal to the number of procedures,
-    // plus 1.
-    assert(counter == (pkb.getProcTable().size() + 1));
-
-    // Populate the graph
-    for (const Row row : callsTable.getData()) {
-      std::string caller = pkb.getEntityFromIntRef(row[0]);
-      std::string callee = pkb.getEntityFromIntRef(row[1]);
-      invertedProcGraph.insert(procNameToNum.at(callee), procNameToNum.at(caller));
-    }
-
-    std::list<int> topoOrder = invertedProcGraph.topologicalOrder();
-
-    // Now we compute the Uses(p, v) relations in topological order.
-    for (int nodeNum : topoOrder) {
-      std::string procName = numToProcName.at(nodeNum);
-
+  void fillModifiesPTable(Pkb& pkb,
+    std::list<std::string>& reverseTopoSortedProcs) {
+    // We compute the Uses(p, v) relations in reverse topological order.
+    for (const std::string& procName : reverseTopoSortedProcs) {
       // No need to compute "direct" Uses(p, v) 
       // i.e. relations where some stmt s in p satisfies Uses(s, v)
       // since that is done by the parser. We just add the relations from
@@ -1068,41 +725,70 @@ namespace {
    * Requires that the callsTable be populated first.
    *
    * @param pkb The PKB to reference.
-   * @returns none
+   * @param topoProc The list of topologically sorted procedures.
    */
-  void verifyNoCyclicCalls(Pkb& pkb) {
+  void verifyNoCyclicCalls(Pkb& pkb, std::list<std::string>& topoSortedProcs) {
     // Key idea:
     // 1) Get the topological order of the procedure calls
     // 2) Check if the number of vertices (procedures) in the order
     //    equals the total number of procedures. If not, a cycle exists.
-    AdjList procGraph(pkb.getProcTable().size());
+    const int topoSortedProcsSize = topoSortedProcs.size();
+    const int numProcs = pkb.getProcIntRefs().size();
+    bool isCycleExists = (topoSortedProcsSize != numProcs);
 
-    std::map<std::string, int> procNameToNum;
-    std::map<int, std::string> numToProcName;
+    if (isCycleExists) {
+      throw SourceProcessor::SemanticError(
+        SourceProcessor::ErrorMessage::SEMANTIC_ERROR_RECURSIVE_OR_CYCLIC_PROCEDURE_CALL +
+        "\nExpected topological order of length " + std::to_string(numProcs) +
+        " but got " + std::to_string(topoSortedProcsSize) + "."
+      );
+    }
+  }
+
+  void initialiseTopoSortedProcs(const Pkb& pkb,
+    std::list<std::string>& topoSortedProcs,
+    std::list<std::string>& reverseTopoSortedProcs) {
+    // Key idea:
+    // 1) Get the topological order of the procedure calls
+    // 2) Check if the number of vertices (procedures) in the order
+    //    equals the total number of procedures. If not, a cycle exists.
+    const std::unordered_set<int>& procIntRefs = pkb.getProcIntRefs();
+    const int numProcs = procIntRefs.size();
+
+    // Construct mapping
+    std::unordered_map<std::string, int> procNameToNum;
+    procNameToNum.reserve(numProcs);
+    std::unordered_map<int, std::string> numToProcName;
+    numToProcName.reserve(numProcs);
 
     int counter = 1;
-    for (const Row row : pkb.getProcTable().getData()) {
-      std::string procName = pkb.getEntityFromIntRef(row[0]);
+    for (const int intRef : procIntRefs) {
+      std::string procName = pkb.getEntityFromIntRef(intRef);
       procNameToNum.emplace(procName, counter);
       numToProcName.emplace(counter, procName);
       counter++;
     }
 
+    // Construct graphs
+    AdjList procGraph(numProcs);
+    AdjList reverseProcGraph(numProcs);
+
     for (const Row row : pkb.getCallsTable().getData()) {
       std::string caller = pkb.getEntityFromIntRef(row[0]);
       std::string callee = pkb.getEntityFromIntRef(row[1]);
       procGraph.insert(procNameToNum.at(caller), procNameToNum.at(callee));
+      reverseProcGraph.insert(procNameToNum.at(callee), procNameToNum.at(caller));
     }
 
-    std::list<int> topoOrder = procGraph.topologicalOrder();
-    bool isCycleExists = (topoOrder.size() != pkb.getProcTable().size());
-
-    if (isCycleExists) {
-      throw SourceProcessor::SemanticError(
-        SourceProcessor::ErrorMessage::SEMANTIC_ERROR_RECURSIVE_OR_CYCLIC_PROCEDURE_CALL +
-        "\nExpected topological order of length " + std::to_string(pkb.getProcTable().size()) +
-        " but got " + std::to_string(topoOrder.size()) + "."
-      );
+    const std::list<int>& topoOrder = procGraph.topologicalOrder();
+    const std::list<int>& reverseTopoOrder = reverseProcGraph.topologicalOrder();
+    for (const int num : topoOrder) {
+      std::string proc = numToProcName.at(num);
+      topoSortedProcs.push_back(proc);
+    }
+    for (const int num : reverseTopoOrder) {
+      std::string proc = numToProcName.at(num);
+      reverseTopoSortedProcs.push_back(proc);
     }
   }
 
@@ -1110,17 +796,17 @@ namespace {
    * Verifies that no calls to non-existent procedures exist.
    * If any are found, an exception is thrown.
    *
-   * @returns none
+   * @param pkb The PKB to reference.
    */
-  void verifyNoCallsToNonExistentProcedures(Pkb& pkb) {
-    // Table mapping call stmt# to procedure called.
-    Table callProcTable = pkb.getCallProcTable();
+  void verifyNoCallsToNonExistentProcedures(const Pkb& pkb) {
+    // Table of references mapping call stmt# to procedure called.
+    const Table& callProcTable = pkb.getCallProcTable();
 
-    // Table detailing all procedures.
-    Table procTable = pkb.getProcTable();
+    // Set detailing all procedures references.
+    const std::unordered_set<int> procIntRefs = pkb.getProcIntRefs();
 
     for (const Row row : callProcTable.getData()) {
-      bool isCallToExistentProcedure = procTable.getData().count({ row[1] }) > 0;
+      bool isCallToExistentProcedure = procIntRefs.count(row[1]) > 0;
       if (!isCallToExistentProcedure) {
         throw SourceProcessor::SemanticError(
           SourceProcessor::ErrorMessage::SEMANTIC_ERROR_CALL_TO_NON_EXISTENT_PROCEDURE +
@@ -1133,10 +819,14 @@ namespace {
 }
 
 namespace SourceProcessor {
+  DesignExtractor::DesignExtractor(Pkb& pkb) : pkb(pkb) {
+  }
+
   void DesignExtractor::extractDesignAbstractions() {
     // Verification
     verifyNoCallsToNonExistentProcedures(pkb);
-    verifyNoCyclicCalls(pkb);
+    initialiseTopoSortedProcs(pkb, topoSortedProcs, reverseTopoSortedProcs);
+    verifyNoCyclicCalls(pkb, topoSortedProcs);
 
     // Transitive relations
     fillParentTTable(pkb);
@@ -1161,7 +851,7 @@ namespace SourceProcessor {
     // 2) All Uses(p, v) due to some s != c in p satisfying Uses(s, v)
     // 3) All Uses(a, v), Uses(pn, v)
     fillUsesSTableNonCallStmts(pkb);
-    fillUsesPTable(pkb);
+    fillUsesPTable(pkb, reverseTopoSortedProcs);
     fillUsesSTableCallStmts(pkb);
     fillUsesSTableNonCallStmts(pkb);
 
@@ -1171,16 +861,23 @@ namespace SourceProcessor {
     // 1) All Modifies(p, v) due to some s != c in p satisfying Uses(s, v)
     // 2) All Modifies(a, v), Modifies(r, v)
     fillModifiesSTableNonCallStmts(pkb);
-    fillModifiesPTable(pkb);
+    fillModifiesPTable(pkb, reverseTopoSortedProcs);
     fillModifiesSTableCallStmts(pkb);
     fillModifiesSTableNonCallStmts(pkb);
 
     fillAffectsTable(pkb);
     fillAffectsTTable(pkb);
+  }
 
+  void DesignExtractor::extractIter3DesignAbstractions() {
     // Iteration 3 extensions
-    preprocessCfgBip(pkb);
-    fillNextBipTTable(pkb);
+    initialiseCfgBip(pkb, topoSortedProcs);
+    fillNextBipTable(pkb);
     fillAffectsBipTable(pkb);
+  }
+
+  void DesignExtractor::extractAllDesignAbstractions() {
+    extractDesignAbstractions();
+    extractIter3DesignAbstractions();
   }
 }

@@ -1,13 +1,13 @@
 #include "catch.hpp"
 
-#include <string>
 #include <list>
-#include <unordered_set>
 #include <sstream>
+#include <string>
+#include <unordered_set>
 
-#include "Tokeniser.h"
-#include "Token.h"
 #include "ExprParser.h"
+#include "Token.h"
+#include "Tokeniser.h"
 
 namespace {
   std::list<Token> expressionStringToTokens(std::string& string) {
