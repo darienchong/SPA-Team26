@@ -20,15 +20,13 @@ namespace Pql {
     : index(JOINED_INDEX), left(left.index), right(right.index) {
     header = mergeHeaders(left.header, right.header);
     if (header.size() == left.header.size() + right.header.size()) {
-      // cross product
+      // cross product (actual)
       size = left.size * right.size;
-      cost = (unsigned long long)size * (unsigned long long)header.size();
     } else {
-      // inner join
+      // inner join (semi-conservative estimate)
       size = left.size + right.size;
-      cost = (unsigned long long)left.size * (unsigned long long)left.header.size()
-        + (unsigned long long)right.size * (unsigned long long)right.header.size();
     }
+    cost = (unsigned long long)size * (unsigned long long)header.size();
   }
 
   std::unordered_set<std::string> ClauseNode::mergeHeaders(const std::unordered_set<std::string>& leftHeader, const std::unordered_set<std::string>& rightHeader) {

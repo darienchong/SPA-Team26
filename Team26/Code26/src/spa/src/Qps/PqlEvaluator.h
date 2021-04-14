@@ -14,6 +14,7 @@ namespace Pql {
   private:
     std::vector<Clause> clauses;
     std::vector<Entity> targets;
+    std::unordered_set<std::string> targetSynonymsSet;
     bool isQueryBoolean;
     Pkb& pkb;
     std::list<std::string>& results;

@@ -11,6 +11,6 @@
 Team26/Code26/build*
 
 # xml output files from autotester
-Team26/Code26/tests/out/
+Team26/Code26/tests/**/out/
 Team26/Code26/tests/*.xml
 Team26/Tests26/*.xml

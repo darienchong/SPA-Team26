@@ -100,6 +100,14 @@ public:
   bool dropColumn(const std::string& headerTitle);
 
   /**
+   * Filter table with specified headers to keep. Must contain at least one 
+   * existing header to keep. All other columns will be dropped.
+   *
+   * @param headerTitles The specified headers to keep.
+   */
+  void Table::filterHeaders(const std::unordered_set<std::string>& headersToKeep);
+
+  /**
    * Filter the table rows based on the values for a particular column.
    * If the values from the column at the specified index in the table matches any of the
    * specified values, that particular row would be preserved.
@@ -130,7 +138,7 @@ public:
   void naturalJoin(const Table& otherTable);
 
   /**
-   * Joins two tables using cross join.
+   * Cross joins two tables using cross join.
    *
    * The data from the other table would be added to the original table.
    * The other table remains unaltered.
@@ -149,7 +157,8 @@ public:
    * @param otherTable The other table.
    * @param indexPairs The index pairs representing the column index for each table.
    */
-  void innerJoin(const Table& otherTable, const std::vector<std::pair<size_t, size_t>>& indexPairs);
+  void innerJoin(const Table& otherTable, 
+    const std::vector<std::pair<size_t, size_t>>& indexPairs);
 
   /**
    * Joins two tables using inner join based on the specified indices.

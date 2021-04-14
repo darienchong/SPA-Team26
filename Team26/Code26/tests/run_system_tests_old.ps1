@@ -33,7 +33,9 @@ foreach ($test_folder in $test_cases) {
   # For each quries file, run autotester and save result in out folder
   $i = 1
   foreach($test_query in $test_queries) {
-    Invoke-Expression -Command "$autotester .\$test_folder\source.txt .\$test_folder\$test_query $OUT_DIR\$test_folder\result_$i.xml" > $OUT_DIR\$test_folder\result_$i.log
+    Measure-Command {
+      Invoke-Expression -Command "$autotester .\$test_folder\source.txt .\$test_folder\$test_query $OUT_DIR\$test_folder\result_$i.xml" > $OUT_DIR\$test_folder\result_$i.log
+    }
     "[$test_folder] [Queries $i] Done"
     $i += 1
   }

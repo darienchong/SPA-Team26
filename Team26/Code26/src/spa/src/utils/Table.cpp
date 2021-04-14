@@ -62,24 +62,18 @@ size_t Table::getColumnIndex(const std::string& headerTitle) const {
 
 bool Table::dropColumn(const size_t index) {
   const size_t numCols = header.size();
-  if (index < 0 || index >= numCols) {
-    return false;
-  }
-
-  // Cannot remove one column
-  if (numCols == 1) {
+  if (index < 0 || index >= numCols || numCols == 1) {
     return false;
   }
 
   header.erase(header.begin() + index);
   RowSet newData;
   newData.reserve(size());
-  for (Row row : data) {
-    row.erase(row.begin() + index);
-    newData.emplace(row);
+  for (Row rowCopy : data) {
+    rowCopy.erase(rowCopy.begin() + index);
+    newData.emplace(std::move(rowCopy));
   }
   data = std::move(newData);
-
   return true;
 }
 
@@ -89,6 +83,42 @@ bool Table::dropColumn(const std::string& headerTitle) {
     return false;
   }
   return dropColumn(index);
+}
+
+void Table::filterHeaders(const std::unordered_set<std::string>& headersToKeep) {
+  
+  // Get column indexes to keep
+  const size_t oldHeaderSize = header.size();
+  std::vector<size_t> colIdxsToKeep;
+  colIdxsToKeep.reserve(oldHeaderSize);
+  for (size_t i = 0; i < oldHeaderSize; i++) {
+    if (headersToKeep.count(header[i]) == 1) {
+      colIdxsToKeep.emplace_back(i);
+    }
+  }
+
+  // Update headers
+  for (Header::iterator it = header.begin(); it != header.end(); ) {
+    if (headersToKeep.count(*it) == 0) {
+      it = header.erase(it);
+    } else {
+      it++;
+    }
+  }
+
+  // Update data
+  const size_t newHeaderSize = colIdxsToKeep.size();
+  RowSet newData;
+  newData.reserve(size());
+  for (const Row& oldRow : data) {
+    Row newRow;
+    newRow.reserve(newHeaderSize);
+    for (const int idx : colIdxsToKeep) {
+      newRow.emplace_back(oldRow[idx]);
+    }
+    newData.emplace(std::move(newRow));
+  }
+  data = std::move(newData);
 }
 
 void Table::filterColumn(const size_t index, const std::unordered_set<int>& values) {
