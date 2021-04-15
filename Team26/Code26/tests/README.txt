@@ -14,7 +14,7 @@ These test cases name start with `SystemIter3Ext` and they focuses on the SPA ex
   1. Open Visual Studio 2019 in the current directory (Code26)
   2. Select the `x86-Release` configuration.
   3. In the Solution Explorer, Right-click `CMakeLists.txt` > `Build`
-  4. Once the build is successful, the executable path can be found in `Team26\Code26\build_win\x86-Release\src\autotester\autotester.exe`
+  4. Once the build is successful, the executable path can be found in `build_win\x86-Release\src\autotester\autotester.exe`
 
 #######################################
 # Running System Tests (Windows only) #
@@ -26,7 +26,6 @@ Follow the instructions below to use the test script.
   2. Place the autotester.exe in the same directory ad the script (in `script`)
   3. Ensure that `analysis.xsl` is also in the `script` sub-directory.
   4. Place all the test cases in the current directory 
-    - Each test case source program should be named `<DESCRIPTION>_source.txt` and the queries files should be named `<DESCRIPTION>_queries.txt`
     - Place the test cases in `test_extension` in the current directory if you want to test them.
     - Skip this step if you do not want to test the extension test cases.
   4. Right-click on `run_system_tests.ps1` > `Run with PowerShell`. 
