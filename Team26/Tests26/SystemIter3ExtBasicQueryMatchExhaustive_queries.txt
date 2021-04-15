@@ -1,0 +1,550 @@
+1 - NextBip/VALID - control
+stmt s1, s2;
+Select BOOLEAN such that NextBip(s1, s2)
+TRUE
+5000
+2 - NextBip/VALID - left wildcard
+stmt s1;
+Select BOOLEAN such that NextBip(_, s1)
+TRUE
+5000
+3 - NextBip/VALID - right wildcard
+stmt s1;
+Select BOOLEAN such that NextBip(s1, _)
+TRUE
+5000
+4 - NextBip/VALID - double wildcard
+
+Select BOOLEAN such that NextBip(_, _)
+TRUE
+5000
+5 - NextBip/VALID - left print
+print p;
+Select BOOLEAN such that NextBip(p, _)
+TRUE
+5000
+6 - NextBip/VALID - right print
+print p;
+Select BOOLEAN such that NextBip(_, p)
+TRUE
+5000
+7 - NextBip/VALID - left read
+read r;
+Select BOOLEAN such that NextBip(r, _)
+TRUE
+5000
+8 - NextBip/VALID - right read
+read r;
+Select BOOLEAN such that NextBip(_, r)
+FALSE
+5000
+9 - NextBip/VALID - left call
+call c;
+Select BOOLEAN such that NextBip(c, _)
+TRUE
+5000
+10 - NextBip/VALID - right call
+call c;
+Select BOOLEAN such that NextBip(_, c)
+TRUE
+5000
+11 - NextBip/VALID - left while
+while w;
+Select BOOLEAN such that NextBip(w, _)
+TRUE
+5000
+12 - NextBip/VALID - right while
+while w;
+Select BOOLEAN such that NextBip(_, w)
+TRUE
+5000
+13 - NextBip/VALID - left if
+if f;
+Select BOOLEAN such that NextBip(f, _)
+TRUE
+5000
+14 - NextBip/VALID - right if
+if f;
+Select BOOLEAN such that NextBip(_, f)
+TRUE
+5000
+15 - NextBip/VALID - left assign
+assign a;
+Select BOOLEAN such that NextBip(a, _)
+TRUE
+5000
+16 - NextBip/VALID - right assign
+assign a;
+Select BOOLEAN such that NextBip(_, a)
+TRUE
+5000
+17 - NextBip/VALID - left prog_line
+prog_line n;
+Select BOOLEAN such that NextBip(n, _)
+TRUE
+5000
+18 - NextBip/VALID - right prog_line
+prog_line n;
+Select BOOLEAN such that NextBip(_, n)
+TRUE
+5000
+19 - NextBip/INVALID (semantic error) - left variable
+variable v;
+Select BOOLEAN such that NextBip(v, _)
+FALSE
+5000
+20 - NextBip/INVALID (semantic error) - right variable
+variable v;
+Select BOOLEAN such that NextBip(_, v)
+FALSE
+5000
+21 - NextBip/INVALID (semantic error) - left constant
+constant c;
+Select BOOLEAN such that NextBip(c, _)
+FALSE
+5000
+22 - NextBip/INVALID (semantic error) - right constant
+constant c;
+Select BOOLEAN such that NextBip(_, c)
+FALSE
+5000
+23 - NextBip/INVALID (semantic error) - left procedure
+procedure p;
+Select BOOLEAN such that NextBip(p, _)
+FALSE
+5000
+24 - NextBip/INVALID (semantic error) - right procedure
+procedure p;
+Select BOOLEAN such that NextBip(_, p)
+FALSE
+5000
+25 - NextBip/VALID - left INTEGER
+
+Select BOOLEAN such that NextBip(1, _)
+TRUE
+5000
+26 - NextBip/VALID - right INTEGER
+
+Select BOOLEAN such that NextBip(_, 2)
+TRUE
+5000
+27 - NextBip/INVALID (syntax error) - attrRef 1
+stmt s;
+Select BOOLEAN such that NextBip(s.stmt#, _)
+
+5000
+28 - NextBip/INVALID (syntax error) - attrRef 2
+constant c;
+Select BOOLEAN such that NextBip(c.value, _)
+
+5000
+29 - NextBipT/VALID - control
+stmt s1, s2;
+Select BOOLEAN such that NextBip*(s1, s2)
+TRUE
+5000
+30 - NextBipT/VALID - left wildcard
+stmt s1;
+Select BOOLEAN such that NextBip*(_, s1)
+TRUE
+5000
+31 - NextBipT/VALID - right wildcard
+stmt s1;
+Select BOOLEAN such that NextBip*(s1, _)
+TRUE
+5000
+32 - NextBipT/VALID - double wildcard
+
+Select BOOLEAN such that NextBip*(_, _)
+TRUE
+5000
+33 - NextBipT/VALID - left print
+print p;
+Select BOOLEAN such that NextBip*(p, _)
+TRUE
+5000
+34 - NextBipT/VALID - right print
+print p;
+Select BOOLEAN such that NextBip*(_, p)
+TRUE
+5000
+35 - NextBipT/VALID - left read
+read r;
+Select BOOLEAN such that NextBip*(r, _)
+TRUE
+5000
+36 - NextBipT/VALID - right read
+read r;
+Select BOOLEAN such that NextBip*(_, r)
+FALSE
+5000
+37 - NextBipT/VALID - left call
+call c;
+Select BOOLEAN such that NextBip*(c, _)
+TRUE
+5000
+38 - NextBipT/VALID - right call
+call c;
+Select BOOLEAN such that NextBip*(_, c)
+TRUE
+5000
+39 - NextBipT/VALID - left while
+while w;
+Select BOOLEAN such that NextBip*(w, _)
+TRUE
+5000
+40 - NextBipT/VALID - right while
+while w;
+Select BOOLEAN such that NextBip*(_, w)
+TRUE
+5000
+41 - NextBipT/VALID - left if
+if f;
+Select BOOLEAN such that NextBip*(f, _)
+TRUE
+5000
+42 - NextBipT/VALID - right if
+if f;
+Select BOOLEAN such that NextBip*(_, f)
+TRUE
+5000
+43 - NextBipT/VALID - left assign
+assign a;
+Select BOOLEAN such that NextBip*(a, _)
+TRUE
+5000
+44 - NextBipT/VALID - right assign
+assign a;
+Select BOOLEAN such that NextBip*(_, a)
+TRUE
+5000
+45 - NextBipT/VALID - left prog_line
+prog_line n;
+Select BOOLEAN such that NextBip*(n, _)
+TRUE
+5000
+46 - NextBipT/VALID - right prog_line
+prog_line n;
+Select BOOLEAN such that NextBip*(_, n)
+TRUE
+5000
+47 - NextBipT/INVALID (semantic error) - left variable
+variable v;
+Select BOOLEAN such that NextBip*(v, _)
+FALSE
+5000
+48 - NextBipT/INVALID (semantic error) - right variable
+variable v;
+Select BOOLEAN such that NextBip*(_, v)
+FALSE
+5000
+49 - NextBipT/INVALID (semantic error) - left constant
+constant c;
+Select BOOLEAN such that NextBip*(c, _)
+FALSE
+5000
+50 - NextBipT/INVALID (semantic error) - right constant
+constant c;
+Select BOOLEAN such that NextBip*(_, c)
+FALSE
+5000
+51 - NextBipT/INVALID (semantic error) - left procedure
+procedure p;
+Select BOOLEAN such that NextBip*(p, _)
+FALSE
+5000
+52 - NextBipT/INVALID (semantic error) - right procedure
+procedure p;
+Select BOOLEAN such that NextBip*(_, p)
+FALSE
+5000
+53 - NextBipT/VALID - left INTEGER
+
+Select BOOLEAN such that NextBip*(1, _)
+TRUE
+5000
+54 - NextBipT/VALID - right INTEGER
+
+Select BOOLEAN such that NextBip*(_, 2)
+TRUE
+5000
+55 - AffectsBip/VALID - control
+stmt s1, s2;
+Select BOOLEAN such that AffectsBip(s1, s2)
+TRUE
+5000
+56 - AffectsBip/VALID - left wildcard
+stmt s1;
+Select BOOLEAN such that AffectsBip(_, s1)
+TRUE
+5000
+57 - AffectsBip/VALID - right wildcard
+stmt s1;
+Select BOOLEAN such that AffectsBip(s1, _)
+TRUE
+5000
+58 - AffectsBip/VALID - double wildcard
+
+Select BOOLEAN such that AffectsBip(_, _)
+TRUE
+5000
+59 - AffectsBip/VALID - left assign
+assign a;
+Select BOOLEAN such that AffectsBip(a, _)
+TRUE
+5000
+60 - AffectsBip/VALID - right assign
+assign a;
+Select BOOLEAN such that AffectsBip(_, a)
+TRUE
+5000
+61 - AffectsBip/VALID - left prog_line
+prog_line n;
+Select BOOLEAN such that AffectsBip(n, _)
+TRUE
+5000
+62 - AffectsBip/VALID - right prog_line
+prog_line n;
+Select BOOLEAN such that AffectsBip(_, n)
+TRUE
+5000
+63 - AffectsBip/INVALID (semantic error) - left print
+print p;
+Select BOOLEAN such that AffectsBip(p, _)
+FALSE
+5000
+64 - AffectsBip/INVALID (semantic error) - right print
+print p;
+Select BOOLEAN such that AffectsBip(_, p)
+FALSE
+5000
+65 - AffectsBip/INVALID (semantic error) - left read
+read r;
+Select BOOLEAN such that AffectsBip(r, _)
+FALSE
+5000
+66 - AffectsBip/INVALID (semantic error) - right read
+read r;
+Select BOOLEAN such that AffectsBip(_, r)
+FALSE
+5000
+67 - AffectsBip/INVALID (semantic error) - left call
+call c;
+Select BOOLEAN such that AffectsBip(c, _)
+FALSE
+5000
+68 - AffectsBip/INVALID (semantic error) - right call
+call c;
+Select BOOLEAN such that AffectsBip(_, c)
+FALSE
+5000
+69 - AffectsBip/INVALID (semantic error) - left while
+while w;
+Select BOOLEAN such that AffectsBip(w, _)
+FALSE
+5000
+70 - AffectsBip/INVALID (semantic error) - right while
+while w;
+Select BOOLEAN such that AffectsBip(_, w)
+FALSE
+5000
+71 - AffectsBip/INVALID (semantic error) - left if
+if f;
+Select BOOLEAN such that AffectsBip(f, _)
+FALSE
+5000
+72 - AffectsBip/INVALID (semantic error) - right if
+if f;
+Select BOOLEAN such that AffectsBip(_, f)
+FALSE
+5000
+73 - AffectsBip/INVALID (semantic error) - left variable
+variable v;
+Select BOOLEAN such that AffectsBip(v, _)
+FALSE
+5000
+74 - AffectsBip/INVALID (semantic error) - right variable
+variable v;
+Select BOOLEAN such that AffectsBip(_, v)
+FALSE
+5000
+75 - AffectsBip/INVALID (semantic error) - left constant
+constant c;
+Select BOOLEAN such that AffectsBip(c, _)
+FALSE
+5000
+76 - AffectsBip/INVALID (semantic error) - right constant
+constant c;
+Select BOOLEAN such that AffectsBip(_, c)
+FALSE
+5000
+77 - AffectsBip/INVALID (semantic error) - left procedure
+procedure p;
+Select BOOLEAN such that AffectsBip(p, _)
+FALSE
+5000
+78 - AffectsBip/INVALID (semantic error) - right procedure
+procedure p;
+Select BOOLEAN such that AffectsBip(_, p)
+FALSE
+5000
+79 - AffectsBip/VALID - left INTEGER
+
+Select BOOLEAN such that AffectsBip(1, _)
+FALSE
+5000
+80 - AffectsBip/VALID - right INTEGER
+
+Select BOOLEAN such that AffectsBip(_, 2)
+FALSE
+5000
+81 - AffectsBip/INVALID (syntax error) - attrRef 1
+assign a;
+Select BOOLEAN such that AffectsBip(a.stmt#, _)
+
+5000
+82 - AffectsBip/INVALID (syntax error) - attrRef 2
+constant c;
+Select BOOLEAN such that AffectsBip(c.value, _)
+
+5000
+83 - AffectsBipT/VALID - control
+stmt s1, s2;
+Select BOOLEAN such that AffectsBip*(s1, s2)
+TRUE
+5000
+84 - AffectsBipT/VALID - left wildcard
+stmt s1;
+Select BOOLEAN such that AffectsBip*(_, s1)
+TRUE
+5000
+85 - AffectsBipT/VALID - right wildcard
+stmt s1;
+Select BOOLEAN such that AffectsBip*(s1, _)
+TRUE
+5000
+86 - AffectsBipT/VALID - double wildcard
+
+Select BOOLEAN such that AffectsBip*(_, _)
+TRUE
+5000
+87 - AffectsBipT/VALID - left assign
+assign a;
+Select BOOLEAN such that AffectsBip*(a, _)
+TRUE
+5000
+88 - AffectsBipT/VALID - right assign
+assign a;
+Select BOOLEAN such that AffectsBip*(_, a)
+TRUE
+5000
+89 - AffectsBipT/VALID - left prog_line
+prog_line n;
+Select BOOLEAN such that AffectsBip*(n, _)
+TRUE
+5000
+90 - AffectsBipT/VALID - right prog_line
+prog_line n;
+Select BOOLEAN such that AffectsBip*(_, n)
+TRUE
+5000
+91 - AffectsBipT/INVALID (semantic error) - left print
+print p;
+Select BOOLEAN such that AffectsBip*(p, _)
+FALSE
+5000
+92 - AffectsBipT/INVALID (semantic error) - right print
+print p;
+Select BOOLEAN such that AffectsBip*(_, p)
+FALSE
+5000
+93 - AffectsBipT/INVALID (semantic error) - left read
+read r;
+Select BOOLEAN such that AffectsBip*(r, _)
+FALSE
+5000
+94 - AffectsBipT/INVALID (semantic error) - right read
+read r;
+Select BOOLEAN such that AffectsBip*(_, r)
+FALSE
+5000
+95 - AffectsBipT/INVALID (semantic error) - left call
+call c;
+Select BOOLEAN such that AffectsBip*(c, _)
+FALSE
+5000
+96 - AffectsBipT/INVALID (semantic error) - right call
+call c;
+Select BOOLEAN such that AffectsBip*(_, c)
+FALSE
+5000
+97 - AffectsBipT/INVALID (semantic error) - left while
+while w;
+Select BOOLEAN such that AffectsBip*(w, _)
+FALSE
+5000
+98 - AffectsBipT/INVALID (semantic error) - right while
+while w;
+Select BOOLEAN such that AffectsBip*(_, w)
+FALSE
+5000
+99 - AffectsBipT/INVALID (semantic error) - left if
+if f;
+Select BOOLEAN such that AffectsBip*(f, _)
+FALSE
+5000
+100 - AffectsBipT/INVALID (semantic error) - right if
+if f;
+Select BOOLEAN such that AffectsBip*(_, f)
+FALSE
+5000
+101 - AffectsBipT/INVALID (semantic error) - left variable
+variable v;
+Select BOOLEAN such that AffectsBip*(v, _)
+FALSE
+5000
+102 - AffectsBipT/INVALID (semantic error) - right variable
+variable v;
+Select BOOLEAN such that AffectsBip*(_, v)
+FALSE
+5000
+103 - AffectsBipT/INVALID (semantic error) - left constant
+constant c;
+Select BOOLEAN such that AffectsBip*(c, _)
+FALSE
+5000
+104 - AffectsBipT/INVALID (semantic error) - right constant
+constant c;
+Select BOOLEAN such that AffectsBip*(_, c)
+FALSE
+5000
+105 - AffectsBipT/INVALID (semantic error) - left procedure
+procedure p;
+Select BOOLEAN such that AffectsBip*(p, _)
+FALSE
+5000
+106 - AffectsBipT/INVALID (semantic error) - right procedure
+procedure p;
+Select BOOLEAN such that AffectsBip*(_, p)
+FALSE
+5000
+107 - AffectsBipT/VALID - left INTEGER
+
+Select BOOLEAN such that AffectsBip*(1, _)
+FALSE
+5000
+108 - AffectsBipT/VALID - right INTEGER
+
+Select BOOLEAN such that AffectsBip*(_, 2)
+FALSE
+5000
+109 - AffectsBipT/INVALID (syntax error) - attrRef 1
+assign a;
+Select BOOLEAN such that AffectsBip*(a.stmt#, _)
+
+5000
+110 - AffectsBipT/INVALID (syntax error) - attrRef 2
+constant c;
+Select BOOLEAN such that AffectsBip*(c.value, _)
+
+5000

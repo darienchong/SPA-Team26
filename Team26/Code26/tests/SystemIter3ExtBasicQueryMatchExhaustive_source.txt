@@ -1,0 +1,22 @@
+procedure procedure{
+read read;
+print print;
+call call;
+if(if==while)then{
+while(while<4){
+a=b;
+b=c;
+c=d;
+d=e;
+e=a;
+}
+}else{
+a=f;
+}
+}
+
+procedure call{
+f=assign;
+stmt=call;
+assign=b;
+}

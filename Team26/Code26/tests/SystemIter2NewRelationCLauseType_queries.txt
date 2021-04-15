@@ -1,0 +1,475 @@
+1 - No clause
+read r;
+Select r
+1, 2, 4, 17, 18
+5000
+2 - No clause
+procedure p; read r;
+Select p
+AdvancedSpaOneProcedureWithNesting
+5000
+3 - No clause
+variable v;
+Select v.varName
+var1, var2, var3, a111111111111111111, a0, AdvancedSpaOneProcedureWithNesting, AdvancedSpaOneProced, v1, a, b, c, d, asdf, A, B
+5000
+4 - Follows
+stmt s;
+Select s such that Follows(s, 2)
+1
+5000
+5 - Follows
+stmt s;
+Select s such that Follows(1, 3)
+
+5000
+6 - Follows
+if f; while w;
+Select <w, f> such that Follows(w, f)
+3 5, 16 22
+5000
+7 - Follows*
+if f;
+Select f such that Follows*(3, f)
+5
+5000
+8 - Follows*
+print p; read r;
+Select r such that Follows*(r, p)
+1, 2
+5000
+9 - Follows*
+stmt s; if f;
+Select <s, f> such that Follows*(f, s)
+13 5, 14 5, 26 5
+5000
+10 - Parent
+while w; stmt s;
+Select s such that Parent(w, s)
+4, 15, 16, 17, 18, 19, 20, 21, 22
+5000
+11 - Parent
+if f; while w;
+Select f such that Parent(f, w)
+
+5000
+12 - Parent
+while w; read r;
+Select <w, r> such that Parent(w, r)
+3 4, 16 17, 16 18
+5000
+13 - Parent*
+while w;
+Select w such that Parent*(w, 21)
+14, 16
+5000
+14 - Parent*
+if f;
+Select f such that Parent*(f, 26)
+
+5000
+15 - Parent*
+if f; while w;
+Select <f, w> such that Parent*(w, f)
+22 14
+5000
+16 - ModifiesS
+stmt s;
+Select s such that Modifies(s, "var2")
+2, 3, 4, 5, 6
+5000
+17 - ModifiesS
+read r;
+Select r such that Modifies(r, "x")
+
+5000
+18 - ModifiesS
+print pr; if f;
+Select <pr, f> such that Modifies(f, "A")
+8 22, 9 22, 12 22, 13 22, 25 22, 26 22
+5000
+19 - ModifiesP
+procedure p; variable v;
+Select p such that Modifies(p, v)
+AdvancedSpaOneProcedureWithNesting
+5000
+20 - ModifiesP
+procedure p; variable v;
+Select p such that Modifies(p, "potato")
+
+5000
+21 - ModifiesP
+procedure p; if f;
+Select <p, f> such that Modifies(p, _)
+AdvancedSpaOneProcedureWithNesting 5, AdvancedSpaOneProcedureWithNesting 22
+5000
+22 - UsesS
+stmt s;
+Select s such that Uses(s, "asdf")
+14, 16, 21
+5000
+23 - UsesS
+while w;
+Select w such that Uses(w, "var4")
+
+5000
+24 - UsesS
+assign a; variable v;
+Select <a, v> such that Uses(a, v)
+6 var2, 7 var1, 7 var2, 10 var1, 10 var2, 11 var1, 15 var3, 19 a111111111111111111, 20 AdvancedSpaOneProced, 20 a0, 20 var2, 20 v1, 21 b, 21 c, 21 d, 21 asdf, 21 a111111111111111111, 23 a, 24 B
+5000
+25 - UsesP
+procedure p;
+Select p such that Uses("AdvancedSpaOneProcedureWithNesting", _)
+AdvancedSpaOneProcedureWithNesting
+5000
+26 - UsesP
+procedure p;
+Select p such that Uses("main", _)
+
+5000
+27 - UsesP
+procedure p; if f;
+Select <p, f> such that Uses("AdvancedSpaOneProcedureWithNesting","AdvancedSpaOneProcedureWithNesting")
+AdvancedSpaOneProcedureWithNesting 5, AdvancedSpaOneProcedureWithNesting 22
+5000
+28 - PatternAssign
+assign a;
+Select a pattern a (_, _"var1"_)
+7, 10, 11
+5000
+29 - PatternAssign
+assign a; variable v;
+Select a pattern a (v, _"a0 + var2"_)
+
+5000
+30 - PatternAssign
+assign a; procedure p; variable v;
+Select <a, p> pattern a(v, _"c / d + 3"_)
+21 AdvancedSpaOneProcedureWithNesting
+5000
+31 - Select prog_line
+prog_line n;
+Select n
+1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26
+5000
+32 - Next - General
+while w; read r;
+Select w such that Next(r, w)
+3
+5000
+33 - Next - If
+assign a; if f;
+Select a such that Next(f, a)
+6, 10, 23, 24
+5000
+34 - Next - While
+stmt s;
+Select s such that Next(4, s)
+3
+5000
+35 - Next - Wildcard
+read r;
+Select r such that Next(_, r)
+2, 4, 17, 18
+5000
+36 - Next* - If
+prog_line n;
+Select n such that Next*(n, 6)
+1, 2, 3, 4, 5
+5000
+37 - Next* - While
+while w, w1;
+Select w such that Next*(w, w1)
+3, 14, 16
+5000
+38 - Next* - Wildcard
+if f;
+Select f such that Next*(f, _)
+5, 22
+5000
+39 - Affects - General
+assign a;
+Select a such that Affects(a, 7)
+6
+5000
+40 - Affects - General
+prog_line n;
+Select n such that Affects(_, 3)
+
+5000
+41 - Affects - If
+variable v;
+Select v such that Affects(6, 10)
+
+5000
+42 - Affects - While
+
+Select BOOLEAN such that Affects(21, 23)
+TRUE
+5000
+43 - Affects - Wildcard
+prog_line n;
+Select n such that Affects(n, _)
+6, 10, 15, 19, 21
+5000
+44 - Affects* - General
+stmt s;
+Select s such that Affects*(s, 20)
+6
+5000
+45 - Affects* - General
+stmt s;
+Select s such that Affects*(s, 23)
+19, 21
+5000
+46 - With
+stmt s;
+Select s with s.stmt# = 10
+10
+5000
+47 - With
+procedure p; variable v;
+Select p with p.procName = v.varName
+AdvancedSpaOneProcedureWithNesting
+5000
+48 - With
+read r;
+Select r with r.varName = "hello"
+
+5000
+49 - PatternIf
+if f;
+Select f pattern f ("var1", _, _)
+5, 22
+5000
+50 - PatternIf
+if f;
+Select f pattern f("abcd", _, _)
+
+5000
+51 - PatternIf
+if f; variable v; while w;
+Select <w, f> pattern f (v, _, _)
+3 5, 3 22, 14 5, 14 22, 16 5, 16 22
+5000
+52 - PatternWhile
+while w;
+Select w pattern w ("var1", _)
+3, 14
+5000
+53 - PatternWhile
+while w;
+Select w pattern w("while", _)
+
+5000
+54 - PatternWhile
+while w; if f;
+Select <w, f> pattern w ("var2",   _ )
+3 5, 3 22, 16 5, 16 22
+5000
+55 - Next clauses - Single select
+prog_line n; prog_line m;
+Select n such that Next(n, m) such that Next(m, 10)
+3
+5000
+56 - Multiple Next clauses - Single select
+prog_line n; prog_line m; prog_line l; prog_line k;
+Select n such that Next(n, m) such that Next(m, l) such that Next(l, k) such that Next(k, 19)
+15, 21
+5000
+57 - Next clauses - Tuple select
+prog_line n; prog_line m;
+Select <n, m> such that Next(n, m) such that Next(m, 10)
+3 5
+5000
+58 - Next clauses - Multiple tuple select
+stmt s; stmt n; stmt m; stmt r;
+Select <s, n, m, r> such that Next (s, 13) such that Next(n, m) such that Next(m, n) such that Next(r, 2)
+9 3 4 1, 9 4 3 1, 12 3 4 1, 12 4 3 1
+5000
+59 - Next clauses - Boolean select
+stmt s; stmt n;
+Select BOOLEAN such that Next(10, 11)
+TRUE
+5000
+60 - Next* clauses - Single select
+prog_line n; prog_line m;
+Select n such that Next*(n, m) such that Next*(m, 10)
+1, 2, 3, 4
+5000
+61 - Next* clauses - Tuple select
+stmt s; stmt n;
+Select <s, n> such that Next*(s, 3) such that Next*(n, 3)
+1 1, 1 2, 1 3, 1 4, 2 1, 2 2, 2 3, 2 4, 3 1, 3 2, 3 3, 3 4, 4 1, 4 2, 4 3, 4 4
+5000
+62 - Next* clauses - Boolean select
+stmt s; stmt n;
+Select BOOLEAN such that Next*(19, 19)
+TRUE
+5000
+63 - Affects clauses - Single select
+assign a; assign a1;
+Select a1 such that Affects(a1, 21) such that Affects(a, 7)
+19
+5000
+64 - Affects clauses - Tuple select
+assign a; assign a1;
+Select <a, a1> such that Affects(a1, 21) such that Affects(a, 7)
+6 19
+5000
+65 - Affect clauses - Boolean select
+stmt s; stmt n;
+Select BOOLEAN such that Affects(10, 11)
+FALSE
+5000
+66 - Affects* clauses - Single select
+prog_line n; prog_line m;
+Select n such that Affects*(n, m) such that Affects*(6, 7)
+6, 10, 15, 19, 21
+5000
+67 - Affects* clauses - Tuple select
+prog_line n; prog_line m;
+Select <n, m> such that Affects*(n, 7)
+6 1, 6 2, 6 3, 6 4, 6 5, 6 6, 6 7, 6 8, 6 9, 6 10, 6 11, 6 12, 6 13, 6 14, 6 15, 6 16, 6 17, 6 18, 6 19, 6 20, 6 21, 6 22, 6 23, 6 24, 6 25, 6 26
+5000
+68 - Affects* clauses - Boolean select
+prog_line n;
+Select BOOLEAN such that Affects*(n, 7)
+TRUE
+5000
+69 - Such that and such that - Single select
+assign a; assign a1;
+Select a such that Modifies(a, "var2") such that Next(a, a1)
+6
+5000
+70 - Such that and such that - Tuple select
+stmt s; while w;
+Select <s, w> such that Modifies(s, "var2") such that Next(s, w)
+2 3, 4 3
+5000
+71 - Such that and such that - Boolean select
+stmt s; while w;
+Select BOOLEAN such that Parent*(w, s) such that Affects*(s, 21)
+TRUE
+5000
+72 - Such that and pattern - Single select
+assign a; if f;
+Select a such that Modifies(a, "var1") pattern f ("var1", _, _)
+7, 11
+5000
+73 - Such that and pattern - Tuple select
+prog_line n; assign a;
+Select <n, a> such that Affects(n, 21) pattern a (_, _"a111111111111111111"_)
+19 19, 19 21
+5000
+74 - Such that and pattern - Boolean select
+prog_line n; if f; variable v;
+Select BOOLEAN such that Affects(n, 7) pattern f (v, _, _)
+TRUE
+5000
+75 - Such that and with - Single select
+assign a; prog_line n;
+Select a.stmt# such that Affects(a, n) with n = 7
+6
+5000
+76 - Such that and with - Tuple select
+assign a; prog_line n; if f;
+Select <a, f> such that Affects(a, n) with n = 7 such that Uses(f, "var1")
+6 5, 6 22
+5000
+77 - Such that and with - Boolean select
+prog_line n;
+Select BOOLEAN such that Affects(n, 21) with n = 10
+FALSE
+5000
+78 - Pattern and with - Single select
+if f; prog_line n;
+Select f pattern f ("var1", _, _) with n = 10
+5, 22
+5000
+79 - Pattern and with - Tuple select
+while w; prog_line n; if f;
+Select <w, n, f> pattern w ("var2", _) with n = 20 pattern f ("a", _, _)
+3 20 22, 16 20 22
+5000
+80 - Pattern and with - Boolean select
+while w; constant c; stmt s;
+Select BOOLEAN pattern w ("var2", _) with s.stmt# = c.value
+TRUE
+5000
+81 - With and with - Single select
+stmt s; constant c;
+Select s with s.stmt# = c.value with c.value = 2
+2
+5000
+82 - With and with - Tuple select
+stmt s; constant c; variable v;
+Select <s, v> with s.stmt# = c.value with v.varName = "var2"
+1 var2, 2 var2, 3 var2, 12 var2, 15 var2, 25 var2
+5000
+83 - With and with - Boolean select
+variable v; constant c;
+Select BOOLEAN with v.varName = "var2" with c.value = 4
+FALSE
+5000
+84 - Pattern and pattern - Single select
+assign a; if f; stmt s;
+Select s pattern a ("var3", "var1 + var2") pattern f ("var5", _, _)
+
+5000
+85 - Pattern and pattern - Tuple select
+assign a; if f; variable v;
+Select <a, f> pattern a ("var3", _"var1"_) pattern f (v, _, _)
+10 5, 10 22
+5000
+86 - Pattern and pattern - Boolean select
+while w; assign a;
+Select BOOLEAN pattern a (_, _"a11111"_) pattern w("abc", _)
+FALSE
+5000
+87 - Such that and and - Single select
+assign a; assign a1; while w;
+Select a such that Follows(a, a1) and Next*(a, w)
+6, 10, 19, 20
+5000
+88 - Such that and and - Tuple select
+assign a; assign a1; while w;
+Select <a, w> such that Follows(a, a1) and Next*(a, w)
+6 14, 10 14, 19 14, 20 14, 6 16, 10 16, 19 16, 20 16
+5000
+89 - Such that and and - Boolean select
+assign a, a1, a2; while w;
+Select BOOLEAN such that Next(a, a1) and Next(a1, a2) and Next(a2, w)
+TRUE
+5000
+90 - With and and - Single select
+prog_line n; constant c; stmt s;
+Select s with s.stmt# = c.value and n = s.stmt# and n = 10
+
+5000
+91 - With and and - Tuple select
+prog_line n; constant c; stmt s;
+Select <s, n> with s.stmt# = n and n = c.value and c.value = 25
+25 25
+5000
+92 - With and and - Boolean select
+constant c; variable v; prog_line n;
+Select BOOLEAN with c.value = n and n = 10
+FALSE
+5000
+93 - Pattern and and - Single select
+assign a; if f; stmt s;
+Select s pattern a ("var3", "var1 + var2") and f ("var5", _, _)
+
+5000
+94 - Pattern and and - Tuple select
+assign a; if f; variable v;
+Select <a, f> pattern a ("var3", _"var1"_) and f (v, _, _)
+10 5, 10 22
+5000
+95 - Pattern and and - Boolean select
+while w; assign a;
+Select BOOLEAN pattern a (_, _) and w("var3", _)
+TRUE
+5000

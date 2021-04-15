@@ -1,0 +1,420 @@
+1 - Error
+
+Select s such that Parent(w, s)
+
+5000
+2 - Error
+stmt s;
+Select s such that Follow(11, s)
+
+5000
+3 - Error
+assign a
+Select a
+
+5000
+4 - Follows
+stmt s;
+Select s such that Follows(16, s)
+
+5000
+5 - Follows
+while w;
+Select w such that Follows(18, w)
+19
+5000
+6 - Follows
+stmt s; if f;
+Select <s,f> such that Follows(s,f)
+3 4, 6 7, 10 11, 21 22
+5000
+7 - Follows*
+stmt s;
+Select s such that Follows*(4, s)
+
+5000
+8 - Follows*
+stmt s; if f;
+Select s such that Follows*(s,f)
+1, 2, 3, 6, 10, 21
+5000
+9 - Follows*
+read r; if f;
+Select <r, f> such that Follows*(r,f)
+1 4, 2 4, 3 4
+5000
+10 - Parent
+if f; while w;
+Select f such that Parent(f,w)
+
+5000
+11 - Parent
+if f, f1;
+Select f such that Parent(f,f1)
+4, 7
+5000
+12 - Parent
+stmt s; call c;
+Select <s,c> such that Parent(s,c)
+7 10, 19 20
+5000
+13 - Parent*
+print p; while w;
+Select p such that Parent*(w,p)
+
+5000
+14 - Parent*
+print p; if f;
+Select f such that Parent*(f,p)
+4, 7, 11
+5000
+15 - Parent*
+if f,f1;
+Select <f,f1> such that Parent*(f,f1)
+4 7, 4 11, 7 11
+5000
+16 - Uses
+procedure p;
+Select p such that Uses(p, "e")
+
+5000
+17 - Uses
+if f;
+Select f such that Uses(f, "n")
+4, 7, 11
+5000
+18 - Uses
+procedure p; variable v;
+Select <p,v> such that Uses(p,v)
+printN a, printN b, printN c, printN d, printN n, printN ab, printN diff, iterate a, iterate b, iterate c, iterate d, iterate n, iterate diff, add a, add c, add d, add n, add diff
+5000
+19 - Modifies
+print p; variable v;
+Select p such that Modifies(p,v)
+
+5000
+20 - Modifies
+procedure p;
+Select p such that Modifies(p,"a")
+printN, iterate, add
+5000
+21 - Modifies
+read r; variable v;
+Select <r,v> such that Modifies(r,v)
+1 a, 2 b, 3 n
+5000
+22 - Calls
+procedure p;
+Select p such that Calls(p, "printN")
+
+5000
+23 - Calls
+while w;
+Select w such that Calls("iterate", "add")
+19
+5000
+24 - Calls
+procedure p, p1;
+Select <p,p1> such that Calls(p, p1)
+printN iterate, iterate add
+5000
+25 - Calls*
+procedure p;
+Select p such that Calls*(p, "notExist")
+
+5000
+26 - Calls*
+if f;
+Select f such that Calls*("printN", "add")
+4, 7, 11, 22
+5000
+27 - Calls*
+procedure p,p1;
+Select <p, p1> such that Calls*(p,p1)
+printN iterate, printN add, iterate add
+5000
+28 - Next
+stmt s;
+Select s such that Next(24, s)
+
+5000
+29 - Next
+assign a; if f;
+Select a such that Next(f,a)
+6, 8, 12, 23, 24
+5000
+30 - Next
+assign a; print p;
+Select <a,p> such that Next(a, p)
+8 9, 14 15
+5000
+31 - Next*
+stmt s;
+Select s such that Next*(s, 1)
+
+5000
+32 - Next*
+if f; read r;
+Select f such that Next*(r,f)
+4, 7, 11
+5000
+33 - Next*
+assign a; print p;
+Select <a,p> such that Next*(a, p)
+6 9, 6 15, 6 16, 8 9, 12 15, 13 15, 14 15
+5000
+34 - Affects
+assign a;
+Select a such that Affects(a,6)
+
+5000
+35 - Affects
+assign a;
+Select a such that Affects(a,a)
+
+5000
+36 - Affects
+assign a, a1;
+Select <a, a1> such that Affects(a,a1)
+6 8, 12 13, 13 14, 17 18
+5000
+37 - Affects*
+assign a;
+Select a such that Affects*(a,6)
+
+5000
+38 - Affects*
+assign a;
+Select a such that Affects*(12,a)
+13, 14
+5000
+39 - Affects*
+assign a, a1;
+Select <a,a1> such that Affects*(a,a1)
+6 8, 12 13, 12 14, 13 14, 17 18
+5000
+40 - Pattern Assign
+assign a;
+Select a pattern a(_,_"diff + 1"_)
+
+5000
+41 - Pattern Assign
+assign a;
+Select a pattern a(_,_"a - diff"_)
+13
+5000
+42 - Pattern Assign
+assign a; variable v;
+Select <a,v> pattern a(v,_"1"_)
+13 a, 14 a
+5000
+43 - Pattern If
+if f;
+Select f pattern f("b",_,_)
+
+5000
+44 - Pattern If
+if f;
+Select f pattern f("n",_,_)
+4, 7, 11
+5000
+45 - Pattern If
+if f; variable v;
+Select <f, v> pattern f(v,_,_)
+4 a, 4 n, 7 ab, 7 n, 11 a, 11 n, 22 diff, 22 c
+5000
+46 - Pattern While
+while w;
+Select w pattern w("x",_)
+
+5000
+47 - Pattern While
+while w;
+Select w pattern w("n",_)
+19
+5000
+48 - Pattern While
+while w; variable v;
+Select <w,v> pattern w(v,_)
+19 a, 19 n
+5000
+49 - Boolean Select
+while w, w1;
+Select BOOLEAN such that Parent(w,w1)
+FALSE
+5000
+50 - Boolean Select
+if f, f1;
+Select BOOLEAN such that Next*(f, f1)
+TRUE
+5000
+51 - Boolean Select
+
+Select BOOLEAN such that Affects*(6,7)
+FALSE
+5000
+52 - With
+assign a;
+Select a with a.stmt# = 3
+
+5000
+53 - With
+call c;
+Select c with c.procName = "add"
+20
+5000
+54 - With
+call c; procedure p;
+Select <c.procName,p>  with c.procName = p.procName
+iterate iterate, add add
+5000
+55 - Such that and Such that - single select
+if f; print p;
+Select p such that Parent(f,p) such that Uses(p,"a")
+5, 9, 15, 16
+5000
+56 - Such that and Such that - tuple select
+procedure p, p1; variable v;
+Select <p,v> such that Calls(p,p1) such that Uses(p,v) such that Modifies(p,v)
+printN a, printN b, printN ab, printN c, printN d, printN n, printN diff, iterate a, iterate c, iterate d, iterate diff
+5000
+57 - Such that and Such that - boolean select
+procedure p; call c; if f;
+Select BOOLEAN such that Uses(p, "iterate") such that Follows*(c,f)
+FALSE
+5000
+58 - Such that and Pattern - single select
+if f; assign a;
+Select f such that Follows(a,f) pattern a("diff",_) pattern f("diff",_,_)
+22
+5000
+59 - Such that and Pattern - tuple select
+assign a, a1;
+Select <a,a1> such that Affects*(a,a1) pattern a(_,_"1"_)
+13 14
+5000
+60 - Such that and Pattern - boolean select
+while w;
+Select BOOLEAN such that Parent(w,_) pattern w("n",_)
+TRUE
+5000
+61 - Such that and With - single select
+call c;
+Select c such that Uses(c,"a") with c.procName="iterate"
+10
+5000
+62 - Such that and With - tuple select
+procedure p, p1;
+Select <p, p1> such that Calls(p,p1) with p.procName=p1.procName
+
+5000
+63 - Such that and With - boolean select
+if f; assign a;
+Select BOOLEAN such that Parent*(f,a) with a.stmt#=12
+TRUE
+5000
+64 - With and Such that - single select
+assign a, a1;
+Select a1 with a.stmt#=12 such that Affects*(a,a1)
+13, 14
+5000
+65 - With and Such that - tuple select
+procedure p; call c; while w;
+Select <c,p,w> with c.procName = p.procName such that Parent(_,c)
+10 iterate 19, 20 add 19
+5000
+66 - With and Such that - boolean select
+if f; variable v;
+Select BOOLEAN with v.varName = "a" with 2=2 such that Uses(f,v)
+TRUE
+5000
+67 - With and Pattern - single select
+if f;
+Select f with f.stmt#=7 pattern f("n",_,_)
+7
+5000
+68 - With and Pattern - tuple select
+read r; constant c; if f; variable v;
+Select <r,c,v> with r.stmt#=c.value pattern f(v,_,_)
+1 1 a, 1 1 ab, 1 1 c, 1 1 n, 1 1 diff, 2 2 a, 2 2 ab, 2 2 c, 2 2 n, 2 2 diff, 3 3 a, 3 3 ab, 3 3 c, 3 3 n, 3 3 diff
+5000
+69 - With and Pattern - boolean select
+assign a; stmt s;
+Select BOOLEAN with a.stmt#=s.stmt# pattern a("diff",_)
+TRUE
+5000
+70 - With and With - single select
+print p; read r; variable v;
+Select v with p.varName=r.varName with v.varName=r.varName
+a
+5000
+71 - With and With - tuple select
+prog_line n; stmt s; if f;
+Select <n, s, f> with n=s.stmt# with s.stmt#=f.stmt#
+4 4 4, 7 7 7, 11 11 11, 22 22 22
+5000
+72 - With and With - boolean select
+procedure p, p1; variable v, v1;
+Select BOOLEAN with p.procName=v.varName with p1.procName=v1.varName
+FALSE
+5000
+73 - Pattern and Pattern - single select
+if f; assign a; variable v; while w;
+Select f pattern f(v,_,_) pattern a(v,_) pattern w(_,_)
+4, 7, 11, 22
+5000
+74 - Pattern and Pattern - tuple select
+if f; assign a; variable v;
+Select <f,a> pattern f(v,_,_) pattern a(v,_"1"_)
+4 13, 4 14, 11 13, 11 14
+5000
+75 - Pattern and Pattern - boolean select
+while w; variable v; if f;
+Select BOOLEAN pattern w(v,_) pattern f(v,_,_)
+TRUE
+5000
+76 - Such that and And - single select
+assign a, a1, a2;
+Select a such that Affects(a, a1) and Next*(a,a2) and Affects*(a1, a2)
+12
+5000
+77 - Such that and And - tuple select
+assign a,a1;
+Select <a,a1> such that Affects*(a,a1) and Next(a,a1)
+12 13, 13 14, 17 18
+5000
+78 - Such that and And - boolean select
+procedure p, p1; call c;
+Select BOOLEAN such that Calls*(p,p1) and Uses(p1, "add") and Modifies(p1, "add")
+FALSE
+5000
+79 - With and And - single select
+call c; procedure p;
+Select c.stmt# with c.stmt#=20 and c.procName=p.procName
+20
+5000
+80 - With and And - tuple select
+if f; while w;
+Select <f, w> with 1=1 and 2=2
+4 19, 7 19, 11 19, 22 19
+5000
+81 - With and And - boolean select
+constant c; print p;
+Select BOOLEAN with p.stmt#=c.value and c.value=2
+FALSE
+5000
+82 - Pattern and And - single select
+if f; while w;
+Select f pattern f("ab",_,_) and w("ab",_)
+
+5000
+83 - Pattern and And - tuple select
+if f; while w; variable v;
+Select <f,w,v> pattern f(v,_,_) and w(v,_)
+4 19 a, 4 19 n, 7 19 n, 11 19 a, 11 19 n
+5000
+84 - Pattern and And - boolean select
+assign a;
+Select BOOLEAN pattern a("a",_) and a("diff",_)
+FALSE
+5000

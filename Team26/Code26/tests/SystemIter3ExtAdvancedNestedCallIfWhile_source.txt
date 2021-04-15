@@ -1,0 +1,49 @@
+procedure A {
+	while (h < 0) {
+		call B;
+		x = a + b + d;
+		call E; }
+	call E;
+}
+
+procedure B {
+	a = b;
+	b = c;
+	c = d;
+	d = a; }
+
+procedure C {
+	aa = AA;
+	AA = aa; }
+
+procedure D {
+	if (affectsBip < FALSE) then {
+		aa = 1;
+		read = AA + a + c + x;
+	} else {
+		call C;
+	}
+	call C;
+}
+
+procedure E {
+	read b;
+	while (a != 0) {
+		b = aa;
+		if (FALSE != 0) then {
+			call D;
+		} else {
+			print d;
+		}
+		read y;
+	}
+	if (FALSE != 0) then {
+		call C;
+		y = y;
+	} else {
+		y = aa + AA + a + b + c + d + x + y;
+	}
+	x = 1 + x;
+	x = x;
+	y = x;
+}

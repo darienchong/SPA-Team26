@@ -1,0 +1,10 @@
+procedure B {
+call C;
+call C;
+call C; }
+
+procedure C {
+d = a;
+a = b;
+b = c;
+c = d; }

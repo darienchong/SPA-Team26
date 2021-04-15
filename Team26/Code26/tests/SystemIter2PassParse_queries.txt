@@ -1,0 +1,5 @@
+1 - Dummy query
+
+Select BOOLEAN
+TRUE
+1000

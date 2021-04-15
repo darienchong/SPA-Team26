@@ -1,0 +1,100 @@
+1 - AffectsBip - Valid AffectsBip
+
+Select BOOLEAN such that AffectsBip(4, 7)
+TRUE
+5000
+2 - AffectsBip - Valid AffectsBip
+
+Select BOOLEAN such that AffectsBip(5, 4)
+TRUE
+5000
+3 - AffectsBip - Valid AffectsBip
+
+Select BOOLEAN such that AffectsBip(6, 5)
+TRUE
+5000
+4 - AffectsBip - Valid AffectsBip
+
+Select BOOLEAN such that AffectsBip(7, 6)
+TRUE
+5000
+5 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(4, 7)
+TRUE
+5000
+6 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(4, 6)
+TRUE
+5000
+7 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(4, 5)
+TRUE
+5000
+8 - AffectsBipT - Invalid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(4, 4)
+FALSE
+5000
+9 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(5, 4)
+TRUE
+5000
+10 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(5, 7)
+TRUE
+5000
+11 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(5, 6)
+TRUE
+5000
+12 - AffectsBipT - Invalid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(5, 5)
+FALSE
+5000
+13 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(6, 5)
+TRUE
+5000
+14 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(6, 4)
+TRUE
+5000
+15 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(6, 7)
+TRUE
+5000
+16 - AffectsBipT - Invalid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(6, 6)
+FALSE
+5000
+17 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(7, 6)
+TRUE
+5000
+18 - AffectsBipT - Valid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(7, 5)
+TRUE
+5000
+19 - AffectsBipT - Invalid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(7, 4)
+FALSE
+5000
+20 - AffectsBipT - Invalid AffectsBipT
+
+Select BOOLEAN such that AffectsBip*(7, 7)
+FALSE
+5000
