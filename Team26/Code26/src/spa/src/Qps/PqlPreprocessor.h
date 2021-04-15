@@ -1,19 +1,20 @@
 #pragma once
 
-#include <vector>
-#include <unordered_set>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include "PqlQuery.h"
 
 namespace Pql {
   /**
-   * Struct to store the processed grouped of clauses.
+   * Struct to store the processed groups of clauses.
    *
-   * There are 3 types of clauses:
+   * There are 3 types of Clauses:
    *   1. Clauses without synonyms
    *   2. Clauses not connected to the select targets
    *   3. Clauses connected to the select targets
+   * And one type of Entity:
    *   4. Unused select targets
    */
   struct ClauseGroups {
